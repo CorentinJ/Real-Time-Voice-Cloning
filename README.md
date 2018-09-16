@@ -24,5 +24,5 @@
 - Adapt/Improve the cross-language aspect baseline
 
 ### Other things
-- Settle on the title of the thesis (prefix with deep/neural?, 
+- Settle on the title of the thesis (prefix with deep/neural?, add something to indicate the intended application?)
 - Migrate repo to github once the baseline is decent *(possibly, make it an open source repo on its own and keep working on transfer across languages as a fork)*
