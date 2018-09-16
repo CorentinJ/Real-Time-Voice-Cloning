@@ -1,8 +1,8 @@
 # Voice Transfer Across Languages
 
 ### Task list
+- [x] Reformulate the subject and a short description of how the implementation will work
 *In no particular order:*
-- [ ] Reformulate the subject and a short description of how the implementation will work
 - [ ] Finish the analysis of 1806.04558
 - [ ] Find out which other papers to analyse first
 - [ ] Reformat my paper/dataset notes in markdown (?)
