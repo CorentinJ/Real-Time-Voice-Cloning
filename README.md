@@ -24,6 +24,6 @@
 - Adapt/Improve the cross-language aspect baseline
 
 ### Other things
-- Sign in to Matheo
+- Setup Matheo (Must be done between the 1st and 30th of November)
 - Settle on the title of the thesis (prefix with deep/neural?, add something to indicate the intended application?)
 - Migrate repo to github once the baseline is decent *(possibly, make it an open source repo on its own and keep working on transfer across languages as a fork)*
