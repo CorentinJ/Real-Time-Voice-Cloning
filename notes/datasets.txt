@@ -1,0 +1,38 @@
+Not yet analyzed:
+http://www.openslr.org/resources.php
+https://catalog.ldc.upenn.edu/LDC93S1
+http://www.voxforge.org/home
+https://homepages.inf.ed.ac.uk/jyamagis/page3/page58/page58.html (used in 1802.06006, 1806.04558)
+http://www.robots.ox.ac.uk/~vgg/data/voxceleb/
+
+
+### TATOEBA ###
+URL: https://tatoeba.org/
+
+DESCRIPTION: Tatoeba is a collection of (generally short) sentences with corresponding translations. It is a collaborative project that relies on the free contribution of its users to grow. A sentence is given by a user in a given language, and anyone is then free to provide a new sentence as translation in another language that they are comfortable with. Users are also allowed to provide their own voice recording of a sentence, but this is not mandatory.
+
+EXAMPLE: The sentence "I'm not blaming you", with audio translations in French, German and several other languages: https://tatoeba.org/eng/sentences/show/2548229
+
+SIZE: ~460k sentences that contain an audio reading. Spoken sentences indexed by language are shown on the right column of this page: https://tatoeba.org/eng/stats/sentences_by_language. Sentences that are linked with a least one spoken English translation are listed here: http://www.manythings.org/sentences/audioplayer/. More widespread languages have generally more translations available (e.g. Dutch: 10k, French: 37k, German: 52k, Italian: 48k, Japanese: 26k, Portuguese: 29k, Russian: 74k, Spanish: 47k, Turkish: 166k).
+
+ACQUISITION: Sentences that have spoken audio are indexed in a file available here: https://tatoeba.org/eng/downloads (under "Sentences with audio"). In order to obtain translations by a same users, one can browse https://tatoeba.org/eng/users/all and lookup the list of audio recordings for each user. No direct dataset download nor API is provided, so writing a crawler is necessary.
+
+ENCODING: None enforced, however all files are in mp3. Most files have a bitrate of 48kbps.
+
+LICENSE: Creative Commons Attribution 2.0 (CC-BY 2.0)
+
+
+
+### LIBRISPEECH ###
+URL: http://www.openslr.org/12/ 
+
+DESCRIPTION: LibriSpeech is a corpus of speech derived from read audiobooks from the LibriVox project, carefully segmented and aligned.
+
+EXAMPLE: Either check the original audios: https://librivox.org/the-marvelous-land-of-oz-by-l-frank-baum/, or download one of the smallest archives (~300mb) on http://www.openslr.org/12/.
+
+SIZE: ~1000 hours of speech from 2484 different speakers.
+
+ACQUISITION: Direct download.
+
+ENCODING: FLAC sampled at 16KHz.
+

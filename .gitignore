@@ -1,0 +1,11 @@
+*.pyc
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.suo
+__pycache__
+.idea
+.ipynb_checkpoints
+*.pickle
+*.npy

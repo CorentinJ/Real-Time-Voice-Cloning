@@ -1,0 +1,41 @@
+TOPIC 1
+Description: Translate the voice of a character in a movie based on their voice in the original language, using subtitles in the target language.
+Domains: NLP, Generative neural networks, Audio processing
+Outline: The essential goal of this project is to be able to generate spoken sentences in a target language with a given voice based on training samples spoken in a different language by the same voice (we assume that for every audio sample we have, we also have a correct transcript of it). If this goal is achieved, the possible next step would be to incorporate lip movements in the process so that the generated audio is synchronized to the video. Note that in the general case, only the lip movements of the original language will be available, opening the possibility for another extension: letting the generative model also recreate lip movements. 
+Our possible objectives, in order of increasing difficulty, are as follows:
+	(1) Translate audio samples by a single speaker from their source language to a target language using transcripts available in both languages.
+	(2) Same as (1), but the audio samples come from a video (a filmed monologue of the speaker) and the generated audio must match the speed of the speaker.
+	(3) Same as (2), but the model also outputs a modified video where the lips of the speaker match the translated audio. We consider this objective to be optional.
+	(4) Same as (2) or (3), but generalized to multiple speakers (Note: the subtitle files include the identity of the speaker for each line).
+	(5) Same as (4), but on arbitrary video segments (-> how should music and noises in the audio be handled?)
+Alternatively, we could instead aim for audio translation without the use of transcripts and instead perform voice recognition followed by language translation, but it seems extremely ambitious.
+Difficulty: The project is ambitious. Achieving our first objective alone already amounts for a considerable quantity of work, depending on the current state of the art. Thorough research must be conducted before being able to accurately rate the difficulty of this projet. However, the remaining possible objectives ensure that this project will be challenging in the unlikely event that (1) is quickly achieved.
+Opinion: I like that the project is ambitious and fairly original. It also could have actual applications in practice if I were to reach (5), but that is putting the bar very high. It is definitely a topic I am motivated to go for, but I need to research it properly to get an idea of what is achievable.
+	
+
+TOPIC 2
+Description: Real-time multi-object tracking applied to humans playing football.
+Domains: Computer vision
+Outline: This project would be supervised by Deltatec (they have given their approval). It consists in creating a model that performs either semantic instance segmentation or multi-object detection (the latter is more common in practice) on players in a football game sequence. The model has to operate over time as it tracks each individual player and must be able to tell when a player goes off the scene. It should also handle edge cases such as two players overlapping each other. Ideally, the model should be able to differentiate between players and other humans present on the scene (line judges, spectators, ...). Previous work at Deltatec has shown that this can be a difficult task on still images, but we hope that it can be made easier with the added time dimension. Indeed, players will hold specific poses or run on the field which other humans present are not expected to do (asides from the referees, which we will consider as players). Thus, a small number of frames would probably be needed before being able to make a detection. The model should run in real-time or near real-time depending on the constraints.
+Difficulty: The difficulty of this project is advanced. It requires developing a framework that interacts with the model. Time constraints and a decent accuracy must be met.
+Opinion: The project seems interesting and challenging enough overall. I am already familiar with the data, which is a plus.
+
+	
+TOPIC 3
+Description: Real-time tracking of a board game: being able to tell what is being played and report to an internal model of the game. 
+Domains: Computer vision
+Outline: An example of such project can be found here: https://www.youtube.com/watch?v=pnntrewH0xg. 
+The project would be made with a chosen board game in mind. A single camera would capture the entire board and machine learning models need to infer the actions made by the players. Possibly, an AI could be integrated in order to take actions as an additional player. The software integrating the models should be able to determine the current state of the game, if an invalid move was made, the score of each player, whose turn it is to play, etc...
+Difficulty: The difficulty of this project is moderate. It involves mostly object detection when very performant models already exist in that field. The remaining part is mostly casual software development.
+Opinion: This is a project I can easily turn to if the others appear too difficult to tackle. It may however not be considered ambitious enough. The choice of the board game could potentially change the nature of the project; I have yet to explore the possibilities. My initial idea was to work with the game of Carcassonne: https://en.wikipedia.org/wiki/Carcassonne_(board_game).
+
+
+TOPIC 4
+Description: Generic framework for active learning. Application with a GUI that facilitates manual data labeling and possibly trains models at the same time.
+Domains: Semi-supervised learning, Software development (higher focus than for the other projects)
+Outline: The goal here is to create a user-friendly and modulable software that is specifically aimed at people who need to manually label data when labeling is a time-consuming process (e.g. the case of segmentation). The software presents a graphical interface and assists the user in creating the labels. The user can define a model to be trained and a training protocol or provide a pretrained model. This model is used in predicting labels and the user is invited to bring correction to them. The framework must operate in such a way that 
+	- The predictions offered by the model actually help in making the labeling process faster and are, at worst, not useful (but non intrusive).
+	- The quality of the predictions increases over time, resulting in faster labeling.
+It is likely difficult to make such an application truly generic with respect to the task at hand. More than likely, the application will be specialized to certain tasks where labeling is time-consuming and should be widely modular. We consider implementing it as a python package so that users can easily interface their own code with the application.
+Difficulty: It is problematic to evaluate the difficulty of this project while it is yet underspecified and not researched. 
+Opinion: It is likely a great effort of software development more than an application of machine learning, even though a part of the project involves getting familiar with active learning. I am unsure as to how interesting this project may be yet. As far as I know, active learning is uncommon in practice. I have however met situations where labeling more data seemed to be the only way to get more out of my models, and found no tools that would help me do this faster than if I were to make a labeling tool myself.
