@@ -3,7 +3,7 @@
 ### Task list
 *In no particular order:*
 - [x] Reformulate the subject and a short description of how the implementation will work
-- [ ] Finish the analysis of 1806.04558
+- [x] Finish the analysis of 1806.04558
 - [ ] Find out which other papers to analyse first
 - [ ] Reformat my paper/dataset notes in markdown (?)
 - [ ] Get started on the SOTA review
@@ -24,6 +24,6 @@
 - Adapt/Improve the cross-language aspect baseline
 
 ### Other things
-- Setup Matheo (Must be done between the 1st and 30th of November)
+- Setup Matheo (must be done between the 1st and 30th of November)
 - Settle on the title of the thesis (prefix with deep/neural?, add something to indicate the intended application?)
 - Migrate repo to github once the baseline is decent *(possibly, make it an open source repo on its own and keep working on transfer across languages as a fork)*
