@@ -66,7 +66,8 @@ as that generated for same speakers."
 speech sometimes mimics that of the reference utterance."
 - "The better generalization of the LibriSpeech [w.r.t. VCTK] model suggests that training the synthesizer on only 100 speakers is insufficient to enable high quality speaker transfer", so I need to work with large datasets.
 - They used a similar speaker verification model as in 1802.06006 to get a metric.
-
+- From 1710.10467: "(...) a technique called “MultiReader”, which enables us to train a single
+model that supports multiple keywords and languages".
 
 
 
