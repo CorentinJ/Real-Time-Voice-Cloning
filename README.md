@@ -3,10 +3,12 @@
 ### Papers 
 | URL | Designation | Title |
 | --- | ------------ | ----- |
+|[1808.10128](https://arxiv.org/pdf/1808.10128.pdf) | SST4TTS | Semi-Supervised Training for Improving Data Efficiency in End-to-End Speech Synthesis |
 |[**1806.04558**](https://arxiv.org/pdf/1806.04558.pdf) | **SV2TTS** | **Transfer Learning from Speaker Verification to Multispeaker Text-To-Speech Synthesis** |
 |[1802.06006](https://arxiv.org/pdf/1802.06006.pdf) | / | Neural Voice Cloning with a Few Samples |
 |[1712.05884](https://arxiv.org/pdf/1712.05884.pdf) | Tacotron 2 | Natural TTS Synthesis by Conditioning Wavenet on Mel Spectrogram Predictions |
 |[1710.10467](https://arxiv.org/pdf/1710.10467.pdf) | GE2E | Generalized End-To-End Loss for Speaker Verification |
+|[1703.10135](https://arxiv.org/pdf/1703.10135.pdf) | Tacotron | Tacotron: Towards End-To-End Speech Synthesis |
 |[1509.08062](https://arxiv.org/pdf/1509.08062.pdf) | TE2E | End-to-End Text-Dependent Speaker Verification |
 |[1409.0473](https://arxiv.org/pdf/1409.0473.pdf) | Attention | Neural Machine Translation by Jointly Learning to Align and Translate |
 
@@ -37,6 +39,7 @@
 - Evaluate the quality of this baseline w.r.t. the reported results in SV2TTS
 
 **For much later**:
+- Implement the improvements in SST4TTS to achieve better data efficiency
 - Adapt/Improve the cross-language aspect from the baseline
 
 ### Other things
