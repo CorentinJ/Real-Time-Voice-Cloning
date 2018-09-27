@@ -9,6 +9,7 @@
 |[1712.05884](https://arxiv.org/pdf/1712.05884.pdf) | Tacotron 2 | Natural TTS Synthesis by Conditioning Wavenet on Mel Spectrogram Predictions |
 |[1710.10467](https://arxiv.org/pdf/1710.10467.pdf) | GE2E | Generalized End-To-End Loss for Speaker Verification |
 |[1703.10135](https://arxiv.org/pdf/1703.10135.pdf) | Tacotron | Tacotron: Towards End-To-End Speech Synthesis |
+|[1609.03499](https://arxiv.org/pdf/1609.03499.pdf) | Wavenet | Wavenet: A Generative Model for Raw Audio |
 |[1509.08062](https://arxiv.org/pdf/1509.08062.pdf) | TE2E | End-to-End Text-Dependent Speaker Verification |
 |[1409.0473](https://arxiv.org/pdf/1409.0473.pdf) | Attention | Neural Machine Translation by Jointly Learning to Align and Translate |
 
@@ -19,10 +20,11 @@
 - [x] Finish the analysis of SV2TTS
 - Other papers to read:
   - [x] Tacotron 2 (base for the synthesizer and vocoder of SV2TTS)
-  - [ ] GE2E (base for the encoder of SV2TTS)
+  - [ ] GE2E (Encoder of SV2TTS)
   - [ ] TE2E (base for GE2E)
   - [ ] Attention (to learn about the attention layer)
-  - [ ] Tacotron 1
+  - [ ] Tacotron 1 (base for Tacotron 2)
+  - [ ] Wavenet (vocoder of Tacotron)
 - [ ] Reformat my paper/dataset notes in markdown (?)
 - [ ] Get started on the SOTA review
 - [ ] Get started on the description of SV2TTS 

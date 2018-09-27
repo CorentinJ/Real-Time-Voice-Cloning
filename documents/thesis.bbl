@@ -1,0 +1,34 @@
+\begin{thebibliography}{1}
+
+\bibitem{TTSSOTA}
+Kallirroi Georgila.
+\newblock {\em Speech Synthesis: State of the Art and Challenges for the
+  Future}, page 257–272.
+\newblock Cambridge University Press, 2017.
+
+\bibitem{MLSA}
+S.~Imai.
+\newblock Cepstral analysis synthesis on the mel frequency scale.
+\newblock In {\em ICASSP '83. IEEE International Conference on Acoustics,
+  Speech, and Signal Processing}, volume~8, pages 93--96, April 1983.
+
+\bibitem{HMMSpeakerInterpolation}
+Takayoshi Yoshimura, Takashi Masuko, Keiichi Tokuda, Takao Kobayashi, and
+  Tadashi Kitamura.
+\newblock Speaker interpolation in hmm-based speech synthesis system.
+\newblock In {\em EUROSPEECH}, 1997.
+
+\bibitem{HMMTTS}
+Takayoshi Yoshimura, Keiichi Tokuda, Takashi Masuko, Takao Kobayashi, and
+  Tadashi Kitamura.
+\newblock Simultaneous modeling of spectrum, pitch and duration in hmm-based
+  speech synthesis.
+\newblock In {\em EUROSPEECH}, 1999.
+
+\bibitem{SPSSDNN}
+H.~Ze, A.~Senior, and M.~Schuster.
+\newblock Statistical parametric speech synthesis using deep neural networks.
+\newblock In {\em 2013 IEEE International Conference on Acoustics, Speech and
+  Signal Processing}, pages 7962--7966, May 2013.
+
+\end{thebibliography}
