@@ -1,0 +1,1 @@
+IIRC "THE EFFECT OF NEURAL NETWORKS IN STATISTICAL PARAMETRIC SPEECH SYNTHESIS" talked somewhere about recurrence and neighbouring features. I can't find where again, but it'd be great if I did.
