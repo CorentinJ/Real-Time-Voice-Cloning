@@ -1,5 +1,6 @@
-- Format of the thesis
-
+- Page format
+- Could it be that in HMM-base synthesis, static features and their deltas (dynamic) are the same things as predicted mean and variance?
+- How do i aggregate the different metrics: MOS, Preference score, LSD/VU error rate/F0 RMSE?
 
 Self:
 - Am I going to need a different embedding for the voice of a same speaker in two different languages? I may need to formulate a "unique encoding hypothesis", i.e. that two people with the same voice in language A would also have the same voice in language B. This is likely not a true hypothesis but still a reasonable simplification for the voice transfer problem.

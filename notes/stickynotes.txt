@@ -1,3 +1,5 @@
 IIRC "THE EFFECT OF NEURAL NETWORKS IN STATISTICAL PARAMETRIC SPEECH SYNTHESIS" talked somewhere about recurrence and neighbouring features. I can't find where again, but it'd be great if I did.
 
-I think Hashimoto 2015 talked about cross language.
+I think Hashimoto 2015 talked about cross-language.
+
+Fundamentals of speaker recognition has a good deal of stuff for the definitions in the lexicon
