@@ -3,3 +3,7 @@ IIRC "THE EFFECT OF NEURAL NETWORKS IN STATISTICAL PARAMETRIC SPEECH SYNTHESIS" 
 I think Hashimoto 2015 talked about cross-language.
 
 Fundamentals of speaker recognition has a good deal of stuff for the definitions in the lexicon
+
+Damn good slides by H. Zen: https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/42624.pdf
+
+1609.03499: "1606.06061 showed that state-of-the-art statistical parametric speech syntheziers matched state-of-the-art concatenative ones in some languages"

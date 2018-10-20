@@ -17,6 +17,7 @@
 \usepackage{tabularx}
 \usepackage{subfig}
 \usepackage{hyperref}
+\usepackage[authoryear, round]{natbib}
 \usepackage[dvipsnames]{xcolor}
 
 
@@ -74,20 +75,21 @@ To do when I'll have a good overview of the project. Try to answer:
 
 \section{Introduction}
 
-\color{red}
-Concise presentation of the problem
-\color{black}
+\subsection{Problem definition}
+\color{red} Update this section to reflect what was actually achieved and is presented in this document \color{black}
+
+We aim to develop a framework that, given an audio segment of speech in a same language from different speakers, a transcript of this segment and a translation of this transcript in a target language, is able to regenerate the audio segment as if each speaker was talking in the target language. This task is to be performed online by the framework but is expected to output an audio of better quality given a longer delay from the source, such that the best performance is obtained when running offline. The quality of an audio sample transferred in a different language relies on the naturalness of the output voice and a meaningful transfer of the speaker features (e.g. someone speaking slowly in French is expected to also speak slowly in English).
 
 
 \subsection{Statistical parametric speech synthesis}
 Statistical parametric speech synthesis (SPSS) refers to a group of data-driven TTS synthesis methods that emerged in the late 1990s. In SPSS, the relation between features computed on the input text and output acoustic features is modeled by a statistical generative model (called the acoustic model). A complete SPSS framework thus also includes a pipeline to extract features from the text to synthesize as well as a system able to reconstruct an audio waveform from the acoustic features produced by the acoustic model (such a system is called a vocoder). Unlike the acoustic model, these two parts of the framework may be entirely engineered and make use of no statistical methods. If it is possible to condition parts of the framework in such a way that the characteristics of the generated voice are modified, then the framework is a multispeaker TTS synthesis system.
 
-The processing of text into features can be nearly inexistent as it can be very extensive. Speech is an intricate process that depends on a wide range of linguistic contexts. Providing these contexts greatly reduces the extent of the task to be learned by the acoustic model, but may require complex natural language processing (NLP) techniques or accuracy trade-offs, especially for rare or unknown words. Linguistic contexts are retrieved on different levels: utterance, phoneme, syllable, word and phrase. For each of those elements, their neighbouring elements of the same level are usually considered, as well as the elements lower in the hierarchy it comprises. For example, a given frame will contain a word, the two previous words, the two following words and the syllables contained in all those words. The position of each element with regard to its parent element can be included (e.g. fifth word in a sentence), as well as grammatical information such as part of speech. For syllables, the lexical stress and accent can be predicted by a statistical model such as a decision tree. For prosody, ToBI \cite{TOBI} is often used.
+The processing of text into features can be nearly inexistent as it can be very extensive. Speech is an intricate process that depends on a wide range of linguistic contexts. Providing these contexts greatly reduces the extent of the task to be learned by the acoustic model, but may require complex natural language processing (NLP) techniques or accuracy trade-offs, especially for rare or unknown words. Linguistic contexts are retrieved on different levels: utterance, phoneme, syllable, word and phrase. For each of those elements, their neighbouring elements of the same level are usually considered, as well as the elements lower in the hierarchy it comprises. For example, a given frame will contain a word, the two previous words, the two following words and the syllables contained in all those words. The position of each element with regard to its parent element can be included (e.g. fifth word in a sentence), as well as grammatical information such as part of speech. For syllables, the lexical stress and accent can be predicted by a statistical model such as a decision tree. For prosody, ToBI \citep{TOBI} is often used.
 
-\color{red}Talk about evaluation metrics (mainly MOS)?\color{black}
+\color{red}Talk about evaluation metrics (mainly MOS)? 50 features?\color{black}
 
 \subsection{State of the art in multispeaker TTS}
-Previous state of the art in SPSS includes hidden Markov models (HMM) based speech synthesis \cite{Tokuda-2013}. The speech generation pipeline is laid out in figure \ref{hmm_spss_framework}. In this framework, the acoustic model is a set of HMMs. The input features are rich linguistic contexts. Ideally, one would train an HMM for each possible context; but as the number of contexts increases exponentially with the number of factors considered, it is not practical to do so. Indeed, not every context will be found in a typical dataset and the training set would then be partitioned over the different contexts, which is very data inefficient. Instead, contexts are clustered using decision trees and an HMM is learned for each cluster \cite{HMMTTS}. Note that this does not solve entirely the training set fragmentation problem. The HMMs are trained to produce a distribution over mel-frequency cepstral coefficients (MFCC) with energy (called static features), their delta and delta-delta coefficients (called dynamic features) as well as a binary flag that indicates which parts of the audio should contain voice. This is shown in figure \ref{mlpg_features}. A new sequence of static features is retrieved from these static and dynamic features using the maximum likelihood parameter generation (MLPG) algorithm \cite{Tokuda-2000}. These static features are then fed through the MLSA \cite{MLSA} vocoder. It is possible to modify the voice generated by conditioning on a speaker or tuning the generated speech parameters with adaptation or interpolation techniques (e.g. \cite{HMMSpeakerInterpolation} \color{red} elaborate a bit on these techniques?\color{black}), making HMM-based speech synthesis a multispeaker TTS system. \color{red} Compare with concatenative see \cite{SPSSDNN} and ieeexplore.ieee.org/document/541110.\color{black}
+Previous state of the art in SPSS includes hidden Markov models (HMM) based speech synthesis \citep{Tokuda-2013}. The speech generation pipeline is laid out in figure \ref{hmm_spss_framework}. In this framework, the acoustic model is a set of HMMs. The input features are rich linguistic contexts. Ideally, one would train an HMM for each possible context; but as the number of contexts increases exponentially with the number of factors considered, it is not practical to do so. Indeed, not every context will be found in a typical dataset and the training set would then be partitioned over the different contexts, which is very data inefficient. Instead, contexts are clustered using decision trees and an HMM is learned for each cluster \citep{HMMTTS}. Note that this does not solve entirely the training set fragmentation problem. The HMMs are trained to produce a distribution over mel-frequency cepstral coefficients (MFCC) with energy (called static features), their delta and delta-delta coefficients (called dynamic features) as well as a binary flag that indicates which parts of the audio should contain voice. This is shown in figure \ref{mlpg_features}. A new sequence of static features is retrieved from these static and dynamic features using the maximum likelihood parameter generation (MLPG) algorithm \citep{Tokuda-2000}. These static features are then fed through the MLSA \citep{MLSA} vocoder. It is possible to modify the voice generated by conditioning on a speaker or tuning the generated speech parameters with adaptation or interpolation techniques (e.g. \citep{HMMSpeakerInterpolation} \color{red} elaborate a bit on these techniques?\color{black}), making HMM-based speech synthesis a multispeaker TTS system. \color{red} Compare with concatenative see \citep{SPSSDNN} and ieeexplore.ieee.org/document/541110.\color{black}
 
 \begin{figure}[h]
 	\centering
@@ -106,9 +108,31 @@ Previous state of the art in SPSS includes hidden Markov models (HMM) based spee
 	\end{minipage}
 \end{figure}
 
-Improvements to this framework were later brought by feed-forward deep neural networks (DNN), as a result of progress in both hardware and software. \cite{SPSSDNN} proposes to replace entirely the decision tree-clustered HMMs in favor of a DNN. They argue for better data efficiency as the training set is no longer fragmented in different clusters of contexts\color{red}, and for a more powerful model?\color{black}. They demonstrate improvements over the speech quality with a number of parameters similar to that of the HMM-based approach. Their best model is a DNN with 4 layers of 256 units using a sigmoid activation function. Subjects assessing the quality of the generated audio samples report that the DNN-based models produces speech that sounds less muffled than that of the HMM-based models. Later researches corroborate these findings \cite{OnTheTrainingAspects}. \cite{Hashimoto-2015} additionally studies the effect of replacing MLPG with another DNN. The combinations of HMM/DNN and MLPG/DNN give rise to four possible frameworks, the novel ones being HMM+DNN and DNN+DNN\footnote{Note that since the two networks are consecutive in the framework, they can be considered a single network.}, while HMM+MLPG and DNN+MLPG are the frameworks described respectively in \cite{Tokuda-2013} and \cite{SPSSDNN}. Each DNN they use is 3 layers deep with 1024 units using a sigmoid activation function. MOS results confirm that DNN+MLPG is significantly better than HMM+MLPG. The DNN+DNN approach performs as well as HMM+MLPG while HMM+DNN is worse. In another experiment, they introduce a DNN before and after MLPG. While both approaches yield a MOS similar to DNN+MLPG, neither are statistically significantly better. \color{red} make this part nicer to read. Quid of the MOS?\color{black}
+Improvements to this framework were later brought by feed-forward deep neural networks (DNN), as a result of progress in both hardware and software. \citep{SPSSDNN} proposes to replace entirely the decision tree-clustered HMMs in favor of a DNN. They argue for better data efficiency as the training set is no longer fragmented in different clusters of contexts\color{red}, and for a more powerful model?\color{black}. They demonstrate improvements over the speech quality with a number of parameters similar to that of the HMM-based approach. Their best model is a DNN with 4 layers of 256 units using a sigmoid activation function. Subjects assessing the quality of the generated audio samples report that the DNN-based models produces speech that sounds less muffled than that of the HMM-based models. Later researches corroborate these findings \citep{OnTheTrainingAspects}. \citep{Hashimoto-2015} additionally studies the effect of replacing MLPG with another DNN. The combinations of HMM/DNN and MLPG/DNN give rise to four possible frameworks, the novel ones being HMM+DNN and DNN+DNN\footnote{Note that since the two networks are consecutive in the framework, they can be considered a single network.}, while HMM+MLPG and DNN+MLPG are the frameworks described respectively in \citep{Tokuda-2013} and \citep{SPSSDNN}. Each DNN they use is 3 layers deep with 1024 units using a sigmoid activation function. MOS results confirm that DNN+MLPG is significantly better than HMM+MLPG. The DNN+DNN approach performs as well as HMM+MLPG while HMM+DNN is worse. In another experiment, they introduce a DNN before and after MLPG. While both approaches yield a MOS similar to DNN+MLPG, neither are statistically significantly better. \color{red} make this part nicer to read. Quid of the MOS? Mention DMDN?\color{black}
 
-\cite{BDLSTMTTS} supports that RNNs make natural acoustic models as they are able to learn a compact representation of complex and long-span functions, better so than shallow architectures such as the decision trees used in HMM-based TTS. Furthermore, the internal state of RNNs makes the mapping from an input frame to output acoustic features no longer deterministic, allowing for more variety in the synthesized audio. As RNNs are fit to generate temporally consistent series, the static features can directly be determined by the acoustic model, alleviating the need for dynamic features and MLPG. The authors present two RNNs: Hybrid\_A with three feed-forward layers followed by one bidirectional (BDLSTM) layer and Hybrid\_B with two feed-forward layers followed by two BDLSTM layers. They argue that deeper structures of BDLSTM would worsen the performance due to imprecise gradient computation. They compare these networks against the HMM and DNN based approaches described previously, using objective and subjective measures. The objective measures are compared with the true ground: log spectral distance (LSD), V/UV error rate and F0 distortion in root mean squared error (RMSE). The subjective measure is a preference test where participants choose between two audio samples of different models and have the option to select neither. Results are shown in figures \ref{dblstm_objective} and \ref{dblstm_subjective}. DNN\_A is 6 layers deep with 512 units per layer while DNN\_B is 3 layers deep with 1024 units per layer. These two networks perform very similarly. Hybrid\_B systematically performs better than the other approaches.
+%\begin{wraptable}{r}{5.5cm}
+%	\begin{tabular}{| l | c |}
+%		\hline
+%		Method & MOS \\
+%		\hline
+%		HMM+MLPG & 3.08 ($\pm$0.12) \\
+%		HMM+DNN & 2.86 ($\pm$0.12) \\
+%		\textbf{DNN+MLPG} & \textbf{3.53 ($\pm$0.12}) \\
+%		DNN+DNN & 3.17 ($\pm$0.12) \\
+%		\hline
+%	\end{tabular}
+%	\caption{MOS of the different methods explored in \citep{Hashimoto-2015}}
+%	\label{hashimoto_results}
+%\end{wraptable}
+
+\citep{BDLSTMTTS} supports that RNNs make natural acoustic models as they are able to learn a compact representation of complex and long-span functions, better so than shallow architectures such as the decision trees used in HMM-based TTS. Furthermore, the internal state of RNNs makes the mapping from an input frame to output acoustic features no longer deterministic, allowing for more variety in the synthesized audio. As RNNs are fit to generate temporally consistent series, the static features can directly be determined by the acoustic model, alleviating the need for dynamic features and MLPG. The authors present two RNNs: Hybrid\_A with three feed-forward layers followed by one bidirectional (BDLSTM) layer and Hybrid\_B with two feed-forward layers followed by two BDLSTM layers. They argue that deeper structures of BDLSTM would worsen the performance due to imprecise gradient computation. They compare these networks against the HMM and DNN based approaches described previously, using objective and subjective measures. The objective measures are compared with the ground truth: log spectral distance (LSD), V/UV error rate and F0 distortion in root mean squared error (RMSE). The subjective measure is a preference test where participants choose between two audio samples of different models and have the option to select neither. Results are shown in figures \ref{dblstm_objective} and \ref{dblstm_subjective}. DNN\_A is 6 layers deep with 512 units per layer while DNN\_B is 3 layers deep with 1024 units per layer. These two networks perform very similarly. Hybrid\_B systematically performs better than the other approaches.
+
+%3: Main advantage: long span and compact representation of complex functions. DTs are shallow. Not only memory but also internal hidden states which means non determinism wrt input states.
+%3: Because RNN good for sequences -> direct prediction of same static features without dynamic
+%4.1: Similar input features
+%4.1: Using LSP and not MFCC
+%4.1: Claim to be limited by depth
+%4.2: Preference score
 
 \begin{figure}[h]
 	\centering
@@ -127,44 +151,25 @@ Improvements to this framework were later brought by feed-forward deep neural ne
 	\end{minipage}
 \end{figure}
 
-
-%3: Main advantage: long span and compact representation of complex functions. DTs are shallow. Not only memory but also internal hidden states which means non determinism wrt input states.
-%3: Because RNN good for sequences -> direct prediction of same static features without dynamic
-%4.1: Similar input features
-%4.1: Using LSP and not MFCC
-%4.1: Claim to be limited by depth
-%4.2: Preference score
-
-
-
-
-%\begin{wraptable}{r}{5.5cm}
-%	\begin{tabular}{| l | c |}
-%		\hline
-%		Method & MOS \\
-%		\hline
-%		HMM+MLPG & 3.08 ($\pm$0.12) \\
-%		HMM+DNN & 2.86 ($\pm$0.12) \\
-%		\textbf{DNN+MLPG} & \textbf{3.53 ($\pm$0.12}) \\
-%		DNN+DNN & 3.17 ($\pm$0.12) \\
-%		\hline
-%	\end{tabular}
-%	\caption{MOS of the different methods explored in \cite{Hashimoto-2015}}
-%	\label{hashimoto_results}
-%\end{wraptable}
-
-
-
+Later, a substantial breakthrough is achieved in TTS with the coming of Wavenet.
 
 \color{red}
+\noindent 1 SOTA TTS \\
+ 2.1 Dilated causal convolutions \\
+ 2.2 u-law \\
+ 2.3 Gated activations - Relu  \\
+ 2.4 Residual \\
+ 2.5 Condition on speaker identity (one hot) + local conditioning \\
+ 2.6 Context stack \\
+ Annex: Raw audio gen with no postprocessing \\
+ Take images from https://deepmind.com/blog/wavenet-generative-model-raw-audio/ ? \\
 
-Wavenet: breakthrough in TTS with raw waveform gen
 
-Take images from https://deepmind.com/blog/wavenet-generative-model-raw-audio/ ?
 
-Dilated causal convolutions
 
-Condition on a speaker identity
+
+
+
 
 Tacotron
 
@@ -181,7 +186,7 @@ Extensions?
 \color{black}
 
 \clearpage
-\bibliographystyle{alpha}
+\bibliographystyle{unsrtnat}
 \bibliography{references} 
 
 

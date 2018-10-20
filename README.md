@@ -18,16 +18,22 @@
 *In no particular order:*
 - [x] Reformulate the subject and a short description of how the implementation will work
 - [x] Finish the analysis of SV2TTS
-- [x] Get started on the SOTA review
 - Other papers to read:
   - [x] Tacotron 2 (base for the synthesizer and vocoder of SV2TTS)
   - [ ] GE2E (Encoder of SV2TTS)
   - [ ] TE2E (base for GE2E)
   - [ ] Attention (to learn about the attention layer)
   - [ ] Tacotron 1 (base for Tacotron 2)
-  - [ ] Wavenet (vocoder of Tacotron)
+  - [x] Wavenet (vocoder of Tacotron)
+- SOTA review:
+  - [x] HMM-based TTS
+  - [x] DNN-based TTS
+  - [x] RNN-based TTS
+  - [x] Wavenet
+  - [ ] Deep voice
+  - [ ] Tacotron
+  - ...
 - [ ] Reformat my paper/dataset notes in markdown (?)
-- [ ] Find a better format for citations in the thesis?
 - [ ] Get started on the description of SV2TTS 
 - [ ] Get started on the analysis of the benchmarks in SV2TTS 
 
