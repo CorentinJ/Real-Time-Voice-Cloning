@@ -31,10 +31,9 @@
   - [x] DNN-based TTS
   - [x] RNN-based TTS
   - [x] Wavenet
-  - [ ] Deep voice
+  - [x] Deep voice
   - [ ] Tacotron
   - ...
-- [ ] Reformat my paper/dataset notes in markdown (?)
 - [ ] Get started on the description of SV2TTS 
 - [ ] Get started on the analysis of the benchmarks in SV2TTS 
 
