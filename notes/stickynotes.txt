@@ -9,3 +9,5 @@ Damn good slides by H. Zen: https://static.googleusercontent.com/media/research.
 1609.03499: "1606.06061 showed that state-of-the-art statistical parametric speech syntheziers matched state-of-the-art concatenative ones in some languages"
 
 Deep voice 1 explains wavenet better than wavenet... go figure
+
+1702.07825: "As is common with high-dimensional generative models (Theis et al., 2015), model loss is somewhat uncorrelated with perceptual quality of individual samples."
