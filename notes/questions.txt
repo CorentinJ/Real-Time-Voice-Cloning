@@ -1,5 +1,5 @@
 - Why do they call the architecture a encoder-decoder one? There is no special embedding in the middle of the network. Something to do with the loss?
-- Matheo
+- Matheo + B. Wéry
 
 Self:
 - Am I going to need a different embedding for the voice of a same speaker in two different languages? I may need to formulate a "unique encoding hypothesis", i.e. that two people with the same voice in language A would also have the same voice in language B. This is likely not a true hypothesis but still a reasonable simplification for the voice transfer problem.

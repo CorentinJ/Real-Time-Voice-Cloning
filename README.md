@@ -1,4 +1,4 @@
-# Automatic Neural Voice Cloning Across Languages
+# Automatic Multispeaker Voice Cloning Across Languages
 
 ### Papers 
 | URL | Designation | Title |
