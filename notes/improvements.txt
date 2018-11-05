@@ -1,0 +1,4 @@
+Self adjusting alignment: https://www.reddit.com/r/MachineLearning/comments/9t88jj/r_you_may_not_need_attention_summary_pytorch_code/
+
+Semi-Supervised Training for Improving Data Efficiency in End-to-End Speech Synthesis:
+https://arxiv.org/abs/1808.10128

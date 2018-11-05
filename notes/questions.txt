@@ -1,5 +1,5 @@
-- How do i aggregate the different metrics: MOS, Preference score, LSD/VU error rate/F0 RMSE?
-
+- Why do they call the architecture a encoder-decoder one? There is no special embedding in the middle of the network. Something to do with the loss?
+- Matheo
 
 Self:
 - Am I going to need a different embedding for the voice of a same speaker in two different languages? I may need to formulate a "unique encoding hypothesis", i.e. that two people with the same voice in language A would also have the same voice in language B. This is likely not a true hypothesis but still a reasonable simplification for the voice transfer problem.
@@ -7,5 +7,8 @@ Self:
 
 
 Answered:
+- How do i aggregate the different metrics: MOS, Preference score, LSD/VU error rate/F0 RMSE?
+-> Don't. Present them seperately as they are.
+
 - Could it be that in HMM-base synthesis, static features and their deltas (dynamic) are the same things as predicted mean and variance? 
 -> Not exactly. Mean is predicted by the acoustic model, variance is precomputed and deltas allow for continuity. See H. Zen slides 27-31

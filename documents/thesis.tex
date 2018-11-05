@@ -1,4 +1,4 @@
-\documentclass[a4paper, oneside]{article}
+ge\documentclass[a4paper, oneside]{article}
 \usepackage{array}
 \usepackage{shortvrb}
 \usepackage{listings}
@@ -15,7 +15,7 @@
 \usepackage{wrapfig}
 \usepackage{systeme}
 \usepackage{tabularx}
-\usepackage{subfig}
+\usepackage{subfig}ccc
 \usepackage{hyperref}
 \usepackage[authoryear, round]{natbib}
 \usepackage[dvipsnames]{xcolor}
@@ -86,7 +86,7 @@ To do when I'll have a good overview of the project. Try to answer:
 \subsection{Problem definition}
 \color{red} Update this section to reflect what was actually achieved and is presented in this document \color{black}
 
-We aim to develop a framework that, given an audio segment of speech in a same language from different speakers, a transcript of this segment and a translation of this transcript in a target language, is able to regenerate the audio segment as if each speaker was talking in the target language. This task is to be performed online by the framework but is expected to output an audio of better quality given a longer delay from the source, such that the best performance is obtained when running offline. The quality of an audio sample transferred in a different language relies on the naturalness of the output voice and a meaningful transfer of the speaker features (e.g. someone speaking slowly in French is expected to also speak slowly in English).
+We aim to develop a framework that, given an audio segment of speech in a source language from different speakers, a transcript of this segment and a translation of this transcript in a target language, is able to regenerate the audio segment as if each speaker was talking in the target language. This task is to be performed online by the framework but is expected to output an audio of better quality given a longer delay from the source, such that the best performance is obtained when running offline. The quality of an audio sample transferred in a different language relies on the naturalness of the output voice and a meaningful transfer of the speaker features (e.g. someone speaking slowly in French is expected to also speak slowly in English).
 
 
 \subsection{Statistical parametric speech synthesis}
@@ -183,7 +183,7 @@ The output is a categorical distribution (using a softmax layer) over sample val
 
 
 Deep Voice \cite{DeepVoice1} proposes a fully neural TTS framework that exploits Wavenet among other deep architectures. Deep Voice stands out by making use of only a few intermediate features: phonemes with stress annotations, phoneme durations,
-and F0. This has the advantage of making the framework easily transferable to new domains with little engineering effort as complex linguistic features need not be derived. The neural networks intervening in Deep Voice are: a grapheme-to-phoneme model that converts text to phonemes, a segmentation model that aligns a sequence of phonemes to an audio segment, a phoneme duration model that predicts the duration of each phoneme at generation time, a fundamental frequency model that predicts the V/UV flag with F0 values for voiced parts and finally, Wavenet which acts as an audio synthesis model. In all the works we presented previously, only the audio synthesis model was not manually engineered. While others have researched the use of neural networks for some of these components, Deep Voice is the first to simultaneously employ them all in a single framework. However, the grapheme-to-phoneme model is only used as a fallback for words not present in a phoneme dictionary. The roles and interactions of these components at training and inference time are shown in figure \ref{deep_voice_1_arch}. Deep Voice also improves on the inference speed of Wavenet, with a speedup of up to 400. This allows for real-time or near real-time execution, with a tunable speed/quality trade-off. Deep Voice does not yield state of the art results but instead serves as groundwork for future researches. \color{red} add results \color{black}.
+and F0. This has the advantage of making the framework easily transferable to new domains with little engineering effort as complex linguistic features need not be derived. The neural networks intervening in Deep Voice are: a grapheme-to-phoneme model that converts text to phonemes, a segmentation model that aligns a sequence of phonemes to an audio segment, a phoneme duration model that predicts the duration of each phoneme at generation time, a fundamental frequency model that predicts the V/UV flag with F0 values for voiced parts and finally, Wavenet which acts as an audio synthesis model. In all the works we presented previously, only the audio synthesis model was not manually engineered. While others have researched the use of neural networks for some of these components, Deep Voice is the first to simultaneously employ them all in a single framework. However, the grapheme-to-phoneme model is only used as a fallback for words not present in a phoneme dictionary. The roles and interactions of these components at training and inference time are shown in figure \ref{deep_voice_1_arch}. Deep Voice also improves on the inference speed of Wavenet, with a speedup of up to 400. This allows for real-time or near real-time execution, with a tunable speed/quality trade-off. Deep Voice does not yield state of the art results but instead serves as groundwork for future researches. \color{red} discuss results \color{black}.
 
 \begin{figure}[h]
 	\centering
@@ -199,13 +199,18 @@ and F0. This has the advantage of making the framework easily transferable to ne
 % Near real-time (accuracy/speed tradeoff)
 % No diff when using original wavenet
 
+\color{red}
+Skipping the following, in order:
 
+Tacotron, Deep voice 2, Deep voice 3
+
+I'll see later whether or not I should read and include them
+\color{black}
+
+Tacotron 2
 
 \color{red}
-Deep voice 1, Tacotron
-
-
-Deep voice 2 \& 3, Few samples, Tacotron 2
+Few samples
 
 SV2TTS
 
