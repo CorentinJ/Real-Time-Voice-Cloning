@@ -1,4 +1,4 @@
-# Automatic Multispeaker Voice Cloning Across Languages
+# Automatic Neural Voice Cloning Across Languages
 
 ### Papers 
 | URL | Designation | Title |
@@ -34,26 +34,27 @@
   - [x] RNN-based TTS
   - [x] Wavenet
   - [x] Deep voice
-  - [ ] Tacotron
-  - ...
+  - [ ] Tacotron2
+  - [ ] SV2TTS
+  - ... more?
 - [ ] Get started on the description of SV2TTS 
 - [ ] Get started on the analysis of the benchmarks in SV2TTS 
 
 ### Roadmap
-**For the 19th of October**:
-- Review the current SOTA  (weaknesses/strengths w.r.t. SV2TTS)
-- Complete description of the architecture of SV2TTS (embedded models, exotic layers)
-- Analysis of the benchmarks (data used, metrics)
+**For the 21th of November**:
+- Finish SOTA
+- Begin description of the architecture of SV2TTS 
+- Begin training Tacotron2
 
 **For later**:
+- Obtain results on Tacotron2
 - Implement SV2TTS as a baseline
 - Evaluate the quality of this baseline w.r.t. the reported results in SV2TTS
+- Analysis of the benchmarks (data used, metrics)
 
 **For much later**:
 - Implement the improvements in SST4TTS to achieve better data efficiency
 - Adapt/Improve the cross-language aspect from the baseline
 
 ### Other things
-- Setup Matheo (must be done between the 1st and 30th of November)
-- Settle on the title of the thesis (prefix with deep/neural?, add something to indicate the intended application?)
 - Migrate repo to github once the baseline is decent *(possibly, make it an open source repo on its own and keep working on transfer across languages as a fork)*
