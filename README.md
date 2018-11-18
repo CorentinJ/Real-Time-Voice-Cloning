@@ -14,7 +14,8 @@
 |[1702.07825](https://arxiv.org/pdf/1702.07825.pdf) | Deep Voice 1 | Deep Voice: Real-time Neural Text-to-Speech |
 |[1609.03499](https://arxiv.org/pdf/1609.03499.pdf) | Wavenet | Wavenet: A Generative Model for Raw Audio |
 |[1509.08062](https://arxiv.org/pdf/1509.08062.pdf) | TE2E | End-to-End Text-Dependent Speaker Verification |
-|[1409.0473](https://arxiv.org/pdf/1409.0473.pdf) | Attention | Neural Machine Translation by Jointly Learning to Align and Translate |
+|[1506.07503](https://arxiv.org/pdf/1506.07503.pdf) | Attention (location) | Attention-Based Models for Speech Recognition |
+|[1409.0473](https://arxiv.org/pdf/1409.0473.pdf) | Attention (basic) | Neural Machine Translation by Jointly Learning to Align and Translate |
 
 
 ### Task list
@@ -25,8 +26,9 @@
   - [x] Tacotron 2 (base for the synthesizer and vocoder of SV2TTS)
   - [ ] GE2E (Encoder of SV2TTS)
   - [ ] TE2E (base for GE2E)
-  - [ ] Attention (to learn about the attention layer)
-  - [ ] Tacotron 1 (base for Tacotron 2)
+  - [x] Attention (basic)
+  - [ ] Attention (location)
+  - [x] Tacotron 1 (base for Tacotron 2)
   - [x] Wavenet (vocoder of Tacotron)
 - SOTA review:
   - [x] HMM-based TTS
@@ -38,16 +40,20 @@
   - [ ] SV2TTS
   - ... more?
 - [ ] Get started on the description of SV2TTS 
-- [ ] Get started on the analysis of the benchmarks in SV2TTS 
+- [ ] Get started on the analysis of the benchmarks in SV2TTS
+- On the Tacotron 2 implementation:
+  - [ ] Present results from the basic implementation
+  - [ ] Address the Wavenet speed problem
+  - [ ] Train on custom data
+	
 
 ### Roadmap
 **For the 21th of November**:
 - Finish SOTA
+- Obtain results on Tacotron2
 - Begin description of the architecture of SV2TTS 
-- Begin training Tacotron2
 
 **For later**:
-- Obtain results on Tacotron2
 - Implement SV2TTS as a baseline
 - Evaluate the quality of this baseline w.r.t. the reported results in SV2TTS
 - Analysis of the benchmarks (data used, metrics)
