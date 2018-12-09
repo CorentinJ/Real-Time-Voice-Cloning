@@ -1,0 +1,45 @@
+END-TO-END TEXT-DEPENDENT SPEAKER VERIFICATION:
+- Take an utterance, split it in frames with a window function, feed frames to the LSTM. Take only the last output of the LSTM and average it over several frames to obtain the embedding of that utterance. The speaker embedding (also called speaker model) is the average of several utterance embeddings.
+- The process of deriving a speaker embedding from several utterances of the same speaker is called enrollment.
+- Typically an order more of utterances available per speaker than used for enrollment.
+- Addition of noise to the data (page 3, top of right column), but not to the enrollment samples! Non-augmented samples are also used for evaluation.
+- Dataset of 22M utterances from 80k speakers with at least 150 utterances per speaker.
+- 100Hz framerate (~80 frames per sample) with 40 log-mel filters.
+
+
+GENERALIZED END-TO-END LOSS FOR SPEAKER VERIFICATION:
+- Each batch contains N speakers and M utterances.
+- Addition of a linear layer at the end of the LSTM network.
+- The utterance embedding is the L2 norm of the last layer.
+- In training, when comparing an uterrance embedding with a speaker embedding, they exclude that utterance embedding from the computation of the speaker embedding if they both come from the same speaker.
+- Overlapping windows of 25ms width every 10ms (= 100Hz) with 40 log-mel filters.
+- Utterances of 140-180 frames randomly extracted using Voice Activity Detection (VAD)
+- Utterances of 160 frames with 50% overlap are used at inference time. The outputs of the model for each utterance are L2-normalized then averaged.
+- 3-layer LSTM with projection of size equal to the embedding (64 and 256 for small and large datasets respectively). 
+- Training hyperparameters at the begining of section 3.
+- Dataset of 36M utterances from 80k speakers for training. 1k speakers for evaluation with 6.3 average enrollment utterances and 7.2 evaluation utterances per speaker.
+
+
+TRANSFER LEARNING FROM SPEAKER VERIFICATION TO MULTISPEAKER TEXT-TO-SPEECH SYNTHESIS
+- Trained on untranscribed speech containing reverbation and background noise for a large number or speakers (can be disjoint from synthesis network).
+- Training on 36M utterances from 18k speakers (and 1.2k for synthesis network) with median utterance duration of 3.9 seconds. This data is not used for the other parts of the framework. At least thousands of speakers are needed for zero-shot transfer.
+- Training set consists of audio segmented in 1.6 seconds and the speaker label.
+- Only using the last output of the LSTM as embedding (still L2-normalized).
+- Utterances of 800ms with 50% overlap are used at inference time.
+- VCTK: downsampling to 24kHz, trim leading and trailing silences (median duration from 3.3 to 1.8 seconds).
+- LibriSpeech: data sampled at 16kHz. See paper for details.
+- Datasets used for the encoder: LS-Other, VC, VC2 (for the synthesis network: VCTK, LS-Clean)
+- LS-Other: 461 hours of speech from 1166 speakers (disjoint from LS-Clean)
+- VoxCeleb: 139k utterances from 1211 speakers
+- VoxCeleb: 1.09M utterances from 5994 speakers
+
+
+About mel:
+- Tacotron predicts a mel spectrogram
+- Tacotron's target is an 80-channel mel-scale filterbank followed by log dynamic range compression
+- The encoder takes 40-channel log-mel spectrogram frames
+- The encoder takes 40-channel log-mel filterbank energies
+- https://haythamfayek.com/2016/04/21/speech-processing-for-machine-learning.html
+
+What I suggest:
+- Start with GE2E

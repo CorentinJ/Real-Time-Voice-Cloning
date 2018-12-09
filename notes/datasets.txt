@@ -4,6 +4,7 @@ https://catalog.ldc.upenn.edu/LDC93S1
 http://www.voxforge.org/home
 https://homepages.inf.ed.ac.uk/jyamagis/page3/page58/page58.html (used in 1802.06006, 1806.04558)
 http://www.robots.ox.ac.uk/~vgg/data/voxceleb/
+http://www.m-ailabs.bayern/en/the-mailabs-speech-dataset/
 
 
 ### TATOEBA ###

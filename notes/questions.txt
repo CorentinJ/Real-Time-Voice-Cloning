@@ -1,13 +1,14 @@
-- Why do they call the architecture a encoder-decoder one? There is no special embedding in the middle of the network. Something to do with the loss?
-- Matheo + B. Wéry
 
 
-Self:
 - Am I going to need a different embedding for the voice of a same speaker in two different languages? I may need to formulate a "unique encoding hypothesis", i.e. that two people with the same voice in language A would also have the same voice in language B. This is likely not a true hypothesis but still a reasonable simplification for the voice transfer problem.
+
 - [1409.0473] "Most of the proposed neural machine translation models belong to a family of encoder–decoders (...), with an encoder and a decoder for each language, (...)". I could do something similar: a voice encoder and a synthesizer per language, and somehow manage to keep a shared embedding space for all languages. This reminds me of UNIT, I wonder if it's applicable here. Very likely, the best way to do this lies in recent NLP methods.
 
 
 Answered:
+- Why do they call the architecture a encoder-decoder one? There is no special embedding in the middle of the network. Something to do with the loss?
+-> Because of the attention layer. Encode source characters in an intermediate representation, decode them to produce a spectrogram.
+
 - How do i aggregate the different metrics: MOS, Preference score, LSD/VU error rate/F0 RMSE?
 -> Don't. Present them seperately as they are.
 
