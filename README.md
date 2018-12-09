@@ -36,7 +36,7 @@
   - [x] RNN-based TTS
   - [x] Wavenet
   - [x] Deep voice
-  - [ ] Tacotron2
+  - [x] Tacotron2
   - [ ] SV2TTS
   - ... more?
 - [ ] Get started on the description of SV2TTS 
