@@ -1,4 +1,5 @@
 from vlibs import fileio
 
-LIBRISPEECH_ROOT = "E://Datasets/LibriSpeech"
-LIBRISPEECH_DATASETS = ["train-other-500"]
+librispeech_root = "E://Datasets/LibriSpeech"
+librispeech_datasets = ["train-other-500"]
+clean_data_root = "temp"

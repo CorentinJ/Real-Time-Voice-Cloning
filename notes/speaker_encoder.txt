@@ -39,7 +39,30 @@ About mel:
 - Tacotron's target is an 80-channel mel-scale filterbank followed by log dynamic range compression
 - The encoder takes 40-channel log-mel spectrogram frames
 - The encoder takes 40-channel log-mel filterbank energies
+- One frame contains 40-channel log-mel filterbank energies
 - https://haythamfayek.com/2016/04/21/speech-processing-for-machine-learning.html
+
 
 What I suggest:
 - Start with GE2E
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
