@@ -31,7 +31,7 @@ def wave_to_mel_filterbank(wave, sampling_rate):
         hop_length=int(sampling_rate * mel_window_step / 1000),
         n_mels=mel_n
     )
-    return frames.transpose()
+    return frames.astype(np.float32).transpose()
 
 def plot_wave(wave, sampling_rate):
     plt.plot(wave)

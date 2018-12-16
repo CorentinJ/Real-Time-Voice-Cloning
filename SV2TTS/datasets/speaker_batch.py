@@ -12,7 +12,8 @@ class SpeakerBatch:
         
         # Array of shape (n_speakers * n_utterances) * n_frames * mel_n, e.g. for 3 speakers with
         # 4 utterances each of 160 frames of 40 mel coefficients: (12, 160, 40)
-        self.data = np.zeros((len(speakers) * utterances_per_speaker, n_frames, mel_n))
+        self.data = np.zeros((len(speakers) * utterances_per_speaker, n_frames, mel_n), 
+                             dtype=np.float32)
         i = 0
         for speaker in speakers:
             for _, frames, _ in self.partial_utterances[speaker]:
