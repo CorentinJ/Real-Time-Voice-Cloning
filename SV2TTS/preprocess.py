@@ -67,14 +67,14 @@ def preprocess_librispeech(n_speakers=None, n_utterances=None):
             
             fpaths = fileio.get_files(speaker_in_dir, r"\.flac", recursive=True)[:n_utterances]
             message = "\tProcessing %3d utterances from speaker %s" % (len(fpaths), speaker_id)
-            for i, fpath in enumerate(fpaths):
-                wave, sampling_rate = audio.load(fpath, 16000)
+            for i, in_fpath in enumerate(fpaths):
+                wave, sampling_rate = audio.load(in_fpath, 16000)
                 logger.add_sample(duration=len(wave)/sampling_rate)
                 frames = audio.wave_to_mel_filterbank(wave, sampling_rate)
-                fname = fileio.leaf(fpath).replace(".flac", ".npy")
+                fname = fileio.leaf(in_fpath).replace(".flac", ".npy")
                 out_fpath = fileio.join(speaker_out_dir, fname)
                 np.save(out_fpath, frames)
-                sources_file.write("%s %s\n" % (fname, out_fpath))
+                sources_file.write("%s %s\n" % (fname, in_fpath))
                 console.progress_bar(message, i + 1, len(fpaths))
 
             sources_file.close()

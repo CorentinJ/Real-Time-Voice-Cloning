@@ -1,64 +1,81 @@
-from PyQt4.QtCore import *
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from params import mel_window_step
 from PyQt4.QtGui import *
-import PyQt4
-from vlibs import nowarnings
-from functools import partial
-from ui import gui
+from PyQt4 import QtGui
 import numpy as np
+import librosa
+import audio
+import sys
 
 
-class SpeakerMatrixUI(gui.UI):
+class SpeakerMatrixUI(QtGui.QDialog):
     def __init__(self, speakers, partial_utterances, title="Hey"):
         self.speakers = speakers
         self.partial_utterances = partial_utterances
         self.title = title
+        
+        # Create the ui
+        app = QtGui.QApplication(sys.argv)
+        super().__init__(None)
+        
+        # Display it and stay in mainloop until the window is closed
+        total_utterances = sum(map(len, self.partial_utterances.values()))
+        print('Drawing plots for %d utterances, please wait...' % total_utterances)
+        self.setup_ui()
+        self.show()
+        app.exec_()
     
-    def draw_images(self, redraw_source=True):
-        self.edit_frame.setPixmap(gui.standard_to_pixmap(self.edited_image))
+    def setup_ui(self):
+        grid = QtGui.QGridLayout()
+        
+        # Draw the grid
+        for i, speaker in enumerate(self.speakers):
+            # Speaker ID
+            label = QLabel(speaker.name)
+            grid.addWidget(label, i, 0)
+            
+            # Utterances
+            for j, partial_utterance in enumerate(self.partial_utterances[speaker]):
+                grid.addLayout(self._plot_partial_utterance(partial_utterance), i, j + 1)
+        
+        self.setLayout(grid)
+        
+    def _plot_partial_utterance(self, partial_utterance):
+        figure = Figure()
+        canvas = FigureCanvas(figure)
+        
+        # Load the partial utterance's frames and waveform
+        utterance, frames, frames_range = partial_utterance
+        wave_fpath = utterance.wave_fpath
+        wave, _ = audio.load(wave_fpath, 16000)
+        wave_range = (np.array(frames_range) * 16000 * (mel_window_step / 1000)).astype(np.int)
+        wave = wave[wave_range[0]:wave_range[1]]
     
-    def _on_click(self, event):      
-        # Edit the image
-        coords = (event.y() // self.scale, event.x() // self.scale)
-        button = event.button()
-        self.on_click(self.index, self.edited_image, coords, button)
+        # Plot the spectrogram and the waveform
+        ax = figure.add_subplot(211)
+        librosa.display.specshow(
+            librosa.power_to_db(frames.transpose(), ref=np.max),
+            hop_length=int(16000 * 0.01),
+            y_axis='mel',
+            x_axis='time',
+            sr=16000,
+            ax=ax
+        )
+        ax.get_xaxis().set_visible(False)
+        ax = figure.add_subplot(212, sharex=ax)
+        librosa.display.waveplot(
+            wave,
+            sr=16000,
+            ax=ax
+        )
+        figure.tight_layout()
+        canvas.draw()
+        
+        button = QtGui.QPushButton('Play')
+        button.clicked.connect(lambda: audio.play_wave(wave, 16000))
     
-    def setup_ui(self, window):
-        print('hey')
-        pass
-        # # Find the layout parameters
-        # dims = np.array(self.source_image.shape) * self.scale
-        # 
-        # # Create a frame for each image
-        # self.source_frame = QLabel(window)
-        # self.source_frame.setGeometry(10, 10, dims[1], dims[0])
-        # self.source_frame.setScaledContents(True)
-        # 
-        # self.edit_frame = QLabel(window)
-        # self.edit_frame.setGeometry(20 + dims[1], 10, dims[1], dims[0])
-        # self.edit_frame.setScaledContents(True)
-        # GUI.make_clickable(self.edit_frame, self._on_click)
-        # 
-        # # Create the buttons
-        # x_min = dims[1] * 2 + 30
-        # y_min = dims[0] + 20
-        # 
-        # button = QPushButton(window, text="Next")
-        # button.setGeometry(x_min, 10, 140, 60)
-        # GUI.make_clickable(button, key=Qt.Key_A).connect(self.next_images)
-        # 
-        # button = QPushButton(window, text="Undo")
-        # button.setGeometry(x_min, 80, 140, 60)
-        # GUI.make_clickable(button, key=Qt.Key_Z).connect(self.undo)
-        # 
-        # # button = QPushButton(window, text="All black")
-        # # button.setGeometry(x_min, 150, 140, 60)
-        # # GUI.make_clickable(button, key=Qt.Key_E).connect(self.all_black)
-        # 
-        # button = QPushButton(window, text="Skip")
-        # button.setGeometry(x_min, 220, 140, 60)
-        # GUI.make_clickable(button, key=Qt.Key_R).connect(partial(self.next_images, True))
-        # 
-        # # Fit the window to the contents
-        # window.resize(x_min + 150, y_min)
-        # self.draw_images()
-
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(canvas)
+        layout.addWidget(button)
+        return layout

@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import librosa.display
 import librosa
 import numpy as np
+import sounddevice
 from params import *
 
 def load(fpath, sampling_rate):
@@ -49,4 +50,8 @@ def plot_mel_filterbank(frames, sampling_rate):
     plt.title('Mel spectrogram')
     plt.tight_layout()
     plt.show()
+    
+def play_wave(wave, sampling_rate, blocking=False):
+    sounddevice.stop()
+    sounddevice.play(wave, sampling_rate, blocking=blocking)
     
