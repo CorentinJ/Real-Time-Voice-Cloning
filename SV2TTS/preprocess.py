@@ -3,6 +3,7 @@ from config import *
 import audio
 import numpy as np
 from datetime import datetime
+from params import sampling_rate
 
 class DatasetLog:
     """
@@ -15,9 +16,9 @@ class DatasetLog:
         start_time = str(datetime.now().strftime("%A %d %B %Y at %H:%M"))
         self.write_line("Creating dataset %s on %s" % (name, start_time))
         self.write_line("-----")
-        self.log_params()
+        self._log_params()
         
-    def log_params(self):
+    def _log_params(self):
         import params
         self.write_line("Parameter values:")
         for param_name in (p for p in dir(params) if not p.startswith('__')):
@@ -45,6 +46,9 @@ class DatasetLog:
         self.write_line("Finished on %s" % end_time)
         self.text_file.close()
         
+def preprocess_wave(wave):
+    wave = audio.trim_long_silences(wave)
+    return wave
 
 def preprocess_librispeech(n_speakers=None, n_utterances=None):
     fileio.ensure_dir(clean_data_root)
@@ -68,13 +72,18 @@ def preprocess_librispeech(n_speakers=None, n_utterances=None):
             fpaths = fileio.get_files(speaker_in_dir, r"\.flac", recursive=True)[:n_utterances]
             message = "\tProcessing %3d utterances from speaker %s" % (len(fpaths), speaker_id)
             for i, in_fpath in enumerate(fpaths):
-                wave, sampling_rate = audio.load(in_fpath, 16000)
-                logger.add_sample(duration=len(wave)/sampling_rate)
-                frames = audio.wave_to_mel_filterbank(wave, sampling_rate)
+                # Load and preprocess the waveform
+                wave = audio.load(in_fpath)
+                wave = preprocess_wave(wave)
+                logger.add_sample(duration=len(wave) / sampling_rate)
+                
+                # Create and save the mel spectrogram
+                frames = audio.wave_to_mel_filterbank(wave)
                 fname = fileio.leaf(in_fpath).replace(".flac", ".npy")
                 out_fpath = fileio.join(speaker_out_dir, fname)
                 np.save(out_fpath, frames)
                 sources_file.write("%s %s\n" % (fname, in_fpath))
+                
                 console.progress_bar(message, i + 1, len(fpaths))
 
             sources_file.close()

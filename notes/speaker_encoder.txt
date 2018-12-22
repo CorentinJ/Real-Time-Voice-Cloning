@@ -43,9 +43,10 @@ About mel:
 - https://haythamfayek.com/2016/04/21/speech-processing-for-machine-learning.html
 
 
-What I suggest:
-- Start with GE2E
-
+TODO:
+1. Implement the loss function of GE2E
+2. Expand the dataset OR implement the projection layer
+*. Remove y axis in matrix
 
 
 

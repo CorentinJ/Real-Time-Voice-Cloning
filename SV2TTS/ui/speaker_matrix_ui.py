@@ -7,6 +7,8 @@ import numpy as np
 import librosa
 import audio
 import sys
+from params import sampling_rate
+from preprocess import preprocess_wave
 
 
 class SpeakerMatrixUI(QtGui.QDialog):
@@ -48,32 +50,34 @@ class SpeakerMatrixUI(QtGui.QDialog):
         # Load the partial utterance's frames and waveform
         utterance, frames, frames_range = partial_utterance
         wave_fpath = utterance.wave_fpath
-        wave, _ = audio.load(wave_fpath, 16000)
-        wave_range = (np.array(frames_range) * 16000 * (mel_window_step / 1000)).astype(np.int)
-        wave = wave[wave_range[0]:wave_range[1]]
+        wave = audio.load(wave_fpath)
+        wave = preprocess_wave(wave)
+        
+        wave_range = np.array(frames_range) * sampling_rate * (mel_window_step / 1000)
+        wave = wave[int(wave_range[0]):int(wave_range[1])]
     
         # Plot the spectrogram and the waveform
         ax = figure.add_subplot(211)
         librosa.display.specshow(
             librosa.power_to_db(frames.transpose(), ref=np.max),
-            hop_length=int(16000 * 0.01),
+            hop_length=int(sampling_rate * 0.01),
             y_axis='mel',
             x_axis='time',
-            sr=16000,
+            sr=sampling_rate,
             ax=ax
         )
         ax.get_xaxis().set_visible(False)
         ax = figure.add_subplot(212, sharex=ax)
         librosa.display.waveplot(
             wave,
-            sr=16000,
+            sr=sampling_rate,
             ax=ax
         )
         figure.tight_layout()
         canvas.draw()
         
         button = QtGui.QPushButton('Play')
-        button.clicked.connect(lambda: audio.play_wave(wave, 16000))
+        button.clicked.connect(lambda: audio.play_wave(wave))
     
         layout = QtGui.QVBoxLayout()
         layout.addWidget(canvas)

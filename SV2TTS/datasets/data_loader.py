@@ -3,6 +3,7 @@ from datasets.speaker import Speaker
 from datasets.speaker_batch import SpeakerBatch
 from vlibs import fileio
 from config import *
+from params import partial_utterance_length
 import random
 
 class SpeakerVerificationDataset(Dataset):
@@ -21,9 +22,8 @@ class SpeakerVerificationDataset(Dataset):
         
     def __getitem__(self, index):
         speakers = random.sample(self.speakers, self.speakers_per_batch)
-        batch = SpeakerBatch(speakers, self.utterances_per_speaker, 160)
+        batch = SpeakerBatch(speakers, self.utterances_per_speaker, partial_utterance_length)
         return batch
-        # return speakers
     
     def collate(batches):
         # We don't want SpeakerBatches to be aggregated in a single numpy array because they do 
@@ -32,4 +32,4 @@ class SpeakerVerificationDataset(Dataset):
         return batches
     
     def test_data(self):
-        return {s.name: s.test_partial_utterances(160) for s in self.speakers}
+        return {s.name: s.test_partial_utterances(partial_utterance_length) for s in self.speakers}
