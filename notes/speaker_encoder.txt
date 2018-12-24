@@ -18,6 +18,7 @@ GENERALIZED END-TO-END LOSS FOR SPEAKER VERIFICATION:
 - 3-layer LSTM with projection of size equal to the embedding (64 and 256 for small and large datasets respectively). 
 - Training hyperparameters at the begining of section 3.
 - Dataset of 36M utterances from 80k speakers for training. 1k speakers for evaluation with 6.3 average enrollment utterances and 7.2 evaluation utterances per speaker.
+- 64 speakers per batch with 10 utterances each
 
 
 TRANSFER LEARNING FROM SPEAKER VERIFICATION TO MULTISPEAKER TEXT-TO-SPEECH SYNTHESIS

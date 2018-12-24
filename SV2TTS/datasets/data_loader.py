@@ -7,7 +7,7 @@ from params import partial_utterance_length
 import random
 
 class SpeakerVerificationDataset(Dataset):
-    def __init__(self, datasets, speakers_per_batch, utterances_per_speaker, test_split=0.8):
+    def __init__(self, datasets, speakers_per_batch, utterances_per_speaker):
         self.utterances_per_speaker = utterances_per_speaker
         self.speakers_per_batch = speakers_per_batch
         
@@ -15,7 +15,7 @@ class SpeakerVerificationDataset(Dataset):
         for dataset in datasets:
             dataset_root = fileio.join(clean_data_root, dataset) 
             speaker_dirs = fileio.join(dataset_root, fileio.listdir(dataset_root))
-            self.speakers.extend(Speaker(speaker_dir, test_split) for speaker_dir in speaker_dirs)
+            self.speakers.extend(Speaker(speaker_dir) for speaker_dir in speaker_dirs)
 
     def __len__(self):
         return int(1e10)
@@ -26,10 +26,5 @@ class SpeakerVerificationDataset(Dataset):
         return batch
     
     def collate(batches):
-        # We don't want SpeakerBatches to be aggregated in a single numpy array because they do 
-        # not have the same shape. By override the collate function with identity, they are 
-        # aggregated in a list instead.
-        return batches
+        return batches[0]
     
-    def test_data(self):
-        return {s.name: s.test_partial_utterances(partial_utterance_length) for s in self.speakers}

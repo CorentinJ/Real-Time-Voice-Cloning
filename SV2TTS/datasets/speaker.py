@@ -4,31 +4,22 @@ from datasets.utterance import Utterance
 
 # Set of utterances for a single speaker
 class Speaker:
-    def __init__(self, root, test_split=None):
+    def __init__(self, root):
         self.name = fileio.leaf(root)
         sources = fileio.read_all_lines(fileio.join(root, 'sources.txt'))
         sources = list(map(lambda l: l.split(' '), sources))
         sources = {frames_fname: wave_fpath for frames_fname, wave_fpath in sources}
         self.utterances = [Utterance(fileio.join(root, f), w) for f, w in sources.items()]
         self.next_utterances = []
-        self.test_utterances = []
-        if test_split is not None:
-            split = int(len(self.utterances) * test_split)
-            self.test_utterances = self.utterances[split:]
-            self.utterances = self.utterances[:split]
-            
-    def test_partial_utterances(self, n_frames):
-        return [(u,) + u.random_partial_utterance(n_frames) for u in self.test_utterances]
-    
+               
     def random_partial_utterances(self, count, n_frames):
         """
         Samples a batch of <count> unique partial utterances from the disk in a way that all 
-        utterancescome up at least once every two cycles and in a random order every time.
+        utterances come up at least once every two cycles and in a random order every time.
         
         :param count: The number of partial utterances to sample from the set of utterances from 
         that speaker. Utterances are guaranteed not to be repeated if <count> is not larger than 
-        the 
-        number of utterances available.
+        the number of utterances available.
         :param n_frames: The number of frames in the partial utterance.
         :return: A list of tuples (utterance, frames, range) where utterance is an Utterance, 
         frames are the frames of the partial utterances and range is the range of the partial 
