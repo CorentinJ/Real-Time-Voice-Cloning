@@ -18,3 +18,9 @@ vad_window_length = 30  # In milliseconds
 vad_moving_average_width = 8
 # Maximum number of consecutive silent frames a segment can have.
 vad_max_silence_length = 6
+
+## Model parameters
+model_hidden_size = 128
+model_embedding_size = 256
+model_num_layers = 3
+

@@ -1,4 +1,5 @@
 import numpy as np
+from params import partial_utterance_length
 
 class Utterance:
     def __init__(self, frames_fpath, wave_fpath):
@@ -17,6 +18,9 @@ class Utterance:
         partial utterance in the complete utterance.
         """
         frames = self.get_frames()
-        start = np.random.randint(0, frames.shape[0] - n_frames)
+        if frames.shape[0] == n_frames:
+            start = 0
+        else:
+            start = np.random.randint(0, frames.shape[0] - n_frames)
         end = start + n_frames
         return frames[start:end], (start, end)

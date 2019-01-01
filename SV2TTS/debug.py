@@ -24,6 +24,5 @@ if __name__ == '__main__':
     loader = DataLoader(dataset, batch_size=1, num_workers=1, 
                         collate_fn=SpeakerVerificationDataset.collate)
     for batch in loader:
-        batch = batch[0]
         SpeakerMatrixUI(batch.speakers, batch.partial_utterances)
     

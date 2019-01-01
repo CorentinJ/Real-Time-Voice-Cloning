@@ -20,12 +20,10 @@
 
 ### Task list
 *In no particular order:*
-- [x] Reformulate the subject and a short description of how the implementation will work
-- [x] Finish the analysis of SV2TTS
 - Other papers to read:
   - [x] Tacotron 2 (base for the synthesizer and vocoder of SV2TTS)
-  - [ ] GE2E (Encoder of SV2TTS)
-  - [ ] TE2E (base for GE2E)
+  - [x] GE2E (Encoder of SV2TTS)
+  - [x] TE2E (base for GE2E)
   - [x] Attention (basic)
   - [ ] Attention (location)
   - [x] Tacotron 1 (base for Tacotron 2)
@@ -41,6 +39,9 @@
   - ... more?
 - [ ] Get started on the description of SV2TTS 
 - [ ] Get started on the analysis of the benchmarks in SV2TTS
+- On the encoder:
+  - [ ] Present the implementation and that of the authors
+  - [ ] Present the results
 - On the Tacotron 2 implementation:
   - [ ] Present results from the basic implementation
   - [ ] Address the Wavenet speed problem
@@ -48,15 +49,16 @@
 	
 
 ### Roadmap
-**For the 21th of November**:
-- Finish SOTA
-- Obtain results on Tacotron2
-- Begin description of the architecture of SV2TTS 
+**For the 25th january**:
+- Finish the encoder (GE2E) and write about it
+- Present the results
 
-**For later**:
-- Implement SV2TTS as a baseline
-- Evaluate the quality of this baseline w.r.t. the reported results in SV2TTS
-- Analysis of the benchmarks (data used, metrics)
+**For the end of february**:
+- Integrate the encoder with Tacotron
+- Use Griffin-Lim to generate waveforms in a first time
+
+**For later**
+- Possibly, manage to use Wavenet as the waveform generator
 
 **For much later**:
 - Implement the improvements in SST4TTS to achieve better data efficiency

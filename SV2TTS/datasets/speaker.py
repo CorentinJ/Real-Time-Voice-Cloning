@@ -6,7 +6,7 @@ from datasets.utterance import Utterance
 class Speaker:
     def __init__(self, root):
         self.name = fileio.leaf(root)
-        sources = fileio.read_all_lines(fileio.join(root, 'sources.txt'))
+        sources = fileio.read_all_lines(fileio.join(root, 'sources.txt'))[:40]
         sources = list(map(lambda l: l.split(' '), sources))
         sources = {frames_fname: wave_fpath for frames_fname, wave_fpath in sources}
         self.utterances = [Utterance(fileio.join(root, f), w) for f, w in sources.items()]

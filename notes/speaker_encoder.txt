@@ -45,8 +45,13 @@ About mel:
 
 
 TODO:
-1. Implement the loss function of GE2E
-2. Expand the dataset OR implement the projection layer
+1. Accuracy + Ensure proper overfitting
+2. Improve on the speed
+    - Usage of actual softmax?
+    - Tips & einops
+3. Decaying lr
+4. Expand the dataset
+?. Implement the projection layer
 *. Remove y axis in matrix
 
 

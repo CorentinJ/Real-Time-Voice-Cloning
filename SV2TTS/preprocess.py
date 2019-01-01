@@ -3,7 +3,7 @@ from config import *
 import audio
 import numpy as np
 from datetime import datetime
-from params import sampling_rate
+from params import sampling_rate, partial_utterance_length
 
 class DatasetLog:
     """
@@ -67,6 +67,7 @@ def preprocess_librispeech(n_speakers=None, n_utterances=None):
             speaker_name = "LibriSpeech_%s_%s" % (dataset_name, speaker_id)
             speaker_in_dir = fileio.join(dataset_root, speaker_id)
             speaker_out_dir = fileio.ensure_dir(fileio.join(out_dir, speaker_name))
+            fileio.resetdir(speaker_out_dir)
             sources_file = open(fileio.join(speaker_out_dir, "sources.txt"), 'w')
             
             fpaths = fileio.get_files(speaker_in_dir, r"\.flac", recursive=True)[:n_utterances]
@@ -75,15 +76,17 @@ def preprocess_librispeech(n_speakers=None, n_utterances=None):
                 # Load and preprocess the waveform
                 wave = audio.load(in_fpath)
                 wave = preprocess_wave(wave)
-                logger.add_sample(duration=len(wave) / sampling_rate)
                 
                 # Create and save the mel spectrogram
                 frames = audio.wave_to_mel_filterbank(wave)
+                if len(frames) < partial_utterance_length:
+                    continue
                 fname = fileio.leaf(in_fpath).replace(".flac", ".npy")
                 out_fpath = fileio.join(speaker_out_dir, fname)
                 np.save(out_fpath, frames)
-                sources_file.write("%s %s\n" % (fname, in_fpath))
                 
+                logger.add_sample(duration=len(wave) / sampling_rate)
+                sources_file.write("%s %s\n" % (fname, in_fpath))
                 console.progress_bar(message, i + 1, len(fpaths))
 
             sources_file.close()
@@ -91,4 +94,4 @@ def preprocess_librispeech(n_speakers=None, n_utterances=None):
         logger.finalize()
             
 if __name__ == '__main__':
-    preprocess_librispeech(10, 50)
+    preprocess_librispeech(150)
