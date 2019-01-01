@@ -17,6 +17,7 @@ implementation_doc = {
     'Lr decay': None,
     'Gradients ops': False,
     'Projection layer': False,
+    'Native softmax': True,
 }
 
 if __name__ == '__main__':
@@ -44,12 +45,14 @@ if __name__ == '__main__':
     
     # Training loop
     loss_values = []
+    accuracies = []
     for step, speaker_batch in enumerate(loader):
         # Forward pass
         inputs = torch.from_numpy(speaker_batch.data).to(device)
-        outputs = model(inputs)
-        loss = model.loss(outputs)
+        embeds = model(inputs)
+        loss, accuracy = model.loss(embeds)
         loss_values.append(loss.item())
+        accuracies.append(accuracy.item())
         
         # Backward pass
         model.zero_grad()
@@ -59,11 +62,7 @@ if __name__ == '__main__':
         
         # Visualization data
         if step % 10 == 0:
-            print('Step %d: ' % step)
-            print('\tAverage loss: %.4f' % np.mean(loss_values))
-
-            vis.update(np.mean(loss_values), learning_rate, step)
-            
+            vis.update(np.mean(loss_values), np.mean(accuracies), learning_rate, step)
             loss_values.clear()
-
-
+            accuracies.clear()
+            

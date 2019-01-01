@@ -45,6 +45,8 @@ About mel:
 
 
 TODO:
+new browser window
+plot speed
 1. Accuracy + Ensure proper overfitting
 2. Improve on the speed
     - Usage of actual softmax?

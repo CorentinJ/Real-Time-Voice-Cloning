@@ -27,6 +27,12 @@ class SpeakerEncoder(nn.Module):
         self.similarity_linear.weight.data = torch.Tensor([[10.]])
         self.similarity_linear.bias.data = torch.Tensor([-5.])
         
+        # Loss and accuracy computation
+        self.true_ground = torch.tensor(
+            [[i] * utterances_per_speaker for i in range(speakers_per_batch)]
+        )
+        self.loss_function = nn.CrossEntropyLoss(reduction='sum')
+        
     def do_gradient_ops(self):
         # Gradient scale
         for parameters in self.similarity_linear.parameters():
@@ -60,23 +66,23 @@ class SpeakerEncoder(nn.Module):
         
         return sim
 
-    def loss(self, preds):
+    def loss(self, embeds):
         ## See section 2.1 of GE2E
         
-        preds = preds.view((
+        embeds = embeds.view((
             self.speakers_per_batch, 
             self.utterances_per_speaker, 
             model_embedding_size
         ))
         
         # Inclusive centroids (1 per speaker)
-        centroids_incl = torch.mean(preds, dim=1)
+        centroids_incl = torch.mean(embeds, dim=1)
         
         # Exclusive centroids (1 per utterance)
-        centroids_excl = (torch.sum(preds, dim=1, keepdim=True) - preds)
+        centroids_excl = (torch.sum(embeds, dim=1, keepdim=True) - embeds)
         centroids_excl /= (self.utterances_per_speaker - 1)
                          
-        # Similarity matrix S_(i,j,k)
+        # Similarity matrix
         sim_matrix = torch.zeros(
             self.speakers_per_batch, 
             self.utterances_per_speaker, 
@@ -86,14 +92,17 @@ class SpeakerEncoder(nn.Module):
             for i in range(self.utterances_per_speaker):
                 for k in range(self.speakers_per_batch):
                     centroid = centroids_excl[j, i] if j == k else centroids_incl[k]
-                    sim_matrix[j, i, k] = self.similarity(preds[j, i], centroid)
-        
-        # Loss
-        loss_matrix = torch.zeros(self.speakers_per_batch, self.utterances_per_speaker)
-        for j in range(self.speakers_per_batch):
-            for i in range(self.utterances_per_speaker):
-                loss_matrix[j, i] = torch.log(torch.sum(torch.exp(sim_matrix[j, i])))
-                loss_matrix[j, i] -= sim_matrix[j, i, j]
-        
-        return torch.sum(loss_matrix)        
+                    sim_matrix[j, i, k] = self.similarity(embeds[j, i], centroid)
 
+        # Loss
+        loss_vector = torch.zeros(self.speakers_per_batch)
+        for j in range(self.speakers_per_batch):
+            loss_vector[j] = self.loss_function(sim_matrix[j], self.true_ground[j])
+        loss = torch.sum(loss_vector)
+        
+        # Accuracy (not backpropagated)
+        with torch.no_grad():
+            preds = torch.argmax(sim_matrix, dim=2)
+            accuracy = torch.mean((preds == self.true_ground).float())
+        
+        return loss, accuracy

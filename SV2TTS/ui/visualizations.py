@@ -11,6 +11,7 @@ class Visualizations:
         self.env_name = env_name
         self.vis = visdom.Visdom(env=self.env_name)
         self.loss_win = None
+        self.accuracy_win = None
         self.lr_win = None
         self.implementation_win = None
         self.implementation_string = ""
@@ -46,7 +47,7 @@ class Visualizations:
             opts={'title': 'Training implementation'}
         )
 
-    def update(self, loss, lr, step):
+    def update(self, loss, accuracy, lr, step):
         self.loss_win = self.vis.line(
             [loss],
             [step],
@@ -56,6 +57,17 @@ class Visualizations:
                 xlabel='Step',
                 ylabel='Loss',
                 title='Loss (mean per 10 steps)',
+            )
+        )
+        self.accuracy_win = self.vis.line(
+            [accuracy],
+            [step],
+            win=self.accuracy_win,
+            update='append' if self.accuracy_win else None,
+            opts=dict(
+                xlabel='Step',
+                ylabel='Accuracy',
+                title='Accuracy (mean per 10 steps)'
             )
         )
         self.lr_win = self.vis.line(
