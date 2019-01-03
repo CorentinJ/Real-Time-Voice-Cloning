@@ -1,10 +1,7 @@
 from datasets.speaker import Speaker
-from datasets.utterance import Utterance
 from typing import List
 import numpy as np
 from params import mel_n_channels
-from config import device
-import torch
 
 class SpeakerBatch:
     def __init__(self, speakers: List[Speaker], utterances_per_speaker: int, n_frames: int):

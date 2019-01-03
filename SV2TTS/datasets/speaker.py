@@ -1,8 +1,7 @@
 from vlibs import fileio, core
 from datasets.utterance import Utterance
 
-
-# Set of utterances for a single speaker
+# Contains the set of utterances of a single speaker
 class Speaker:
     def __init__(self, root):
         self.name = fileio.leaf(root)
@@ -25,17 +24,16 @@ class Speaker:
         frames are the frames of the partial utterances and range is the range of the partial 
         utterance with regard to the complete utterance.
         """
-        if count > len(self.utterances):
-            raise Exception('Not enough utterances available')
-        
-        # Sample the utterances
         utterances = []
         while count > 0:
             n = min(count, len(self.next_utterances))
             utterances.extend(self.next_utterances[:n])
             self.next_utterances = self.next_utterances[n:]
             if len(self.next_utterances) == 0:
-                new_utterances = [u for u in self.utterances if not u in utterances[-n:]]
+                if len(utterances) < len(self.utterances):
+                    new_utterances = [u for u in self.utterances if not u in utterances[-n:]]
+                else:
+                    new_utterances = list(self.utterances)
                 self.next_utterances = core.shuffle(new_utterances)
             count -= n
         

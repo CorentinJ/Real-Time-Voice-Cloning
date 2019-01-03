@@ -17,7 +17,6 @@ implementation_doc = {
     'Lr decay': None,
     'Gradient ops': True,
     'Projection layer': False,
-    'Native softmax': True,
 }
 
 if __name__ == '__main__':
@@ -49,7 +48,7 @@ if __name__ == '__main__':
     for step, speaker_batch in enumerate(loader):
         # Forward pass
         inputs = torch.from_numpy(speaker_batch.data).to(device)
-        embeds = model(inputs)
+        embeds = model(inputs).to(torch.device('cpu'))
         loss, accuracy = model.loss(embeds)
         loss_values.append(loss.item())
         accuracies.append(accuracy.item())
@@ -66,4 +65,4 @@ if __name__ == '__main__':
             loss_values.clear()
             accuracies.clear()
         if step % 100 == 0:
-            vis.draw_projections(embeds.detach().cpu().numpy(), utterances_per_speaker, step)
+            vis.draw_projections(embeds.detach().numpy(), utterances_per_speaker, step)

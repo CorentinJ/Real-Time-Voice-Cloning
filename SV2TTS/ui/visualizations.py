@@ -2,6 +2,8 @@ from datasets.speaker_verification_dataset import SpeakerVerificationDataset
 # from ui.speaker_matrix_ui import SpeakerMatrixUI
 from datetime import datetime
 from time import perf_counter as clock
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import numpy as np
 import visdom
 import params
@@ -93,7 +95,7 @@ class Visualizations:
             if self.mean_time_per_step == -1:
                 self.mean_time_per_step = time_per_step
             else:
-                self.mean_time_per_step = self.mean_time_per_step * 0.8 + time_per_step * 0.2
+                self.mean_time_per_step = self.mean_time_per_step * 0.9 + time_per_step * 0.1
             time_string = "<b>Mean time per step</b>: %dms" % int(1000 * self.mean_time_per_step)
             time_string += "<br><b>Last step time</b>: %dms" % int(1000 * time_per_step)
             self.vis.text(
@@ -105,13 +107,14 @@ class Visualizations:
         self.last_update_timestamp = now
         
     def draw_projections(self, embeds, utterances_per_speaker, step):
-        import matplotlib.pyplot as plt
         n_speakers = len(embeds) // utterances_per_speaker
         ground_truth = np.repeat(np.arange(n_speakers), utterances_per_speaker)
+        color_map = cm.hsv(np.linspace(0, 1, n_speakers + 1))
+        colors = [color_map[i] for i in ground_truth]
         
         reducer = umap.UMAP()
         projected = reducer.fit_transform(embeds)
-        plt.scatter(projected[:, 0], projected[:, 1], c=ground_truth)
+        plt.scatter(projected[:, 0], projected[:, 1], c=colors)
         plt.gca().set_aspect('equal', 'datalim')
         plt.title('UMAP projection (step %d)' % step)
         self.projection_win = self.vis.matplot(plt, win=self.projection_win)
