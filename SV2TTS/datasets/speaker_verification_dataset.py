@@ -21,8 +21,6 @@ class SpeakerVerificationDataset(Dataset):
             self.speakers.extend(Speaker(speaker_dir) for speaker_dir in speaker_dirs)
 
         self.mean_n_utterances = np.mean([len(s.utterances) for s in self.speakers])
-        print('Dataset of %d speakers with %d utterances per speaker on average' % 
-              (len(self.speakers), self.mean_n_utterances))
 
     def __len__(self):
         return int(1e10)

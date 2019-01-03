@@ -44,17 +44,22 @@ About mel:
 - https://haythamfayek.com/2016/04/21/speech-processing-for-machine-learning.html
 
 
+About speed (tested on 5x6 batches):
+- Went from 250ms to 210ms by replacing the similarity layer with a weight and a bias parameter.
+- Putting the similarity matrix in the CPU rather than the GPU (and thus, performing subsequent operations on the CPU) gives a 10ms gain. That is not surprising given that it is a small matrix.
+- Preloading the data does not help significantly (<5ms gain).
+- Went from 210ms to 155ms by ignoring the computation of the sum of squares of the embeddings (always equal to 1) and precomputing that of the centroids.
+- An additional 50ms could be gained by not including the centroid norms (and thus not computing them) in the cosine similarity. This approximation more or less holds as the centroid of the L2-normed embeddings have an L2-norm close to 1. That property is degraded with more utterances. Furthermore, increasing the number of utterances per speaker alone does not affect this extra computation time. Considering these two points and that the paper uses batches of 10x64, I think it's better not to go with that approximation.
+
 TODO:
 new browser window
-plot speed
-1. Accuracy + Ensure proper overfitting
-2. Improve on the speed
-    - Usage of actual softmax?
-    - Tips & einops
-3. Decaying lr
-4. Expand the dataset
-?. Implement the projection layer
-*. Remove y axis in matrix
+embed speaker matrix in visdom
+saving/loading
+improve on the speed
+decaying lr
+expand the dataset
+remove y axis in matrix
+implement the projection layer?
 
 
 

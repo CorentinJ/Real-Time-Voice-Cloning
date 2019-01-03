@@ -1,6 +1,7 @@
 from torch.nn.utils import clip_grad_norm_
-from torch import nn
+from config import device
 from params import *
+from torch import nn
 import torch
 
 
@@ -8,35 +9,37 @@ class SpeakerEncoder(nn.Module):
     def __init__(self, speakers_per_batch, utterances_per_speaker):
         super().__init__()
         
-        # Params
+        # Dimensions of the inputs
         self.speakers_per_batch = speakers_per_batch
         self.utterances_per_speaker = utterances_per_speaker 
         
-        # Network
+        # Network defition
         self.lstm = nn.LSTM(input_size=mel_n_channels,
                             hidden_size=model_hidden_size, 
                             num_layers=model_num_layers, 
-                            batch_first=True)
+                            batch_first=True).to(device)
         self.linear = nn.Linear(in_features=model_hidden_size, 
-                                out_features=model_embedding_size)
-        self.relu = torch.nn.ReLU()
+                                out_features=model_embedding_size).to(device)
+        self.relu = torch.nn.ReLU().to(device)
         
-        # Cosine similarity scaling (with fixed initial parameters)
-        self.similarity_linear = nn.Linear(in_features=1,
-                                           out_features=1)
-        self.similarity_linear.weight.data = torch.Tensor([[10.]])
-        self.similarity_linear.bias.data = torch.Tensor([-5.])
-        
+        # Cosine similarity scaling (with fixed initial parameter values)
+        # self.similarity_linear = nn.Linear(in_features=1,
+        #                                    out_features=1)
+        # self.similarity_linear.weight.data = torch.Tensor([[10.]])
+        # self.similarity_linear.bias.data = torch.Tensor([-5.])
+        self.similarity_weight = nn.Parameter(torch.tensor([10.]))
+        self.similarity_bias = nn.Parameter(torch.tensor([-5.]))
+
         # Loss and accuracy computation
-        self.true_ground = torch.tensor(
+        self.ground_truth = torch.tensor(
             [[i] * utterances_per_speaker for i in range(speakers_per_batch)]
         )
-        self.loss_function = nn.CrossEntropyLoss(reduction='sum')
+        self.loss_fn = nn.CrossEntropyLoss()
         
     def do_gradient_ops(self):
         # Gradient scale
-        for parameters in self.similarity_linear.parameters():
-            parameters.grad *= 0.01
+        # for parameters in self.similarity_linear.parameters():
+        #     parameters.grad *= 0.01
             
         # Gradient clipping
         clip_grad_norm_(self.parameters(), 3, norm_type=2)
@@ -47,25 +50,13 @@ class SpeakerEncoder(nn.Module):
         out, (h, c) = self.lstm(x, h)
         
         # We take only the hidden state of the last layer
-        embed_raw = self.relu(self.linear(h[-1]))
+        embeds_raw = self.relu(self.linear(h[-1]))
         
         # L2-normalize it
-        embed_norms = torch.sqrt(torch.sum(embed_raw ** 2, dim=1, keepdim=True))
-        embed = embed_raw / embed_norms
+        embeds = embeds_raw / torch.norm(embeds_raw, dim=1, keepdim=True)
         
-        return embed
+        return embeds
     
-    def similarity(self, embed_a, embed_b):
-        assert embed_a.shape == embed_b.shape == (model_embedding_size,)
-        
-        # Cosine similarity
-        sim_raw = torch.dot(embed_a, embed_b) / (torch.sum(embed_a ** 2) * torch.sum(embed_b ** 2))
-        
-        # Scale linearly
-        sim = self.similarity_linear(sim_raw.view(1))
-        
-        return sim
-
     def loss(self, embeds):
         ## See section 2.1 of GE2E
         
@@ -77,10 +68,12 @@ class SpeakerEncoder(nn.Module):
         
         # Inclusive centroids (1 per speaker)
         centroids_incl = torch.mean(embeds, dim=1)
-        
+        centroid_incl_norms = torch.norm(centroids_incl, dim=1)
+
         # Exclusive centroids (1 per utterance)
         centroids_excl = (torch.sum(embeds, dim=1, keepdim=True) - embeds)
         centroids_excl /= (self.utterances_per_speaker - 1)
+        centroid_excl_norms = torch.norm(centroids_excl, dim=2)
                          
         # Similarity matrix
         sim_matrix = torch.zeros(
@@ -92,17 +85,18 @@ class SpeakerEncoder(nn.Module):
             for i in range(self.utterances_per_speaker):
                 for k in range(self.speakers_per_batch):
                     centroid = centroids_excl[j, i] if j == k else centroids_incl[k]
-                    sim_matrix[j, i, k] = self.similarity(embeds[j, i], centroid)
+                    centroid_norm = centroid_excl_norms[j, i] if j == k else centroid_incl_norms[k]
+                    # Note: the sum of squares of the embeddings is always 1 due to the 
+                    # L2-normalization, we can thus ignore it. 
+                    sim_matrix[j, i, k] = torch.dot(embeds[j, i], centroid) / centroid_norm
+        sim_matrix = sim_matrix * self.similarity_weight + self.similarity_bias
 
         # Loss
-        loss_vector = torch.zeros(self.speakers_per_batch)
-        for j in range(self.speakers_per_batch):
-            loss_vector[j] = self.loss_function(sim_matrix[j], self.true_ground[j])
-        loss = torch.sum(loss_vector)
+        loss = self.loss_fn(sim_matrix.view(-1, sim_matrix.shape[2]), self.ground_truth.flatten())
         
         # Accuracy (not backpropagated)
         with torch.no_grad():
             preds = torch.argmax(sim_matrix, dim=2)
-            accuracy = torch.mean((preds == self.true_ground).float())
+            accuracy = torch.mean((preds == self.ground_truth).float())
         
         return loss, accuracy

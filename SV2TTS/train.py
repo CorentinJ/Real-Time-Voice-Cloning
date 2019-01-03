@@ -15,7 +15,7 @@ utterances_per_speaker = 6
 
 implementation_doc = {
     'Lr decay': None,
-    'Gradients ops': False,
+    'Gradient ops': True,
     'Projection layer': False,
     'Native softmax': True,
 }
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     )
     
     # Create the model and the optimizer
-    model = SpeakerEncoder(speakers_per_batch, utterances_per_speaker).to(device)
+    model = SpeakerEncoder(speakers_per_batch, utterances_per_speaker)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     
     # Initialize the visualization environment
@@ -57,7 +57,7 @@ if __name__ == '__main__':
         # Backward pass
         model.zero_grad()
         loss.backward()
-        # model.do_gradient_ops()
+        model.do_gradient_ops()
         optimizer.step()
         
         # Visualization data
@@ -65,4 +65,5 @@ if __name__ == '__main__':
             vis.update(np.mean(loss_values), np.mean(accuracies), learning_rate, step)
             loss_values.clear()
             accuracies.clear()
-            
+        if step % 100 == 0:
+            vis.draw_projections(embeds.detach().cpu().numpy(), utterances_per_speaker, step)

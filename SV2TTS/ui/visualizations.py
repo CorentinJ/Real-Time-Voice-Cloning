@@ -1,19 +1,23 @@
 from datasets.speaker_verification_dataset import SpeakerVerificationDataset
+# from ui.speaker_matrix_ui import SpeakerMatrixUI
 from datetime import datetime
 from time import perf_counter as clock
+import numpy as np
 import visdom
 import params
+import umap
 
 class Visualizations:
     def __init__(self, env_name=None):
         if env_name is None:
-            env_name = str(datetime.now().strftime("%d-%m %H:%M"))
+            env_name = str(datetime.now().strftime("%d-%m %Hh%M"))
         self.env_name = env_name
         self.vis = visdom.Visdom(env=self.env_name)
         self.loss_win = None
         self.accuracy_win = None
         self.lr_win = None
         self.implementation_win = None
+        self.projection_win = None
         self.implementation_string = ""
         self.last_step = -1
         self.last_update_timestamp = -1
@@ -89,8 +93,9 @@ class Visualizations:
             if self.mean_time_per_step == -1:
                 self.mean_time_per_step = time_per_step
             else:
-                self.mean_time_per_step = self.mean_time_per_step * 0.9 + time_per_step * 0.1
+                self.mean_time_per_step = self.mean_time_per_step * 0.8 + time_per_step * 0.2
             time_string = "<b>Mean time per step</b>: %dms" % int(1000 * self.mean_time_per_step)
+            time_string += "<br><b>Last step time</b>: %dms" % int(1000 * time_per_step)
             self.vis.text(
                 self.implementation_string + time_string, 
                 win=self.implementation_win,
@@ -98,3 +103,19 @@ class Visualizations:
             )
         self.last_step = step
         self.last_update_timestamp = now
+        
+    def draw_projections(self, embeds, utterances_per_speaker, step):
+        import matplotlib.pyplot as plt
+        n_speakers = len(embeds) // utterances_per_speaker
+        ground_truth = np.repeat(np.arange(n_speakers), utterances_per_speaker)
+        
+        reducer = umap.UMAP()
+        projected = reducer.fit_transform(embeds)
+        plt.scatter(projected[:, 0], projected[:, 1], c=ground_truth)
+        plt.gca().set_aspect('equal', 'datalim')
+        plt.title('UMAP projection (step %d)' % step)
+        self.projection_win = self.vis.matplot(plt, win=self.projection_win)
+        plt.clf()
+        
+    def draw_speaker_matrix(self, speaker_batch):
+        pass
