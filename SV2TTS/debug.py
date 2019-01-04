@@ -2,7 +2,7 @@ import audio
 import numpy as np
 from vlibs import fileio
 from ui.speaker_matrix_ui import SpeakerMatrixUI
-from datasets.data_loader import SpeakerVerificationDataset
+from data_objects.data_loader import SpeakerVerificationDataset
 from torch.utils.data import DataLoader
 
 if __name__ == '__main__':

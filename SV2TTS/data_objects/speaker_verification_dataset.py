@@ -1,37 +1,30 @@
-from datasets.speaker_batch import SpeakerBatch
-from datasets.speaker import Speaker
+from data_objects.speaker_batch import SpeakerBatch
+from data_objects.speaker import Speaker
 from torch.utils.data import Dataset, DataLoader
 from collections import OrderedDict
 from params import partial_utterance_length
+from vlibs.structs.random_cycler import RandomCycler
 from vlibs import fileio
 from config import *
 import numpy as np
 import random
 
 class SpeakerVerificationDataset(Dataset):
-    def __init__(self, datasets, speakers_per_batch, utterances_per_speaker):
+    def __init__(self, datasets):
         self.datasets = datasets
-        self.utterances_per_speaker = utterances_per_speaker
-        self.speakers_per_batch = speakers_per_batch
-        
         self.speakers = []
         for dataset in datasets:
             dataset_root = fileio.join(clean_data_root, dataset) 
             speaker_dirs = fileio.join(dataset_root, fileio.listdir(dataset_root))[:10]
             self.speakers.extend(Speaker(speaker_dir) for speaker_dir in speaker_dirs)
-
+        self.speaker_cycler = RandomCycler(self.speakers)
         self.mean_n_utterances = np.mean([len(s.utterances) for s in self.speakers])
 
     def __len__(self):
         return int(1e10)
         
     def __getitem__(self, index):
-        speakers = random.sample(self.speakers, self.speakers_per_batch)
-        batch = SpeakerBatch(speakers, self.utterances_per_speaker, partial_utterance_length)
-        return batch
-    
-    def collate(batches):
-        return batches[0]
+        return next(self.speaker_cycler)
     
     def get_logs(self):
         log_string = ""
@@ -44,9 +37,19 @@ class SpeakerVerificationDataset(Dataset):
         params = OrderedDict([
             ("Total speakers", len(self.speakers)),
             ("Average utterances per speaker", self.mean_n_utterances),
-            ("Speakers per batch", self.speakers_per_batch),
-            ("Utterances per speaker", self.utterances_per_speaker),
             ("Datasets", ','.join(self.datasets)),
         ])
         return params
     
+class SpeakerVerificationDataLoader(DataLoader):
+    def __init__(self, dataset, speakers_per_batch, utterances_per_speaker, sampler=None, 
+                 batch_sampler=None,
+                 num_workers=0, pin_memory=False, drop_last=False, timeout=0, worker_init_fn=None):
+        self.utterances_per_speaker = utterances_per_speaker
+
+        
+        super().__init__(dataset, speakers_per_batch, False, sampler, batch_sampler, num_workers,
+                         self.collate, pin_memory, drop_last, timeout, worker_init_fn)
+
+    def collate(self, speakers):
+        return SpeakerBatch(speakers, self.utterances_per_speaker, partial_utterance_length) 

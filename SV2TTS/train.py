@@ -1,7 +1,6 @@
-from datasets.speaker_batch import SpeakerBatch
-from datasets.speaker_verification_dataset import SpeakerVerificationDataset
+from data_objects.speaker_verification_dataset import SpeakerVerificationDataLoader
+from data_objects.speaker_verification_dataset import SpeakerVerificationDataset
 from ui.visualizations import Visualizations
-from torch.utils.data import DataLoader
 from config import device
 from model import SpeakerEncoder
 import numpy as np
@@ -9,7 +8,8 @@ import torch
 
 
 ## Training parameters
-learning_rate = 0.0001
+learning_rate_init = 1e-4
+# exponential_decay_beta = 0.9998
 speakers_per_batch = 5
 utterances_per_speaker = 6
 
@@ -23,19 +23,18 @@ if __name__ == '__main__':
     # Create a data loader
     dataset = SpeakerVerificationDataset(
         datasets=['train-other-500'],
-        speakers_per_batch=speakers_per_batch,
-        utterances_per_speaker=utterances_per_speaker,
     )
-    loader = DataLoader(
+    loader = SpeakerVerificationDataLoader(
         dataset,
-        batch_size=1,
+        speakers_per_batch,
+        utterances_per_speaker,
         num_workers=1,
-        collate_fn=SpeakerVerificationDataset.collate
     )
     
     # Create the model and the optimizer
     model = SpeakerEncoder(speakers_per_batch, utterances_per_speaker)
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate_init)
+    # scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, exponential_decay_beta)
     
     # Initialize the visualization environment
     vis = Visualizations()
@@ -45,7 +44,7 @@ if __name__ == '__main__':
     # Training loop
     loss_values = []
     accuracies = []
-    for step, speaker_batch in enumerate(loader):
+    for step, speaker_batch in enumerate(loader, 1):
         # Forward pass
         inputs = torch.from_numpy(speaker_batch.data).to(device)
         embeds = model(inputs).to(torch.device('cpu'))
@@ -58,9 +57,11 @@ if __name__ == '__main__':
         loss.backward()
         model.do_gradient_ops()
         optimizer.step()
+        # scheduler.step()
         
         # Visualization data
         if step % 10 == 0:
+            learning_rate = optimizer.param_groups[0]['lr']
             vis.update(np.mean(loss_values), np.mean(accuracies), learning_rate, step)
             loss_values.clear()
             accuracies.clear()

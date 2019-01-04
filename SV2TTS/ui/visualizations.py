@@ -1,4 +1,4 @@
-from datasets.speaker_verification_dataset import SpeakerVerificationDataset
+from data_objects.speaker_verification_dataset import SpeakerVerificationDataset
 # from ui.speaker_matrix_ui import SpeakerMatrixUI
 from datetime import datetime
 from time import perf_counter as clock
@@ -84,7 +84,7 @@ class Visualizations:
             opts=dict(
                 xlabel='Step',
                 ylabel='Learning rate',
-                ytype='log',
+                # ytype='log',
                 title='Learning rate'
             )
         )

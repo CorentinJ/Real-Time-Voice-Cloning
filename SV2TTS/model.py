@@ -69,9 +69,7 @@ class SpeakerEncoder(nn.Module):
         :param embeds: the embeddings as a tensor of shape (batch_size, embedding_size), 
         where batch_size == speakers_per_batch * utterances_per_speaker and where each speaker's 
         utterances are listed sequentially
-        :return: the loss and the accuracy for this batch of embeddings. Note that this accuracy 
-        does properly reflect the SV-EER of the model as the centroid of each speaker is computed
-        from the predicted embeddings themselves, which inflates the accuracy.
+        :return: the loss and the accuracy for this batch of embeddings.
         """
         # Computation is significantly faster on the CPU
         if embeds.device != torch.device('cpu'):

@@ -1,4 +1,4 @@
-from datasets.speaker import Speaker
+from data_objects.speaker import Speaker
 from typing import List
 import numpy as np
 from params import mel_n_channels
