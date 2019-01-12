@@ -5,6 +5,7 @@ END-TO-END TEXT-DEPENDENT SPEAKER VERIFICATION:
 - Addition of noise to the data (page 3, top of right column), but not to the enrollment samples! Non-augmented samples are also used for evaluation.
 - Dataset of 22M utterances from 80k speakers with at least 150 utterances per speaker.
 - 100Hz framerate (~80 frames per sample) with 40 log-mel filters.
+- The value −b/w corresponds to the verification threshold
 
 
 GENERALIZED END-TO-END LOSS FOR SPEAKER VERIFICATION:
@@ -55,13 +56,12 @@ About speed (tested on 5x6 batches):
 
 
 TODO:
-new browser window
-embed speaker matrix in visdom
+compute EER
+make model independant of batch size?
 saving/loading
-decaying lr
-expand the dataset
+expand the dataset & check hidden sizes etc
+embed speaker matrix in visdom
 remove y axis in matrix
-implement the projection layer?
 
 
 

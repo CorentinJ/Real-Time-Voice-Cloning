@@ -43,14 +43,14 @@ if __name__ == '__main__':
     
     # Training loop
     loss_values = []
-    accuracies = []
+    error_rates = []
     for step, speaker_batch in enumerate(loader, 1):
         # Forward pass
         inputs = torch.from_numpy(speaker_batch.data).to(device)
-        embeds = model(inputs).to(torch.device('cpu'))
-        loss, accuracy = model.loss(embeds)
+        embeds = model(inputs).cpu()
+        loss, eer = model.loss(embeds)
         loss_values.append(loss.item())
-        accuracies.append(accuracy.item())
+        error_rates.append(eer)
         
         # Backward pass
         model.zero_grad()
@@ -62,8 +62,8 @@ if __name__ == '__main__':
         # Visualization data
         if step % 10 == 0:
             learning_rate = optimizer.param_groups[0]['lr']
-            vis.update(np.mean(loss_values), np.mean(accuracies), learning_rate, step)
+            vis.update(np.mean(loss_values), np.mean(error_rates), learning_rate, step)
             loss_values.clear()
-            accuracies.clear()
+            error_rates.clear()
         if step % 100 == 0:
             vis.draw_projections(embeds.detach().numpy(), utterances_per_speaker, step)

@@ -1,9 +1,16 @@
+from sklearn.metrics import roc_curve
 from torch.nn.utils import clip_grad_norm_
 from config import device
 from params import *
 from torch import nn
 import numpy as np
 import torch
+
+import matplotlib.pyplot as plt
+from scipy.optimize import brentq
+from scipy.interpolate import interp1d
+
+
 
 class SpeakerEncoder(nn.Module):
     def __init__(self, speakers_per_batch, utterances_per_speaker):
@@ -73,7 +80,7 @@ class SpeakerEncoder(nn.Module):
         """
         # Computation is significantly faster on the CPU
         if embeds.device != torch.device('cpu'):
-            embeds = embeds.to(torch.device('cpu'))
+            embeds = embeds.cpu()
             
         embeds = embeds.view((
             self.speakers_per_batch, 
@@ -102,16 +109,20 @@ class SpeakerEncoder(nn.Module):
                     centroid = centroids_excl[j, i] if j == k else centroids_incl[k]
                     centroid_norm = centroid_excl_norms[j, i] if j == k else centroid_incl_norms[k]
                     # Note: the sum of squares of the embeddings is always 1 due to the 
-                    # L2-normalization, we can thus ignore it. 
+                    # L2-normalization, so we can ignore it. 
                     sim_matrix[ji, k] = torch.dot(embeds[j, i], centroid) / centroid_norm
         sim_matrix = sim_matrix * self.similarity_weight + self.similarity_bias
 
         # Loss
         loss = self.loss_fn(sim_matrix, self.ground_truth)
         
-        # Accuracy (not backpropagated)
+        # EER (not backpropagated)
         with torch.no_grad():
-            preds = torch.argmax(sim_matrix, dim=1)
-            accuracy = torch.mean((preds == self.ground_truth).float())
+            a = np.array([np.eye(1, 5, i, dtype=np.int)[0] for i in self.ground_truth]).flatten()
+            b = sim_matrix.detach().numpy().flatten()
+            fpr, tpr, thresholds = roc_curve(a, b)
+            
+            eer = brentq(lambda x: 1. - x - interp1d(fpr, tpr)(x), 0., 1.)
+            # thresh = interp1d(fpr, thresholds)(eer)
         
-        return loss, accuracy
+        return loss, eer

@@ -5,18 +5,31 @@ from time import perf_counter as clock
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
+import subprocess
+import webbrowser
 import visdom
 import params
 import umap
+import sys
+
 
 class Visualizations:
     def __init__(self, env_name=None):
         if env_name is None:
             env_name = str(datetime.now().strftime("%d-%m %Hh%M"))
         self.env_name = env_name
-        self.vis = visdom.Visdom(env=self.env_name)
+        
+        try:
+            self.vis = visdom.Visdom(env=self.env_name, raise_exceptions=True)
+        except ConnectionError as e:
+            print('No visdom server detected, running a temporary instance...\nRun the command '
+                  '\'visdom\' in your CLI to start an external server.', file=sys.stderr)
+            subprocess.Popen('visdom')
+            self.vis = visdom.Visdom(env=self.env_name)
+        webbrowser.open("http://localhost:8097/env/" + self.env_name)
+        
         self.loss_win = None
-        self.accuracy_win = None
+        self.eer_win = None
         self.lr_win = None
         self.implementation_win = None
         self.projection_win = None
@@ -53,7 +66,7 @@ class Visualizations:
             opts={'title': 'Training implementation'}
         )
 
-    def update(self, loss, accuracy, lr, step):
+    def update(self, loss, eer, lr, step):
         self.loss_win = self.vis.line(
             [loss],
             [step],
@@ -65,15 +78,15 @@ class Visualizations:
                 title='Loss (mean per 10 steps)',
             )
         )
-        self.accuracy_win = self.vis.line(
-            [accuracy],
+        self.eer_win = self.vis.line(
+            [eer],
             [step],
-            win=self.accuracy_win,
-            update='append' if self.accuracy_win else None,
+            win=self.eer_win,
+            update='append' if self.eer_win else None,
             opts=dict(
                 xlabel='Step',
-                ylabel='Accuracy',
-                title='Accuracy (mean per 10 steps)'
+                ylabel='EER',
+                title='Equal error rate (mean per 10 steps)'
             )
         )
         self.lr_win = self.vis.line(
