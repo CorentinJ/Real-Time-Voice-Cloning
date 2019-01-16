@@ -14,9 +14,11 @@ import sys
 
 class Visualizations:
     def __init__(self, env_name=None):
+        now = str(datetime.now().strftime("%d-%m %Hh%M"))
         if env_name is None:
-            env_name = str(datetime.now().strftime("%d-%m %Hh%M"))
-        self.env_name = env_name
+            self.env_name = now
+        else:
+            self.env_name = env_name + ' (' + now + ')'
         
         try:
             self.vis = visdom.Visdom(env=self.env_name, raise_exceptions=True)

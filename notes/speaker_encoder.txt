@@ -56,12 +56,12 @@ About speed (tested on 5x6 batches):
 
 
 TODO (priority at the top):
-saving/loading
 expand the dataset & check hidden sizes etc & REMOVE DATA LIMITS
 adaptive LR
 correct EER
 embed speaker matrix in visdom
 remove y axis in matrix
+include other datasets
 
 
 
