@@ -30,9 +30,15 @@ if __name__ == '__main__':
         utterances_per_speaker,
         num_workers=1,
     )
+    test_loader = SpeakerVerificationDataLoader(
+        dataset,
+        64,
+        2,
+        num_workers=1,
+    ) 
     
     # Create the model and the optimizer
-    model = SpeakerEncoder(speakers_per_batch, utterances_per_speaker)
+    model = SpeakerEncoder()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate_init)
     # scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, exponential_decay_beta)
     
@@ -48,7 +54,7 @@ if __name__ == '__main__':
         # Forward pass
         inputs = torch.from_numpy(speaker_batch.data).to(device)
         embeds = model(inputs).cpu()
-        loss, eer = model.loss(embeds)
+        loss, eer = model.loss(embeds.view((speakers_per_batch, utterances_per_speaker, -1)))
         loss_values.append(loss.item())
         error_rates.append(eer)
         

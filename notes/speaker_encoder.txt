@@ -55,11 +55,10 @@ About speed (tested on 5x6 batches):
 - Inference (forward pass alone and without gradients) is 14ms! Considering that a 5x6 batch corresponds to 48 seconds of speech, that's pretty fast!
 
 
-TODO:
-compute EER
-make model independant of batch size?
-saving/loading
+TODO (priority at the top):
 expand the dataset & check hidden sizes etc
+saving/loading
+correct EER
 embed speaker matrix in visdom
 remove y axis in matrix
 

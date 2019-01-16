@@ -13,12 +13,8 @@ from scipy.interpolate import interp1d
 
 
 class SpeakerEncoder(nn.Module):
-    def __init__(self, speakers_per_batch, utterances_per_speaker):
+    def __init__(self):
         super().__init__()
-        
-        # Dimensions of the inputs
-        self.speakers_per_batch = speakers_per_batch
-        self.utterances_per_speaker = utterances_per_speaker 
         
         # Network defition
         self.lstm = nn.LSTM(input_size=mel_n_channels,
@@ -33,10 +29,7 @@ class SpeakerEncoder(nn.Module):
         self.similarity_weight = nn.Parameter(torch.tensor([10.]))
         self.similarity_bias = nn.Parameter(torch.tensor([-5.]))
 
-        # Loss and accuracy computation
-        self.ground_truth = torch.from_numpy(
-            np.repeat(np.arange(speakers_per_batch), utterances_per_speaker)
-        ).long()
+        # Loss
         self.loss_fn = nn.CrossEntropyLoss()
         
     def do_gradient_ops(self):
@@ -73,20 +66,15 @@ class SpeakerEncoder(nn.Module):
         """
         Computes the softmax loss according the section 2.1 of GE2E.
         
-        :param embeds: the embeddings as a tensor of shape (batch_size, embedding_size), 
-        where batch_size == speakers_per_batch * utterances_per_speaker and where each speaker's 
-        utterances are listed sequentially
+        :param embeds: the embeddings as a tensor of shape (speakers_per_batch, 
+        utterances_per_speaker, embedding_size)
         :return: the loss and the accuracy for this batch of embeddings.
         """
         # Computation is significantly faster on the CPU
         if embeds.device != torch.device('cpu'):
             embeds = embeds.cpu()
-            
-        embeds = embeds.view((
-            self.speakers_per_batch, 
-            self.utterances_per_speaker, 
-            model_embedding_size
-        ))
+
+        speakers_per_batch, utterances_per_speaker = embeds.shape[:2]
         
         # Inclusive centroids (1 per speaker)
         centroids_incl = torch.mean(embeds, dim=1)
@@ -94,18 +82,15 @@ class SpeakerEncoder(nn.Module):
 
         # Exclusive centroids (1 per utterance)
         centroids_excl = (torch.sum(embeds, dim=1, keepdim=True) - embeds)
-        centroids_excl /= (self.utterances_per_speaker - 1)
+        centroids_excl /= (utterances_per_speaker - 1)
         centroid_excl_norms = torch.norm(centroids_excl, dim=2)
                          
         # Similarity matrix
-        sim_matrix = torch.zeros(
-            self.speakers_per_batch * self.utterances_per_speaker, 
-            self.speakers_per_batch
-        )
-        for j in range(self.speakers_per_batch):
-            for i in range(self.utterances_per_speaker):
-                ji = j * self.utterances_per_speaker + i
-                for k in range(self.speakers_per_batch):
+        sim_matrix = torch.zeros(speakers_per_batch * utterances_per_speaker, speakers_per_batch)
+        for j in range(speakers_per_batch):
+            for i in range(utterances_per_speaker):
+                ji = j * utterances_per_speaker + i
+                for k in range(speakers_per_batch):
                     centroid = centroids_excl[j, i] if j == k else centroids_incl[k]
                     centroid_norm = centroid_excl_norms[j, i] if j == k else centroid_incl_norms[k]
                     # Note: the sum of squares of the embeddings is always 1 due to the 
@@ -114,11 +99,14 @@ class SpeakerEncoder(nn.Module):
         sim_matrix = sim_matrix * self.similarity_weight + self.similarity_bias
 
         # Loss
-        loss = self.loss_fn(sim_matrix, self.ground_truth)
+        ground_truth = torch.from_numpy(
+            np.repeat(np.arange(speakers_per_batch), utterances_per_speaker)
+        ).long()
+        loss = self.loss_fn(sim_matrix, ground_truth)
         
         # EER (not backpropagated)
         with torch.no_grad():
-            a = np.array([np.eye(1, 5, i, dtype=np.int)[0] for i in self.ground_truth]).flatten()
+            a = np.array([np.eye(1, 5, i, dtype=np.int)[0] for i in ground_truth]).flatten()
             b = sim_matrix.detach().numpy().flatten()
             fpr, tpr, thresholds = roc_curve(a, b)
             
