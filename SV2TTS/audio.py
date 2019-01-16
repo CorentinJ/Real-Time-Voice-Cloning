@@ -6,7 +6,7 @@ import sounddevice
 import webrtcvad
 import struct
 from scipy.ndimage.morphology import binary_dilation
-from params import *
+from params_data import *
 
 def load(fpath):
     """

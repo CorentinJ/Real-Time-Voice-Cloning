@@ -1,5 +1,5 @@
 import numpy as np
-from params import partial_utterance_length
+from params_data import partial_utterance_length
 
 class Utterance:
     def __init__(self, frames_fpath, wave_fpath):

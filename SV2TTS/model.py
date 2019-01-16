@@ -1,15 +1,13 @@
+from scipy.interpolate import interp1d
 from sklearn.metrics import roc_curve
 from torch.nn.utils import clip_grad_norm_
+from scipy.optimize import brentq
+from params_model import *
+from params_data import *
 from config import device
-from params import *
 from torch import nn
 import numpy as np
 import torch
-
-import matplotlib.pyplot as plt
-from scipy.optimize import brentq
-from scipy.interpolate import interp1d
-
 
 
 class SpeakerEncoder(nn.Module):
@@ -68,7 +66,7 @@ class SpeakerEncoder(nn.Module):
         
         :param embeds: the embeddings as a tensor of shape (speakers_per_batch, 
         utterances_per_speaker, embedding_size)
-        :return: the loss and the accuracy for this batch of embeddings.
+        :return: the loss and the EER for this batch of embeddings.
         """
         # Computation is significantly faster on the CPU
         if embeds.device != torch.device('cpu'):
@@ -106,10 +104,12 @@ class SpeakerEncoder(nn.Module):
         
         # EER (not backpropagated)
         with torch.no_grad():
-            a = np.array([np.eye(1, 5, i, dtype=np.int)[0] for i in ground_truth]).flatten()
-            b = sim_matrix.detach().numpy().flatten()
-            fpr, tpr, thresholds = roc_curve(a, b)
-            
+            inv_argmax = lambda i: np.eye(1, speakers_per_batch, i, dtype=np.int)[0]
+            labels = np.array([inv_argmax(i) for i in ground_truth])
+            preds = sim_matrix.detach().numpy()
+
+            # Snippet from https://yangcha.github.io/EER-ROC/
+            fpr, tpr, thresholds = roc_curve(labels.flatten(), preds.flatten())
             eer = brentq(lambda x: 1. - x - interp1d(fpr, tpr)(x), 0., 1.)
             # thresh = interp1d(fpr, thresholds)(eer)
         

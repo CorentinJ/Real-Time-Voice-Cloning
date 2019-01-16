@@ -5,13 +5,7 @@ from config import device
 from model import SpeakerEncoder
 import numpy as np
 import torch
-
-
-## Training parameters
-learning_rate_init = 1e-4
-# exponential_decay_beta = 0.9998
-speakers_per_batch = 5
-utterances_per_speaker = 6
+from params_model import *
 
 implementation_doc = {
     'Lr decay': None,
@@ -30,12 +24,12 @@ if __name__ == '__main__':
         utterances_per_speaker,
         num_workers=1,
     )
-    test_loader = SpeakerVerificationDataLoader(
-        dataset,
-        64,
-        2,
-        num_workers=1,
-    ) 
+    # test_loader = SpeakerVerificationDataLoader(
+    #     dataset,
+    #     64,
+    #     2,
+    #     num_workers=1,
+    # ) 
     
     # Create the model and the optimizer
     model = SpeakerEncoder()

@@ -8,7 +8,6 @@ import numpy as np
 import subprocess
 import webbrowser
 import visdom
-import params
 import umap
 import sys
 
@@ -40,18 +39,22 @@ class Visualizations:
         self.log_params()
         
     def log_params(self):
-        param_string = ""
-        for param_name in (p for p in dir(params) if not p.startswith('__')):
-            value = getattr(params, param_name)
-            param_string += "\t%s: %s" % (param_name, value)
-        param_string = param_string.replace("\n", "<br>")
+        import params_data, params_model
+        param_string = "<b>Model parameters</b>:<br>"
+        for param_name in (p for p in dir(params_model) if not p.startswith('__')):
+            value = getattr(params_model, param_name)
+            param_string += "\t%s: %s<br>" % (param_name, value)
+        param_string += "<b>Data parameters</b>:<br>"
+        for param_name in (p for p in dir(params_data) if not p.startswith('__')):
+            value = getattr(params_data, param_name)
+            param_string += "\t%s: %s<br>" % (param_name, value)
         self.vis.text(param_string, opts={'title': 'Parameters'})
         
     def log_dataset(self, dataset: SpeakerVerificationDataset):
         dataset_string = ""
         for param, value in dataset.get_params().items():
             dataset_string += "<b>%s</b>: %s\n" % (param, value)
-        dataset_string += "\n\n" + dataset.get_logs()
+        dataset_string += "\n" + dataset.get_logs()
         dataset_string = dataset_string.replace("\n", "<br>")
         self.vis.text(dataset_string, opts={'title': 'Dataset'})
         

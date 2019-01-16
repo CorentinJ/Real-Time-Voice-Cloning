@@ -1,13 +1,12 @@
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from params import mel_window_step
 from PyQt4.QtGui import *
 from PyQt4 import QtGui
 import numpy as np
 import librosa
 import audio
 import sys
-from params import sampling_rate
+from params_data import sampling_rate, mel_window_step
 from preprocess import preprocess_wave
 
 

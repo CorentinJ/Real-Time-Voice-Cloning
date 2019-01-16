@@ -2,7 +2,7 @@ from data_objects.speaker_batch import SpeakerBatch
 from data_objects.speaker import Speaker
 from torch.utils.data import Dataset, DataLoader
 from collections import OrderedDict
-from params import partial_utterance_length
+from params_data import partial_utterance_length
 from vlibs.structs.random_cycler import RandomCycler
 from vlibs import fileio
 from config import *

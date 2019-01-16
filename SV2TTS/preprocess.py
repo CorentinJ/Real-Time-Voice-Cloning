@@ -3,7 +3,7 @@ from config import *
 import audio
 import numpy as np
 from datetime import datetime
-from params import sampling_rate, partial_utterance_length
+from params_data import *
 
 class DatasetLog:
     """
@@ -19,10 +19,10 @@ class DatasetLog:
         self._log_params()
         
     def _log_params(self):
-        import params
+        import params_data
         self.write_line("Parameter values:")
-        for param_name in (p for p in dir(params) if not p.startswith('__')):
-            value = getattr(params, param_name)
+        for param_name in (p for p in dir(params_data) if not p.startswith('__')):
+            value = getattr(params_data, param_name)
             self.write_line("\t%s: %s" % (param_name, value))
         self.write_line("-----")
     
