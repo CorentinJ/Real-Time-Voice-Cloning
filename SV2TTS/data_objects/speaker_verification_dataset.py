@@ -15,10 +15,11 @@ class SpeakerVerificationDataset(Dataset):
         self.speakers = []
         for dataset in datasets:
             dataset_root = fileio.join(clean_data_root, dataset) 
-            speaker_dirs = fileio.join(dataset_root, fileio.listdir(dataset_root))[:10]
+            speaker_dirs = fileio.join(dataset_root, fileio.listdir(dataset_root))
             self.speakers.extend(Speaker(speaker_dir) for speaker_dir in speaker_dirs)
         self.speaker_cycler = RandomCycler(self.speakers)
-        self.mean_n_utterances = np.mean([len(s.utterances) for s in self.speakers])
+        # self.mean_n_utterances = np.mean([len(s.utterances) for s in self.speakers])
+        self.mean_n_utterances = -1
 
     def __len__(self):
         return int(1e10)

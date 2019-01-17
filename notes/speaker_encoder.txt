@@ -53,10 +53,13 @@ About speed (tested on 5x6 batches):
 - An additional 50ms could be gained by not including the centroid norms (and thus not computing them) in the cosine similarity. This approximation more or less holds as the centroid of the L2-normed embeddings have an L2-norm close to 1. That property is degraded with more utterances. Furthermore, increasing the number of utterances per speaker alone does not affect this extra computation time. Considering these two points and that the paper uses batches of 10x64, I think it's better not to go with that approximation.
 - Went from 155ms to 45ms by computing the loss entirely on the cpu! On batches of 10x64 it's from 5600ms to 2710ms. The LSTM, however, absolutely needs to be on the GPU.
 - Inference (forward pass alone and without gradients) is 14ms! Considering that a 5x6 batch corresponds to 48 seconds of speech, that's pretty fast!
+- I just realized it's batches of 64x10, not 10x64. Anyway I've doubled the LSTM cell size now so all the figures are no longer accurate.
+- It seems that the complexity of the backward pass is at least quadratic with respect to the number of speakers. With 64x10 I get a backward pass of 11s (the rest takes ~500ms) but with 32x10 it's 1.4s.
 
 
 TODO (priority at the top):
-expand the dataset & check hidden sizes etc & REMOVE DATA LIMITS
+improve the load of the current implementation
+check hidden sizes etc
 adaptive LR
 correct EER
 embed speaker matrix in visdom

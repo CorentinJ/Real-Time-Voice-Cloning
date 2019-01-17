@@ -94,4 +94,4 @@ def preprocess_librispeech(n_speakers=None, n_utterances=None):
         logger.finalize()
             
 if __name__ == '__main__':
-    preprocess_librispeech(150)
+    preprocess_librispeech()

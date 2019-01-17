@@ -3,13 +3,29 @@ from data_objects.speaker_verification_dataset import SpeakerVerificationDataset
 from datetime import datetime
 from time import perf_counter as clock
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 import numpy as np
 import subprocess
 import webbrowser
 import visdom
 import umap
 import sys
+
+colormap = np.array([
+    [76, 255, 0],
+    [0, 127, 70],
+    [255, 0, 0],
+    [255, 217, 38],
+    [0, 135, 255],
+    [165, 0, 165],
+    [255, 167, 255],
+    [97, 142, 151],
+    [0, 255, 255],
+    [255, 96, 38],
+    [142, 76, 0],
+    [33, 0, 127],
+    [0, 0, 0],
+    [183, 183, 183],
+], dtype=np.float) / 255 
 
 
 class Visualizations:
@@ -80,7 +96,7 @@ class Visualizations:
             opts=dict(
                 xlabel='Step',
                 ylabel='Loss',
-                title='Loss (mean per 10 steps)',
+                title='Loss',
             )
         )
         self.eer_win = self.vis.line(
@@ -91,7 +107,7 @@ class Visualizations:
             opts=dict(
                 xlabel='Step',
                 ylabel='EER',
-                title='Equal error rate (mean per 10 steps)'
+                title='Equal error rate'
             )
         )
         self.lr_win = self.vis.line(
@@ -102,7 +118,7 @@ class Visualizations:
             opts=dict(
                 xlabel='Step',
                 ylabel='Learning rate',
-                # ytype='log',
+                ytype='log',
                 title='Learning rate'
             )
         )
@@ -124,11 +140,14 @@ class Visualizations:
         self.last_step = step
         self.last_update_timestamp = now
         
-    def draw_projections(self, embeds, utterances_per_speaker, step):
+    def draw_projections(self, embeds, utterances_per_speaker, step, proj_fpath=None, 
+                         max_speakers=10):
+        max_speakers = max(max_speakers, len(colormap))
+        embeds = embeds[:max_speakers * utterances_per_speaker]
+        
         n_speakers = len(embeds) // utterances_per_speaker
         ground_truth = np.repeat(np.arange(n_speakers), utterances_per_speaker)
-        color_map = cm.hsv(np.linspace(0, 1, n_speakers + 1))
-        colors = [color_map[i] for i in ground_truth]
+        colors = [colormap[i] for i in ground_truth]
         
         reducer = umap.UMAP()
         projected = reducer.fit_transform(embeds)
@@ -136,7 +155,12 @@ class Visualizations:
         plt.gca().set_aspect('equal', 'datalim')
         plt.title('UMAP projection (step %d)' % step)
         self.projection_win = self.vis.matplot(plt, win=self.projection_win)
+        if proj_fpath is not None:
+            plt.savefig(proj_fpath + ('_umap_%06d.png' % step))
         plt.clf()
+        
+    def save(self):
+        self.vis.save([self.env_name])
         
     def draw_speaker_matrix(self, speaker_batch):
         pass

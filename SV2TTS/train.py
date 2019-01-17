@@ -5,13 +5,14 @@ from params_model import *
 from config import device, model_dir
 from model import SpeakerEncoder
 from vlibs import fileio
-import numpy as np
+from time import perf_counter
 import torch
 
 # Specify the run ID here. Note: visdom will group together run IDs starting with the same prefix
 # followed by an underscore.
 run_id = None
-run_id = 'save_test'
+run_id = 'debug'
+run_id = 'first_run_64x10'
 
 implementation_doc = {
     'Lr decay': None,
@@ -29,13 +30,13 @@ if __name__ == '__main__':
         dataset,
         speakers_per_batch,
         utterances_per_speaker,
-        num_workers=1,
+        num_workers=4,
     )
     # test_loader = SpeakerVerificationDataLoader(
     #     dataset,
     #     64,
     #     2,
-    #     num_workers=1,
+    #     num_workers=4,
     # ) 
     
     # Create the model and the optimizer
@@ -65,41 +66,37 @@ if __name__ == '__main__':
     vis.log_implementation(implementation_doc)
     
     # Training loop
-    loss_values = []
-    error_rates = []
     for step, speaker_batch in enumerate(loader, init_step):
         # Forward pass
         inputs = torch.from_numpy(speaker_batch.data).to(device)
         embeds = model(inputs).cpu()
         loss, eer = model.loss(embeds.view((speakers_per_batch, utterances_per_speaker, -1)))
-        loss_values.append(loss.item())
-        error_rates.append(eer)
         
         # Backward pass
         model.zero_grad()
+        # start = perf_counter()
         loss.backward()
+        # print("Backward in %.3f seconds" % (perf_counter() - start))
         model.do_gradient_ops()
         optimizer.step()
         # scheduler.step()
         
         # Update visualizations
-        if step % 10 == 0:
-            learning_rate = optimizer.param_groups[0]['lr']
-            vis.update(np.mean(loss_values), np.mean(error_rates), learning_rate, step)
-            loss_values.clear()
-            error_rates.clear()
-            
-        # Draw projections, save state
+        learning_rate = optimizer.param_groups[0]['lr']
+        vis.update(loss.item(), eer, learning_rate, step)
+        
+        # Save state and draw projections
         if step % 100 == 0:
-            vis.draw_projections(embeds.detach().numpy(), utterances_per_speaker, step)
-            
-            if model_fpath is None:
-                continue
-            fileio.ensure_dir(model_dir)
-            torch.save({
-                'step': step + 1,
-                'model_state': model.state_dict(),
-                'optimizer_state': optimizer.state_dict(),
-            }, model_fpath)
-            
-            
+            proj_fpath = None
+            if model_fpath is not None:
+                proj_fpath = fileio.join(model_dir, run_id)
+                
+                fileio.ensure_dir(model_dir)
+                torch.save({
+                    'step': step + 1,
+                    'model_state': model.state_dict(),
+                    'optimizer_state': optimizer.state_dict(),
+                }, model_fpath)
+               
+            vis.draw_projections(embeds.detach().numpy(), utterances_per_speaker, step, proj_fpath)
+            vis.save()
