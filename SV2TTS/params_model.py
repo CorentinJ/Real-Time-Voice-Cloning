@@ -6,7 +6,7 @@ model_num_layers = 3
 
 
 ## Training parameters
-learning_rate_init = 1e-4
+learning_rate_init = 2e-5
 # exponential_decay_beta = 0.9998
 speakers_per_batch = 64
 utterances_per_speaker = 10

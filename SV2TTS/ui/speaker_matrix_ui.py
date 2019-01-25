@@ -11,10 +11,9 @@ from preprocess import preprocess_wave
 
 
 class SpeakerMatrixUI(QtGui.QDialog):
-    def __init__(self, speakers, partial_utterances, title="Hey"):
+    def __init__(self, speakers, partial_utterances):
         self.speakers = speakers
         self.partial_utterances = partial_utterances
-        self.title = title
         
         # Create the ui
         app = QtGui.QApplication(sys.argv)

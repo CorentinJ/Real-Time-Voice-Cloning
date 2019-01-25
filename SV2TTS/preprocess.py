@@ -1,4 +1,5 @@
-from vlibs import fileio, console
+from vlibs.ui import console
+from vlibs import fileio
 from config import *
 import audio
 import numpy as np
@@ -92,6 +93,70 @@ def preprocess_librispeech(n_speakers=None, n_utterances=None):
             sources_file.close()
                 
         logger.finalize()
+
+
+def preprocess_voxceleb1(n_speakers=None, n_utterances=None):
+    fileio.ensure_dir(clean_data_root)
+
+    dataset_name = "voxceleb1"
+    out_dir = fileio.ensure_dir(fileio.join(clean_data_root, dataset_name))
+    logger = DatasetLog(clean_data_root, dataset_name)
+    
+    # Get the contents of the meta file
+    metadata = fileio.read_all_lines(fileio.join(voxceleb1_root, "vox1_meta.csv"))[1:]
+    metadata_fields = [line.split('\t') for line in metadata]
+    
+    # Select the ID and the nationality, filter out non-anglophone speakers
+    nationalities = {line[0]: line[3] for line in metadata_fields}
+    speaker_ids = [speaker_id for speaker_id, nationality in nationalities.items() if 
+                   nationality.lower() in anglophone_nationalites]
+    speaker_ids = speaker_ids[:n_speakers]
+    print("VoxCeleb1: using samples from %d (assumed anglophone) speakers out of %d." % 
+          (len(speaker_ids), len(nationalities)))
+    
+    # Get the speaker directories
+    speakers_root = fileio.join(voxceleb1_root, "wav")
+    disk_speaker_ids = fileio.listdir(speakers_root)
+    speaker_ids_len = len(speaker_ids)
+    speaker_ids = list(filter(lambda s_id: s_id in disk_speaker_ids, speaker_ids))
+    print("Found %d speakers on the disk, %d missing (this is normal)." % 
+          (len(speaker_ids), speaker_ids_len - len(speaker_ids)))
+    print("Preprocessing data for %d speakers." % len(speaker_ids))
+    
+    # Process the utterances for each speaker
+    for speaker_id in speaker_ids:
+        speaker_name = "VoxCeleb1_%s" % speaker_id
+        speaker_in_dir = fileio.join(speakers_root, speaker_id)
+        speaker_out_dir = fileio.ensure_dir(fileio.join(out_dir, speaker_name))
+        fileio.resetdir(speaker_out_dir)
+        sources_file = open(fileio.join(speaker_out_dir, "sources.txt"), 'w')
+        
+        fpaths = fileio.get_files(speaker_in_dir, r"\.wav", recursive=True)[:n_utterances]
+        message = "\tProcessing %3d utterances from speaker %s" % (len(fpaths), speaker_id)
+        for i, in_fpath in enumerate(fpaths):
+            # Load and preprocess the waveform
+            wave = audio.load(in_fpath)
+            wave = preprocess_wave(wave)
             
+            # Create and save the mel spectrogram
+            try:
+                frames = audio.wave_to_mel_filterbank(wave)
+            except:
+                3+2
+            if len(frames) < partial_utterance_length:
+                continue
+            fname = fileio.leaf(in_fpath).replace(".wav", ".npy")
+            out_fpath = fileio.join(speaker_out_dir, fname)
+            np.save(out_fpath, frames)
+            
+            logger.add_sample(duration=len(wave) / sampling_rate)
+            sources_file.write("%s %s\n" % (fname, in_fpath))
+            console.progress_bar(message, i + 1, len(fpaths))
+        
+        sources_file.close()
+    
+    logger.finalize()
+
+
 if __name__ == '__main__':
-    preprocess_librispeech()
+    preprocess_voxceleb1()

@@ -45,15 +45,15 @@ def trim_long_silences(wave):
     :param wave: the raw waveform as a numpy array of floats 
     :return: the same waveform with silences trimmed away (length <= original wave length)
     """
-    # import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt
     
     # Compute the voice detection window size
     samples_per_window = (vad_window_length * sampling_rate) // 1000
     
     # Trim the end of the audio to have a multiple of the window size
     wave = wave[:len(wave) - (len(wave) % samples_per_window)]
-    # plt.subplot(611)
-    # plt.plot(wave)
+    plt.subplot(611)
+    plt.plot(wave)
     
     # Convert the float waveform to 16-bit mono PCM
     pcm_wave = struct.pack("%dh" % len(wave), *(wave * 32767).astype(np.int16))
@@ -66,8 +66,8 @@ def trim_long_silences(wave):
         voice_flags.append(vad.is_speech(pcm_wave[window_start * 2:window_end * 2],
                                          sample_rate=sampling_rate))
     voice_flags = np.array(voice_flags)
-    # plt.subplot(612)
-    # plt.plot(voice_flags)
+    plt.subplot(612)
+    plt.plot(voice_flags)
         
     # Smooth the voice detection with a moving average
     def moving_average(array, width):
@@ -77,25 +77,25 @@ def trim_long_silences(wave):
         return ret[width - 1:] / width
     audio_mask = moving_average(voice_flags, vad_moving_average_width)
     audio_mask = np.round(audio_mask).astype(np.bool)
-    # plt.subplot(613)
-    # plt.plot(audio_mask)
+    plt.subplot(613)
+    plt.plot(audio_mask)
     
     # Dilate the voiced regions
     audio_mask = binary_dilation(audio_mask, np.ones(vad_max_silence_length + 1))
-    # plt.subplot(614)
-    # plt.plot(audio_mask)
+    plt.subplot(614)
+    plt.plot(audio_mask)
     
     # Trim away the long silences in the audio
     audio_mask = np.repeat(audio_mask, samples_per_window)
-    # plt.subplot(615)
-    # plt.plot(wave)
-    # plt.plot(audio_mask * 10000)
+    plt.subplot(615)
+    plt.plot(wave)
+    plt.plot(audio_mask * 10000)
     
     wave = wave[audio_mask == True]
-    # plt.subplot(616)
-    # plt.plot(wave)
-    # play_wave(wave)
-    # plt.show()
+    plt.subplot(616)
+    plt.plot(wave)
+    play_wave(wave)
+    plt.show()
     
     return wave
     
@@ -121,9 +121,24 @@ def play_wave(wave, blocking=False):
     sounddevice.play(wave, sampling_rate, blocking=blocking)
 
 
-# if __name__ == '__main__':
-#     fpath = r"E:\Datasets\LibriSpeech\train-other-500\37\215\37-215-0005.flac"
-#     wave = load(fpath)
-#     trim_long_silences(wave)
+if __name__ == '__main__':
+    fpath = 'E:\\Datasets\\VoxCeleb1\\wav\\id11210\\voTTV7oqJmw\\00001.wav'
+
+    from pydub import AudioSegment
+    import pydub
+
+    def match_target_amplitude(sound, target_dBFS):
+        change_in_dBFS = target_dBFS - sound.dBFS
+        return sound.apply_gain(change_in_dBFS)
+    wave = load(fpath)
+    
+    sound = AudioSegment.from_file(fpath, "wav")
+    sound._spawn()
+    sound.apply_gain()
+    normalized_sound = match_target_amplitude(sound, -20.0)
+    normalized_sound.export("nomrmalizedAudio2.m4a", format="mp4")
+    quit()
+    
+    trim_long_silences(wave)
 
     

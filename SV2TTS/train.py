@@ -32,13 +32,7 @@ if __name__ == '__main__':
         utterances_per_speaker,
         num_workers=4,
     )
-    # test_loader = SpeakerVerificationDataLoader(
-    #     dataset,
-    #     64,
-    #     2,
-    #     num_workers=4,
-    # ) 
-    
+
     # Create the model and the optimizer
     model = SpeakerEncoder()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate_init)

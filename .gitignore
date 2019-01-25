@@ -15,4 +15,4 @@
 tacotron2
 data
 SV2TTS/datasets/temp
-SV2TTS/saved_models/
+SV2TTS/_old/
