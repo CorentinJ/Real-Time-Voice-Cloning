@@ -94,7 +94,7 @@ def trim_long_silences(wave):
     wave = wave[audio_mask == True]
     plt.subplot(616)
     plt.plot(wave)
-    play_wave(wave)
+    # play_wave(wave)
     plt.show()
     
     return wave
@@ -119,11 +119,26 @@ def plot_mel_filterbank(frames):
 def play_wave(wave, blocking=False):
     sounddevice.stop()
     sounddevice.play(wave, sampling_rate, blocking=blocking)
+    
+def rec_wave(duration, blocking=True, verbose=True):
+    if verbose:
+        print('Recording %d seconds of audio' % duration)
+    wave = sounddevice.rec(duration * sampling_rate, sampling_rate, 1)
+    if blocking:
+        sounddevice.wait()
+        if verbose:
+            print('Done recording!')
+    return wave.squeeze()
 
 
 if __name__ == '__main__':
-    fpath = 'E:\\Datasets\\VoxCeleb1\\wav\\id11210\\voTTV7oqJmw\\00001.wav'
+    wave = rec_wave(10)
+    wave = trim_long_silences(wave)
+    play_wave(wave, blocking=True)
+    
+    quit()
 
+    fpath = 'E:\\Datasets\\VoxCeleb1\\wav\\id11210\\voTTV7oqJmw\\00001.wav'
     from pydub import AudioSegment
     import pydub
 

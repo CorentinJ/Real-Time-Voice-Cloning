@@ -7,7 +7,7 @@ from vlibs import fileio
 import torch
 
 run_id = 'first_run_64x10'
-utterances_per_speaker = 6
+utterances_per_speaker = 5
 
 if __name__ == '__main__':
     # Create a data loader
@@ -27,9 +27,12 @@ if __name__ == '__main__':
     checkpoint = torch.load(model_fpath)
     model.load_state_dict(checkpoint['model_state'])
 
-    def get_embeds(speaker_batch):
+    def get_embeds(speaker_batch, data=None):
         with torch.no_grad():
-            inputs = torch.from_numpy(speaker_batch.data).to(device)
+            if data is None:
+                inputs = torch.from_numpy(speaker_batch.data).to(device)
+            else:
+                inputs = torch.from_numpy(data).to(device)
             embeds = model(inputs).cpu().detach().numpy()
             return embeds
             # loss, eer = model.loss(embeds.view((n_speakers, utterances_per_speaker, -1)))

@@ -71,6 +71,18 @@ class UMapDemoUI(QtGui.QDialog):
         add_speaker_button.clicked.connect(add_speaker_button_action)
         menu_layout.addWidget(add_speaker_button)
         
+        record_one_button = QtGui.QPushButton('Record one')
+        def record_one_button_action():
+            waves = [audio.rec_wave(2) for _ in range(5)]
+            # waves = map(preprocess_wave, waves)
+            waves = list(map(audio.wave_to_mel_filterbank, waves))
+            data = np.array(waves)
+            embeds = self.get_embeds(None, data=data)
+            self.embeds['user'] = embeds
+            self.draw_umap()
+        record_one_button.clicked.connect(record_one_button_action)
+        menu_layout.addWidget(record_one_button)
+        
         clear_button = QtGui.QPushButton('Clear')
         def clear_button_action():
             self.embeds.clear()
@@ -102,15 +114,21 @@ class UMapDemoUI(QtGui.QDialog):
             return
         all_embeds = np.concatenate(tuple(self.embeds.values()))
         
-        utterances_per_speaker = len(next(self.embeds.values().__iter__()))
-        ground_truth = np.repeat(np.arange(n_speakers), utterances_per_speaker)
-        colors = [colormap[i] for i in ground_truth]
+        # utterances_per_speaker = len(next(self.embeds.values().__iter__()))
+        # ground_truth = np.repeat(np.arange(n_speakers), utterances_per_speaker)
+        # colors = [colormap[i] for i in ground_truth]
+        # labels = []
+        # for speaker_name in self.embeds.keys():
+        #     labels.extend([speaker_name] * utterances_per_speaker)
 
         reducer = umap.UMAP()
-        projected = reducer.fit_transform(all_embeds)
-        self.ax.scatter(projected[:, 0], projected[:, 1], c=colors)
+        transformer = reducer.fit(all_embeds)
+        for i, (speaker_name, embeds) in enumerate(self.embeds.items()):
+            projected = transformer.transform(embeds)
+            self.ax.scatter(projected[:, 0], projected[:, 1], c=[colormap[i]], label=speaker_name)
         self.ax.set_aspect('equal', 'datalim')
         self.ax.set_title('UMAP projection')
+        self.ax.legend()
     
         # figure.tight_layout()
         self.ax.figure.canvas.draw()

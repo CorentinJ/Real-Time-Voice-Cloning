@@ -58,6 +58,7 @@ About speed (tested on 5x6 batches):
 
 
 TODO (priority at the top):
+normalize audio
 improve the load of the current implementation
 check hidden sizes etc
 adaptive LR
