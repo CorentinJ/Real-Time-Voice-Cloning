@@ -6,8 +6,10 @@ project_root = fileio.abspath(fileio.leafdir(__file__))
 librispeech_root = "E://Datasets/LibriSpeech"
 librispeech_datasets = ["train-other-500"]
 voxceleb1_root = "E://Datasets/VoxCeleb1"
+voxceleb_datasets = ["voxceleb1"]
 anglophone_nationalites = ['australia', 'canada', 'ireland', 'uk', 'usa']
 clean_data_root = "E://Datasets//SpeakerEncoder"
+all_datasets = librispeech_datasets + voxceleb_datasets
 
 model_dir = fileio.join(project_root, "saved_models")
 

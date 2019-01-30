@@ -57,15 +57,21 @@ About speed (tested on 5x6 batches):
 - It seems that the complexity of the backward pass is at least quadratic with respect to the number of speakers. With 64x10 I get a backward pass of 11s (the rest takes ~500ms) but with 32x10 it's 1.4s.
 
 
+Ideas for a deeper analysis:
+- Description of the datasets
+- How stable is the encoding w.r.t. the length of the utterance? Compare side by side embeddings of several utterances cut at 1.6s, 2.4s, 3.2s... Show the distribution of the distance to the centroids w.r.t. to the length of the utterances, the EER
+- How much is the encoding affected by the quality of the microphone? Record the same sentences on 2 or 3 different microphones and project the embeddings. Look at how far they are from the rest of the dataset.
+
+
 TODO (priority at the top):
 normalize audio
+include other datasets
+correct EER
 improve the load of the current implementation
 check hidden sizes etc
-adaptive LR
-correct EER
+adaptive LR/batch size
 embed speaker matrix in visdom
 remove y axis in matrix
-include other datasets
 
 
 

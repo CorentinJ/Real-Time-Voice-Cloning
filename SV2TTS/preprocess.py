@@ -5,6 +5,7 @@ import audio
 import numpy as np
 from datetime import datetime
 from params_data import *
+from pathos.multiprocessing import ThreadPool
 
 class DatasetLog:
     """
@@ -48,6 +49,11 @@ class DatasetLog:
         self.text_file.close()
         
 def preprocess_wave(wave):
+    """ 
+    This is the standard routine that should be used on every audio file before being used in 
+    this project.
+    """
+    wave = audio.normalize_volume(wave, audio_norm_target_dBFS, increase_only=True)
     wave = audio.trim_long_silences(wave)
     return wave
 
@@ -62,9 +68,10 @@ def preprocess_librispeech(n_speakers=None, n_utterances=None):
         # Get the speaker directories
         speaker_ids = fileio.listdir(dataset_root, numerical_sorting=True)[:n_speakers]
         print("Librispeech: Preprocessing data for %d speakers." % len(speaker_ids))
-
-        # Process the utterances for each speaker
-        for speaker_id in speaker_ids:
+        
+        # Function to preprocess utterances for one speaker
+        def preprocess_speaker(speaker_id):
+            print("Starting speaker %s" % speaker_id)
             speaker_name = "LibriSpeech_%s_%s" % (dataset_name, speaker_id)
             speaker_in_dir = fileio.join(dataset_root, speaker_id)
             speaker_out_dir = fileio.ensure_dir(fileio.join(out_dir, speaker_name))
@@ -72,7 +79,6 @@ def preprocess_librispeech(n_speakers=None, n_utterances=None):
             sources_file = open(fileio.join(speaker_out_dir, "sources.txt"), 'w')
             
             fpaths = fileio.get_files(speaker_in_dir, r"\.flac", recursive=True)[:n_utterances]
-            message = "\tProcessing %3d utterances from speaker %s" % (len(fpaths), speaker_id)
             for i, in_fpath in enumerate(fpaths):
                 # Load and preprocess the waveform
                 wave = audio.load(in_fpath)
@@ -80,7 +86,7 @@ def preprocess_librispeech(n_speakers=None, n_utterances=None):
                 
                 # Create and save the mel spectrogram
                 frames = audio.wave_to_mel_filterbank(wave)
-                if len(frames) < partial_utterance_length:
+                if len(frames) < partial_utterance_length:  
                     continue
                 fname = fileio.leaf(in_fpath).replace(".flac", ".npy")
                 out_fpath = fileio.join(speaker_out_dir, fname)
@@ -88,10 +94,13 @@ def preprocess_librispeech(n_speakers=None, n_utterances=None):
                 
                 logger.add_sample(duration=len(wave) / sampling_rate)
                 sources_file.write("%s %s\n" % (fname, in_fpath))
-                console.progress_bar(message, i + 1, len(fpaths))
 
             sources_file.close()
-                
+            print("Speaker %s done!" % speaker_id)
+
+        # Process the utterances for each speaker
+        with ThreadPool(8) as pool:
+            list(pool.imap(preprocess_speaker, speaker_ids))
         logger.finalize()
 
 
@@ -122,9 +131,10 @@ def preprocess_voxceleb1(n_speakers=None, n_utterances=None):
     print("Found %d speakers on the disk, %d missing (this is normal)." % 
           (len(speaker_ids), speaker_ids_len - len(speaker_ids)))
     print("Preprocessing data for %d speakers." % len(speaker_ids))
-    
-    # Process the utterances for each speaker
-    for speaker_id in speaker_ids:
+
+    # Function to preprocess utterances for one speaker
+    def preprocess_speaker(speaker_id):
+        print("Starting speaker %s" % speaker_id)
         speaker_name = "VoxCeleb1_%s" % speaker_id
         speaker_in_dir = fileio.join(speakers_root, speaker_id)
         speaker_out_dir = fileio.ensure_dir(fileio.join(out_dir, speaker_name))
@@ -132,31 +142,32 @@ def preprocess_voxceleb1(n_speakers=None, n_utterances=None):
         sources_file = open(fileio.join(speaker_out_dir, "sources.txt"), 'w')
         
         fpaths = fileio.get_files(speaker_in_dir, r"\.wav", recursive=True)[:n_utterances]
-        message = "\tProcessing %3d utterances from speaker %s" % (len(fpaths), speaker_id)
         for i, in_fpath in enumerate(fpaths):
             # Load and preprocess the waveform
             wave = audio.load(in_fpath)
             wave = preprocess_wave(wave)
             
             # Create and save the mel spectrogram
-            try:
-                frames = audio.wave_to_mel_filterbank(wave)
-            except:
-                3+2
+            frames = audio.wave_to_mel_filterbank(wave)
             if len(frames) < partial_utterance_length:
                 continue
-            fname = fileio.leaf(in_fpath).replace(".wav", ".npy")
+            video_id = fileio.leaf(fileio.leafdir(in_fpath))
+            fname = video_id + '_' + fileio.leaf(in_fpath).replace(".wav", ".npy")
             out_fpath = fileio.join(speaker_out_dir, fname)
             np.save(out_fpath, frames)
             
             logger.add_sample(duration=len(wave) / sampling_rate)
             sources_file.write("%s %s\n" % (fname, in_fpath))
-            console.progress_bar(message, i + 1, len(fpaths))
         
         sources_file.close()
-    
+        print("Speaker %s done!" % speaker_id)
+        
+    # Process the utterances for each speaker
+    with ThreadPool(8) as pool:
+        list(pool.imap(preprocess_speaker, sorted(speaker_ids)))
     logger.finalize()
 
 
 if __name__ == '__main__':
+    # preprocess_librispeech()
     preprocess_voxceleb1()

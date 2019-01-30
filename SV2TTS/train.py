@@ -2,7 +2,7 @@ from data_objects.speaker_verification_dataset import SpeakerVerificationDataLoa
 from data_objects.speaker_verification_dataset import SpeakerVerificationDataset
 from ui.visualizations import Visualizations
 from params_model import *
-from config import device, model_dir
+from config import *
 from model import SpeakerEncoder
 from vlibs import fileio
 from time import perf_counter
@@ -11,8 +11,8 @@ import torch
 # Specify the run ID here. Note: visdom will group together run IDs starting with the same prefix
 # followed by an underscore.
 run_id = None
-run_id = 'debug'
-run_id = 'first_run_64x10'
+run_id = 'debug_new_data_params'
+run_id = 'ls_vc_265_embedding'
 
 implementation_doc = {
     'Lr decay': None,
@@ -24,13 +24,13 @@ implementation_doc = {
 if __name__ == '__main__':
     # Create a data loader
     dataset = SpeakerVerificationDataset(
-        datasets=['train-other-500'],
+        datasets=all_datasets,
     )
     loader = SpeakerVerificationDataLoader(
         dataset,
         speakers_per_batch,
         utterances_per_speaker,
-        num_workers=4,
+        # num_workers=4,
     )
 
     # Create the model and the optimizer
@@ -48,6 +48,7 @@ if __name__ == '__main__':
             init_step = checkpoint['step']
             model.load_state_dict(checkpoint['model_state'])
             optimizer.load_state_dict(checkpoint['optimizer_state'])
+            optimizer.param_groups[0]['lr'] = learning_rate_init
         else:
             print('No model \"%s\" found, starting training from scratch.' % run_id)
     else:
