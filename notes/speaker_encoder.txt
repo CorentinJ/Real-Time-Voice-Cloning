@@ -64,14 +64,17 @@ Ideas for a deeper analysis:
 
 
 TODO (priority at the top):
-normalize audio
-include other datasets
-correct EER
-improve the load of the current implementation
-check hidden sizes etc
-adaptive LR/batch size
+- Double check that all model parameters are correct (draw the model graph?)
+- Find LSTM extensions?
+
+
+
+smooth plots
 embed speaker matrix in visdom
 remove y axis in matrix
+include other datasets
+adaptive LR/batch size
+improve the load of the current implementation (?)
 
 
 

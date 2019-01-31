@@ -18,7 +18,6 @@ colormap = np.array([
     [0, 135, 255],
     [165, 0, 165],
     [255, 167, 255],
-    [97, 142, 151],
     [0, 255, 255],
     [255, 96, 38],
     [142, 76, 0],
@@ -50,6 +49,8 @@ class Visualizations:
         self.lr_win = None
         self.implementation_win = None
         self.projection_win = None
+        self.loss_exp = None
+        self.eer_exp = None
         self.implementation_string = ""
         self.last_step = -1
         self.last_update_timestamp = -1
@@ -88,23 +89,27 @@ class Visualizations:
         )
 
     def update(self, loss, eer, lr, step):
+        self.loss_exp = loss if self.loss_exp is None else 0.985 * self.loss_exp + 0.015 * loss
         self.loss_win = self.vis.line(
-            [loss],
-            [step],
+            [[loss, self.loss_exp]],
+            [[step, step]],
             win=self.loss_win,
             update='append' if self.loss_win else None,
             opts=dict(
+                legend=['Loss', 'Avg. loss'],
                 xlabel='Step',
                 ylabel='Loss',
                 title='Loss',
             )
         )
+        self.eer_exp = eer if self.eer_exp is None else 0.985 * self.eer_exp + 0.015 * eer
         self.eer_win = self.vis.line(
-            [eer],
-            [step],
+            [[eer, self.eer_exp]],
+            [[step, step]],
             win=self.eer_win,
             update='append' if self.eer_win else None,
             opts=dict(
+                legend=['EER', 'Avg. EER'],
                 xlabel='Step',
                 ylabel='EER',
                 title='Equal error rate'
@@ -142,7 +147,7 @@ class Visualizations:
         
     def draw_projections(self, embeds, utterances_per_speaker, step, proj_fpath=None, 
                          max_speakers=10):
-        max_speakers = max(max_speakers, len(colormap))
+        max_speakers = min(max_speakers, len(colormap))
         embeds = embeds[:max_speakers * utterances_per_speaker]
         
         n_speakers = len(embeds) // utterances_per_speaker

@@ -38,7 +38,7 @@ class SpeakerVerificationDataset(Dataset):
         params = OrderedDict([
             ("Total speakers", len(self.speakers)),
             ("Average utterances per speaker", self.mean_n_utterances),
-            ("Datasets", ','.join(self.datasets)),
+            ("Datasets", ', '.join(self.datasets)),
         ])
         return params
     

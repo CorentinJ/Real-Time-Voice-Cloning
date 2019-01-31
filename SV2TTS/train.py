@@ -5,14 +5,13 @@ from params_model import *
 from config import *
 from model import SpeakerEncoder
 from vlibs import fileio
-from time import perf_counter
 import torch
 
 # Specify the run ID here. Note: visdom will group together run IDs starting with the same prefix
 # followed by an underscore.
 run_id = None
-run_id = 'debug_new_data_params'
 run_id = 'ls_vc_265_embedding'
+run_id = 'debug_eer2'
 
 implementation_doc = {
     'Lr decay': None,
@@ -30,7 +29,7 @@ if __name__ == '__main__':
         dataset,
         speakers_per_batch,
         utterances_per_speaker,
-        # num_workers=4,
+        num_workers=4,
     )
 
     # Create the model and the optimizer
@@ -69,9 +68,7 @@ if __name__ == '__main__':
         
         # Backward pass
         model.zero_grad()
-        # start = perf_counter()
         loss.backward()
-        # print("Backward in %.3f seconds" % (perf_counter() - start))
         model.do_gradient_ops()
         optimizer.step()
         # scheduler.step()
@@ -92,6 +89,14 @@ if __name__ == '__main__':
                     'model_state': model.state_dict(),
                     'optimizer_state': optimizer.state_dict(),
                 }, model_fpath)
+                
+                # Occasionally make a backup
+                if step % 2000 == 0:
+                    torch.save({
+                        'step': step + 1,
+                        'model_state': model.state_dict(),
+                        'optimizer_state': optimizer.state_dict(),
+                    }, "%s_bak_%06d.pt" % (model_fpath[:-3], step))
                
             vis.draw_projections(embeds.detach().numpy(), utterances_per_speaker, step, proj_fpath)
             vis.save()
