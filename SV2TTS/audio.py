@@ -47,7 +47,7 @@ def trim_long_silences(wave):
     :param wave: the raw waveform as a numpy array of floats 
     :return: the same waveform with silences trimmed away (length <= original wave length)
     """
-    import matplotlib.pyplot as plt
+    # import matplotlib.pyplot as plt
     
     # Compute the voice detection window size
     samples_per_window = (vad_window_length * sampling_rate) // 1000
@@ -148,7 +148,7 @@ if __name__ == '__main__':
     fpath = r"E:\Datasets\LibriSpeech\train-other-500\149\125760\149-125760-0003.flac"
     
     wave = load(fpath)
-    play_wave(wave, True)
+    # play_wave(wave, True)
     wave = normalize_volume(wave, -30)
     play_wave(wave, True)
     

@@ -74,14 +74,14 @@ class SpeakerEncoder(nn.Module):
 
         speakers_per_batch, utterances_per_speaker = embeds.shape[:2]
         
-        # Inclusive centroids (1 per speaker)
+        # Inclusive centroids (1 per speaker). Cloning is needed for reverse differentiation
         centroids_incl = torch.mean(embeds, dim=1)
-        centroid_incl_norms = torch.norm(centroids_incl, dim=1)
+        centroids_incl = centroids_incl.clone() / torch.norm(centroids_incl, dim=1, keepdim=True)
 
         # Exclusive centroids (1 per utterance)
-        centroids_excl = (torch.sum(embeds, dim=1, keepdim=True) - embeds)
+        centroids_excl = (torch.sum(embeds, dim=1, keepdim=True) - embeds) 
         centroids_excl /= (utterances_per_speaker - 1)
-        centroid_excl_norms = torch.norm(centroids_excl, dim=2)
+        centroids_excl = centroids_excl.clone() / torch.norm(centroids_excl, dim=2, keepdim=True)
                          
         # Similarity matrix
         sim_matrix = torch.zeros(speakers_per_batch * utterances_per_speaker, speakers_per_batch)
@@ -90,10 +90,8 @@ class SpeakerEncoder(nn.Module):
                 ji = j * utterances_per_speaker + i
                 for k in range(speakers_per_batch):
                     centroid = centroids_excl[j, i] if j == k else centroids_incl[k]
-                    centroid_norm = centroid_excl_norms[j, i] if j == k else centroid_incl_norms[k]
-                    # Note: the sum of squares of the embeddings is always 1 due to the 
-                    # L2-normalization, so we can ignore it. 
-                    sim_matrix[ji, k] = torch.dot(embeds[j, i], centroid) / centroid_norm
+                    # The cosine similarity is the dot product when vectors are normalized
+                    sim_matrix[ji, k] = torch.dot(embeds[j, i], centroid)
         sim_matrix = sim_matrix * self.similarity_weight + self.similarity_bias
 
         # Loss

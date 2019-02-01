@@ -10,7 +10,7 @@ import torch
 # Specify the run ID here. Note: visdom will group together run IDs starting with the same prefix
 # followed by an underscore.
 run_id = None
-run_id = 'ls_vc_265_embedding'
+run_id = 'first_debug'
 run_id = 'debug_eer2'
 
 implementation_doc = {
@@ -18,7 +18,7 @@ implementation_doc = {
     'Gradient ops': True,
     'Projection layer': False,
     'Run ID': run_id,
-    'Device': str(torch.cuda.get_device_name(0) if device == 'cuda' else 'CPU'),
+    'Device': str(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU'),
 }
 
 if __name__ == '__main__':
@@ -82,8 +82,7 @@ if __name__ == '__main__':
         if step % 100 == 0:
             proj_fpath = None
             if model_fpath is not None:
-                proj_fpath = fileio.join(model_dir, run_id)
-                
+                # Overwrite the latest version of the model
                 fileio.ensure_dir(model_dir)
                 torch.save({
                     'step': step + 1,
@@ -91,13 +90,16 @@ if __name__ == '__main__':
                     'optimizer_state': optimizer.state_dict(),
                 }, model_fpath)
                 
-                # Occasionally make a backup
+                # Make a backup every 2000 steps
+                backup_dir = fileio.ensure_dir(fileio.join(model_dir, run_id + '_backups'))
+                backup_fpath = fileio.join(backup_dir, "%s_bak_%06d.pt" % (run_id, step))
                 if step % 2000 == 0:
                     torch.save({
                         'step': step + 1,
                         'model_state': model.state_dict(),
                         'optimizer_state': optimizer.state_dict(),
-                    }, "%s_bak_%06d.pt" % (model_fpath[:-3], step))
-               
+                    }, backup_fpath)
+
+                proj_fpath = fileio.join(backup_dir, run_id)
             vis.draw_projections(embeds.detach().numpy(), utterances_per_speaker, step, proj_fpath)
             vis.save()
