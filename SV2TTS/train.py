@@ -18,6 +18,7 @@ implementation_doc = {
     'Gradient ops': True,
     'Projection layer': False,
     'Run ID': run_id,
+    'Device': str(torch.cuda.get_device_name(0) if device == 'cuda' else 'CPU'),
 }
 
 if __name__ == '__main__':
