@@ -12,8 +12,13 @@
 *.blg
 *.bbl
 *.bcf
-tacotron2
 data
 SV2TTS/datasets/temp
 SV2TTS/_old/
 SV2TTS/saved_models/*_backups
+tacotron2/tacotron_output
+tacotron2/debug
+tacotron2/papers
+tacotron2/wav_out
+WaveGlow
+torch-tacotron2
