@@ -1,0 +1,16 @@
+TRANSFER LEARNING FROM SPEAKER VERIFICATION TO MULTISPEAKER TEXT-TO-SPEECH SYNTHESIS:
+- ASR to remove silence... Any different from WEBRTCVAD? They mention 14->5s median duration, which sounds like a big reduction to me (maybe it's just because it's the median). Will have to check the samples myself.
+- VCTK and LibriSpeech were seperately used for different models.
+- Same speaker set for training and validation in VCTK but disjoint for LibriSpeech.
+- Noise reduction applied to the spectrogram. Go figure if I'll ever implement that.
+- Note that VCTK is 1/10th the duration of LibriSpeech. Is it even worth bothering at this point? I could just start with LibriSpeech and add it later anyway.
+- Guess I will have to skip on the phoneme inputs also. Maybe Waveglow implements them? Would also have to check if it ever appears in the Tacotron 2 paper at all.
+
+
+
+-------------------------------------------------
+
+- Interface train-clean
+- Listen to inverted samples to check if the silence removal is ok
+- Begin with train-clean to see if that works
+- If it does, maybe consider adding VCTK then train-other

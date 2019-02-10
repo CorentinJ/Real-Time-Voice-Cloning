@@ -93,7 +93,8 @@ hparams = tf.contrib.training.HParams(
     #	6- If audio quality is too metallic or fragmented (or if linear spectrogram plots are 
 	# showing black silent regions on top), then restart from step 2.
     num_mels=80,  # Number of mel-spectrogram channels and local conditioning dimensionality
-    num_freq=1025,  # (= n_fft / 2 + 1) only used when adding linear spectrograms post processing
+    # num_freq=1025,  # (= n_fft / 2 + 1) only used when adding linear spectrograms post processing
+    num_freq=513,  # (= n_fft / 2 + 1) only used when adding linear spectrograms post processing
     #  network
     rescale=True,  # Whether to rescale audio prior to preprocessing
     rescaling_max=0.999,  # Rescaling value
@@ -104,7 +105,7 @@ hparams = tf.contrib.training.HParams(
     clip_mels_length=True,
     # For cases of OOM (Not really recommended, only use if facing unsolvable OOM errors, 
 	# also consider clipping your samples to smaller chunks)
-    max_mel_frames=1000,    # was 1000
+    max_mel_frames=1000,
     # Only relevant when clip_mels_length = True, please only use after trying output_per_steps=3
 	#  and still getting OOM errors.
     
@@ -117,10 +118,18 @@ hparams = tf.contrib.training.HParams(
     silence_threshold=2,  # silence threshold used for sound trimming for wavenet preprocessing
     
     # Mel spectrogram
-    n_fft=2048,  # Extra window size is filled with 0 paddings to match this parameter
-    hop_size=275,  # For 22050Hz, 275 ~= 12.5 ms (0.0125 * sample_rate)
-    win_size=1100,  # For 22050Hz, 1100 ~= 50 ms (If None, win_size = n_fft) (0.05 * sample_rate)
-    sample_rate=22050,  # 22050 Hz (corresponding to ljspeech dataset) (sox --i <filename>)
+    # # FOR DATASETS IN 22050Hz:
+    # n_fft=2048,  # Extra window size is filled with 0 paddings to match this parameter
+    # hop_size=275,  # For 22050Hz, 275 ~= 12.5 ms (0.0125 * sample_rate)
+    # win_size=1100,  # For 22050Hz, 1100 ~= 50 ms (If None, win_size = n_fft) (0.05 * sample_rate)
+    # sample_rate=22050,  # 22050 Hz (corresponding to ljspeech dataset) (sox --i <filename>)
+    
+    # FOR DATASETS IN 16000Hz:
+    n_fft=1024,  # Extra window size is filled with 0 paddings to match this parameter
+    hop_size=200,  # For 16000Hz, 200 ~= 12.5 ms (0.0125 * sample_rate)
+    win_size=800,  # For 16000Hz, 800 ~= 50 ms (If None, win_size = n_fft) (0.05 * sample_rate)
+    sample_rate=16000,  # 16000Hz (corresponding to librispeech) (sox --i <filename>)
+    
     frame_shift_ms=None,  # Can replace hop_size parameter. (Recommended: 12.5)
     
     # M-AILABS (and other datasets) trim params (these parameters are usually correct for any 
@@ -276,7 +285,8 @@ hparams = tf.contrib.training.HParams(
     # for each frame while 2D spans "freq_axis_kernel_size" bands at a time
     upsample_activation='LeakyRelu',
     # Activation function used during upsampling. Can be ('LeakyRelu', 'Relu' or None)
-    upsample_scales=[5, 5, 11],  # prod(upsample_scales) should be equal to hop_size
+    # upsample_scales=[5, 5, 11],  # prod(upsample_scales) should be equal to hop_size
+    upsample_scales=[5, 5, 8],  # prod(upsample_scales) should be equal to hop_size
     freq_axis_kernel_size=3,
     # Only used for 2D upsampling. This is the number of requency bands that are spanned at a time
     #  for each frame.

@@ -28,8 +28,8 @@ class Tacotron():
     def __init__(self, hparams):
         self._hparams = hparams
     
-    def initialize(self, inputs, input_lengths, mel_targets=None, stop_token_targets=None,
-                   linear_targets=None, targets_lengths=None, gta=False,
+    def initialize(self, inputs, input_lengths, speaker_embeddings, mel_targets=None, 
+                   stop_token_targets=None, linear_targets=None, targets_lengths=None, gta=False,
                    global_step=None, is_training=False, is_evaluating=False, split_infos=None):
         """
         Initializes the model for inference sets "mel_outputs" and "alignments" fields.
@@ -38,6 +38,8 @@ class Tacotron():
               steps in the input time series, and values are character IDs
             - input_lengths: int32 Tensor with shape [N] where N is batch size and values are the 
             lengths of each sequence in inputs.
+            - speaker_embeddings: float32 Tensor with shape [N, E] where E is the speaker 
+            embedding size.
             - mel_targets: float32 Tensor with shape [N, T_out, M] where N is batch size, 
             T_out is number of steps in the output time series, M is num_mels, and values are 
             entries in the mel spectrogram. Only needed for training.
@@ -152,9 +154,11 @@ class Tacotron():
                     ### SV2TT2 ###
                     
                     # Append the speaker embedding to the encoder output at each timestep
-                    dummy = tf.zeros((tf.shape(encoder_outputs)[0], 1, 256))
-                    dummy1 = tf.tile(dummy, (1, tf.shape(encoder_outputs)[1], 1))
-                    encoder_cond_outputs = tf.concat((encoder_outputs, dummy1), 2)
+                    tileable_shape = [batch_size, 1, self._hparams.speaker_embedding_size]
+                    tileable_speaker_embeddings = tf.reshape(speaker_embeddings, tileable_shape)
+                    tiled_speaker_embeddings = tf.tile(tileable_speaker_embeddings, 
+                                                       [1, tf.shape(encoder_outputs)[1], 1])
+                    encoder_cond_outputs = tf.concat((encoder_outputs, tiled_speaker_embeddings), 2)
                     
                     ##############
                     

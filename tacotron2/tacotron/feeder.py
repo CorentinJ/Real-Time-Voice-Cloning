@@ -240,7 +240,18 @@ class Feeder:
 			split_infos.append([input_max_len, mel_target_max_len, token_target_max_len, linear_target_max_len])
 
 		split_infos = np.asarray(split_infos, dtype=np.int32)
-		return (inputs, input_lengths, mel_targets, token_targets, linear_targets, targets_lengths, split_infos)
+		
+		
+		### SV2TTS ###
+		
+		batch_size = mel_targets.shape[0]
+		speaker_embeddings = np.array([[i / 1000] * 256 for i in range(batch_size)])
+		
+		##############
+		
+		
+		return inputs, input_lengths, mel_targets, token_targets, linear_targets, targets_lengths, \
+			   split_infos, speaker_embeddings
 
 	def _prepare_inputs(self, inputs):
 		max_len = max([len(x) for x in inputs])
