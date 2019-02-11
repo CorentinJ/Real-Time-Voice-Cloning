@@ -1,3 +1,4 @@
+import sys
 from vlibs.ui import console
 from vlibs import fileio
 from config import *
@@ -168,6 +169,60 @@ def preprocess_voxceleb1(n_speakers=None, n_utterances=None):
     logger.finalize()
 
 
+def preprocess_voxceleb2(n_speakers=None, n_utterances=None):
+    fileio.ensure_dir(clean_data_root)
+    
+    dataset_name = "voxceleb2"
+    out_dir = fileio.ensure_dir(fileio.join(clean_data_root, dataset_name))
+    logger = DatasetLog(clean_data_root, dataset_name)
+    
+    # Get the speaker directories
+    speakers_root = fileio.join(voxceleb2_root, "dev", "aac")
+    speaker_ids = fileio.listdir(speakers_root)[:n_speakers]
+    print("Preprocessing data for %d speakers." % len(speaker_ids))
+    
+    # Function to preprocess utterances for one speaker
+    def preprocess_speaker(speaker_id):
+        print("Starting speaker %s" % speaker_id)
+        speaker_name = "VoxCeleb2_%s" % speaker_id
+        speaker_in_dir = fileio.join(speakers_root, speaker_id)
+        speaker_out_dir = fileio.ensure_dir(fileio.join(out_dir, speaker_name))
+        fileio.resetdir(speaker_out_dir)
+        sources_file = open(fileio.join(speaker_out_dir, "sources.txt"), 'w')
+        
+        fpaths = fileio.get_files(speaker_in_dir, r"\.m4a", recursive=True)[:n_utterances]
+        for i, in_fpath in enumerate(fpaths):
+            # Load and preprocess the waveform
+            wave = audio.load(in_fpath)
+            wave = preprocess_wave(wave)
+            
+            if len(wave) == 0:
+                print('Warning: audio file %s is entirely silent after processing.' % in_fpath,
+                      file=sys.stderr)
+                continue
+            
+            # Create and save the mel spectrogram
+            frames = audio.wave_to_mel_filterbank(wave)
+            if len(frames) < partial_utterance_length:
+                continue
+            video_id = fileio.leaf(fileio.leafdir(in_fpath))
+            fname = video_id + '_' + fileio.leaf(in_fpath).replace(".m4a", ".npy")
+            out_fpath = fileio.join(speaker_out_dir, fname)
+            np.save(out_fpath, frames)
+            
+            logger.add_sample(duration=len(wave) / sampling_rate)
+            sources_file.write("%s %s\n" % (fname, in_fpath))
+        
+        sources_file.close()
+        print("Speaker %s done!" % speaker_id)
+    
+    # Process the utterances for each speaker
+    with ThreadPool(8) as pool:
+        list(pool.imap(preprocess_speaker, speaker_ids))
+    logger.finalize()
+
+
 if __name__ == '__main__':
     # preprocess_librispeech()
-    preprocess_voxceleb1()
+    # preprocess_voxceleb1()
+    preprocess_voxceleb2()

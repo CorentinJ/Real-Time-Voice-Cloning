@@ -10,8 +10,8 @@ import torch
 # Specify the run ID here. Note: visdom will group together run IDs starting with the same prefix
 # followed by an underscore.
 run_id = None
-run_id = 'first_debug'
 run_id = 'debug_eer2'
+run_id = 'all'
 
 implementation_doc = {
     'Lr decay': None,
@@ -36,7 +36,6 @@ if __name__ == '__main__':
     # Create the model and the optimizer
     model = SpeakerEncoder()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate_init)
-    # scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, exponential_decay_beta)
     init_step = 1
     
     # Load any existing model
@@ -72,7 +71,6 @@ if __name__ == '__main__':
         loss.backward()
         model.do_gradient_ops()
         optimizer.step()
-        # scheduler.step()
         
         # Update visualizations
         learning_rate = optimizer.param_groups[0]['lr']

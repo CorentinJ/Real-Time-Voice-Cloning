@@ -99,16 +99,13 @@ class SpeakerEncoder(nn.Module):
         loss = self.loss_fn(sim_matrix, torch.from_numpy(ground_truth).long())
         
         # EER (not backpropagated)
-        sim_matrix = sim_matrix.detach().numpy()
         with torch.no_grad():
-            ## Imabalanced EER
             inv_argmax = lambda i: np.eye(1, speakers_per_batch, i, dtype=np.int)[0]
             labels = np.array([inv_argmax(i) for i in ground_truth])
-            preds = sim_matrix
+            preds = sim_matrix.detach().numpy()
 
             # Snippet from https://yangcha.github.io/EER-ROC/
             fpr, tpr, thresholds = roc_curve(labels.flatten(), preds.flatten())
             eer = brentq(lambda x: 1. - x - interp1d(fpr, tpr)(x), 0., 1.)
-            # thresh = interp1d(fpr, thresholds)(eer)
             
         return loss, eer

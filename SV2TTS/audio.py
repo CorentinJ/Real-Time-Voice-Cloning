@@ -8,7 +8,7 @@ import struct
 from scipy.ndimage.morphology import binary_dilation
 from params_data import *
 
-int16_max = 32768
+int16_max = (2 ** 15) - 1
 
 def load(fpath):
     """
