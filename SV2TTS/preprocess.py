@@ -87,7 +87,7 @@ def preprocess_librispeech(n_speakers=None, n_utterances=None):
                 
                 # Create and save the mel spectrogram
                 frames = audio.wave_to_mel_filterbank(wave)
-                if len(frames) < partial_utterance_length:  
+                if len(frames) < partial_utterance_n_frames:  
                     continue
                 fname = fileio.leaf(in_fpath).replace(".flac", ".npy")
                 out_fpath = fileio.join(speaker_out_dir, fname)
@@ -150,7 +150,7 @@ def preprocess_voxceleb1(n_speakers=None, n_utterances=None):
             
             # Create and save the mel spectrogram
             frames = audio.wave_to_mel_filterbank(wave)
-            if len(frames) < partial_utterance_length:
+            if len(frames) < partial_utterance_n_frames:
                 continue
             video_id = fileio.leaf(fileio.leafdir(in_fpath))
             fname = video_id + '_' + fileio.leaf(in_fpath).replace(".wav", ".npy")
@@ -203,7 +203,7 @@ def preprocess_voxceleb2(n_speakers=None, n_utterances=None):
             
             # Create and save the mel spectrogram
             frames = audio.wave_to_mel_filterbank(wave)
-            if len(frames) < partial_utterance_length:
+            if len(frames) < partial_utterance_n_frames:
                 continue
             video_id = fileio.leaf(fileio.leafdir(in_fpath))
             fname = video_id + '_' + fileio.leaf(in_fpath).replace(".m4a", ".npy")

@@ -7,7 +7,7 @@ mel_n_channels = 40
 
 ## Audio
 # Number of spectrogram frames in a partial utterance
-partial_utterance_length = 160  
+partial_utterance_n_frames = 160  
 sampling_rate = 16000
 
 
@@ -24,3 +24,4 @@ vad_max_silence_length = 6
 
 ## Audio volume normalization
 audio_norm_target_dBFS = -30
+
