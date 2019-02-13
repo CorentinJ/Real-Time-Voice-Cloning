@@ -9,8 +9,11 @@ TRANSFER LEARNING FROM SPEAKER VERIFICATION TO MULTISPEAKER TEXT-TO-SPEECH SYNTH
 
 
 -------------------------------------------------
-
+HIGH PRIORITY:
 - Interface train-clean
-- Listen to inverted samples to check if the silence removal is ok
 - Begin with train-clean to see if that works
+FOR THE DEMO:
+- Make a portable version of the encoder -> create a demo (it'll be useful for the presentation)
+AFTER EVERYTHING ELSE:
 - If it does, maybe consider adding VCTK then train-other
+- Also retrain with better encoder network

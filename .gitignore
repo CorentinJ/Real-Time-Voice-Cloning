@@ -13,9 +13,9 @@
 *.bbl
 *.bcf
 data
-SV2TTS/datasets/temp
-SV2TTS/_old/
-SV2TTS/saved_models/*_backups
+encoder/datasets/temp
+encoder/_old/
+encoder/saved_models/*_backups
 tacotron2/tacotron_output
 tacotron2/debug
 tacotron2/papers

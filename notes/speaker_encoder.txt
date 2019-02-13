@@ -64,18 +64,19 @@ Ideas for a deeper analysis:
 - How much is the encoding affected by the quality of the microphone? Record the same sentences on 2 or 3 different microphones and project the embeddings. Look at how far they are from the rest of the dataset.
 - Analyze the components of the embeddings
 - Technically, you could do voice morphing in the same sentence
+- Mention the sparsity effect of cosine similarity and relu
 
 
 Ideas for extensions:
 - Add a term in the loss that forces centroid of synthesized utterances to be close to that of ground truth utterances
 http://www.robots.ox.ac.uk/~vgg/data/lip_reading/
+- Try once with relu if you're curious
 
 
 TODO (priority at the top):
 Analyze perf on test set (join vc1_test and vc2_test, they're small)
 embed speaker matrix in visdom
 remove y axis in matrix
-
 
 
 
