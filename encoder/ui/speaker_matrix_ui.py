@@ -5,9 +5,9 @@ from PyQt4 import QtGui
 import numpy as np
 import librosa
 import sys
-from .. import audio
 from ..params_data import sampling_rate, mel_window_step
 from ..preprocess import preprocess_wave
+from .. import audio
 
 
 class SpeakerMatrixUI(QtGui.QDialog):

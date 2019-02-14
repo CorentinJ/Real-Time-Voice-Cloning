@@ -4,8 +4,8 @@ from collections import OrderedDict
 from vlibs import fileio
 import numpy as np
 import random
-from ..data_objects.speaker_batch import SpeakerBatch
-from ..data_objects.speaker import Speaker
+from .speaker_batch import SpeakerBatch
+from .speaker import Speaker
 from ..params_data import partial_utterance_n_frames
 from ..config import *
 

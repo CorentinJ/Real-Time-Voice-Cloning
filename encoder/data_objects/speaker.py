@@ -1,6 +1,6 @@
 from vlibs import fileio
 from vlibs.structs.random_cycler import RandomCycler
-from ..data_objects.utterance import Utterance
+from .utterance import Utterance
 
 # Contains the set of utterances of a single speaker
 class Speaker:

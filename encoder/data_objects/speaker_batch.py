@@ -1,6 +1,6 @@
 from typing import List
 import numpy as np
-from ..data_objects.speaker import Speaker
+from .speaker import Speaker
 from ..params_data import mel_n_channels
 
 class SpeakerBatch:
