@@ -1,26 +1,26 @@
-from vlibs import fileio
 import numpy as np
 import torch
-from .params_model import model_embedding_size
-from .params_data import *
-from .preprocess import preprocess_wave
-from .config import model_dir, device
-from .model import SpeakerEncoder
-from . import audio
+from encoder.params_data import *
+from encoder.model import SpeakerEncoder
+from encoder import audio
 
-
-default_weights_fpath = fileio.join(model_dir, 'all.pt') 
 _model = None # type: SpeakerEncoder
+_device = None # type: torch.device
 
-def load_model(weights_fpath=default_weights_fpath):
+def load_model(weights_fpath, device):
     """
     Loads the model in memory. If this function is not explicitely called, it will be run on the 
     first call to embed_frames() with the default weights file.
     
     :param weights_fpath: the path to saved model weights.
+    :param device: either a torch device or the name of a torch device (e.g. 'cpu', 'cuda'). The 
+    model will be loaded and will run on this device. Outputs will however always be on the cpu.
     """
-    global _model
-    _model = SpeakerEncoder()
+    global _model, _device
+    if isinstance(device, str):
+        device = torch.device(device)
+    _device = device
+    _model = SpeakerEncoder(_device)
     checkpoint = torch.load(weights_fpath)
     _model.load_state_dict(checkpoint['model_state'])
     _model.eval()
@@ -34,9 +34,9 @@ def embed_frames_batch(frames_batch):
     :return: the embeddings as a numpy array of float32 of shape (batch_size, model_embedding_size)
     """
     if _model is None:
-        load_model()
+        raise Exception("Model was not loaded. Call load_model() before inference.")
     
-    frames = torch.from_numpy(frames_batch).to(device)
+    frames = torch.from_numpy(frames_batch).to(_device)
     embed = _model.forward(frames).detach().cpu().numpy()
     return embed
 
@@ -155,23 +155,5 @@ def load_and_preprocess_wave(fpath):
     :return: the audio waveform as a numpy array of float32.
     """
     wave = audio.load(fpath)
-    wave = preprocess_wave(wave)
+    wave = audio.preprocess_wave(wave)
     return wave
-
-if __name__ == '__main__':
-    from time import perf_counter
-    
-    fpath = r"E:\Datasets\LibriSpeech\train-other-500\149\125760\149-125760-0003.flac"
-    wave = load_and_preprocess_wave(fpath)
-    
-    start = perf_counter()
-    load_model()
-    print("Loaded model in %.2fs" % (perf_counter() - start))
-
-    duration = len(wave) / sampling_rate
-    start = perf_counter()
-    embed = embed_utterance(wave)
-    print("Processed %.2fs long utterance in %.2fs" % (duration, perf_counter() - start))
-    
-    print(embed)
-    

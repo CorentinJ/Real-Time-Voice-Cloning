@@ -10,10 +10,13 @@ TRANSFER LEARNING FROM SPEAKER VERIFICATION TO MULTISPEAKER TEXT-TO-SPEECH SYNTH
 
 -------------------------------------------------
 HIGH PRIORITY:
-- Interface train-clean
-- Begin with train-clean to see if that works
+- Copy dataset
+- Reorganize encoder so it contains a package
 FOR THE DEMO:
 - Make a portable version of the encoder -> create a demo (it'll be useful for the presentation)
 AFTER EVERYTHING ELSE:
-- If it does, maybe consider adding VCTK then train-other
+- If librispeech works, maybe consider adding VCTK then train-other
 - Also retrain with better encoder network
+
+- Ask StackExchange how to compute EER properly
+

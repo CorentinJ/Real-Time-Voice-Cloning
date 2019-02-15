@@ -13,12 +13,12 @@
 *.bbl
 *.bcf
 data
-encoder/datasets/temp
 encoder/_old/
 encoder/saved_models/*_backups
 tacotron2/tacotron_output
 tacotron2/debug
 tacotron2/papers
 tacotron2/wav_out
+tacotron2/_old/
 WaveGlow
 torch-tacotron2

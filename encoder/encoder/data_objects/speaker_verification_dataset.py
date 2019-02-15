@@ -1,20 +1,18 @@
 from vlibs.structs.random_cycler import RandomCycler
 from torch.utils.data import Dataset, DataLoader
 from collections import OrderedDict
+from encoder.data_objects.speaker_batch import SpeakerBatch
+from encoder.data_objects.speaker import Speaker
+from encoder.params_data import partial_utterance_n_frames
 from vlibs import fileio
-import numpy as np
-import random
-from .speaker_batch import SpeakerBatch
-from .speaker import Speaker
-from ..params_data import partial_utterance_n_frames
-from ..config import *
 
 class SpeakerVerificationDataset(Dataset):
-    def __init__(self, datasets):
+    def __init__(self, clean_data_root, datasets):
         self.datasets = datasets
         self.speakers = []
+        self.root = clean_data_root
         for dataset in datasets:
-            dataset_root = fileio.join(clean_data_root, dataset) 
+            dataset_root = fileio.join(self.root, dataset) 
             speaker_dirs = fileio.join(dataset_root, fileio.listdir(dataset_root))
             self.speakers.extend(Speaker(speaker_dir) for speaker_dir in speaker_dirs)
         self.speaker_cycler = RandomCycler(self.speakers)
@@ -30,7 +28,7 @@ class SpeakerVerificationDataset(Dataset):
     def get_logs(self):
         log_string = ""
         for dataset in self.datasets:
-            log_fpath = fileio.join(clean_data_root, clean_data_root, "log_%s.txt" % dataset)
+            log_fpath = fileio.join(self.root, "log_%s.txt" % dataset)
             log_string += "\n".join(fileio.read_all_lines(log_fpath))
         return log_string
     

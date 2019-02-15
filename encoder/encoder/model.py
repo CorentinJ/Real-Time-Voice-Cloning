@@ -5,13 +5,12 @@ from scipy.optimize import brentq
 from torch import nn
 import numpy as np
 import torch
-from .params_model import *
-from .params_data import *
-from .config import device
+from encoder.params_model import *
+from encoder.params_data import *
 
 
 class SpeakerEncoder(nn.Module):
-    def __init__(self):
+    def __init__(self, device):
         super().__init__()
         
         # Network defition

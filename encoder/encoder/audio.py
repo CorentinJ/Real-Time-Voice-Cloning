@@ -6,7 +6,7 @@ import numpy as np
 import sounddevice
 import webrtcvad
 import struct
-from .params_data import *
+from encoder.params_data import *
 
 int16_max = (2 ** 15) - 1
 
@@ -110,7 +110,16 @@ def normalize_volume(wave, target_dBFS, increase_only=False, decrease_only=False
     if dBFS_change < 0 and increase_only or dBFS_change > 0 and decrease_only:
         return wave
     return wave * (10 ** (dBFS_change / 20))
-    
+
+def preprocess_wave(wave):
+    """ 
+    This is the standard routine that should be used on every audio file before being used in 
+    this project.
+    """
+    wave = normalize_volume(wave, audio_norm_target_dBFS, increase_only=True)
+    wave = trim_long_silences(wave)
+    return wave
+
 def plot_wave(wave):
     plt.plot(wave)
     plt.show()

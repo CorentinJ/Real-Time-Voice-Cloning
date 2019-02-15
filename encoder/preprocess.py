@@ -1,11 +1,11 @@
 from pathos.multiprocessing import ThreadPool
 from datetime import datetime
-from vlibs import fileio
 import numpy as np
 import sys
-from .params_data import *
-from .config import *
-from . import audio
+from encoder.params_data import *
+from config import *
+from encoder import audio
+
 
 class DatasetLog:
     """
@@ -21,7 +21,7 @@ class DatasetLog:
         self._log_params()
         
     def _log_params(self):
-        import params_data
+        from encoder import params_data
         self.write_line("Parameter values:")
         for param_name in (p for p in dir(params_data) if not p.startswith('__')):
             value = getattr(params_data, param_name)
@@ -47,15 +47,6 @@ class DatasetLog:
         end_time = str(datetime.now().strftime("%A %d %B %Y at %H:%M"))
         self.write_line("Finished on %s" % end_time)
         self.text_file.close()
-        
-def preprocess_wave(wave):
-    """ 
-    This is the standard routine that should be used on every audio file before being used in 
-    this project.
-    """
-    wave = audio.normalize_volume(wave, audio_norm_target_dBFS, increase_only=True)
-    wave = audio.trim_long_silences(wave)
-    return wave
 
 def preprocess_librispeech(n_speakers=None, n_utterances=None):
     fileio.ensure_dir(clean_data_root)
@@ -82,7 +73,7 @@ def preprocess_librispeech(n_speakers=None, n_utterances=None):
             for i, in_fpath in enumerate(fpaths):
                 # Load and preprocess the waveform
                 wave = audio.load(in_fpath)
-                wave = preprocess_wave(wave)
+                wave = audio.preprocess_wave(wave)
                 
                 # Create and save the mel spectrogram
                 frames = audio.wave_to_mel_filterbank(wave)
@@ -145,7 +136,7 @@ def preprocess_voxceleb1(n_speakers=None, n_utterances=None):
         for i, in_fpath in enumerate(fpaths):
             # Load and preprocess the waveform
             wave = audio.load(in_fpath)
-            wave = preprocess_wave(wave)
+            wave = audio.preprocess_wave(wave)
             
             # Create and save the mel spectrogram
             frames = audio.wave_to_mel_filterbank(wave)
@@ -193,7 +184,7 @@ def preprocess_voxceleb2(n_speakers=None, n_utterances=None):
         for i, in_fpath in enumerate(fpaths):
             # Load and preprocess the waveform
             wave = audio.load(in_fpath)
-            wave = preprocess_wave(wave)
+            wave = audio.preprocess_wave(wave)
             
             if len(wave) == 0:
                 print('Warning: audio file %s is entirely silent after processing.' % in_fpath,

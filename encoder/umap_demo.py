@@ -1,8 +1,6 @@
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt4.QtGui import *
-from collections import OrderedDict
-from matplotlib import pyplot as plt
 from PyQt4 import QtGui
 from vlibs import fileio
 import sounddevice as sd
@@ -10,10 +8,9 @@ import numpy as np
 import umap
 import sys
 import os
-from ..params_data import sampling_rate
-from ..config import demo_datasets_root
-from .. import inference
-from .. import audio
+from encoder.params_data import sampling_rate
+from encoder.config import demo_datasets_root
+from encoder import audio, inference
 
 colormap = np.array([
     [76, 255, 0],
@@ -40,7 +37,7 @@ recognized_datasets = [
     'VoxCeleb2/dev/aac',
     'VCTK-Corpus/wav48',
 ]
-recognized_datasets = [fileio.join(d) for d in recognized_datasets]
+# recognized_datasets = [fileio.join(d) for d in recognized_datasets]
 
 class UMapDemoUI(QtGui.QDialog):
     def __init__(self):

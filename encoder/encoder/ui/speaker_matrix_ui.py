@@ -2,12 +2,11 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt4.QtGui import *
 from PyQt4 import QtGui
-import numpy as np
 import librosa
 import sys
-from ..params_data import sampling_rate, mel_window_step
-from ..preprocess import preprocess_wave
-from .. import audio
+from encoder.params_data import sampling_rate, mel_window_step
+from encoder import audio
+import numpy as np
 
 
 class SpeakerMatrixUI(QtGui.QDialog):
@@ -49,7 +48,7 @@ class SpeakerMatrixUI(QtGui.QDialog):
         utterance, frames, frames_range = partial_utterance
         wave_fpath = utterance.wave_fpath
         wave = audio.load(wave_fpath)
-        wave = preprocess_wave(wave)
+        wave = audio.preprocess_wave(wave)
         
         wave_range = np.array(frames_range) * sampling_rate * (mel_window_step / 1000)
         wave = wave[int(wave_range[0]):int(wave_range[1])]
@@ -83,16 +82,11 @@ class SpeakerMatrixUI(QtGui.QDialog):
         return layout
 
 
-import audio
-import numpy as np
-from vlibs import fileio
-from ui.speaker_matrix_ui import SpeakerMatrixUI
-from data_objects.speaker_verification_dataset import SpeakerVerificationDataLoader
-from data_objects.speaker_verification_dataset import SpeakerVerificationDataset
-from config import *
-
-if __name__ == '__main__':
-    dataset = SpeakerVerificationDataset(['voxceleb2'])
-    loader = SpeakerVerificationDataLoader(dataset, 4, 5, num_workers=3)
-    for batch in loader:
-        SpeakerMatrixUI(batch.speakers, batch.partial_utterances)
+# from encoder.data_objects.speaker_verification_dataset import SpeakerVerificationDataLoader
+# from encoder.data_objects.speaker_verification_dataset import SpeakerVerificationDataset
+# 
+# if __name__ == '__main__':
+#     dataset = SpeakerVerificationDataset(['voxceleb2'])
+#     loader = SpeakerVerificationDataLoader(dataset, 4, 5, num_workers=3)
+#     for batch in loader:
+#         SpeakerMatrixUI(batch.speakers, batch.partial_utterances)

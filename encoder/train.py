@@ -1,11 +1,9 @@
-from vlibs import fileio
-import torch
-from .data_objects.speaker_verification_dataset import SpeakerVerificationDataLoader
-from .data_objects.speaker_verification_dataset import SpeakerVerificationDataset
-from .ui.visualizations import Visualizations
-from .params_model import *
-from .config import *
-from .model import SpeakerEncoder
+from encoder.data_objects.speaker_verification_dataset import SpeakerVerificationDataLoader
+from encoder.data_objects.speaker_verification_dataset import SpeakerVerificationDataset
+from encoder.ui.visualizations import Visualizations
+from encoder.params_model import *
+from encoder.model import SpeakerEncoder
+from config import *
 
 # Specify the run ID here. Note: visdom will group together run IDs starting with the same prefix
 # followed by an underscore.
@@ -24,6 +22,7 @@ implementation_doc = {
 if __name__ == '__main__':
     # Create a data loader
     dataset = SpeakerVerificationDataset(
+        clean_data_root,
         datasets=all_datasets,
     )
     loader = SpeakerVerificationDataLoader(
@@ -34,7 +33,7 @@ if __name__ == '__main__':
     )
 
     # Create the model and the optimizer
-    model = SpeakerEncoder()
+    model = SpeakerEncoder(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate_init)
     init_step = 1
     
