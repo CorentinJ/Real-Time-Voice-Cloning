@@ -40,17 +40,17 @@ def embed_frames_batch(frames_batch):
     embed = _model.forward(frames).detach().cpu().numpy()
     return embed
 
-def compute_partial_splits(n_samples, partial_utterance_n_frames=partial_utterance_n_frames,
+def compute_partial_slices(n_samples, partial_utterance_n_frames=partial_utterance_n_frames,
                            min_pad_coverage=0.75, overlap=0.5):
     """
     Computes where to split an utterance waveform and its corresponding mel spectrogram to obtain 
     partial utterances of <partial_utterance_n_frames> each. Both the waveform and the mel 
-    spectrogram splits are returned, so as to make each partial utterance waveform correspond to 
+    spectrogram slices are returned, so as to make each partial utterance waveform correspond to 
     its spectrogram. This function assumes that the mel spectrogram parameters used are those 
     defined in params_data.py.
     
     The returned ranges may be indexing further than the length of the waveform. It is 
-    recommended that you pad the waveform with zeros up to wave_splits[-1].stop.
+    recommended that you pad the waveform with zeros up to wave_slices[-1].stop.
     
     :param n_samples: the number of samples in the waveform
     :param partial_utterance_n_frames: the number of mel spectrogram frames in each partial 
@@ -59,10 +59,10 @@ def compute_partial_splits(n_samples, partial_utterance_n_frames=partial_utteran
     enough frames. If at least <min_pad_coverage> of <partial_utterance_n_frames> are present, 
     then the last partial utterance will be considered, as if we padded the audio. Otherwise, 
     it will be discarded, as if we trimmed the audio. If there aren't enough frames for 1 partial 
-    utterance, this parameter is ignored so that the function always returns at least 1 split.
+    utterance, this parameter is ignored so that the function always returns at least 1 slice.
     :param overlap: by how much the partial utterance should overlap. If set to 0, the partial 
     utterances are entirely disjoint. 
-    :return: the waveform splits and mel spectrogram splits as lists of array slices. Index 
+    :return: the waveform slices and mel spectrogram slices as lists of array slices. Index 
     respectively the waveform and the mel spectrogram with these slices to obtain the partial 
     utterances.
     """
@@ -73,26 +73,25 @@ def compute_partial_splits(n_samples, partial_utterance_n_frames=partial_utteran
     n_frames = int(np.ceil((n_samples + 1) / samples_per_frame))
     frame_step = max(int(np.round(partial_utterance_n_frames * (1 - overlap))), 1)
 
-    # Compute the splits
-    wave_splits, mel_splits = [], []
+    # Compute the slices
+    wave_slices, mel_slices = [], []
     steps = max(1, n_frames - partial_utterance_n_frames + frame_step + 1)
     for i in range(0, steps, frame_step):
         mel_range = np.array([i, i + partial_utterance_n_frames])
         wave_range = mel_range * samples_per_frame
-        mel_splits.append(slice(*mel_range))
-        wave_splits.append(slice(*wave_range))
+        mel_slices.append(slice(*mel_range))
+        wave_slices.append(slice(*wave_range))
         
     # Evaluate whether extra padding is warranted or not
-    last_wave_range = wave_splits[-1]
+    last_wave_range = wave_slices[-1]
     coverage = (n_samples - last_wave_range.start) / (last_wave_range.stop - last_wave_range.start)
-    if coverage < min_pad_coverage and len(mel_splits) > 1:
-        mel_splits = mel_splits[:-1]
-        wave_splits = wave_splits[:-1]
+    if coverage < min_pad_coverage and len(mel_slices) > 1:
+        mel_slices = mel_slices[:-1]
+        wave_slices = wave_slices[:-1]
     
-    return wave_splits, mel_splits
+    return wave_slices, mel_slices
 
-def embed_utterance(wave, using_partials=True, return_partial_embeds=False, 
-                    return_wave_splits=False, **kwargs):
+def embed_utterance(wave, using_partials=True, return_partials=False, **kwargs):
     """
     Computes an embedding for a single utterance.
     
@@ -101,44 +100,41 @@ def embed_utterance(wave, using_partials=True, return_partial_embeds=False,
     <partial_utterance_n_frames> frames and the utterance embedding is computed from their 
     normalized average. If False, the utterance is instead computed from feeding the entire 
     spectogram to the network.
-    :param return_partial_embeds: if True, the partial embeddings will also be returned. Requires 
-    <using_partials> to be True.
-    :param return_wave_splits: if True, the wave split ranges corresponding to the partial embeds 
-    will also be returned. Requires <using_partials> to be True.
+    :param return_partials: if True, the partial embeddings will also be returned along with the 
+    wave slices that correspond to the partial embeddings.
     :param kwargs: additional arguments to compute_partial_splits()
-    :return: the embedding as a numpy array of float32 of shape (model_embedding_size,), 
-    the partial utterances as a numpy array of float32 of shape (n_partials, model_embedding_size,)
-    [optional] and the wave partials as a list of slices [optional].
+    :return: the embedding as a numpy array of float32 of shape (model_embedding_size,). If 
+    <return_partials> is True, the partial utterances as a numpy array of float32 of shape 
+    (n_partials, model_embedding_size) and the wave partials as a list of slices will also be 
+    returned. If <using_partials> is simultaneously set to False, both these values will be None 
+    instead.
     """
-    if not using_partials and (return_partial_embeds or return_wave_splits):
-        raise ValueError("Cannot use partial utterances when complete utterance mode is set.")
-    
     # Process the entire utterance if not using partials
     if not using_partials:
         frames = audio.wave_to_mel_filterbank(wave)
-        return embed_frames_batch(frames[None, ...])[0]
+        embed = embed_frames_batch(frames[None, ...])[0]
+        if return_partials:
+            return embed, None, None
+        return embed
     
     # Compute where to split the utterance into partials and pad if necessary
-    wave_splits, mel_splits = compute_partial_splits(len(wave), **kwargs)
-    max_wave_length = wave_splits[-1].stop
+    wave_slices, mel_slices = compute_partial_slices(len(wave), **kwargs)
+    max_wave_length = wave_slices[-1].stop
     if max_wave_length >= len(wave):
         wave = np.pad(wave, (0, max_wave_length - len(wave)), 'constant')
     
     # Split the utterance into partials
     frames = audio.wave_to_mel_filterbank(wave)
-    frames_batch = np.array([frames[s] for s in mel_splits])
+    frames_batch = np.array([frames[s] for s in mel_slices])
     partial_embeds = embed_frames_batch(frames_batch)
     
     # Compute the utterance embedding from the partial embeddings
     raw_embed = np.mean(partial_embeds, axis=0)
     embed = raw_embed / np.linalg.norm(raw_embed, 2)
     
-    out = [embed]
-    if return_partial_embeds:
-        out.append(partial_embeds)
-    if return_wave_splits:
-        out.append(wave_splits)
-    return out[0] if len(out) == 1 else tuple(out)
+    if return_partials:
+        return embed, partial_embeds, wave_slices
+    return embed
     
 def embed_stream(stream, partial_utterance_n_frames=partial_utterance_n_frames, overlap=0.5):
     pass
