@@ -1,7 +1,7 @@
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt4.QtGui import *
-from vlibs import fileio
+from vlibs import fileio, nowarnings
 import sounddevice as sd
 import numpy as np
 import umap
@@ -50,7 +50,7 @@ class UMapDemoUI(QDialog):
         inference.load_model('saved_models/all.pt', 'cuda')
         
         # Create the ui
-        self.setWindowTitle("Voice embedding visualizer")
+        # self.setWindowTitle("Voice embedding visualizer")
         app = QApplication(sys.argv)
         super().__init__(None)
         
@@ -112,7 +112,7 @@ class UMapDemoUI(QDialog):
         embeds_grid = QGridLayout()
         embed_button = QPushButton('Embed utterance (direct)')
         embed_demo_button = QPushButton('Embed utterance (demo)')
-        record_one_button = QPushButton('Record one')
+        self.record_one_button = QPushButton('Record one')
         self.use_partials_button = QCheckBox('Use partials')
         self.show_partials_button = QCheckBox('Show partials')
         self.go_next_button = QCheckBox('Auto pick next')
@@ -123,13 +123,13 @@ class UMapDemoUI(QDialog):
         self.go_next_button.setChecked(True)
         embed_button.clicked.connect(lambda: self.embed_utterance(False))
         embed_demo_button.clicked.connect(lambda: self.embed_utterance(True))
-        record_one_button.clicked.connect(self.record_one)
+        self.record_one_button.clicked.connect(self.record_one)
         embeds_grid.addWidget(self.use_partials_button, 0, 0)
         embeds_grid.addWidget(self.show_partials_button, 1, 0)
         embeds_grid.addWidget(self.go_next_button, 2, 0)
         embeds_grid.addWidget(embed_button, 3, 0)
         embeds_grid.addWidget(embed_demo_button, 3, 1)
-        embeds_grid.addWidget(record_one_button, 4, 0)
+        embeds_grid.addWidget(self.record_one_button, 4, 0)
         embeds_grid.addWidget(self.user_id_box, 4, 1)
         # TODO add overlap and n_frames
         menu_layout.addLayout(embeds_grid)
@@ -227,32 +227,38 @@ class UMapDemoUI(QDialog):
             self.select_next()
 
     def record_one(self):
+        self.record_one_button.setText("Recording...")
+        self.record_one_button.setDisabled(True)
         self.utterance = audio.preprocess_wave(audio.rec_wave(4))
+        self.record_one_button.setText("Done!")
         speaker_name = 'user_' + self.user_id_box.text() 
         self.embed_utterance(False, speaker_name, False)
+        self.record_one_button.setText("Record one")
+        self.record_one_button.setDisabled(False)
     
     def draw_umap(self):
         self.ax.clear()
         if len(self.embeds) < 5:
             self.ax.figure.canvas.draw()
             return
-        
+
+        # Compute the projections
+        speaker_names, indices = np.unique([e[2] for e in self.embeds], return_index=True)
+        speaker_names = speaker_names[np.argsort(indices)]
+        speaker_dict = {s: i for i, s in enumerate(speaker_names)}
+        embed_data = np.array([e[0] for e in self.embeds])
+        reducer = umap.UMAP(int(np.ceil(np.sqrt(len(embed_data)))), metric='cosine')
+        projections = reducer.fit_transform(embed_data)
+
         # Hide or show partials
         show_partials = self.show_partials_button.isChecked()
         if not show_partials:
+            projections = [p for e, p in zip(self.embeds, projections) if e[1] != '.']
             embeds = [e for e in self.embeds if e[1] != '.']
         else:
             embeds = self.embeds
 
-        # Compute the projections
-        speaker_names, indices = np.unique([e[2] for e in embeds], return_index=True)
-        speaker_names = speaker_names[np.argsort(indices)]
-        speaker_dict = {s: i for i, s in enumerate(speaker_names)}
-        embed_data = np.array([e[0] for e in embeds])
-        reducer = umap.UMAP(int(np.ceil(np.sqrt(len(embed_data)))), metric='cosine')
-        projections = reducer.fit_transform(embed_data)
-
-        # TODO: record, lines
+        # TODO: lines
         
         legend_done = set()
         for projection, (embed, mark, speaker_name) in zip(projections, embeds):

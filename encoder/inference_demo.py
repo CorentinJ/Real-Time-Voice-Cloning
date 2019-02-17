@@ -18,4 +18,8 @@ if __name__ == '__main__':
     embed = inference.embed_utterance(wave)
     print("Processed %.2fs long utterance in %.2fs" % (duration, perf_counter() - start))
     
+    start = perf_counter()
+    embed = inference.embed_utterance(wave)
+    print("Processed %.2fs long utterance in %.2fs" % (duration, perf_counter() - start))
+    
     print(embed)
