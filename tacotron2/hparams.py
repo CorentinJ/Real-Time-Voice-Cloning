@@ -96,7 +96,7 @@ hparams = tf.contrib.training.HParams(
     # num_freq=1025,  # (= n_fft / 2 + 1) only used when adding linear spectrograms post processing
     num_freq=513,  # (= n_fft / 2 + 1) only used when adding linear spectrograms post processing
     #  network
-    rescale=True,  # Whether to rescale audio prior to preprocessing
+    rescale=False,  # Whether to rescale audio prior to preprocessing
     rescaling_max=0.999,  # Rescaling value
     trim_silence=True,
     # Whether to clip silence in Audio (at beginning and end of audio only, not the middle)
@@ -105,7 +105,7 @@ hparams = tf.contrib.training.HParams(
     clip_mels_length=True,
     # For cases of OOM (Not really recommended, only use if facing unsolvable OOM errors, 
 	# also consider clipping your samples to smaller chunks)
-    max_mel_frames=1000,
+    max_mel_frames=1200,
     # Only relevant when clip_mels_length = True, please only use after trying output_per_steps=3
 	#  and still getting OOM errors.
     
@@ -125,9 +125,9 @@ hparams = tf.contrib.training.HParams(
     # sample_rate=22050,  # 22050 Hz (corresponding to ljspeech dataset) (sox --i <filename>)
     
     # FOR DATASETS IN 16000Hz:
-    n_fft=1024,  # Extra window size is filled with 0 paddings to match this parameter
-    hop_size=200,  # For 16000Hz, 200 ~= 12.5 ms (0.0125 * sample_rate)
-    win_size=800,  # For 16000Hz, 800 ~= 50 ms (If None, win_size = n_fft) (0.05 * sample_rate)
+    n_fft=800,  # Extra window size is filled with 0 paddings to match this parameter
+    hop_size=200,  # For 16000Hz, 200 = 12.5 ms (0.0125 * sample_rate)
+    win_size=800,  # For 16000Hz, 800 = 50 ms (If None, win_size = n_fft) (0.05 * sample_rate)
     sample_rate=16000,  # 16000Hz (corresponding to librispeech) (sox --i <filename>)
     
     frame_shift_ms=None,  # Can replace hop_size parameter. (Recommended: 12.5)
@@ -237,7 +237,7 @@ hparams = tf.contrib.training.HParams(
     cross_entropy_pos_weight=20,
     # Use class weights to reduce the stop token classes imbalance (by adding more penalty on 
     # False Negatives (FN)) (1 = disabled)
-    predict_linear=True,
+    predict_linear=False,
     # Whether to add a post-processing network to the Tacotron to predict linear spectrograms (
 	# True mode Not tested!!)
     ###########################################################################################################################################
@@ -322,7 +322,7 @@ hparams = tf.contrib.training.HParams(
     # major slowdowns! Only use when critical!)
     
     # train/test split ratios, mini-batches sizes
-    tacotron_batch_size=32,  # number of training samples on each training steps
+    tacotron_batch_size=32,  # number of training samples on each training steps (was 32)
     # Tacotron Batch synthesis supports ~16x the training batch size (no gradients during 
     # testing). 
     # Training Tacotron with unmasked paddings makes it aware of them, which makes synthesis times
@@ -469,6 +469,16 @@ hparams = tf.contrib.training.HParams(
     
     ### SV2TTS ###
     speaker_embedding_size=256,
+    
+    ## Voice Activation Detection
+    # Window size of the VAD. Must be either 10, 20 or 30 milliseconds.
+    # This sets the granularity of the VAD. Should not need to be changed.
+    vad_window_length = 30,  # In milliseconds
+    # Number of frames to average together when performing the moving average smoothing.
+    # The larger this value, the larger the VAD variations must be to not get smoothed out. 
+    vad_moving_average_width = 8,
+    # Maximum number of consecutive silent frames a segment can have.
+    vad_max_silence_length = 6,
 )
 
 

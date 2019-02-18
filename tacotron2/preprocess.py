@@ -1,20 +1,21 @@
 import argparse
 import os
 from multiprocessing import cpu_count
-
 from datasets import preprocessor
 from hparams import hparams
 from tqdm import tqdm
+from vlibs import fileio
 
 
 def preprocess(args, input_folders, out_dir, hparams):
 	mel_dir = os.path.join(out_dir, 'mels')
 	wav_dir = os.path.join(out_dir, 'audio')
-	linear_dir = os.path.join(out_dir, 'linear')
+	embed_dir = os.path.join(out_dir, 'embed')
 	os.makedirs(mel_dir, exist_ok=True)
 	os.makedirs(wav_dir, exist_ok=True)
-	os.makedirs(linear_dir, exist_ok=True)
-	metadata = preprocessor.build_from_path(hparams, input_folders, mel_dir, linear_dir, wav_dir, args.n_jobs, tqdm=tqdm)
+	os.makedirs(embed_dir, exist_ok=True)
+	metadata = preprocessor.build_from_path(hparams, input_folders, mel_dir, embed_dir, wav_dir, 
+											args.n_jobs, tqdm=tqdm)
 	write_metadata(metadata, out_dir)
 
 def write_metadata(metadata, out_dir):
@@ -33,39 +34,40 @@ def write_metadata(metadata, out_dir):
 
 def norm_data(args):
 	print('Selecting data folders..')
-	supported_datasets = ['LibriSpeech']
-	if args.dataset not in supported_datasets:
-		raise ValueError('dataset value entered {} does not belong to supported datasets: {}'.format(
-			args.dataset, supported_datasets))
-
-	if args.dataset.startswith('LJSpeech'):
-		return [os.path.join(args.base_dir, args.dataset)]
-
+	dataset_dir = fileio.join(args.base_dir, 'LibriSpeech')
+	if args.sets is not None:
+		sets = args.sets
+	else:
+		sets = [set for set in fileio.listdir(dataset_dir) if set.startswith('train-clean')]
+	return fileio.join(dataset_dir, sets)
 
 def run_preprocess(args, hparams):
 	input_folders = norm_data(args)
 	output_folder = os.path.join(args.base_dir, args.output)
-
 	preprocess(args, input_folders, output_folder, hparams)
-
 
 def main():
 	print('initializing preprocessing..')
 	parser = argparse.ArgumentParser()
+	
+	# Root data directory that contains the LibriSpeech directory
 	parser.add_argument('--base_dir', default='')
+	
 	parser.add_argument('--hparams', default='',
 		help='Hyperparameter overrides as a comma-separated list of name=value pairs')
-	parser.add_argument('--dataset', default='LibriSpeech')
-	parser.add_argument('--output', default='training_data')
+	parser.add_argument('--output', default='Synthesizer')
 	parser.add_argument('--n_jobs', type=int, default=cpu_count())
+	
+	# Name of the LibriSpeech sets to use, separated by spaces 
+	# (e.g. "--sets train-other-500 train-clean-360). Defaults to using all the training sets 
+	# present in the LibriSpeech directory.
+	parser.add_argument('--sets', type=str, nargs='+', default=None)
+	
 	args = parser.parse_args()
 
 	modified_hp = hparams.parse(args.hparams)
 
-	assert args.merge_books in ('False', 'True')
-
 	run_preprocess(args, modified_hp)
-
 
 if __name__ == '__main__':
 	main()

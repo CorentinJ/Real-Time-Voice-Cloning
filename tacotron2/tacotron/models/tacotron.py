@@ -28,7 +28,7 @@ class Tacotron():
     def __init__(self, hparams):
         self._hparams = hparams
     
-    def initialize(self, inputs, input_lengths, speaker_embeddings, mel_targets=None, 
+    def initialize(self, inputs, input_lengths, embed_targets, mel_targets=None, 
                    stop_token_targets=None, linear_targets=None, targets_lengths=None, gta=False,
                    global_step=None, is_training=False, is_evaluating=False, split_infos=None):
         """
@@ -38,7 +38,7 @@ class Tacotron():
               steps in the input time series, and values are character IDs
             - input_lengths: int32 Tensor with shape [N] where N is batch size and values are the 
             lengths of each sequence in inputs.
-            - speaker_embeddings: float32 Tensor with shape [N, E] where E is the speaker 
+            - embed_targets: float32 Tensor with shape [N, E] where E is the speaker 
             embedding size.
             - mel_targets: float32 Tensor with shape [N, T_out, M] where N is batch size, 
             T_out is number of steps in the output time series, M is num_mels, and values are 
@@ -72,10 +72,16 @@ class Tacotron():
             
             tower_input_lengths = tf.split(input_lengths, num_or_size_splits=hp.tacotron_num_gpus,
                                            axis=0)
-            tower_targets_lengths = tf.split(targets_lengths,
-                                             num_or_size_splits=hp.tacotron_num_gpus,
-                                             axis=0) if targets_lengths is not None else \
-				targets_lengths
+            tower_targets_lengths = \
+                tf.split(targets_lengths, num_or_size_splits=hp.tacotron_num_gpus, axis=0) if \
+                    targets_lengths is not None else targets_lengths
+            
+            ### SV2TTS ###
+            
+            tower_embed_targets = tf.split(embed_targets, num_or_size_splits=hp.tacotron_num_gpus,
+                                           axis=0)
+            
+            ##############
             
             p_inputs = tf.py_func(split_func, [inputs, split_infos[:, 0]], lout_int)
             p_mel_targets = tf.py_func(split_func, [mel_targets, split_infos[:, 1]],
@@ -83,18 +89,13 @@ class Tacotron():
             p_stop_token_targets = tf.py_func(split_func, [stop_token_targets, split_infos[:, 2]],
                                               lout_float) if stop_token_targets is not None else \
 				stop_token_targets
-            p_linear_targets = tf.py_func(split_func, [linear_targets, split_infos[:, 3]],
-                                          lout_float) if linear_targets is not None else \
-				linear_targets
             
             tower_inputs = []
             tower_mel_targets = []
             tower_stop_token_targets = []
-            tower_linear_targets = []
             
             batch_size = tf.shape(inputs)[0]
             mel_channels = hp.num_mels
-            linear_channels = hp.num_freq
             for i in range(hp.tacotron_num_gpus):
                 tower_inputs.append(tf.reshape(p_inputs[i], [batch_size, -1]))
                 if p_mel_targets is not None:
@@ -103,15 +104,11 @@ class Tacotron():
                 if p_stop_token_targets is not None:
                     tower_stop_token_targets.append(
                         tf.reshape(p_stop_token_targets[i], [batch_size, -1]))
-                if p_linear_targets is not None:
-                    tower_linear_targets.append(
-                        tf.reshape(p_linear_targets[i], [batch_size, -1, linear_channels]))
         
         self.tower_decoder_output = []
         self.tower_alignments = []
         self.tower_stop_token_prediction = []
         self.tower_mel_outputs = []
-        self.tower_linear_outputs = []
         
         tower_embedded_inputs = []
         tower_enc_conv_output_shape = []
@@ -154,11 +151,11 @@ class Tacotron():
                     ### SV2TT2 ###
                     
                     # Append the speaker embedding to the encoder output at each timestep
-                    tileable_shape = [batch_size, 1, self._hparams.speaker_embedding_size]
-                    tileable_speaker_embeddings = tf.reshape(speaker_embeddings, tileable_shape)
-                    tiled_speaker_embeddings = tf.tile(tileable_speaker_embeddings, 
+                    tileable_shape = [-1, 1, self._hparams.speaker_embedding_size]
+                    tileable_embed_targets = tf.reshape(tower_embed_targets[i], tileable_shape)
+                    tiled_embed_targets = tf.tile(tileable_embed_targets, 
                                                        [1, tf.shape(encoder_outputs)[1], 1])
-                    encoder_cond_outputs = tf.concat((encoder_outputs, tiled_speaker_embeddings), 2)
+                    encoder_cond_outputs = tf.concat((encoder_outputs, tiled_embed_targets), 2)
                     
                     ##############
                     
@@ -282,7 +279,7 @@ class Tacotron():
         self.tower_inputs = tower_inputs
         self.tower_input_lengths = tower_input_lengths
         self.tower_mel_targets = tower_mel_targets
-        self.tower_linear_targets = tower_linear_targets
+        # self.tower_linear_targets = tower_linear_targets
         self.tower_targets_lengths = tower_targets_lengths
         self.tower_stop_token_targets = tower_stop_token_targets
         

@@ -1,8 +1,0 @@
-What I want to achieve
-    - Real-time or near real-time
-    - Not human-like voice but at least you should be able to recognize some similarity
-    
-
-Graph of synthesis MoS through the innovations
-    - Note that better than human is achievable
-    

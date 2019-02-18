@@ -100,11 +100,11 @@ def main():
     parser.add_argument('--hparams', default='',
                         help='Hyperparameter overrides as a comma-separated list of name=value '
 							 'pairs')
-    parser.add_argument('--tacotron_input', default='training_data/train.txt')
+    parser.add_argument('--tacotron_input', default='Synthesizer/train.txt')
     parser.add_argument('--wavenet_input', default='tacotron_output/gta/map.txt')
     parser.add_argument('--name', help='Name of logging directory.')
-    parser.add_argument('--model', default='Tacotron-2')
-    parser.add_argument('--input_dir', default='training_data',
+    parser.add_argument('--model', default='Tacotron')
+    parser.add_argument('--input_dir', default='Synthesizer',
                         help='folder to contain inputs sentences/targets')
     parser.add_argument('--output_dir', default='output',
                         help='folder to contain synthesized mel spectrograms')
@@ -115,15 +115,15 @@ def main():
 							 'in Tacotron synthesis mode')
     parser.add_argument('--restore', type=bool, default=True,
                         help='Set this to False to do a fresh training')
-    parser.add_argument('--summary_interval', type=int, default=250,
+    parser.add_argument('--summary_interval', type=int, default=500,
                         help='Steps between running summary ops')
     parser.add_argument('--embedding_interval', type=int, default=10000,
                         help='Steps between updating embeddings projection visualization')
-    parser.add_argument('--checkpoint_interval', type=int, default=1000, # Was 5000
+    parser.add_argument('--checkpoint_interval', type=int, default=2000, # Was 5000
                         help='Steps between writing checkpoints')
     parser.add_argument('--eval_interval', type=int, default=10000,
                         help='Steps between eval on test data')
-    parser.add_argument('--tacotron_train_steps', type=int, default=120000, # Was 100000
+    parser.add_argument('--tacotron_train_steps', type=int, default=200000, # Was 100000
                         help='total number of tacotron training steps')
     parser.add_argument('--wavenet_train_steps', type=int, default=750000,
                         help='total number of wavenet training steps')

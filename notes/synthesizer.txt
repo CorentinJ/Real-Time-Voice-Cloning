@@ -10,10 +10,7 @@ TRANSFER LEARNING FROM SPEAKER VERIFICATION TO MULTISPEAKER TEXT-TO-SPEECH SYNTH
 
 -------------------------------------------------
 HIGH PRIORITY:
-- Copy dataset
-- Reorganize encoder so it contains a package
-FOR THE DEMO:
-- Make a portable version of the encoder -> create a demo (it'll be useful for the presentation)
+- train
 AFTER EVERYTHING ELSE:
 - If librispeech works, maybe consider adding VCTK then train-other
 - Also retrain with better encoder network
