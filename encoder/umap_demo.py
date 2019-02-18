@@ -28,11 +28,16 @@ colormap = np.array([
     [76, 255, 0],
 ], dtype=np.float) / 255 
 recognized_datasets = [
+    'Librispeech/dev-clean',
+    'Librispeech/dev-other',
+    'Librispeech/test-clean',
+    'Librispeech/test-other',
     'Librispeech/train-other-500',
     'Librispeech/train-clean-100',
     'Librispeech/train-clean-360',
     'LJSpeech-1.1',
     'VoxCeleb1/wav',
+    'VoxCeleb1/test_wav',
     'VoxCeleb2/dev/aac',
     'VCTK-Corpus/wav48',
 ]
