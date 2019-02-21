@@ -20,5 +20,6 @@ tacotron2/debug
 tacotron2/papers
 tacotron2/wav_out
 tacotron2/_old/
+tacotron2/logs-conditioned
 WaveGlow
 torch-tacotron2

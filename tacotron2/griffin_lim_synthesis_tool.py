@@ -25,7 +25,7 @@ for i in range(1, len(fnames)):
     wav = inv_mel_spectrogram(mel_spectro.T, hparams) 
     sounddevice.wait()
     print(fnames[i])
-    sounddevice.play(wav, 22050)
+    sounddevice.play(wav, 16000)
 sounddevice.wait()
 quit()
 

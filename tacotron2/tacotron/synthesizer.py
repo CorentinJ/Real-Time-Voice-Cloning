@@ -52,6 +52,7 @@ class Synthesizer:
 
 		self.inputs = inputs
 		self.input_lengths = input_lengths
+		self.speaker_embeddings = speaker_embeddings
 		self.targets = targets
 		self.split_infos = split_infos
 
@@ -115,9 +116,13 @@ class Synthesizer:
 			assert len(np_targets) == len(texts)
 
 		feed_dict[self.split_infos] = np.asarray(split_infos, dtype=np.int32)
+		embed_fpath = r"E:\Datasets\Synthesizer\embed\embed-85-121551-0036.npy"
+		feed_dict[self.speaker_embeddings] = np.load(embed_fpath)[None, ...]
 
 		if self.gta or not hparams.predict_linear:
-			mels, alignments, stop_tokens = self.session.run([self.mel_outputs, self.alignments, self.stop_token_prediction], feed_dict=feed_dict)
+			mels, alignments, stop_tokens = self.session.run(
+				[self.mel_outputs, self.alignments, self.stop_token_prediction], 
+				feed_dict=feed_dict)
 			#Linearize outputs (1D arrays)
 			mels = [mel for gpu_mels in mels for mel in gpu_mels]
 			alignments = [align for gpu_aligns in alignments for align in gpu_aligns]
@@ -133,7 +138,10 @@ class Synthesizer:
 			assert len(mels) == len(texts)
 
 		else:
-			linears, mels, alignments, stop_tokens = self.session.run([self.linear_outputs, self.mel_outputs, self.alignments, self.stop_token_prediction], feed_dict=feed_dict)
+			linears, mels, alignments, stop_tokens = self.session.run(
+				[self.linear_outputs, self.mel_outputs, self.alignments, 
+				 self.stop_token_prediction], 
+				feed_dict=feed_dict)
 			#Linearize outputs (1D arrays)
 			linears = [linear for gpu_linear in linears for linear in gpu_linear]
 			mels = [mel for gpu_mels in mels for mel in gpu_mels]
@@ -214,8 +222,6 @@ class Synthesizer:
 					#save linear spectrogram plot
 					plot.plot_spectrogram(linears[i], os.path.join(log_dir, 'plots/linear-{}.png'.format(basenames[i])),
 						title='{}'.format(texts[i]), split_title=True, auto_aspect=True)
-
-
 
 		return saved_mels_paths, speaker_ids
 

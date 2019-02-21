@@ -124,11 +124,13 @@ def tacotron_synthesize(args, hparams, checkpoint, sentences=None):
 		raise RuntimeError('Failed to load checkpoint at {}'.format(checkpoint))
 
 	if hparams.tacotron_synthesis_batch_size < hparams.tacotron_num_gpus:
-		raise ValueError('Defined synthesis batch size {} is smaller than minimum required {} (num_gpus)! Please verify your synthesis batch size choice.'.format(
+		raise ValueError('Defined synthesis batch size {} is smaller than minimum required {} '
+						 '(num_gpus)! Please verify your synthesis batch size choice.'.format(
 			hparams.tacotron_synthesis_batch_size, hparams.tacotron_num_gpus))
 
 	if hparams.tacotron_synthesis_batch_size % hparams.tacotron_num_gpus != 0:
-		raise ValueError('Defined synthesis batch size {} is not a multiple of {} (num_gpus)! Please verify your synthesis batch size choice!'.format(
+		raise ValueError('Defined synthesis batch size {} is not a multiple of {} (num_gpus)! '
+						 'Please verify your synthesis batch size choice!'.format(
 			hparams.tacotron_synthesis_batch_size, hparams.tacotron_num_gpus))
 
 	if args.mode == 'eval':
