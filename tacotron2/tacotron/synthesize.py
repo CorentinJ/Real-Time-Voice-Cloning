@@ -14,7 +14,6 @@ from tqdm import tqdm
 def generate_fast(model, text):
 	model.synthesize(text, None, None, None, None)
 
-
 def run_live(args, checkpoint_path, hparams):
 	#Log to Terminal without keeping any records in files
 	log(hparams_debug_string())
@@ -113,6 +112,7 @@ def run_synthesis(args, checkpoint_path, output_dir, hparams):
 				file.write('|'.join([str(x) for x in elems]) + '\n')
 	log('synthesized mel spectrograms at {}'.format(synth_dir))
 	return os.path.join(synth_dir, 'map.txt')
+
 
 def tacotron_synthesize(args, hparams, checkpoint, sentences=None):
 	output_dir = 'tacotron_' + args.output_dir

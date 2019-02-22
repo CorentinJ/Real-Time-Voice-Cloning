@@ -1,14 +1,11 @@
 import os
 import wave
-from datetime import datetime
 
 import numpy as np
 import pyaudio
-import sounddevice as sd
 import tensorflow as tf
 from datasets import audio
 from infolog import log
-from librosa import effects
 from tacotron.models import create_model
 from tacotron.utils import plot
 from tacotron.utils.text import text_to_sequence
@@ -19,7 +16,7 @@ class Synthesizer:
 		log('Constructing model: %s' % model_name)
 		#Force the batch size to be known in order to use attention masking in batch synthesis
 		inputs = tf.placeholder(tf.int32, (None, None), name='inputs')
-		input_lengths = tf.placeholder(tf.int32, (None), name='input_lengths')
+		input_lengths = tf.placeholder(tf.int32, (None,), name='input_lengths')
 		speaker_embeddings = tf.placeholder(tf.float32, (None, hparams.speaker_embedding_size),
 					   name='speaker_embeddings')
 		targets = tf.placeholder(tf.float32, (None, None, hparams.num_mels), name='mel_targets')
@@ -67,6 +64,45 @@ class Synthesizer:
 
 		saver = tf.train.Saver()
 		saver.restore(self.session, checkpoint_path)
+
+	def my_synthesize(self, speaker_embed, text, raise_exception=False):
+		"""
+		Lighter synthesis function that directly returns the mel spectrogram.
+		
+		:param speaker_embed: 
+		:param text: the text to synthesize 
+		:param raise_exception: 
+		:return: 
+		"""
+		
+		# Prepare the input
+		cleaner_names = [x.strip() for x in self._hparams.cleaners.split(',')]
+		seqs = [np.asarray(text_to_sequence(text, cleaner_names))]
+		input_lengths = [len(seq) for seq in seqs]
+		input_seqs, max_seq_len = self._prepare_inputs(seqs)
+		split_infos = [[max_seq_len, 0, 0, 0]]
+		feed_dict = {
+			self.inputs: input_seqs,
+			self.input_lengths: np.asarray(input_lengths, dtype=np.int32),
+			self.split_infos: np.asarray(split_infos, dtype=np.int32),
+			self.speaker_embeddings: speaker_embed
+		}
+		
+		# Forward it
+		mels, alignments, stop_tokens = self.session.run(
+			[self.mel_outputs, self.alignments, self.stop_token_prediction], 
+			feed_dict=feed_dict)
+		mel, alignment, stop_token = mels[0][0], alignments[0][0], stop_tokens[0][0]
+		
+		# Trim the output
+		try:
+			target_length = np.round(stop_token).index(1)
+			mel = mel[:target_length, :]
+		except:
+			if raise_exception:
+				raise Exception("Tacotron could not generate a stop token.")
+			
+		return mel
 
 
 	def synthesize(self, texts, basenames, out_dir, log_dir, mel_filenames):
@@ -116,8 +152,7 @@ class Synthesizer:
 			assert len(np_targets) == len(texts)
 
 		feed_dict[self.split_infos] = np.asarray(split_infos, dtype=np.int32)
-		embed_fpath = r"E:\Datasets\Synthesizer\embed\embed-85-121551-0036.npy"
-		feed_dict[self.speaker_embeddings] = np.load(embed_fpath)[None, ...]
+		feed_dict[self.speaker_embeddings] = np.zeros((len(texts), 256))
 
 		if self.gta or not hparams.predict_linear:
 			mels, alignments, stop_tokens = self.session.run(
