@@ -12,14 +12,8 @@
 *.blg
 *.bbl
 *.bcf
-data
-encoder/_old/
+_old
 encoder/saved_models/*_backups
-tacotron2/tacotron_output
-tacotron2/debug
-tacotron2/papers
-tacotron2/wav_out
-tacotron2/_old/
-tacotron2/logs-conditioned
-WaveGlow
+tacotron2/logs-*
+waveglow
 torch-tacotron2
