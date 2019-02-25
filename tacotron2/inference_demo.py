@@ -16,7 +16,7 @@ def get_speaker_embed(speaker_id):
     return speaker_embed[None, ...]
 
 if __name__ == '__main__':
-    checkpoint_dir = os.path.join('logs-conditioned', 'taco_pretrained')
+    checkpoint_dir = os.path.join('logs-one_output', 'taco_pretrained')
     checkpoint_fpath = tf.train.get_checkpoint_state(checkpoint_dir).model_checkpoint_path
 
     synth = synthesizer.Synthesizer()

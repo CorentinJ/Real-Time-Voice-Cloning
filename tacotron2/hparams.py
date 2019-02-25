@@ -176,7 +176,7 @@ hparams = tf.contrib.training.HParams(
     ###########################################################################################################################################
     
     # Tacotron
-    outputs_per_step=2, # Was 1
+    outputs_per_step=1, # Was 1
     # number of frames to generate at each decoding step (increase to speed up computation and 
     # allows for higher batch size, decreases G&L audio quality)
     stop_at_any=True,
@@ -322,7 +322,7 @@ hparams = tf.contrib.training.HParams(
     # major slowdowns! Only use when critical!)
     
     # train/test split ratios, mini-batches sizes
-    tacotron_batch_size=32,  # number of training samples on each training steps (was 32)
+    tacotron_batch_size=19,  # number of training samples on each training steps (was 32)
     # Tacotron Batch synthesis supports ~16x the training batch size (no gradients during 
     # testing). 
     # Training Tacotron with unmasked paddings makes it aware of them, which makes synthesis times
