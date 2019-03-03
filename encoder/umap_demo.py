@@ -48,7 +48,8 @@ class UMapDemoUI(QDialog):
         self.embeds = []
         self.utterance = None
         self.is_record = None
-        self.ax = None
+        self.umap_ax = None
+        self.embed_ax = None
         
         # Load and prime the models
         print("Loading the model in memory, please wait...")
@@ -68,8 +69,10 @@ class UMapDemoUI(QDialog):
         root_layout = QHBoxLayout()
         
         ## UMAP plot (left)
-        canvas = FigureCanvas(Figure(figsize=(10, 20)))
-        self.ax = canvas.figure.subplots()
+        umap_canvas = FigureCanvas(Figure(figsize=(10, 20)))
+        root_layout.addWidget(umap_canvas)
+        self.umap_ax = umap_canvas.figure.subplots()
+        self.umap_ax.figure.patch.set_facecolor('#F0F0F0')
         self.draw_umap()
         
         ## Menu layout (right)
@@ -110,8 +113,12 @@ class UMapDemoUI(QDialog):
         menu_layout.addStretch()
         self.select_random(0)
         
-        ## Audio visualization (middle right)
-        # TODO if I feel like it
+        ## Embed visualization (middle right)
+        embed_canvas = FigureCanvas(Figure(figsize=(5, 5)))
+        menu_layout.addWidget(embed_canvas)
+        self.embed_ax = embed_canvas.figure.subplots()
+        self.embed_ax.figure.patch.set_facecolor('#F0F0F0')
+        self.embed_ax.set_xticks([]), self.embed_ax.set_yticks([])
         
         ## Embeds (bottom right)
         embeds_grid = QGridLayout()
@@ -147,7 +154,6 @@ class UMapDemoUI(QDialog):
         clear_button.clicked.connect(clear_button_action)
         menu_layout.addWidget(clear_button)
 
-        root_layout.addWidget(canvas)
         root_layout.addLayout(menu_layout)
         self.setLayout(root_layout)
         
@@ -226,6 +232,8 @@ class UMapDemoUI(QDialog):
         else:
             self.embeds.append((embed, 's', speaker_name))
             
+        # Draw the embed and the UMAP projection
+        self.draw_embed()
         self.draw_umap()
         
         if go_next:
@@ -241,10 +249,20 @@ class UMapDemoUI(QDialog):
         self.record_one_button.setText("Record one")
         self.record_one_button.setDisabled(False)
     
+    def draw_embed(self):
+        if len(self.embeds) != 0:
+            embed, _, speaker_name = self.embeds[-1]
+            if len(self.embed_ax.images) > 0:
+                self.embed_ax.images[0].colorbar.remove()
+            self.embed_ax.clear()
+            inference.plot_embedding_as_heatmap(embed, self.embed_ax, 
+                                                "Last embedding for %s" % speaker_name)
+        self.embed_ax.figure.canvas.draw()
+    
     def draw_umap(self):
-        self.ax.clear()
+        self.umap_ax.clear()
         if len(self.embeds) < 5:
-            self.ax.figure.canvas.draw()
+            self.umap_ax.figure.canvas.draw()
             return
 
         # Compute the projections
@@ -272,13 +290,13 @@ class UMapDemoUI(QDialog):
             if not speaker_name in legend_done:
                 legend = speaker_name
                 legend_done.add(speaker_name)
-            self.ax.scatter(projection[0], projection[1], c=color, marker=mark, label=legend)
-        self.ax.set_aspect('equal', 'datalim')
-        self.ax.set_title('UMAP projection')
-        self.ax.legend()
+            self.umap_ax.scatter(projection[0], projection[1], c=color, marker=mark, label=legend)
+        self.umap_ax.set_aspect('equal', 'datalim')
+        self.umap_ax.set_title('UMAP projection')
+        self.umap_ax.legend()
 
         # figure.tight_layout()
-        self.ax.figure.canvas.draw()
+        self.umap_ax.figure.canvas.draw()
 
 
 if __name__ == '__main__':

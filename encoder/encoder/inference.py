@@ -3,6 +3,8 @@ import torch
 from encoder.params_data import *
 from encoder.model import SpeakerEncoder
 from encoder import audio
+import matplotlib.pyplot as plt
+from matplotlib import cm
 
 _model = None # type: SpeakerEncoder
 _device = None # type: torch.device
@@ -137,10 +139,10 @@ def embed_utterance(wave, using_partials=True, return_partials=False, **kwargs):
     return embed
     
 def embed_stream(stream, partial_utterance_n_frames=partial_utterance_n_frames, overlap=0.5):
-    pass
+    raise NotImplemented()
 
 def embed_speaker(waves, normalize=False, **kwargs):
-    pass
+    raise NotImplemented()
 
 def load_and_preprocess_wave(fpath):
     """
@@ -153,3 +155,40 @@ def load_and_preprocess_wave(fpath):
     wave = audio.load(fpath)
     wave = audio.preprocess_wave(wave)
     return wave
+
+def plot_embedding_as_heatmap(embed, ax=None, title="", color_range=(0, 0.35)):
+    if ax is None:
+        ax = plt.gca()
+    
+    height = int(np.sqrt(len(embed)))
+    assert len(embed) % height == 0
+    embed = embed.reshape((height, -1))
+    
+    cmap = cm.get_cmap()
+    mappable = ax.imshow(embed, cmap=cmap)
+    cbar = plt.colorbar(mappable, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_clim(*color_range)
+    
+    ax.set_xticks([]), ax.set_yticks([])
+    ax.set_title(title)
+
+if __name__ == '__main__':
+    load_model("../saved_models/all.pt", "cuda")
+    
+    fig, axes = plt.subplots(3, 3)
+    for i, ax in enumerate(axes.flatten(), 50):
+        fpath = r"E:\Datasets\LJSpeech-1.1\wavs\LJ001-%04d.wav" % (i + 1)
+        wave = load_and_preprocess_wave(fpath)
+        embed = embed_utterance(wave)
+        plot_embedding_as_heatmap(embed, ax)
+    plt.show(block=False)
+    
+    fig, axes = plt.subplots(3, 3)
+    for i, ax in enumerate(axes.flatten(), 20):
+        fpath = r"E:\Datasets\LibriSpeech\train-other-500\25\123319\25-123319-%04d.flac" % i
+        wave = load_and_preprocess_wave(fpath)
+        embed = embed_utterance(wave)
+        plot_embedding_as_heatmap(embed, ax)
+    plt.show()
+    
+    
