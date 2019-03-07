@@ -4,9 +4,6 @@ import numpy as np
 import tensorflow as tf
 from scipy import signal
 from scipy.io import wavfile
-import webrtcvad
-import struct
-from scipy.ndimage.morphology import binary_dilation
 
 
 def load_wav(path, sr):
@@ -43,63 +40,6 @@ def start_and_end_indices(quantized, silence_threshold=2):
 	assert abs(quantized[end] - 127) > silence_threshold
 
 	return start, end
-
-# def trim_silence(wav, hparams):
-# 	'''Trim leading and trailing silence
-# 
-# 	Useful for M-AILABS dataset if we choose to trim the extra 0.5 silence at beginning and end.
-# 	'''
-# 	# Thanks @begeekmyfriend and @lautjy for pointing out the params contradiction. 
-#     # These params are separate and tunable per dataset.
-# 	return librosa.effects.trim(wav, top_db=hparams.trim_top_db, 
-# 								frame_length=hparams.trim_fft_size, 
-# 								hop_length=hparams.trim_hop_size)[0]
-
-def trim_silence(wav, hparams):
-	"""
-    Ensures that silences (segments without voice) in the waveform remain no longer than a 
-    threshold determined by the VAD parameters in hparams.py.
-
-    :param wav: the raw waveform as a numpy array of floats 
-    :return: the same waveform with silences trimmed away (length <= original wave length)
-    """
-	
-	# Compute the voice detection window size
-	samples_per_window = (hparams.vad_window_length * hparams.sample_rate) // 1000
-	
-	# Trim the end of the audio to have a multiple of the window size
-	wav = wav[:len(wav) - (len(wav) % samples_per_window)]
-	
-	# Convert the float waveform to 16-bit mono PCM
-	pcm_wave = struct.pack("%dh" % len(wav), *(np.round(wav * 32767)).astype(np.int16))
-	
-	# Perform voice activation detection
-	voice_flags = []
-	vad = webrtcvad.Vad(mode=3)
-	for window_start in range(0, len(wav), samples_per_window):
-		window_end = window_start + samples_per_window
-		voice_flags.append(vad.is_speech(pcm_wave[window_start * 2:window_end * 2],
-										 sample_rate=hparams.sample_rate))
-	voice_flags = np.array(voice_flags)
-	
-	# Smooth the voice detection with a moving average
-	def moving_average(array, width):
-		array_padded = np.concatenate((np.zeros((width - 1) // 2), array, np.zeros(width // 2)))
-		ret = np.cumsum(array_padded, dtype=float)
-		ret[width:] = ret[width:] - ret[:-width]
-		return ret[width - 1:] / width
-	
-	audio_mask = moving_average(voice_flags, hparams.vad_moving_average_width)
-	audio_mask = np.round(audio_mask).astype(np.bool)
-	
-	# Dilate the voiced regions
-	audio_mask = binary_dilation(audio_mask, np.ones(hparams.vad_max_silence_length + 1))
-	
-	# Trim away the long silences in the audio
-	audio_mask = np.repeat(audio_mask, samples_per_window)
-	wave = wav[audio_mask == True]
-	
-	return wave
 
 def get_hop_size(hparams):
 	hop_size = hparams.hop_size

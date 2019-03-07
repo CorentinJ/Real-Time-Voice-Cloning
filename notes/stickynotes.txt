@@ -1,3 +1,37 @@
+Generalized End-To-End Loss For Speaker Verification
+
+------ Todo ------
+- Analyze perf of the encoder on the test set (join vc1_test and vc2_test, they're small) [Waiting for   proper way of computing EER]
+- SV2TTS 3:
+    - Clean the target mel spectrograms of tacotron (now that I have silences...)
+    - Train the vocoder on tacotron generated mel spectrograms
+
+------ Ideas ------
+- Add a term in the loss that forces centroid of synthesized utterances to be close to that of ground truth utterances
+- How much is the encoding affected by the quality of the microphone? Record the same sentences on 2 or 3 different microphones and project the embeddings. Look at how far they are from the rest of the dataset.
+- How stable is the encoding w.r.t. the length of the utterance? Compare side by side embeddings of several utterances cut at 1.6s, 2.4s, 3.2s... Show the distribution of the distance to the centroids w.r.t. to the length of the utterances, the EER
+- Analyze the components of the embeddings
+- Technically, you could do voice morphing in the same sentence
+- If librispeech works, maybe consider adding VCTK then train-other
+- Also retrain with better encoder network
+- Check out this dataset http://www.robots.ox.ac.uk/~vgg/data/lip_reading/
+
+
+------ Old ideas ------
+- Embed speaker audios in visdom
+- Try the encoder withou relu
+
+
+------ Things to not forget to write about ------
+- The contents of problems.txt, improvements.txt, encoder.txt, synthesizer.txt, questions.txt.
+- Removal of projection layer
+- Relu at the end of the network
+- (slides) Interpretation of EER
+
+
+------ Notes ------
+https://stats.stackexchange.com/questions/395345/computing-and-estimating-the-eer-on-an-entire-dataset
+
 IIRC "THE EFFECT OF NEURAL NETWORKS IN STATISTICAL PARAMETRIC SPEECH SYNTHESIS" talked somewhere about recurrence and neighbouring features. I can't find where again, but it'd be great if I did.
 
 I think Hashimoto 2015 talked about cross-language.

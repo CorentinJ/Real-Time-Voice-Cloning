@@ -56,30 +56,7 @@ About speed (tested on 5x6 batches):
 - I just realized it's batches of 64x10, not 10x64. Anyway I've doubled the LSTM cell size now so all the figures are no longer accurate.
 - It seems that the complexity of the backward pass is at least quadratic with respect to the number of speakers. With 64x10 I get a backward pass of 11s (the rest takes ~500ms) but with 32x10 it's 1.4s.
 - I think I went from 3000ms to 2500ms by normalizing the centroids before doing the cosine similarity. I believe that doing the operation first makes the backward pass faster.
-
-
-Ideas for a deeper analysis:
-- Description of the datasets
-- How stable is the encoding w.r.t. the length of the utterance? Compare side by side embeddings of several utterances cut at 1.6s, 2.4s, 3.2s... Show the distribution of the distance to the centroids w.r.t. to the length of the utterances, the EER
-- How much is the encoding affected by the quality of the microphone? Record the same sentences on 2 or 3 different microphones and project the embeddings. Look at how far they are from the rest of the dataset.
-- Analyze the components of the embeddings
-- Technically, you could do voice morphing in the same sentence
-- Mention the sparsity effect of cosine similarity and relu
-
-
-Ideas for extensions:
-- Add a term in the loss that forces centroid of synthesized utterances to be close to that of ground truth utterances
-http://www.robots.ox.ac.uk/~vgg/data/lip_reading/
-- Try once with relu if you're curious
-
-
-TODO (priority at the top):
-Analyze perf on test set (join vc1_test and vc2_test, they're small)
-embed speaker matrix in visdom
-remove y axis in matrix
-
-
-
+- The lower bound on the GPU I/O for this task seems to be around 40ms.
 
 
 

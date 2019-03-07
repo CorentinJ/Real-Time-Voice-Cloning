@@ -47,15 +47,14 @@ def run_preprocess(args, hparams):
 	preprocess(args, input_folders, output_folder, hparams)
 
 def main():
-	print('initializing preprocessing..')
+	print('Initializing preprocessing..')
 	parser = argparse.ArgumentParser()
 	
 	# Root data directory that contains the LibriSpeech directory
 	parser.add_argument('--base_dir', default='')
-	
 	parser.add_argument('--hparams', default='',
 		help='Hyperparameter overrides as a comma-separated list of name=value pairs')
-	parser.add_argument('--output', default='Synthesizer')
+	parser.add_argument('--output', default='Synthesizer3')
 	parser.add_argument('--n_jobs', type=int, default=cpu_count())
 	
 	# Name of the LibriSpeech sets to use, separated by spaces 

@@ -1,5 +1,5 @@
 Problems:
-- VC2 has mixed languages and I cannot seem to find labels for those anywhere. For the lack of consistency, I VC1 also has mixed languages but I did have the labels there and was able to prune them out.
+- VC2 has mixed languages and I cannot seem to find labels for those anywhere. For the lack of consistency, VC1 also has mixed languages but I did have the labels there and was able to prune them out.
     * Try to find the labels to exclude them:
         o It's less data, but it's better data
         * I sent a mail to the authors on the 5th of february

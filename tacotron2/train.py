@@ -1,14 +1,12 @@
 import argparse
 import os
 from time import sleep
-
 import infolog
 import tensorflow as tf
 from hparams import hparams
 from infolog import log
 from tacotron.synthesize import tacotron_synthesize
 from tacotron.train import tacotron_train
-from wavenet_vocoder.train import wavenet_train
 
 log = infolog.log
 
@@ -79,18 +77,8 @@ def train(args, log_dir, hparams):
     
     if input_path == '' or input_path is None:
         raise RuntimeError('input_path has an unpleasant value -> {}'.format(input_path))
-    
-    if not wave_state:
-        log('\n#############################################################\n')
-        log('Wavenet Train\n')
-        log('###########################################################\n')
-        checkpoint = wavenet_train(args, log_dir, hparams, input_path)
-        if checkpoint is None:
-            raise ('Error occured while training Wavenet, Exiting!')
-        wave_state = 1
-        save_seq(state_file, [taco_state, GTA_state, wave_state], input_path)
-    
-    if wave_state and GTA_state and taco_state:
+
+    if GTA_state and taco_state:
         log('TRAINING IS ALREADY COMPLETE!!')
 
 
@@ -101,9 +89,7 @@ def main():
                         help='Hyperparameter overrides as a comma-separated list of name=value '
 							 'pairs')
     parser.add_argument('--tacotron_input', default='Synthesizer/train.txt')
-    parser.add_argument('--wavenet_input', default='tacotron_output/gta/map.txt')
     parser.add_argument('--name', help='Name of logging directory.')
-    parser.add_argument('--model', default='Tacotron')
     parser.add_argument('--input_dir', default='Synthesizer',
                         help='folder to contain inputs sentences/targets')
     parser.add_argument('--output_dir', default='output',
@@ -125,29 +111,14 @@ def main():
                         help='Steps between eval on test data')
     parser.add_argument('--tacotron_train_steps', type=int, default=200000, # Was 100000
                         help='total number of tacotron training steps')
-    parser.add_argument('--wavenet_train_steps', type=int, default=750000,
-                        help='total number of wavenet training steps')
     parser.add_argument('--tf_log_level', type=int, default=1, help='Tensorflow C++ log level.')
     parser.add_argument('--slack_url', default=None,
                         help='slack webhook notification destination link')
     args = parser.parse_args()
     
-    accepted_models = ['Tacotron', 'WaveNet', 'Tacotron-2']
-    
-    if args.model not in accepted_models:
-        raise ValueError('please enter a valid model to train: {}'.format(accepted_models))
-    
     log_dir, hparams = prepare_run(args)
     
-    if args.model == 'Tacotron':
-        tacotron_train(args, log_dir, hparams)
-    elif args.model == 'WaveNet':
-        wavenet_train(args, log_dir, hparams, args.wavenet_input)
-    elif args.model == 'Tacotron-2':
-        train(args, log_dir, hparams)
-    else:
-        raise ValueError('Model provided {} unknown! {}'.format(args.model, accepted_models))
-
+    tacotron_train(args, log_dir, hparams)
 
 if __name__ == '__main__':
     main()

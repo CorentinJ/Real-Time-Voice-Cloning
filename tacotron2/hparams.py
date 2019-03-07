@@ -7,7 +7,6 @@ hparams = tf.contrib.training.HParams(
     # text, you may want to use "basic_cleaners" or "transliteration_cleaners".
     cleaners='english_cleaners',
     
-    
     # If you only have 1 GPU or want to use only one GPU, please set num_gpus=0 and specify the 
     # GPU idx on run. example:
     # expample 1 GPU of index 2 (train on "/gpu2" only): CUDA_VISIBLE_DEVICES=2 python train.py 
@@ -98,10 +97,9 @@ hparams = tf.contrib.training.HParams(
     #  network
     rescale=False,  # Whether to rescale audio prior to preprocessing
     rescaling_max=0.999,  # Rescaling value
-    trim_silence=True,
     # Whether to clip silence in Audio (at beginning and end of audio only, not the middle)
     # train samples of lengths between 3sec and 14sec are more than enough to make a model capable
-    #  of good parallelization.
+    # of good parallelization.
     clip_mels_length=True,
     # For cases of OOM (Not really recommended, only use if facing unsolvable OOM errors, 
 	# also consider clipping your samples to smaller chunks)
@@ -241,75 +239,7 @@ hparams = tf.contrib.training.HParams(
     # Whether to add a post-processing network to the Tacotron to predict linear spectrograms (
 	# True mode Not tested!!)
     ###########################################################################################################################################
-    
-    
-    # Wavenet
-    # Input type:
-    # 1. raw [-1, 1]
-    # 2. mulaw [-1, 1]
-    # 3. mulaw-quantize [0, mu]
-    # If input_type is raw or mulaw, network assumes scalar input and
-    # discretized mixture of logistic distributions output, otherwise one-hot
-    # input and softmax output are assumed.
-    # Model generatl type
-    input_type="raw",
-    quantize_channels=2 ** 16,  # 65536 (16-bit) (raw) or 256 (8-bit) (mulaw or mulaw-quantize) //
-    #  number of classes = 256 <=> mu = 255
-    
-    # Minimal scales ranges for MoL and Gaussian modeling
-    log_scale_min=float(np.log(1e-14)),  # Mixture of logistic distributions minimal log scale
-    log_scale_min_gauss=float(np.log(1e-7)),  # Gaussian distribution minimal allowed log scale
-    
-    # model parameters
-    # To use Gaussian distribution as output distribution instead of mixture of logistics, 
-    # set "out_channels = 2" instead of "out_channels = 10 * 3". (UNDER TEST)
-    out_channels=2,
-    # This should be equal to quantize channels when input type is 'mulaw-quantize' else: 
-    # num_distributions * 3 (prob, mean, log_scale).
-    layers=20,  # Number of dilated convolutions (Default: Simplified Wavenet of Tacotron-2 
-    # paper)
-    stacks=2,
-    # Number of dilated convolution stacks (Default: Simplified Wavenet of Tacotron-2 paper)
-    residual_channels=128,  # Number of residual block input/output channels.
-    gate_channels=256,  # split in 2 in gated convolutions
-    skip_out_channels=128,  # Number of residual block skip convolution channels.
-    kernel_size=3,  # The number of inputs to consider in dilated convolutions.
-    
-    # Upsampling parameters (local conditioning)
-    cin_channels=80,
-    # Set this to -1 to disable local conditioning, else it must be equal to num_mels!!
-    upsample_conditional_features=True,
-    # Whether to repeat conditional features or upsample them (The latter is recommended)
-    upsample_type='1D',
-    # Type of the upsampling deconvolution. Can be ('1D' or '2D'). 1D spans all frequency bands 
-    # for each frame while 2D spans "freq_axis_kernel_size" bands at a time
-    upsample_activation='LeakyRelu',
-    # Activation function used during upsampling. Can be ('LeakyRelu', 'Relu' or None)
-    # upsample_scales=[5, 5, 11],  # prod(upsample_scales) should be equal to hop_size
-    upsample_scales=[5, 5, 8],  # prod(upsample_scales) should be equal to hop_size
-    freq_axis_kernel_size=3,
-    # Only used for 2D upsampling. This is the number of requency bands that are spanned at a time
-    #  for each frame.
-    leaky_alpha=0.4,
-    # slope of the negative portion of LeakyRelu (LeakyRelu: y=x if x>0 else y=alpha * x)
-    
-    # global conditioning
-    gin_channels=-1,
-    # Set this to -1 to disable global conditioning, Only used for multi speaker dataset. It 
-    # defines the depth of the embeddings (Recommended: 16)
-    use_speaker_embedding=True,  # whether to make a speaker embedding
-    n_speakers=5,  # number of speakers (rows of the embedding)
-    
-    # the bias debate! :)
-    use_bias=True,  # Whether to use bias in convolutional layers of the Wavenet
-    
-    # training samples length
-    max_time_sec=None,  # Max time of audio for training. If None, we use max_time_steps.
-    max_time_steps=11000,
-    # Max time steps in audio used to train wavenet (decrease to save memory) (Recommend: 8000 on 
-    # modest GPUs, 13000 on stronger ones)
-    ###########################################################################################################################################
-    
+
     # Tacotron Training
     # Reproduction seeds
     tacotron_random_seed=5339,
@@ -386,53 +316,7 @@ hparams = tf.contrib.training.HParams(
     tacotron_teacher_forcing_decay_alpha=0.,
     # teacher forcing ratio decay rate. Relevant if mode='scheduled'
     ###########################################################################################################################################
-    
-    # Wavenet Training
-    wavenet_random_seed=5339,  # S=5, E=3, D=9 :)
-    wavenet_data_random_state=1234,  # random state for train test split repeatability
-    
-    # performance parameters
-    wavenet_swap_with_cpu=False,
-    # Whether to use cpu as support to gpu for synthesis computation (while loop).(Not 
-    # recommended: may cause major slowdowns! Only use when critical!)
-    
-    # train/test split ratios, mini-batches sizes
-    wavenet_batch_size=8,  # batch size used to train wavenet.
-    # During synthesis, there is no max_time_steps limitation so the model can sample much longer
-	#  audio than 8k(or 13k) steps. (Audio can go up to 500k steps, equivalent to ~21sec on 24kHz)
-    # Usually your GPU can handle ~2x wavenet_batch_size during synthesis for the same memory 
-	# amount during training (because no gradients to keep and ops to register for backprop)
-    wavenet_synthesis_batch_size=8,    # Was 10 * 2
-    # This ensure that wavenet synthesis goes up to 4x~8x faster when synthesizing multiple 
-    # sentences. Watch out for OOM with long audios.
-    wavenet_test_size=0.0441,
-    # % of data to keep as test data, if None, wavenet_test_batches must be not None
-    wavenet_test_batches=None,  # number of test batches.
-    
-    # Learning rate schedule
-    wavenet_lr_schedule='exponential',  # learning rate schedule. Can be ('exponential', 'noam')
-    wavenet_learning_rate=1e-4,  # wavenet initial learning rate
-    wavenet_warmup=float(4000),
-    # Only used with 'noam' scheme. Defines the number of ascending learning rate steps.
-    wavenet_decay_rate=0.5,  # Only used with 'exponential' scheme. Defines the decay rate.
-    wavenet_decay_steps=300000,  # Only used with 'exponential' scheme. Defines the decay steps.
-    
-    # Optimization parameters
-    wavenet_adam_beta1=0.9,  # Adam beta1
-    wavenet_adam_beta2=0.999,  # Adam beta2
-    wavenet_adam_epsilon=1e-8,  # Adam Epsilon
-    
-    # Regularization parameters
-    wavenet_clip_gradients=False,  # Whether the clip the gradients during wavenet training.
-    wavenet_ema_decay=0.9999,  # decay rate of exponential moving average
-    wavenet_weight_normalization=False,
-    # Whether to Apply Saliman & Kingma Weight Normalization (reparametrization) technique. (NEEDS
-    #  VERIFICATION)
-    wavenet_init_scale=1.,
-    # Only relevent if weight_normalization=True. Defines the initial scale in data dependent 
-	# initialization of parameters.
-    wavenet_dropout=0.05,  # drop rate of wavenet layers
-    
+ 
     # Tacotron-2 integration parameters
     train_with_GTA=False,
     # Whether to use GTA mels to train WaveNet instead of ground truth mels.
@@ -469,16 +353,8 @@ hparams = tf.contrib.training.HParams(
     
     ### SV2TTS ###
     speaker_embedding_size=256,
+    silence_min_duration_split=0.4, # Duration in seconds of a silence for an utterance to be split
     
-    ## Voice Activation Detection
-    # Window size of the VAD. Must be either 10, 20 or 30 milliseconds.
-    # This sets the granularity of the VAD. Should not need to be changed.
-    vad_window_length = 30,  # In milliseconds
-    # Number of frames to average together when performing the moving average smoothing.
-    # The larger this value, the larger the VAD variations must be to not get smoothed out. 
-    vad_moving_average_width = 8,
-    # Maximum number of consecutive silent frames a segment can have.
-    vad_max_silence_length = 6,
 )
 
 
