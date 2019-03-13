@@ -42,9 +42,6 @@ def run_eval(args, checkpoint_path, output_dir, hparams, sentences):
 	eval_dir = os.path.join(output_dir, 'eval')
 	log_dir = os.path.join(output_dir, 'logs-eval')
 
-	if args.model == 'Tacotron-2':
-		assert os.path.normpath(eval_dir) == os.path.normpath(args.mels_dir)
-
 	#Create output path if it doesn't exist
 	os.makedirs(eval_dir, exist_ok=True)
 	os.makedirs(log_dir, exist_ok=True)

@@ -88,10 +88,7 @@ def time_string():
 
 def model_train_mode(args, feeder, hparams, global_step):
     with tf.variable_scope('Tacotron_model', reuse=tf.AUTO_REUSE) as scope:
-        model_name = None
-        if args.model == 'Tacotron-2':
-            model_name = 'Tacotron'
-        model = create_model(model_name or args.model, hparams)
+        model = create_model('Tacotron', hparams)
         if hparams.predict_linear:
             model.initialize(feeder.inputs, feeder.input_lengths, feeder.speaker_embeddings, 
                              feeder.mel_targets, feeder.token_targets, 
@@ -111,10 +108,7 @@ def model_train_mode(args, feeder, hparams, global_step):
 
 def model_test_mode(args, feeder, hparams, global_step):
     with tf.variable_scope('Tacotron_model', reuse=tf.AUTO_REUSE) as scope:
-        model_name = None
-        if args.model == 'Tacotron-2':
-            model_name = 'Tacotron'
-        model = create_model(model_name or args.model, hparams)
+        model = create_model('Tacotron', hparams)
         if hparams.predict_linear:
             model.initialize(feeder.eval_inputs, feeder.eval_input_lengths, 
                              feeder.speaker_embeddings, feeder.eval_mel_targets, 
@@ -161,7 +155,7 @@ def train(log_dir, args, hparams):
     
     log('Checkpoint path: {}'.format(checkpoint_path))
     log('Loading training data from: {}'.format(input_path))
-    log('Using model: {}'.format(args.model))
+    log('Using model: Tacotron')
     log(hparams_debug_string())
     
     # Start by setting a seed for repeatability
@@ -323,7 +317,7 @@ def train(log_dir, args, hparams):
                     
                     plot.plot_alignment(align, os.path.join(eval_plot_dir,
                                                             'step-{}-eval-align.png'.format(step)),
-                                        title='{}, {}, step={}, loss={:.5f}'.format(args.model,
+                                        title='{}, {}, step={}, loss={:.5f}'.format('Tacotron',
                                                                                     time_string(),
                                                                                     step,
                                                                                     eval_loss),
@@ -332,7 +326,7 @@ def train(log_dir, args, hparams):
                                                               'step-{'
 															  '}-eval-mel-spectrogram.png'.format(
                                                                   step)),
-                                          title='{}, {}, step={}, loss={:.5f}'.format(args.model,
+                                          title='{}, {}, step={}, loss={:.5f}'.format('Tacotron',
                                                                                       time_string(),
                                                                                       step,
                                                                                       eval_loss),
@@ -344,7 +338,7 @@ def train(log_dir, args, hparams):
                                                                   'step-{}-eval-linear-spectrogram.png'.format(
                                                                       step)),
                                               title='{}, {}, step={}, loss={:.5f}'.format(
-                                                  args.model, time_string(), step, eval_loss),
+                                                  'Tacotron', time_string(), step, eval_loss),
                                               target_spectrogram=lin_t,
                                               max_len=t_len, auto_aspect=True)
                     
@@ -387,7 +381,7 @@ def train(log_dir, args, hparams):
                                                                               'step-{}-linear-spectrogram.png'.format(
                                                                                   step)),
                                               title='{}, {}, step={}, loss={:.5f}'.format(
-                                                  args.model, time_string(), step, loss),
+                                                  'Tacotron', time_string(), step, loss),
                                               target_spectrogram=linear_target,
                                               max_len=target_length, auto_aspect=True)
                     
@@ -414,7 +408,7 @@ def train(log_dir, args, hparams):
                     # save alignment plot to disk (control purposes)
                     plot.plot_alignment(alignment,
                                         os.path.join(plot_dir, 'step-{}-align.png'.format(step)),
-                                        title='{}, {}, step={}, loss={:.5f}'.format(args.model,
+                                        title='{}, {}, step={}, loss={:.5f}'.format('Tacotron',
                                                                                     time_string(),
                                                                                     step, loss),
                                         max_len=target_length // hparams.outputs_per_step)
@@ -422,7 +416,7 @@ def train(log_dir, args, hparams):
                     plot.plot_spectrogram(mel_prediction, os.path.join(plot_dir,
                                                                        'step-{}-mel-spectrogram.png'.format(
                                                                            step)),
-                                          title='{}, {}, step={}, loss={:.5f}'.format(args.model,
+                                          title='{}, {}, step={}, loss={:.5f}'.format('Tacotron',
                                                                                       time_string(),
                                                                                       step, loss),
                                           target_spectrogram=target,

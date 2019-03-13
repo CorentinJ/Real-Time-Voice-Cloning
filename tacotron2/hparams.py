@@ -103,7 +103,7 @@ hparams = tf.contrib.training.HParams(
     clip_mels_length=True,
     # For cases of OOM (Not really recommended, only use if facing unsolvable OOM errors, 
 	# also consider clipping your samples to smaller chunks)
-    max_mel_frames=1200,
+    max_mel_frames=900,
     # Only relevant when clip_mels_length = True, please only use after trying output_per_steps=3
 	#  and still getting OOM errors.
     
@@ -252,7 +252,7 @@ hparams = tf.contrib.training.HParams(
     # major slowdowns! Only use when critical!)
     
     # train/test split ratios, mini-batches sizes
-    tacotron_batch_size=19,  # number of training samples on each training steps (was 32)
+    tacotron_batch_size=25,  # number of training samples on each training steps (was 32)
     # Tacotron Batch synthesis supports ~16x the training batch size (no gradients during 
     # testing). 
     # Training Tacotron with unmasked paddings makes it aware of them, which makes synthesis times

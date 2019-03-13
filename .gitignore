@@ -18,3 +18,4 @@ tacotron2/logs-*
 waveglow
 torch-tacotron2
 wave-rnn/checkpoints
+wave-rnn/model_outputs

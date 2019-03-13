@@ -54,11 +54,11 @@ def main():
 	parser.add_argument('--base_dir', default='')
 	parser.add_argument('--hparams', default='',
 		help='Hyperparameter overrides as a comma-separated list of name=value pairs')
-	parser.add_argument('--output', default='Synthesizer3')
+	parser.add_argument('--output', default='Synthesizer')
 	parser.add_argument('--n_jobs', type=int, default=cpu_count())
 	
 	# Name of the LibriSpeech sets to use, separated by spaces 
-	# (e.g. "--sets train-other-500 train-clean-360). Defaults to using all the training sets 
+	# (e.g. "--sets train-other-500 train-clean-360). Defaults to using all the clean training sets 
 	# present in the LibriSpeech directory.
 	parser.add_argument('--sets', type=str, nargs='+', default=None)
 	
