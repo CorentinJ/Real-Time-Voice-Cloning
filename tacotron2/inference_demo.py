@@ -16,7 +16,7 @@ def get_speaker_embed(speaker_id):
     return speaker_embed[None, ...]
 
 if __name__ == '__main__':
-    checkpoint_dir = os.path.join('logs-one_output', 'taco_pretrained')
+    checkpoint_dir = os.path.join('logs-two_asr', 'taco_pretrained')
     checkpoint_fpath = tf.train.get_checkpoint_state(checkpoint_dir).model_checkpoint_path
 
     synth = synthesizer.Synthesizer()
@@ -28,5 +28,6 @@ if __name__ == '__main__':
         text = input("Text: ")
         mel = synth.my_synthesize(speaker_embed, text)
         wav = inv_mel_spectrogram(mel.T, hparams)
+        wav = np.concatenate((wav, [0] * hparams.sample_rate))
         sd.play(wav, 16000)
         sd.wait()

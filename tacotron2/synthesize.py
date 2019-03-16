@@ -46,6 +46,10 @@ def synthesize(args, hparams, taco_checkpoint, wave_checkpoint, sentences):
 
 
 def main():
+    # Eval is text-to-speech without ground truth.
+    # Synthesis is autoregressive synthesis without text. Not much useful unless GTA is True, 
+    # in which case it generates spectrograms that can be used to train a vocoder.
+    # Live isn't really useful in my case I think.
     accepted_modes = ['eval', 'synthesis', 'live']
     parser = argparse.ArgumentParser()
     parser.add_argument('--checkpoint', default='pretrained/', help='Path to model checkpoint')

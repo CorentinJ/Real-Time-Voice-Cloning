@@ -8,6 +8,13 @@ TRANSFER LEARNING FROM SPEAKER VERIFICATION TO MULTISPEAKER TEXT-TO-SPEECH SYNTH
 ASR preprocessing:
 - Median utterance duration is indeed 14s (look at the plots). I initially set the limit to 1200 (15 seconds) as 1000 just didn't cut it.
     - [conditioned (scratch)]: batch size 32, max mel 1200, outputs per step 2, alignment after ~50k steps
-    - [one_output (scratch)]:  batch size 19, max mel 1200, outputs per step 1, no alignment after ~160k steps
+    - [one_output (scratch)]:  batch size 19, max mel 1200, outputs per step 1, no alignment after 190k steps
+    - [asr (from one_output)]: batch size 40, max mel  600, outputs per step 1, no aligmnent after an additional 236k steps (426k total)
+    - [two_asr (from conditioned)]: batch size 40, max mel 900, outputs per step 2, alignment remained
     
-    
+Notes on alignment:
+- Rayhane mentions that he's seen cases where the attention failed to be learned with a batch size smaller than 32 (https://github.com/Rayhane-mamah/Tacotron-2/issues/32#issuecomment-384424074).
+- Begeek thinks there isn't much of an audio quality difference between outputs_per_step set 1 or 2 (https://github.com/Rayhane-mamah/Tacotron-2/issues/32#issuecomment-390533573).
+    -> I could thus retrain "conditioned" on my newer dataset with shorter max mel.
+    -> It's good to keep in mind that a higher value of outputs_per_step will greatly speed up the training and (likely - I gotta make sure) the inference time.
+- Some users report their number of training steps (https://github.com/Rayhane-mamah/Tacotron-2/issues/175)
