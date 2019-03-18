@@ -3,11 +3,11 @@ import time, sys, math
 import numpy as np
 
 def stream(string, variables) :
-    sys.stdout.write(f'\r{string}' % variables)
+    sys.stdout.write('\r%s' % (string % variables))
     
 def num_params(model) :
     parameters = filter(lambda p: p.requires_grad, model.parameters())
-    parameters = sum([np.prod(p.size()) for p in parameters]) / 1_000_000
+    parameters = sum([np.prod(p.size()) for p in parameters]) / 1000000
     print('Trainable Parameters: %.3f million' % parameters)
 
 def time_since(started) :
@@ -17,9 +17,9 @@ def time_since(started) :
     if m >= 60 :
         h = int(m // 60)
         m = m % 60
-        return f'{h}h {m}m {s}s'
+        return '%dh %dm %ds' % (h, m, s)
     else :
-        return f'{m}m {s}s'
+        return '%dm %ds' % (m, s)
 
 def plot(array) : 
     fig = plt.figure(figsize=(30, 5))

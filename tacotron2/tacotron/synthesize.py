@@ -21,7 +21,8 @@ def run_live(args, checkpoint_path, hparams):
 	synth.load(checkpoint_path, hparams)
 
 	#Generate fast greeting message
-	greetings = 'Hello, Welcome to the Live testing tool. Please type a message and I will try to read it!'
+	greetings = 'Hello, Welcome to the Live testing tool. Please type a message and I will try ' \
+				'to read it!'
 	log(greetings)
 	generate_fast(synth, greetings)
 
@@ -92,27 +93,32 @@ def run_synthesis(args, checkpoint_path, output_dir, hparams):
 		log('Loaded metadata for {} examples ({:.2f} hours)'.format(len(metadata), hours))
 
 	#Set inputs batch wise
-	metadata = [metadata[i: i+hparams.tacotron_synthesis_batch_size] for i in range(0, len(metadata), hparams.tacotron_synthesis_batch_size)]
+	metadata = [metadata[i: i+hparams.tacotron_synthesis_batch_size] for i in 
+				range(0, len(metadata), hparams.tacotron_synthesis_batch_size)]
 
 	log('Starting Synthesis')
 	mel_dir = os.path.join(args.input_dir, 'mels')
 	wav_dir = os.path.join(args.input_dir, 'audio')
+	embed_dir = os.path.join(args.input_dir, 'embed')
 	with open(os.path.join(synth_dir, 'map.txt'), 'w') as file:
 		for i, meta in enumerate(tqdm(metadata)):
 			texts = [m[5] for m in meta]
 			mel_filenames = [os.path.join(mel_dir, m[1]) for m in meta]
 			wav_filenames = [os.path.join(wav_dir, m[0]) for m in meta]
+			embed_filenames = [os.path.join(embed_dir, m[2]) for m in meta]
 			basenames = [os.path.basename(m).replace('.npy', '').replace('mel-', '') for m in mel_filenames]
-			mel_output_filenames, speaker_ids = synth.synthesize(texts, basenames, synth_dir, None, mel_filenames)
+			mel_output_filenames, mel_output_n_frames  = synth.synthesize(
+				texts, basenames, synth_dir, None, mel_filenames, embed_filenames)
 
-			for elems in zip(wav_filenames, mel_filenames, mel_output_filenames, speaker_ids, texts):
+			for elems in zip(wav_filenames, mel_filenames, embed_filenames, 
+							 mel_output_filenames, mel_output_n_frames, texts):
 				file.write('|'.join([str(x) for x in elems]) + '\n')
 	log('synthesized mel spectrograms at {}'.format(synth_dir))
 	return os.path.join(synth_dir, 'map.txt')
 
 
 def tacotron_synthesize(args, hparams, checkpoint, sentences=None):
-	output_dir = 'tacotron_' + args.output_dir
+	output_dir = args.output_dir
 
 	try:
 		checkpoint_path = tf.train.get_checkpoint_state(checkpoint).model_checkpoint_path

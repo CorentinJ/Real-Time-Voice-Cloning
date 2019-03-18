@@ -104,8 +104,7 @@ class Synthesizer:
 			
 		return mel
 
-
-	def synthesize(self, texts, basenames, out_dir, log_dir, mel_filenames):
+	def synthesize(self, texts, basenames, out_dir, log_dir, mel_filenames, embed_filenames):
 		hparams = self._hparams
 		cleaner_names = [x.strip() for x in hparams.cleaners.split(',')]
 
@@ -152,7 +151,7 @@ class Synthesizer:
 			assert len(np_targets) == len(texts)
 
 		feed_dict[self.split_infos] = np.asarray(split_infos, dtype=np.int32)
-		feed_dict[self.speaker_embeddings] = np.zeros((len(texts), 256))
+		feed_dict[self.speaker_embeddings] = [np.load(f) for f in embed_filenames]
 
 		if self.gta or not hparams.predict_linear:
 			mels, alignments, stop_tokens = self.session.run(
@@ -193,6 +192,9 @@ class Synthesizer:
 			linears = [linear[:target_length, :] for linear, target_length in zip(linears, target_lengths)]
 			assert len(mels) == len(linears) == len(texts)
 
+		# wav2 = audio.inv_mel_spectrogram(mels[0].T, hparams)
+		# import sounddevice as sd
+		# sd.play(wav2, 16000, blocking=True)
 
 		if basenames is None:
 			#Generate wav and read it
@@ -217,24 +219,15 @@ class Synthesizer:
 			p.terminate()
 			return
 
-
 		saved_mels_paths = []
-		speaker_ids = []
+		saved_mels_n_frames = []
 		for i, mel in enumerate(mels):
-			#Get speaker id for global conditioning (only used with GTA generally)
-			if hparams.gin_channels > 0:
-				raise RuntimeError('Please set the speaker_id rule in line 99 of tacotron/synthesizer.py to allow for global condition usage later.')
-				speaker_id = '<no_g>' #set the rule to determine speaker id. By using the file basename maybe? (basenames are inside "basenames" variable)
-				speaker_ids.append(speaker_id) #finish by appending the speaker id. (allows for different speakers per batch if your model is multispeaker)
-			else:
-				speaker_id = '<no_g>'
-				speaker_ids.append(speaker_id)
-
 			# Write the spectrogram to disk
 			# Note: outputs mel-spectrogram files and target ones have same names, just different folders
 			mel_filename = os.path.join(out_dir, 'mel-{}.npy'.format(basenames[i]))
 			np.save(mel_filename, mel, allow_pickle=False)
 			saved_mels_paths.append(mel_filename)
+			saved_mels_n_frames.append(len(mel))
 
 			if log_dir is not None:
 				#save wav (mel -> wav)
@@ -258,7 +251,7 @@ class Synthesizer:
 					plot.plot_spectrogram(linears[i], os.path.join(log_dir, 'plots/linear-{}.png'.format(basenames[i])),
 						title='{}'.format(texts[i]), split_title=True, auto_aspect=True)
 
-		return saved_mels_paths, speaker_ids
+		return saved_mels_paths, saved_mels_n_frames
 
 	def _round_up(self, x, multiple):
 		remainder = x % multiple

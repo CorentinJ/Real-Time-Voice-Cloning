@@ -7,11 +7,9 @@ sys.path.append('../encoder')
 encoder_model_fpath = '../encoder/saved_models/all.pt'
 from encoder import inference
 
-import matplotlib.pyplot as plt
-import sounddevice as sd
 
 
-def build_from_path(hparams, input_dirs, mel_dir, embed_dir, wav_dir, n_jobs=12, tqdm=lambda x: x):
+def build_from_path(hparams, input_dirs, mel_dir, embed_dir, wav_dir):
     """
     Preprocesses the speech dataset from a gven input path to given output directories
 
@@ -35,6 +33,7 @@ def build_from_path(hparams, input_dirs, mel_dir, embed_dir, wav_dir, n_jobs=12,
         for speaker_dir in fileio.listdir(input_dir, full_path=True):
             print("    " + speaker_dir)
             for utterance_dir in fileio.listdir(speaker_dir, full_path=True):
+                # utterance_dir = r"E:\Datasets\LibriSpeech\train-clean-360\100\121669"
                 alignment_file = fileio.get_files(utterance_dir, '.alignment.txt')[0]
                 for line in fileio.read_all_lines(alignment_file):
                     # Retrieve the audio filepath and its alignment data
@@ -100,16 +99,7 @@ def _process_utterance(mel_dir, embed_dir, wav_dir, basename, wav, text, hparams
 
     Returns:
         - A tuple: (audio_filename, mel_filename, embed_filename, time_steps, mel_frames, text)
-    """   
-    ### SV2TTS ###
-    # Compute the embedding of the utterance
-    embed = inference.embed_utterance(wav)
-    ##############
-    
-    out = wav
-    constant_values = 0.
-    out_dtype = np.float32
-    
+    """      
     # Compute the mel scale spectrogram from the wav
     mel_spectrogram = audio.melspectrogram(wav, hparams).astype(np.float32)
     mel_frames = mel_spectrogram.shape[1]
@@ -117,36 +107,18 @@ def _process_utterance(mel_dir, embed_dir, wav_dir, basename, wav, text, hparams
     if mel_frames > hparams.max_mel_frames and hparams.clip_mels_length:
         return None
     
-    if hparams.use_lws:
-        # Ensure time resolution adjustement between audio and mel-spectrogram
-        fft_size = hparams.n_fft if hparams.win_size is None else hparams.win_size
-        l, r = audio.pad_lr(wav, fft_size, audio.get_hop_size(hparams))
-        
-        # Zero pad audio signal
-        out = np.pad(out, (l, r), mode='constant', constant_values=constant_values)
-    else:
-        # Ensure time resolution adjustement between audio and mel-spectrogram
-        pad = audio.librosa_pad_lr(wav, hparams.n_fft, audio.get_hop_size(hparams))
-        
-        # Reflect pad audio signal (Just like it's done in Librosa to avoid frame inconsistency)
-        out = np.pad(out, pad, mode='reflect')
-    
-    assert len(out) >= mel_frames * audio.get_hop_size(hparams)
-    
-    # time resolution adjustement
-    # ensure length of raw audio is multiple of hop size so that we can use
-    # transposed convolution to upsample
-    out = out[:mel_frames * audio.get_hop_size(hparams)]
-    assert len(out) % audio.get_hop_size(hparams) == 0
-    time_steps = len(out)
+    ### SV2TTS ###
+    # Compute the embedding of the utterance
+    embed = inference.embed_utterance(wav)
+    ##############
     
     # Write the spectrogram, embed and audio to disk
     audio_filename = 'audio-{}.npy'.format(basename)
     mel_filename = 'mel-{}.npy'.format(basename)
     embed_filename = 'embed-{}.npy'.format(basename)
-    np.save(os.path.join(wav_dir, audio_filename), out.astype(out_dtype), allow_pickle=False)
+    np.save(os.path.join(wav_dir, audio_filename), wav, allow_pickle=False)
     np.save(os.path.join(mel_dir, mel_filename), mel_spectrogram.T, allow_pickle=False)
     np.save(os.path.join(embed_dir, embed_filename), embed, allow_pickle=False)
     
     # Return a tuple describing this training example
-    return audio_filename, mel_filename, embed_filename, time_steps, mel_frames, text
+    return audio_filename, mel_filename, embed_filename, len(wav), mel_frames, text

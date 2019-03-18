@@ -14,10 +14,10 @@ def prepare_run(args):
     modified_hp = hparams.parse(args.hparams)
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
     
-    run_name = args.name
+    run_name = args.name or args.tacotron_name or args.model
     taco_checkpoint = os.path.join('logs-' + run_name, 'taco_' + args.checkpoint)
     
-    run_name = args.name
+    run_name = args.name or args.wavenet_name or args.model
     wave_checkpoint = os.path.join('logs-' + run_name, 'wave_' + args.checkpoint)
     return taco_checkpoint, wave_checkpoint, modified_hp
 
@@ -62,7 +62,7 @@ def main():
                         help='Name of logging directory of Tacotron. If trained separately')
     parser.add_argument('--wavenet_name',
                         help='Name of logging directory of WaveNet. If trained separately')
-    parser.add_argument('--model', default='Tacotron-2')
+    parser.add_argument('--model', default='Tacotron')
     parser.add_argument('--input_dir', default='training_data/',
                         help='folder to contain inputs sentences/targets')
     parser.add_argument('--mels_dir', default='tacotron_output/eval/',

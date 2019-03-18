@@ -1,5 +1,5 @@
-from typing import List
 import numpy as np
+from typing import List
 from encoder.data_objects.speaker import Speaker
 from encoder.params_data import mel_n_channels
 

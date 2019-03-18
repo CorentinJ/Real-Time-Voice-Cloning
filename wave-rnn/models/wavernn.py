@@ -1,173 +1,346 @@
 import torch
+import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 from utils.display import *
-from utils.dsp import *
+from params import *
+from utils import audio
 
-class WaveRNN(nn.Module) :
-    def __init__(self, hidden_size=896, quantisation=256) :
-        super(WaveRNN, self).__init__()
-        
-        self.hidden_size = hidden_size
-        self.split_size = hidden_size // 2
-        
-        # The main matmul
-        self.R = nn.Linear(self.hidden_size, 3 * self.hidden_size, bias=False)
-        
-        # Output fc layers
-        self.O1 = nn.Linear(self.split_size, self.split_size)
-        self.O2 = nn.Linear(self.split_size, quantisation)
-        self.O3 = nn.Linear(self.split_size, self.split_size)
-        self.O4 = nn.Linear(self.split_size, quantisation)
-        
-        # Input fc layers
-        self.I_coarse = nn.Linear(2, 3 * self.split_size, bias=False)
-        self.I_fine = nn.Linear(3, 3 * self.split_size, bias=False)
-
-        # biases for the gates
-        self.bias_u = nn.Parameter(torch.zeros(self.hidden_size))
-        self.bias_r = nn.Parameter(torch.zeros(self.hidden_size))
-        self.bias_e = nn.Parameter(torch.zeros(self.hidden_size))
-        
-        # display num params
-        self.num_params()
-
-        
-    def forward(self, prev_y, prev_hidden, current_coarse) :
-        
-        # Main matmul - the projection is split 3 ways
-        R_hidden = self.R(prev_hidden)
-        R_u, R_r, R_e, = torch.split(R_hidden, self.hidden_size, dim=1)
-        
-        # Project the prev input 
-        coarse_input_proj = self.I_coarse(prev_y)
-        I_coarse_u, I_coarse_r, I_coarse_e = \
-            torch.split(coarse_input_proj, self.split_size, dim=1)
-        
-        # Project the prev input and current coarse sample
-        fine_input = torch.cat([prev_y, current_coarse], dim=1)
-        fine_input_proj = self.I_fine(fine_input)
-        I_fine_u, I_fine_r, I_fine_e = \
-            torch.split(fine_input_proj, self.split_size, dim=1)
-        
-        # concatenate for the gates
-        I_u = torch.cat([I_coarse_u, I_fine_u], dim=1)
-        I_r = torch.cat([I_coarse_r, I_fine_r], dim=1)
-        I_e = torch.cat([I_coarse_e, I_fine_e], dim=1)
-        
-        # Compute all gates for coarse and fine 
-        u = F.sigmoid(R_u + I_u + self.bias_u)
-        r = F.sigmoid(R_r + I_r + self.bias_r)
-        e = F.tanh(r * R_e + I_e + self.bias_e)
-        hidden = u * prev_hidden + (1. - u) * e
-        
-        # Split the hidden state
-        hidden_coarse, hidden_fine = torch.split(hidden, self.split_size, dim=1)
-        
-        # Compute outputs 
-        out_coarse = self.O2(F.relu(self.O1(hidden_coarse)))
-        out_fine = self.O4(F.relu(self.O3(hidden_fine)))
-
-        return out_coarse, out_fine, hidden
+class ResBlock(nn.Module):
+    def __init__(self, dims):
+        super().__init__()
+        self.conv1 = nn.Conv1d(dims, dims, kernel_size=1, bias=False)
+        self.conv2 = nn.Conv1d(dims, dims, kernel_size=1, bias=False)
+        self.batch_norm1 = nn.BatchNorm1d(dims)
+        self.batch_norm2 = nn.BatchNorm1d(dims)
     
+    def forward(self, x):
+        residual = x
+        x = self.conv1(x)
+        x = self.batch_norm1(x)
+        x = F.relu(x)
+        x = self.conv2(x)
+        x = self.batch_norm2(x)
+        return x + residual
+
+
+class MelResNet(nn.Module):
+    def __init__(self, res_blocks, in_dims, compute_dims, res_out_dims):
+        super().__init__()
+        k_size = pad * 2 + 1
+        self.conv_in = nn.Conv1d(in_dims, compute_dims, kernel_size=k_size, bias=False)
+        self.batch_norm = nn.BatchNorm1d(compute_dims)
+        self.layers = nn.ModuleList()
+        for i in range(res_blocks):
+            self.layers.append(ResBlock(compute_dims))
+        self.conv_out = nn.Conv1d(compute_dims, res_out_dims, kernel_size=1)
+    
+    def forward(self, x):
+        x = self.conv_in(x)
+        x = self.batch_norm(x)
+        x = F.relu(x)
+        for f in self.layers: x = f(x)
+        x = self.conv_out(x)
+        return x
+
+
+class Stretch2d(nn.Module):
+    def __init__(self, x_scale, y_scale):
+        super().__init__()
+        self.x_scale = x_scale
+        self.y_scale = y_scale
+    
+    def forward(self, x):
+        b, c, h, w = x.size()
+        x = x.unsqueeze(-1).unsqueeze(3)
+        x = x.repeat(1, 1, 1, self.y_scale, 1, self.x_scale)
+        return x.view(b, c, h * self.y_scale, w * self.x_scale)
+
+
+class UpsampleNetwork(nn.Module):
+    def __init__(self, feat_dims, upsample_scales, compute_dims,
+                 res_blocks, res_out_dims, pad):
+        super().__init__()
+        total_scale = np.cumproduct(upsample_scales)[-1]
+        self.indent = pad * total_scale
+        self.resnet = MelResNet(res_blocks, feat_dims, compute_dims, res_out_dims)
+        self.resnet_stretch = Stretch2d(total_scale, 1)
+        self.up_layers = nn.ModuleList()
+        for scale in upsample_scales:
+            k_size = (1, scale * 2 + 1)
+            padding = (0, scale)
+            stretch = Stretch2d(scale, 1)
+            conv = nn.Conv2d(1, 1, kernel_size=k_size, padding=padding, bias=False)
+            conv.weight.data.fill_(1. / k_size[1])
+            self.up_layers.append(stretch)
+            self.up_layers.append(conv)
+    
+    def forward(self, m):
+        aux = self.resnet(m).unsqueeze(1)
+        aux = self.resnet_stretch(aux)
+        aux = aux.squeeze(1)
+        m = m.unsqueeze(1)
+        for f in self.up_layers: m = f(m)
+        m = m.squeeze(1)[:, :, self.indent:-self.indent]
+        return m.transpose(1, 2), aux.transpose(1, 2)
+
+
+class WaveRNN(nn.Module):
+    def __init__(self, rnn_dims, fc_dims, bits, pad, upsample_factors,
+                 feat_dims, compute_dims, res_out_dims, res_blocks,
+                 hop_length, sample_rate):
+        super().__init__()
+        self.pad = pad
+        self.n_classes = 2 ** bits
+        self.rnn_dims = rnn_dims
+        self.aux_dims = res_out_dims // 4
+        self.hop_length = hop_length
+        self.sample_rate = sample_rate
+        self.upsample = UpsampleNetwork(feat_dims, upsample_factors, compute_dims,
+                                        res_blocks, res_out_dims, pad)
+        self.I = nn.Linear(feat_dims + self.aux_dims + 1, rnn_dims)
+        self.rnn1 = nn.GRU(rnn_dims, rnn_dims, batch_first=True)
+        self.rnn2 = nn.GRU(rnn_dims + self.aux_dims, rnn_dims, batch_first=True)
+        self.fc1 = nn.Linear(rnn_dims + self.aux_dims, fc_dims)
+        self.fc2 = nn.Linear(fc_dims + self.aux_dims, fc_dims)
+        self.fc3 = nn.Linear(fc_dims, self.n_classes)
+    
+    def forward(self, x, mels):
+        bsize = x.size(0)
+        h1 = torch.zeros(1, bsize, self.rnn_dims).cuda()
+        h2 = torch.zeros(1, bsize, self.rnn_dims).cuda()
+        mels, aux = self.upsample(mels)
         
-    def generate(self, seq_len) :
+        aux_idx = [self.aux_dims * i for i in range(5)]
+        a1 = aux[:, :, aux_idx[0]:aux_idx[1]]
+        a2 = aux[:, :, aux_idx[1]:aux_idx[2]]
+        a3 = aux[:, :, aux_idx[2]:aux_idx[3]]
+        a4 = aux[:, :, aux_idx[3]:aux_idx[4]]
         
-        with torch.no_grad() :
+        x = torch.cat([x.unsqueeze(-1), mels, a1], dim=2)
+        x = self.I(x)
+        res = x
+        x, _ = self.rnn1(x, h1)
+        
+        x = x + res
+        res = x
+        x = torch.cat([x, a2], dim=2)
+        x, _ = self.rnn2(x, h2)
+        
+        x = x + res
+        x = torch.cat([x, a3], dim=2)
+        x = F.relu(self.fc1(x))
+        
+        x = torch.cat([x, a4], dim=2)
+        x = F.relu(self.fc2(x))
+        return F.log_softmax(self.fc3(x), dim=-1)
+    
+    def generate(self, mels, batched, target, overlap):
+        self.eval()
+        output = []
+        start = time.time()
+        rnn1 = self.get_gru_cell(self.rnn1)
+        rnn2 = self.get_gru_cell(self.rnn2)
+        
+        with torch.no_grad():
+            mels = torch.FloatTensor(mels).cuda().unsqueeze(0)
+            mels = self.pad_tensor(mels.transpose(1, 2), pad=self.pad, side='both')
+            mels, aux = self.upsample(mels.transpose(1, 2))
             
-            # First split up the biases for the gates 
-            b_coarse_u, b_fine_u = torch.split(self.bias_u, self.split_size)
-            b_coarse_r, b_fine_r = torch.split(self.bias_r, self.split_size)
-            b_coarse_e, b_fine_e = torch.split(self.bias_e, self.split_size)
-
-            # Lists for the two output seqs
-            c_outputs, f_outputs = [], []
-
-            # Some initial inputs
-            out_coarse = torch.LongTensor([0]).cuda()
-            out_fine = torch.LongTensor([0]).cuda()
-
-            # We'll meed a hidden state
-            hidden = self.init_hidden()
-
-            # Need a clock for display
-            start = time.time()
-
-            # Loop for generation
-            for i in range(seq_len) :
-
-                # Split into two hidden states
-                hidden_coarse, hidden_fine = \
-                    torch.split(hidden, self.split_size, dim=1)
-
-                # Scale and concat previous predictions
-                out_coarse = out_coarse.unsqueeze(0).float() / 127.5 - 1.
-                out_fine = out_fine.unsqueeze(0).float() / 127.5 - 1.
-                prev_outputs = torch.cat([out_coarse, out_fine], dim=1)
-
-                # Project input 
-                coarse_input_proj = self.I_coarse(prev_outputs)
-                I_coarse_u, I_coarse_r, I_coarse_e = \
-                    torch.split(coarse_input_proj, self.split_size, dim=1)
-
-                # Project hidden state and split 6 ways
-                R_hidden = self.R(hidden)
-                R_coarse_u , R_fine_u, \
-                R_coarse_r, R_fine_r, \
-                R_coarse_e, R_fine_e = torch.split(R_hidden, self.split_size, dim=1)
-
-                # Compute the coarse gates
-                u = F.sigmoid(R_coarse_u + I_coarse_u + b_coarse_u)
-                r = F.sigmoid(R_coarse_r + I_coarse_r + b_coarse_r)
-                e = F.tanh(r * R_coarse_e + I_coarse_e + b_coarse_e)
-                hidden_coarse = u * hidden_coarse + (1. - u) * e
-
-                # Compute the coarse output
-                out_coarse = self.O2(F.relu(self.O1(hidden_coarse)))
-                posterior = F.softmax(out_coarse, dim=1)
+            if batched:
+                mels = self.fold_with_overlap(mels, target, overlap)
+                aux = self.fold_with_overlap(aux, target, overlap)
+            
+            b_size, seq_len, _ = mels.size()
+            
+            h1 = torch.zeros(b_size, self.rnn_dims).cuda()
+            h2 = torch.zeros(b_size, self.rnn_dims).cuda()
+            x = torch.zeros(b_size, 1).cuda()
+            
+            d = self.aux_dims
+            aux_split = [aux[:, :, d * i:d * (i + 1)] for i in range(4)]
+            
+            for i in range(seq_len):
+                
+                m_t = mels[:, i, :]
+                
+                a1_t, a2_t, a3_t, a4_t = (a[:, i, :] for a in aux_split)
+                
+                x = torch.cat([x, m_t, a1_t], dim=1)
+                x = self.I(x)
+                h1 = rnn1(x, h1)
+                
+                x = x + h1
+                inp = torch.cat([x, a2_t], dim=1)
+                h2 = rnn2(inp, h2)
+                
+                x = x + h2
+                x = torch.cat([x, a3_t], dim=1)
+                x = F.relu(self.fc1(x))
+                
+                x = torch.cat([x, a4_t], dim=1)
+                x = F.relu(self.fc2(x))
+                
+                logits = self.fc3(x)
+                posterior = F.softmax(logits, dim=1)
                 distrib = torch.distributions.Categorical(posterior)
-                out_coarse = distrib.sample()
-                c_outputs.append(out_coarse)
-
-                # Project the [prev outputs and predicted coarse sample]
-                coarse_pred = out_coarse.float() / 127.5 - 1.
-                fine_input = torch.cat([prev_outputs, coarse_pred.unsqueeze(0)], dim=1)
-                fine_input_proj = self.I_fine(fine_input)
-                I_fine_u, I_fine_r, I_fine_e = \
-                    torch.split(fine_input_proj, self.split_size, dim=1)
-
-                # Compute the fine gates
-                u = F.sigmoid(R_fine_u + I_fine_u + b_fine_u)
-                r = F.sigmoid(R_fine_r + I_fine_r + b_fine_r)
-                e = F.tanh(r * R_fine_e + I_fine_e + b_fine_e)
-                hidden_fine = u * hidden_fine + (1. - u) * e
-
-                # Compute the fine output
-                out_fine = self.O4(F.relu(self.O3(hidden_fine)))
-                posterior = F.softmax(out_fine, dim=1)
-                distrib = torch.distributions.Categorical(posterior)
-                out_fine = distrib.sample()
-                f_outputs.append(out_fine)
-
-                # Put the hidden state back together
-                hidden = torch.cat([hidden_coarse, hidden_fine], dim=1)
-
-                # Display progress
-                speed = (i + 1) / (time.time() - start)
-                stream('Gen: %i/%i -- Speed: %i',  (i + 1, seq_len, speed))
-
-            coarse = torch.stack(c_outputs).squeeze(1).cpu().data.numpy()
-            fine = torch.stack(f_outputs).squeeze(1).cpu().data.numpy()        
-            output = combine_signal(coarse, fine)
+                
+                sample = audio.restore_signal(distrib.sample())
+                # sample = 2 * distrib.sample().float() / (self.n_classes - 1.) - 1.
+                output.append(sample)
+                x = sample.unsqueeze(-1)
+                
+                if i % 100 == 0: 
+                    self.gen_display(i, seq_len, b_size, start)
         
-        return output, coarse, fine
+        output = torch.stack(output).transpose(0, 1)
+        output = output.cpu().numpy()
+        output = output.astype(np.float64)
         
-             
-    def init_hidden(self, batch_size=1) :
-        return torch.zeros(batch_size, self.hidden_size).cuda()
+        if batched:
+            output = self.xfade_and_unfold(output, target, overlap)
+        else:
+            output = output[0]
+        
+        self.train()
+        
+        return output
+    
+    def gen_display(self, i, seq_len, b_size, start):
+        gen_rate = (i + 1) / (time.time() - start) * b_size / 1000
+        realtime_ratio = gen_rate * 1000 / self.sample_rate
+        stream('%i/%i -- batch_size: %i -- gen_rate: %.1f kHz -- x_realtime: %.1f  ',
+               (i * b_size, seq_len * b_size, b_size, gen_rate, realtime_ratio))
+    
+    def get_gru_cell(self, gru):
+        gru_cell = nn.GRUCell(gru.input_size, gru.hidden_size)
+        gru_cell.weight_hh.data = gru.weight_hh_l0.data
+        gru_cell.weight_ih.data = gru.weight_ih_l0.data
+        gru_cell.bias_hh.data = gru.bias_hh_l0.data
+        gru_cell.bias_ih.data = gru.bias_ih_l0.data
+        return gru_cell
+    
+    def pad_tensor(self, x, pad, side='both'):
+        # NB - this is just a quick method i need right now
+        # i.e., it won't generalise to other shapes/dims
+        b, t, c = x.size()
+        total = t + 2 * pad if side == 'both' else t + pad
+        padded = torch.zeros(b, total, c).cuda()
+        if side == 'before' or side == 'both':
+            padded[:, pad:pad + t, :] = x
+        elif side == 'after':
+            padded[:, :t, :] = x
+        return padded
+    
+    def fold_with_overlap(self, x, target, overlap):
+        """ Fold the tensor with overlap for quick batched inference.
+            Overlap will be used for crossfading in xfade_and_unfold()
+
+        Args:
+            x (tensor)    : Upsampled conditioning features. 
+                            shape=(1, timesteps, features)
+            target (int)  : Target timesteps for each index of batch
+            overlap (int) : Timesteps for both xfade and rnn warmup
+
+        Return:
+            (tensor) : shape=(num_folds, target + 2 * overlap, features)
+
+        Details:      
+            x = [[h1, h2, ... hn]] 
+
+            Where each h is a vector of conditioning features
+
+            Eg: target=2, overlap=1 with x.size(1)=10 
+
+            folded = [[h1, h2, h3, h4],
+                      [h4, h5, h6, h7],
+                      [h7, h8, h9, h10]]
+        """
+        
+        _, total_len, features = x.size()
+        
+        # Calculate variables needed
+        num_folds = (total_len - overlap) // (target + overlap)
+        extended_len = num_folds * (overlap + target) + overlap
+        remaining = total_len - extended_len
+        
+        # Pad if some time steps poking out
+        if remaining != 0:
+            num_folds += 1
+            padding = target + 2 * overlap - remaining
+            x = self.pad_tensor(x, padding, side='after')
+        
+        folded = torch.zeros(num_folds, target + 2 * overlap, features).cuda()
+        
+        # Get the values for the folded tensor
+        for i in range(num_folds):
+            start = i * (target + overlap)
+            end = start + target + 2 * overlap
+            folded[i] = x[:, start:end, :]
+        
+        return folded
     
     
-    def num_params(self) :
-        parameters = filter(lambda p: p.requires_grad, self.parameters())
-        parameters = sum([np.prod(p.size()) for p in parameters]) / 1_000_000
-        print('Trainable Parameters: %.3f million' % parameters)
+    def xfade_and_unfold(self, y, target, overlap):
+        """ Applies a crossfade and unfolds into a 1d array.
+
+        Args:
+            y (ndarry)    : Batched sequences of audio samples
+                            shape=(num_folds, target + 2 * overlap)
+                            dtype=np.float64
+            overlap (int) : Timesteps for both xfade and rnn warmup
+
+        Return:
+            (ndarry) : audio samples in a 1d array  
+                       shape=(total_len)
+                       dtype=np.float64
+
+        Details: 
+            y = [[seq1], 
+                 [seq2], 
+                 [seq3]] 
+
+            Apply a gain envelope at both ends of the sequences
+
+            y = [[seq1_in, seq1_target, seq1_out],
+                 [seq2_in, seq2_target, seq2_out],
+                 [seq3_in, seq3_target, seq3_out]]
+
+            Stagger and add up the groups of samples:
+
+            [seq1_in, seq1_target, (seq1_out + seq2_in), seq2_target, ...]
+
+        """
+        
+        num_folds, length = y.shape
+        target = length - 2 * overlap
+        total_len = num_folds * (target + overlap) + overlap
+        
+        # Need some silence for the rnn warmup
+        silence_len = overlap // 2
+        fade_len = overlap - silence_len
+        silence = np.zeros(silence_len, dtype=np.float64)
+        
+        # Equal power crossfade
+        t = np.linspace(-1, 1, fade_len, dtype=np.float64)
+        fade_in = np.sqrt(0.5 * (1 + t))
+        fade_out = np.sqrt(0.5 * (1 - t))
+        
+        # Concat the silence to the fades
+        fade_in = np.concatenate([silence, fade_in])
+        fade_out = np.concatenate([fade_out, silence])
+        
+        # Apply the gain to the overlap samples
+        y[:, :overlap] *= fade_in
+        y[:, -overlap:] *= fade_out
+        
+        unfolded = np.zeros(total_len, dtype=np.float64)
+        
+        # Loop to add up all the samples
+        for i in range(num_folds):
+            start = i * (target + overlap)
+            end = start + target + 2 * overlap
+            unfolded[start:end] += y[i]
+        
+        return unfolded
+    

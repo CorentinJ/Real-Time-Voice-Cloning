@@ -14,8 +14,7 @@ def preprocess(args, input_folders, out_dir, hparams):
 	os.makedirs(mel_dir, exist_ok=True)
 	os.makedirs(wav_dir, exist_ok=True)
 	os.makedirs(embed_dir, exist_ok=True)
-	metadata = preprocessor.build_from_path(hparams, input_folders, mel_dir, embed_dir, wav_dir, 
-											args.n_jobs, tqdm=tqdm)
+	metadata = preprocessor.build_from_path(hparams, input_folders, mel_dir, embed_dir, wav_dir)
 	write_metadata(metadata, out_dir)
 
 def write_metadata(metadata, out_dir):
