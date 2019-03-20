@@ -5,7 +5,7 @@ from utils.vocoder_dataset import VocoderDataset
 from params import *
 from utils import audio
 
-run_name = 'mu_law'
+run_name = 'from_synth'
 model_dir = 'checkpoints'
 model_fpath = fileio.join(model_dir, run_name + '.pt')
 
@@ -40,10 +40,10 @@ for i, (mel, wav_gt) in enumerate(dataset):
     out_gt_fpath = fileio.join(gen_path, "%s_%dk_steps_%d_gt.wav" % (run_name, k, i))
     out_pred_fpath = fileio.join(gen_path, "%s_%dk_steps_%d_pred.wav" % (run_name, k, i))
     
-    wav_gt = 2 * wav_gt / (2 ** bits - 1) - 1
+    wav_gt = audio.restore_signal(wav_gt)
     wav_pred = model.generate(mel, True, target, overlap)
 
-    audio.save_wav(out_gt_fpath, wav_gt)
     audio.save_wav(out_pred_fpath, wav_pred)
+    audio.save_wav(out_gt_fpath, wav_gt)
 
 

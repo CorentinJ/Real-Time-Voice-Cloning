@@ -161,7 +161,6 @@ class WaveRNN(nn.Module):
             aux_split = [aux[:, :, d * i:d * (i + 1)] for i in range(4)]
             
             for i in range(seq_len):
-                
                 m_t = mels[:, i, :]
                 
                 a1_t, a2_t, a3_t, a4_t = (a[:, i, :] for a in aux_split)
@@ -184,9 +183,15 @@ class WaveRNN(nn.Module):
                 logits = self.fc3(x)
                 posterior = F.softmax(logits, dim=1)
                 distrib = torch.distributions.Categorical(posterior)
-                
-                sample = audio.restore_signal(distrib.sample())
-                # sample = 2 * distrib.sample().float() / (self.n_classes - 1.) - 1.
+
+                sample = 2 * distrib.sample().float() / (self.n_classes - 1.) - 1.
+                # sample = distrib.sample()
+                # a = sample.detach().cpu().numpy().copy()
+                # sample = (sample.float() / (2 ** bits)) * 2 - 1
+                # if use_mu_law:
+                #     sample = torch.sign(sample) * (1 / (2 ** bits - 1)) * ((2 ** bits) ** 
+                #                                                            torch.abs(sample) - 1)
+                # assert np.allclose(audio.restore_signal(a), sample.detach().cpu().numpy())
                 output.append(sample)
                 x = sample.unsqueeze(-1)
                 

@@ -28,7 +28,8 @@ from utils.display import *
 from vlibs import fileio
 from params import *
 
-run_name = 'mu_law'
+# run_name = 'mu_law'
+run_name = 'from_synth'
 model_dir = 'checkpoints'
 fileio.ensure_dir(model_dir)
 model_fpath = fileio.join(model_dir, run_name + '.pt')
@@ -50,7 +51,7 @@ def collate(batch) :
     mels = torch.FloatTensor(mels)
     coarse = torch.LongTensor(coarse)
     
-    x_input = 2 * coarse[:, :seq_len].float() / (2**bits - 1.) - 1.
+    x_input = 2 * coarse[:, :seq_len].float() / (2 ** bits - 1.) - 1.
     y_coarse = coarse[:, 1:]
     
     return x_input, mels, y_coarse
@@ -89,7 +90,7 @@ if __name__ == '__main__':
         
         for e in range(epochs):
             trn_loader = DataLoader(dataset, collate_fn=collate, batch_size=batch_size, 
-                                    num_workers=0, shuffle=True, pin_memory=True)
+                                    num_workers=2, shuffle=True, pin_memory=True)
             start = time.time()
             running_loss = 0.
     
@@ -120,6 +121,6 @@ if __name__ == '__main__':
             print('<saved>')
             
     optimiser = optim.Adam(model.parameters())
-    train(model, optimiser, epochs=60, batch_size=16, classes=2**bits, 
+    train(model, optimiser, epochs=30, batch_size=32, classes=2**bits, 
           seq_len=seq_len, step=step, lr=1e-4)
     

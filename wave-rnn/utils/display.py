@@ -31,6 +31,7 @@ def plot(array) :
     ax.tick_params(axis='x', colors='grey', labelsize=23)
     ax.tick_params(axis='y', colors='grey', labelsize=23)
     plt.plot(array)
+    plt.show()
 
 def plot_spec(M) :
     M = np.flip(M, axis=0)
