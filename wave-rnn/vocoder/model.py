@@ -207,7 +207,7 @@ class WaveRNN(nn.Module):
     def gen_display(self, i, seq_len, b_size, start):
         gen_rate = (i + 1) / (time.time() - start) * b_size / 1000
         realtime_ratio = gen_rate * 1000 / self.sample_rate
-        print('\r%i/%i -- batch_size: %i -- gen_rate: %.1f kHz -- x_realtime: %.1f  ',
+        print('\r%i/%i -- batch_size: %i -- gen_rate: %.1f kHz -- x_realtime: %.1f' %
                (i * b_size, seq_len * b_size, b_size, gen_rate, realtime_ratio), end='')
     
     def get_gru_cell(self, gru):

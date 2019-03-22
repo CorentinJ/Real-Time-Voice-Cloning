@@ -115,7 +115,7 @@ if __name__ == '__main__':
                 step += 1
                 k = step // 1000
                 print('\rEpoch: %i/%i -- Batch: %i/%i -- Loss: %.3f -- %.2f steps/sec -- '
-                       'Step: %ik ', (e + 1, epochs, i + 1, iters, avg_loss, speed, k), end='')
+                       'Step: %ik' % (e + 1, epochs, i + 1, iters, avg_loss, speed, k), end='')
                 
                 if (i + 1) % 1000 == 0:
                     torch.save({'step': step, 'model_state': model.state_dict()}, model_fpath)
