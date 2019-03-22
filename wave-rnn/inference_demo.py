@@ -1,13 +1,12 @@
 import torch
 from vlibs import fileio
-from models.wavernn import WaveRNN
-from utils.vocoder_dataset import VocoderDataset
-from params import *
-from utils import audio
+from vocoder.model import WaveRNN
+from vocoder.vocoder_dataset import VocoderDataset
+from vocoder import audio
+from vocoder.params import *
 import numpy as np
 
-run_name = 'from_synth'
-# run_name = 'mu_law'
+run_name = 'mu_law'
 model_dir = 'checkpoints'
 model_fpath = fileio.join(model_dir, run_name + '.pt')
 

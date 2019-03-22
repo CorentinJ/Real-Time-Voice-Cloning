@@ -6,6 +6,6 @@ NOTES:
 - On eddard, tacotron_model.ckpt-486000 was the model used to generate GTA.
 
 TODO:
-- Begin server-side training of linear then mel and delete the local outdated GTA
 - Meanwhile, work on a rough inference demo (don't forget to show side-by-side generated and original sample)
+- Begin merging the three projects
 - Clean up the rest of the code

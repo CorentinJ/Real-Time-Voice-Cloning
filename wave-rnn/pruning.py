@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from utils.display import *
+from vocoder.display import *
 
 
 def np_now(tensor):
@@ -153,7 +153,6 @@ class Model(nn.Module):
         self.layers2prune = [self.rnn, self.fc]
         self.pruner = Pruner(self.layers2prune, start_prune,
                              prune_steps, sparsity_target)
-        num_params(self)
     
     def forward(self):
         #         h = torch.ones(1, 2)
@@ -185,7 +184,7 @@ model = Model(in_size, model_size, start_prune, prune_steps, sparsity_target)
 param_idx = [1, 2, 5]
 for idx in param_idx:
     W = list(model.parameters())[idx].data
-    plot_spec(W)
+    # plot_spec(W)
     print(W.size(0) * W.size(1), W.shape)
 
 sparsity = []
@@ -195,15 +194,16 @@ for step in range(num_steps):
     model()
     sparsity += [model.pruner.z]
     pruned_params += [model.pruner.num_pruned]
-    if step % 100 == 0: stream('%i/%i', (step, num_steps))
+    if step % 100 == 0: 
+        print('\r%i/%i', (step, num_steps), end='')
 
-plot(sparsity)
-plot(pruned_params)
+# plot(sparsity)
+# plot(pruned_params)
 
 param_idx = [1, 2, 5]
 for idx in param_idx:
     W = list(model.parameters())[idx].data
-    plot_spec(torch.abs(W))
+    # plot_spec(torch.abs(W))
     print(W.size(0) * W.size(1), W.shape)
 
 print((model.pruner.Z, model.pruner.z))

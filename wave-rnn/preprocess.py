@@ -1,7 +1,6 @@
 # from multiprocessing import Pool, cpu_count
 import pickle
-from utils.display import *
-from utils.dsp import *
+from vocoder.display import *
 from vlibs import fileio
 
 bits = 9
@@ -36,7 +35,7 @@ def main():
     pool = Pool(processes=cpu_count())
     for i, fname in enumerate(pool.imap_unordered(process_wav, wav_files), 1):
         dataset_ids += [fname]
-        stream('Processing: %i/%i', (i, len(wav_files)))
+        print('\rProcessing: %i/%i', (i, len(wav_files)), end='')
     
     with open(fileio.join(out_dir, 'dataset_ids.pkl'), 'wb') as f:
         pickle.dump(dataset_ids, f)

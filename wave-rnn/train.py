@@ -22,19 +22,18 @@ import torch
 import torch.nn as nn
 from torch import optim
 from torch.utils.data import DataLoader
-from utils.vocoder_dataset import VocoderDataset
-from models.wavernn import WaveRNN
-from utils.display import *
+from vocoder.vocoder_dataset import VocoderDataset
+from vocoder.model import WaveRNN
 from vlibs import fileio
-from params import *
+from vocoder.params import *
+import time
+import numpy as np
 
 run_name = 'mu_law'
-# run_name = 'from_synth'
 model_dir = 'checkpoints'
 fileio.ensure_dir(model_dir)
 model_fpath = fileio.join(model_dir, run_name + '.pt')
 
-# data_path = r"E:\Datasets\Synthesizer"
 data_path = "../data/Synthesizer"
 gen_path = 'model_outputs'
 fileio.ensure_dir(gen_path)
@@ -74,7 +73,6 @@ if __name__ == '__main__':
         sample_rate=sample_rate
     )
     model = model.cuda()
-    num_params(model)
     
     global step
     if os.path.exists(model_fpath):
@@ -116,8 +114,8 @@ if __name__ == '__main__':
                 
                 step += 1
                 k = step // 1000
-                stream('Epoch: %i/%i -- Batch: %i/%i -- Loss: %.3f -- %.2f steps/sec -- Step: %ik ', 
-                       (e + 1, epochs, i + 1, iters, avg_loss, speed, k))
+                print('\rEpoch: %i/%i -- Batch: %i/%i -- Loss: %.3f -- %.2f steps/sec -- '
+                       'Step: %ik ', (e + 1, epochs, i + 1, iters, avg_loss, speed, k), end='')
                 
                 if (i + 1) % 1000 == 0:
                     torch.save({'step': step, 'model_state': model.state_dict()}, model_fpath)
