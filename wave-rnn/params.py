@@ -12,7 +12,7 @@ ref_level_db = 20
 # Maximum absolute value found in mels generated from the synthesizer
 mel_max_abs_value = 4
 # Whether or not to apply a mu-law to the audio before quantization (and after restoration of the
-# quantized signal). This results in a much greater audio quality but also requires more steps to 
+# quantized signal). This results in a greater audio quality but also requires more steps to 
 # reach convergence.
 use_mu_law = False
 

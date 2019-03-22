@@ -33,7 +33,6 @@ def build_from_path(hparams, input_dirs, mel_dir, embed_dir, wav_dir):
         for speaker_dir in fileio.listdir(input_dir, full_path=True):
             print("    " + speaker_dir)
             for utterance_dir in fileio.listdir(speaker_dir, full_path=True):
-                # utterance_dir = r"E:\Datasets\LibriSpeech\train-clean-360\100\121669"
                 alignment_file = fileio.get_files(utterance_dir, '.alignment.txt')[0]
                 for line in fileio.read_all_lines(alignment_file):
                     # Retrieve the audio filepath and its alignment data

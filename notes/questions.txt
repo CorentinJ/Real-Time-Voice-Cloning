@@ -1,6 +1,14 @@
-- Projection layer
+- Algorithm for determining when the encoder has converged on the embedding?
 
-- Batch size and backward pass complexity. Also, increasing batch size vs decreasing learning rate?
+- Training/Finetuning together the synthesizer and vocoder with the help of the encoder:
+    - Possible in my implementation since vocoding is now tractable
+    - The vocoder will guide towards improved audio quality
+    - The encoder will guide towards improved speaker similarity
+    - But the implementation will be hard:
+        - Second training paradigm
+            - Do I freeze the vocoder?
+            - Do I freeze the encoder? (probably yes)
+        - Mismatch between tf and pytorch
 
 ----------------------------------------------------------------------------------------------------------------
 

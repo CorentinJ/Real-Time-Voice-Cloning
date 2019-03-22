@@ -192,10 +192,6 @@ class Synthesizer:
 			linears = [linear[:target_length, :] for linear, target_length in zip(linears, target_lengths)]
 			assert len(mels) == len(linears) == len(texts)
 
-		# wav2 = audio.inv_mel_spectrogram(mels[0].T, hparams)
-		# import sounddevice as sd
-		# sd.play(wav2, 16000, blocking=True)
-
 		if basenames is None:
 			#Generate wav and read it
 			wav = audio.inv_mel_spectrogram(mels.T, hparams)
@@ -220,14 +216,12 @@ class Synthesizer:
 			return
 
 		saved_mels_paths = []
-		saved_mels_n_frames = []
 		for i, mel in enumerate(mels):
 			# Write the spectrogram to disk
 			# Note: outputs mel-spectrogram files and target ones have same names, just different folders
 			mel_filename = os.path.join(out_dir, 'mel-{}.npy'.format(basenames[i]))
 			np.save(mel_filename, mel, allow_pickle=False)
 			saved_mels_paths.append(mel_filename)
-			saved_mels_n_frames.append(len(mel))
 
 			if log_dir is not None:
 				#save wav (mel -> wav)
@@ -251,7 +245,7 @@ class Synthesizer:
 					plot.plot_spectrogram(linears[i], os.path.join(log_dir, 'plots/linear-{}.png'.format(basenames[i])),
 						title='{}'.format(texts[i]), split_title=True, auto_aspect=True)
 
-		return saved_mels_paths, saved_mels_n_frames
+		return saved_mels_paths
 
 	def _round_up(self, x, multiple):
 		remainder = x % multiple

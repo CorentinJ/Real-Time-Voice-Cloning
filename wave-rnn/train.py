@@ -28,16 +28,18 @@ from utils.display import *
 from vlibs import fileio
 from params import *
 
-# run_name = 'mu_law'
-run_name = 'from_synth'
+run_name = 'mu_law'
+# run_name = 'from_synth'
 model_dir = 'checkpoints'
 fileio.ensure_dir(model_dir)
 model_fpath = fileio.join(model_dir, run_name + '.pt')
 
-data_path = r"E:\Datasets\Synthesizer"
-step_path = fileio.join(model_dir, "step.npy")
+# data_path = r"E:\Datasets\Synthesizer"
+data_path = "../data/Synthesizer"
 gen_path = 'model_outputs'
 fileio.ensure_dir(gen_path)
+
+print("Using %s quantization" % ('mu_law' if use_mu_law else 'linear'))
 
 def collate(batch) :
     max_offsets = [x[0].shape[-1] - (mel_win + 2 * pad) for x in batch]
@@ -116,11 +118,14 @@ if __name__ == '__main__':
                 k = step // 1000
                 stream('Epoch: %i/%i -- Batch: %i/%i -- Loss: %.3f -- %.2f steps/sec -- Step: %ik ', 
                        (e + 1, epochs, i + 1, iters, avg_loss, speed, k))
+                
+                if (i + 1) % 1000 == 0:
+                    torch.save({'step': step, 'model_state': model.state_dict()}, model_fpath)
             
             torch.save({'step': step, 'model_state': model.state_dict()}, model_fpath)
             print('<saved>')
             
     optimiser = optim.Adam(model.parameters())
-    train(model, optimiser, epochs=30, batch_size=32, classes=2**bits, 
+    train(model, optimiser, epochs=30, batch_size=128, classes=2**bits, 
           seq_len=seq_len, step=step, lr=1e-4)
     

@@ -4,8 +4,10 @@ from models.wavernn import WaveRNN
 from utils.vocoder_dataset import VocoderDataset
 from params import *
 from utils import audio
+import numpy as np
 
 run_name = 'from_synth'
+# run_name = 'mu_law'
 model_dir = 'checkpoints'
 model_fpath = fileio.join(model_dir, run_name + '.pt')
 
@@ -35,13 +37,21 @@ dataset = VocoderDataset(data_path)
 target = 11000
 overlap = 550
 k = step // 1000
-for i, (mel, wav_gt) in enumerate(dataset):
+indices = np.array(range(len(dataset)))
+np.random.shuffle(indices)
+for i in indices:
     print('Generating...')
+    mel, wav_gt = dataset[i]
+    
     out_gt_fpath = fileio.join(gen_path, "%s_%dk_steps_%d_gt.wav" % (run_name, k, i))
     out_pred_fpath = fileio.join(gen_path, "%s_%dk_steps_%d_pred.wav" % (run_name, k, i))
     
     wav_gt = audio.restore_signal(wav_gt)
     wav_pred = model.generate(mel, True, target, overlap)
+    if use_mu_law:
+        import numpy as np
+        wav_pred = np.sign(wav_pred) * (1 / (2 ** bits - 1)) * \
+              ((1 + (2 ** bits - 1)) ** np.abs(wav_pred) - 1) 
 
     audio.save_wav(out_pred_fpath, wav_pred)
     audio.save_wav(out_gt_fpath, wav_gt)
