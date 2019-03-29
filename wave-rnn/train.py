@@ -34,11 +34,10 @@ model_dir = 'checkpoints'
 fileio.ensure_dir(model_dir)
 model_fpath = fileio.join(model_dir, model_name + '.pt')
 
-data_path = "../data/Synthesizer"
+# data_path = "../data/Synthesizer"
+data_path = "E:/Datasets/Synthesizer"
 gen_path = 'model_outputs'
 fileio.ensure_dir(gen_path)
-
-print_params()
 
 def collate(batch) :
     max_offsets = [x[0].shape[-1] - (mel_win + 2 * pad) for x in batch]
@@ -58,6 +57,8 @@ def collate(batch) :
     return x_input, mels, y_coarse
 
 if __name__ == '__main__':
+    print_params()
+    
     dataset = VocoderDataset(data_path)
     model = WaveRNN(
         rnn_dims=rnn_dims, 
@@ -123,7 +124,7 @@ if __name__ == '__main__':
             torch.save({'step': step, 'model_state': model.state_dict()}, model_fpath)
             print('<saved>')
             
-    optimiser = optim.Adam(model.parameters())
-    train(model, optimiser, epochs=60, batch_size=128, classes=2**bits, 
+    optimizer = optim.Adam(model.parameters())
+    train(model, optimizer, epochs=60, batch_size=64, classes=2 ** bits,
           seq_len=seq_len, step=step, lr=1e-4)
     

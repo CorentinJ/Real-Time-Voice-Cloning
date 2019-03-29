@@ -19,7 +19,7 @@ gen_path = 'model_outputs'
 fileio.ensure_dir(gen_path)
 
 # Generate Samples
-n_samples = 10
+n_samples = 5
 print('Generating...')
 for i in sorted(np.random.choice(len(dataset), n_samples)):
     mel, wav_gt = dataset[i]
@@ -28,7 +28,7 @@ for i in sorted(np.random.choice(len(dataset), n_samples)):
     out_pred_fpath = fileio.join(gen_path, "%s_%d_pred.wav" % (model_name, i))
     
     wav_gt = audio.restore_signal(wav_gt)
-    wav_pred = inference.infer_waveform(mel)
+    wav_pred = inference.infer_waveform(mel, normalize=False)   # The dataloader already normalizes
 
     audio.save_wav(out_pred_fpath, wav_pred)
     audio.save_wav(out_gt_fpath, wav_gt)

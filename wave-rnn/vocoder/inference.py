@@ -31,7 +31,7 @@ def load_model(weights_fpath, verbose=True):
     _model.load_state_dict(checkpoint['model_state'])
     _model.eval()
 
-def infer_waveform(mel, target=11000, overlap=550):
+def infer_waveform(mel, normalize=True, target=11000, overlap=550):
     """
     Infers the waveform of a mel spectrogram output by the synthesizer (the format must match 
     that of the synthesizer!)
@@ -39,7 +39,8 @@ def infer_waveform(mel, target=11000, overlap=550):
     if _model is None:
         raise Exception("Please load Wave-RNN in memory before using it")
     
-    mel = audio.normalize_mel(mel)
+    if normalize:
+        mel = audio.normalize_mel(mel)
     wav = _model.generate(mel, True, target, overlap)
     if use_mu_law:
         wav = audio.expand_signal(wav)
