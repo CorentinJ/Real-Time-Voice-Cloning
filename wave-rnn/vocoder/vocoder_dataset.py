@@ -26,8 +26,7 @@ class VocoderDataset(Dataset):
         
         # Load the mel spectrogram and adjust its range to [0, 1] 
         mel = np.load(mel_path).T.astype(np.float32)
-        mel = mel / (mel_max_abs_value * 2) + 0.5
-        mel = np.clip(mel, 0, 1)
+        mel = audio.normalize_mel(mel)
         
         return mel, quant
     

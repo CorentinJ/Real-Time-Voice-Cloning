@@ -29,16 +29,16 @@ from vocoder.params import *
 import time
 import numpy as np
 
-run_name = 'mu_law'
+
 model_dir = 'checkpoints'
 fileio.ensure_dir(model_dir)
-model_fpath = fileio.join(model_dir, run_name + '.pt')
+model_fpath = fileio.join(model_dir, model_name + '.pt')
 
 data_path = "../data/Synthesizer"
 gen_path = 'model_outputs'
 fileio.ensure_dir(gen_path)
 
-print("Using %s quantization" % ('mu_law' if use_mu_law else 'linear'))
+print_params()
 
 def collate(batch) :
     max_offsets = [x[0].shape[-1] - (mel_win + 2 * pad) for x in batch]
@@ -60,15 +60,15 @@ def collate(batch) :
 if __name__ == '__main__':
     dataset = VocoderDataset(data_path)
     model = WaveRNN(
-        rnn_dims=512, 
-        fc_dims=512, 
+        rnn_dims=rnn_dims, 
+        fc_dims=fc_dims, 
         bits=bits,
         pad=pad,
-        upsample_factors=(5, 5, 8), 
-        feat_dims=80,
-        compute_dims=128, 
-        res_out_dims=128, 
-        res_blocks=10,
+        upsample_factors=upsample_factors, 
+        feat_dims=feat_dims,
+        compute_dims=compute_dims, 
+        res_out_dims=res_out_dims, 
+        res_blocks=res_blocks,
         hop_length=hop_length,
         sample_rate=sample_rate
     )
@@ -124,6 +124,6 @@ if __name__ == '__main__':
             print('<saved>')
             
     optimiser = optim.Adam(model.parameters())
-    train(model, optimiser, epochs=30, batch_size=128, classes=2**bits, 
+    train(model, optimiser, epochs=60, batch_size=128, classes=2**bits, 
           seq_len=seq_len, step=step, lr=1e-4)
     

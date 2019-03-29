@@ -1,17 +1,14 @@
 import torch
 import torch.nn as nn
-from vocoder.display import *
 
 
 def np_now(tensor):
     return tensor.detach().cpu().numpy()
 
-
 def clamp(x, lo=0, hi=1):
     return max(lo, min(hi, x))
 
-
-class PruneMask():
+class PruneMask:
     def __init__(self, layer, prune_rnn_input):
         self.mask = []
         self.p_idx = [0]
@@ -21,8 +18,7 @@ class PruneMask():
         self.init_mask(layer, prune_rnn_input)
     
     def init_mask(self, layer, prune_rnn_input):
-        # Determine the layer type and 
-        # num matrix splits if rnn 
+        # Determine the layer type and num matrix splits if rnn 
         layer_type = str(layer).split('(')[0]
         splits = {'Linear': 1, 'GRU': 3, 'LSTM': 4}
         
@@ -42,13 +38,12 @@ class PruneMask():
         # Need a split size for mask_from_matrix() later on
         self.split_size = self.mask[0].size(0) // splits[layer_type]
     
-    
     def get_params(self, layer):
         params = []
         for idx in self.p_idx:
             params += [list(layer.parameters())[idx].data]
         return params
-    
+        #return [list(layer.parameters())[idx].data for idx in self.p_idx]
     
     def update_mask(self, layer, z):
         params = self.get_params(layer)
@@ -56,11 +51,9 @@ class PruneMask():
             self.mask[i] = self.mask_from_matrix(W, z)
         self.update_prune_count()
     
-    
     def apply_mask(self, layer):
         params = self.get_params(layer)
         for M, W in zip(self.mask, params): W *= M
-    
     
     def mask_from_matrix(self, W, z):
         # Split into gate matrices (or not)
@@ -88,7 +81,7 @@ class PruneMask():
             self.pruned_params += int(np_now((M - 1).sum() * -1))
 
 
-class Pruner():
+class Pruner:
     def __init__(self, layers, start_prune, prune_steps, target_sparsity,
                  prune_rnn_input=True, prune_every=500):
         self.z = 0  # Objects sparsity @ time t

@@ -10,6 +10,13 @@ def save_wav(path, wav):
     wav *= 32767 / max(0.01, np.max(np.abs(wav)))
     wavfile.write(path, sample_rate, wav.astype(np.int16))
 
+def normalize_mel(mel):
+    """
+    Adapts the range of the spectrogram output from the synthesizer to that of the vocoder
+    """
+    mel = mel / (mel_max_abs_value * 2) + 0.5
+    return np.clip(mel, 0, 1)
+
 def compand_signal(wav):
     """
     Applies the mu-law to an audio waveform

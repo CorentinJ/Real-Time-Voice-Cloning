@@ -11,17 +11,19 @@ def load_model(weights_fpath, verbose=True):
     
     if verbose:
         print("Building Wave-RNN")
-    _model = WaveRNN(rnn_dims=512,
-                     fc_dims=512,
-                     bits=bits,
-                     pad=pad,
-                     upsample_factors=(5, 5, 8),
-                     feat_dims=80,
-                     compute_dims=128,
-                     res_out_dims=128,
-                     res_blocks=10,
-                     hop_length=hop_length,
-                     sample_rate=sample_rate).cuda()
+    _model = WaveRNN(
+        rnn_dims=rnn_dims, 
+        fc_dims=fc_dims, 
+        bits=bits,
+        pad=pad,
+        upsample_factors=upsample_factors, 
+        feat_dims=feat_dims,
+        compute_dims=compute_dims, 
+        res_out_dims=res_out_dims, 
+        res_blocks=res_blocks,
+        hop_length=hop_length,
+        sample_rate=sample_rate
+    ).cuda()
     
     if verbose:
         print("Loading model weights at %s" % weights_fpath)
@@ -30,9 +32,14 @@ def load_model(weights_fpath, verbose=True):
     _model.eval()
 
 def infer_waveform(mel, target=11000, overlap=550):
+    """
+    Infers the waveform of a mel spectrogram output by the synthesizer (the format must match 
+    that of the synthesizer!)
+    """
     if _model is None:
         raise Exception("Please load Wave-RNN in memory before using it")
     
+    mel = audio.normalize_mel(mel)
     wav = _model.generate(mel, True, target, overlap)
     if use_mu_law:
         wav = audio.expand_signal(wav)
