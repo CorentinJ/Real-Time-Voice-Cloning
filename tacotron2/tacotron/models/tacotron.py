@@ -326,7 +326,7 @@ class Tacotron():
         total_regularization_loss = 0
         total_linear_loss = 0
         total_loss = 0
-        
+
         gpus = ["/gpu:{}".format(i) for i in
                 range(hp.tacotron_gpu_start_idx, hp.tacotron_gpu_start_idx + hp.tacotron_num_gpus)]
         
@@ -348,15 +348,20 @@ class Tacotron():
                             self.tower_stop_token_targets[i],
                             self.tower_stop_token_prediction[i], self.tower_targets_lengths[i],
                             hparams=self._hparams)
-                        # Compute masked linear loss
-                        if hp.predict_linear:
-                            # Compute Linear L1 mask loss (priority to low frequencies)
-                            linear_loss = MaskedLinearLoss(self.tower_linear_targets[i],
-                                                           self.tower_linear_outputs[i],
-                                                           self.targets_lengths,
-                                                           hparams=self._hparams)
-                        else:
-                            linear_loss = 0.
+                        # SV2TTS extra L1 loss
+                        linear_loss = MaskedLinearLoss(self.tower_mel_targets[i],
+                                                       self.tower_decoder_output[i],
+                                                       self.tower_targets_lengths[i],
+                                                       hparams=self._hparams)
+                        # # Compute masked linear loss
+                        # if hp.predict_linear:
+                        #     # Compute Linear L1 mask loss (priority to low frequencies)
+                        #     linear_loss = MaskedLinearLoss(self.tower_linear_targets[i],
+                        #                                    self.tower_linear_outputs[i],
+                        #                                    self.targets_lengths,
+                        #                                    hparams=self._hparams)
+                        # else:
+                        #     linear_loss = 0.
                     else:
                         # Compute loss of predictions before postnet
                         before = tf.losses.mean_squared_error(self.tower_mel_targets[i],
@@ -369,17 +374,21 @@ class Tacotron():
                             labels=self.tower_stop_token_targets[i],
                             logits=self.tower_stop_token_prediction[i]))
                         
-                        if hp.predict_linear:
-                            # Compute linear loss
-                            # From https://github.com/keithito/tacotron/blob/tacotron2-work-in
-							# -progress/models/tacotron.py
-                            # Prioritize loss for frequencies under 2000 Hz.
-                            l1 = tf.abs(self.tower_linear_targets[i] - self.tower_linear_outputs[i])
-                            n_priority_freq = int(2000 / (hp.sample_rate * 0.5) * hp.num_freq)
-                            linear_loss = 0.5 * tf.reduce_mean(l1) + 0.5 * tf.reduce_mean(
-                                l1[:, :, 0:n_priority_freq])
-                        else:
-                            linear_loss = 0.
+                        # SV2TTS extra L1 loss
+                        l1 = tf.abs(self.tower_mel_targets[i] - self.tower_decoder_output[i])
+                        linear_loss = tf.reduce_mean(l1)
+
+                        # if hp.predict_linear:
+                        #     # Compute linear loss
+                        #     # From https://github.com/keithito/tacotron/blob/tacotron2-work-in
+						# 	# -progress/models/tacotron.py
+                        #     # Prioritize loss for frequencies under 2000 Hz.
+                        #     l1 = tf.abs(self.tower_linear_targets[i] - self.tower_linear_outputs[i])
+                        #     n_priority_freq = int(2000 / (hp.sample_rate * 0.5) * hp.num_freq)
+                        #     linear_loss = 0.5 * tf.reduce_mean(l1) + 0.5 * tf.reduce_mean(
+                        #         l1[:, :, 0:n_priority_freq])
+                        # else:
+                        #     linear_loss = 0.
                     
                     # Compute the regularization weight
                     if hp.tacotron_scale_regularization:

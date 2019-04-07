@@ -1,3 +1,4 @@
+logmmse
 webrtcvad
 falcon==1.2.0
 inflect==0.2.5

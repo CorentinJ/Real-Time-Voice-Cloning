@@ -3,7 +3,6 @@ import os
 from multiprocessing import cpu_count
 from datasets import preprocessor
 from hparams import hparams
-from tqdm import tqdm
 from vlibs import fileio
 
 

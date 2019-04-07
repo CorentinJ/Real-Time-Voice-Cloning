@@ -1,4 +1,5 @@
 import os
+import logmmse
 from vlibs import fileio
 import numpy as np
 from datasets import audio
@@ -6,7 +7,6 @@ import sys
 sys.path.append('../encoder')
 encoder_model_fpath = '../encoder/saved_models/all.pt'
 from encoder import inference
-
 
 
 def build_from_path(hparams, input_dirs, mel_dir, embed_dir, wav_dir):
@@ -62,6 +62,9 @@ def _clean_and_split_utterance(wav_path, words, end_times, hparams):
     wav = audio.load_wav(wav_path, sr=hparams.sample_rate)
     if hparams.rescale:
         wav = wav / np.abs(wav).max() * hparams.rescaling_max
+        
+    # Suppress the noise
+    wav = logmmse.logmmse(wav, hparams.sample_rate)
     
     # Find pauses in the sentence
     words = np.array(words)
