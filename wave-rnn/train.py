@@ -34,8 +34,8 @@ model_dir = 'checkpoints'
 fileio.ensure_dir(model_dir)
 model_fpath = fileio.join(model_dir, model_name + '.pt')
 
-# data_path = "../data/Synthesizer"
-data_path = "E:/Datasets/Synthesizer"
+data_path = "../data/Synthesizer"
+# data_path = "E:/Datasets/Synthesizer"
 gen_path = 'model_outputs'
 fileio.ensure_dir(gen_path)
 
@@ -125,6 +125,6 @@ if __name__ == '__main__':
             print('<saved>')
             
     optimizer = optim.Adam(model.parameters())
-    train(model, optimizer, epochs=60, batch_size=64, classes=2 ** bits,
+    train(model, optimizer, epochs=100, batch_size=100, classes=2 ** bits,
           seq_len=seq_len, step=step, lr=1e-4)
     

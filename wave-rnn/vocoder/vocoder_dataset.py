@@ -22,6 +22,8 @@ class VocoderDataset(Dataset):
         
         # Load the wav and quantize it
         wav = np.load(wav_path)
+        if use_mu_law:
+            wav = audio.compand_signal(wav)
         quant = audio.quantize_signal(wav)
         
         # Load the mel spectrogram and adjust its range to [0, 1] 
