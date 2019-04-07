@@ -13,7 +13,7 @@
 *.bbl
 *.bcf
 _old
-encoder/saved_models/*_backups
+SV2TTS/encoder/saved_models/*_backups
 tacotron2/logs-*
 waveglow
 torch-tacotron2

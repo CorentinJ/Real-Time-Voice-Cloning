@@ -8,8 +8,19 @@ NOTES:
 
 TODO:
 - Pruning
-- Begin merging the three projects
+- Begin merging the three projects:
+    - Single inference demo (without GUI)
+    - Single big inference tool (with GUI)
+    - Single config file (or args???? -> could be both: default to config values)
+    - Three hparams files (inside packages?)
+    - Proper versions in requirements.txt
 - Clean up the rest of the code
-- Batch inputs?
+- Move root of repo to SV2TTS
+- Put on github (INCLUDE VLIBS)
+- Make demo website
+- Write something
 
 Some noisy speakers: 40, 
+
+- moved files
+- removed old saved models for encoder
