@@ -10,23 +10,27 @@ sys.path.append('../wave-rnn')
 from vocoder import inference as vocoder
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+sys.path.append('../encoder')
+from encoder import inference as encoder
 
-use_griffin_lim = False
-if not use_griffin_lim:
-    vocoder.load_model('../wave-rnn/checkpoints/mu_law.pt')
+encoder.load_model('../encoder/saved_models/all.pt', 'cuda')
+vocoder.load_model('../wave-rnn/checkpoints/mu_law.pt')
     
-all_embeds_fpaths = fileio.get_files(r"E:\Datasets\Synthesizer\embed", "embed")
-
-def get_speaker_embed(speaker_id):
-    embed_root = r"E:\Datasets\Synthesizer\embed"
-    embeds = [np.load(f) for f in fileio.get_files(embed_root, "embed-%d-" % speaker_id)]
-    speaker_embed = np.mean(embeds, axis=0)
-    speaker_embed /= np.linalg.norm(speaker_embed, 2)
-    return speaker_embed[None, ...]
 
 def get_random_embed():
-    fpath = np.random.choice(all_embeds_fpaths)
-    return np.load(fpath)[None, ...], fpath
+    root = r"C:\Datasets\LibriSpeech\test-clean"
+    speakers = fileio.listdir(root)
+    speaker_id = np.random.choice(speakers)
+    speaker_root = fileio.join(root, speaker_id)
+    wav_fpaths = fileio.get_files(speaker_root, "\.flac", recursive=True)
+    wav_fpath = np.random.choice(wav_fpaths)
+    print(wav_fpath)
+    wav = encoder.load_and_preprocess_wave(wav_fpath)
+    print("Source audio (5 secs max):")
+    sd.play(wav[:16000 * 5], 16000)
+    sd.wait()
+    embed = encoder.embed_utterance(wav)[None, ...]
+    return embed, speaker_id, wav
 
 if __name__ == '__main__':
     checkpoint_dir = os.path.join('logs-two_asr', 'taco_pretrained')
@@ -35,41 +39,50 @@ if __name__ == '__main__':
     synth = synthesizer.Synthesizer()
     synth.load(checkpoint_fpath, hparams)
     from datasets.audio import save_wav
-
+    
+    user = True
+    i = 0
+    
     while True:
         # Retrieve the embedding
-        # speaker_id = int(input("Speaker ID: "))
-        # speaker_embed = get_speaker_embed(speaker_id)
-        speaker_embed, embed_fpath = get_random_embed()
-        print(embed_fpath)
-        a = embed_fpath[embed_fpath.find('embed-')+6:]
-        speaker_id = int(a[:a.find('-')])
-        print(speaker_id)
+        if user:
+            from encoder.audio import rec_wave, preprocess_wave
+            from time import sleep
+            print("Watch out, recording in 2 seconds...")
+            sleep(2)
+            print("Recording 5 seconds!")
+            wav_source = preprocess_wave(rec_wave(5))
+            print("Done!", end=' ')
+            sleep(1)
+            print("Here is your audio:")
+            sd.play(wav_source, 16000)
+            sd.wait()
+            speaker_id = "user_%02d" % i
+            i += 1
+            speaker_embed = encoder.embed_utterance(wav_source)[None, ...]
+        else:
+            speaker_embed, speaker_id, wav_source = get_random_embed()
+            print(speaker_id)
 
         # Synthesize the text with the embedding
         text = input("Text: ")
         mel = synth.my_synthesize(speaker_embed, text)
         
-        wav = inv_mel_spectrogram(mel.T, hparams)
-        wav = np.concatenate((wav, [0] * hparams.sample_rate))
+        wav_griffin = inv_mel_spectrogram(mel.T, hparams)
+        wav_griffin = np.concatenate((wav_griffin, [0] * hparams.sample_rate))
         print("Griffin-lim:")
-        sd.play(wav, 16000)
-        wav1 = wav
+        sd.play(wav_griffin, 16000)
         
-        
-        
-        wav = vocoder.infer_waveform(mel.T)
-        wav = np.concatenate((wav, [0] * hparams.sample_rate))
+        wav_wavernn = vocoder.infer_waveform(mel.T)
+        wav_wavernn = np.concatenate((wav_wavernn, [0] * hparams.sample_rate))
         sd.wait()
         print("\nWave-RNN:")
-        sd.play(wav, 16000)
+        sd.play(wav_wavernn, 16000)
         sd.wait()
 
-        save_wav(wav1, "%s_%s.wav" % (speaker_id, 'griffin'), 16000)
-        save_wav(wav, "%s_%s.wav" % (speaker_id, 'wavernn'), 16000)
-
-
-
+        save_wav(wav_source, "../%s_%s.wav" % (speaker_id, 'source'), 16000)
+        save_wav(wav_griffin, "../%s_%s.wav" % (speaker_id, 'griffin'), 16000)
+        save_wav(wav_wavernn, "../%s_%s.wav" % (speaker_id, 'wavernn'), 16000)
 
 
         # # Synthesize the text with the embedding

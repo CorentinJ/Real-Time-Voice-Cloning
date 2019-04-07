@@ -4,11 +4,12 @@ How about a nonlinear encoding? https://i.imgur.com/xRWn6AE.png
 
 NOTES:
 - tacotron_model.ckpt-486000 was the model used to generate GTA.
-- best lost on mu_law: 2.935
+- best lost on mu_law: 2.935 (????)
 
 TODO:
-- Meanwhile, work on a rough inference demo (don't forget to show side-by-side generated and original sample)
 - Pruning
 - Begin merging the three projects
 - Clean up the rest of the code
 - Batch inputs?
+
+Some noisy speakers: 40, 

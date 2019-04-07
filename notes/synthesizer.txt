@@ -18,3 +18,5 @@ Notes on alignment:
     -> I could thus retrain "conditioned" on my newer dataset with shorter max mel.
     -> It's good to keep in mind that a higher value of outputs_per_step will greatly speed up the training and (likely - I gotta make sure) the inference time.
 - Some users report their number of training steps (https://github.com/Rayhane-mamah/Tacotron-2/issues/175)
+
+Using the L1 loss (section 2.2) didn't change anything.
