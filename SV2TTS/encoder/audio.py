@@ -25,7 +25,7 @@ def wave_to_mel_filterbank(wave):
 
 def trim_long_silences(wave):
     """
-    Ensures that silences (segments without voice) in the waveform remain no longer than a 
+    Ensures that segments without voice in the waveform remain no longer than a 
     threshold determined by the VAD parameters in params.py.
     
     :param wave: the raw waveform as a numpy array of floats 
@@ -134,15 +134,3 @@ def rec_wave(duration, blocking=True, verbose=True):
         if verbose:
             print('Done recording!')
     return wave.squeeze()
-
-
-if __name__ == '__main__':
-    fpath = 'E:\\Datasets\\VoxCeleb1\\wav\\id11210\\voTTV7oqJmw\\00001.wav'
-    fpath = r"E:\Datasets\LibriSpeech\train-other-500\149\125760\149-125760-0003.flac"
-    
-    wave = load(fpath)
-    # play_wave(wave, True)
-    wave = normalize_volume(wave, -30)
-    play_wave(wave, True)
-    
-    

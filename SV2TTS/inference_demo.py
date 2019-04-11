@@ -1,4 +1,3 @@
-from vlibs import fileio
 from time import perf_counter
 from encoder import inference
 from config import *

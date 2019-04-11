@@ -1,10 +1,10 @@
 from pathos.multiprocessing import ThreadPool
+from encoder.params_data import *
 from datetime import datetime
+from encoder import audio
 import numpy as np
 import sys
-from encoder.params_data import *
-from config import *
-from encoder import audio
+import os
 
 
 class DatasetLog:
@@ -210,9 +210,3 @@ def preprocess_voxceleb2(n_speakers=None, n_utterances=None):
     with ThreadPool(8) as pool:
         list(pool.imap(preprocess_speaker, speaker_ids))
     logger.finalize()
-
-
-if __name__ == '__main__':
-    # preprocess_librispeech()
-    # preprocess_voxceleb1()
-    preprocess_voxceleb2()
