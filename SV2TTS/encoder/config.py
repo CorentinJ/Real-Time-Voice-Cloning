@@ -1,5 +1,3 @@
-import torch
-
 librispeech_datasets = {
     "train": {
         "clean": ["LibriSpeech/train-clean-100", "LibriSpeech/train-clean-360"],
@@ -45,10 +43,7 @@ other_datasets = [
 ]
 
 anglophone_nationalites = ["australia", "canada", "ireland", "uk", "usa"]
-clean_data_root = "E://Datasets//SpeakerEncoder"
-all_datasets = librispeech_datasets + voxceleb_datasets
-demo_datasets_root = "E://Datasets"
-
-model_dir = fileio.join(project_root, "saved_models")
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# 
+# model_dir = fileio.join(project_root, "saved_models")
+# 
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

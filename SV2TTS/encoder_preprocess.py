@@ -1,6 +1,6 @@
 from encoder.preprocess import preprocess_librispeech, preprocess_voxceleb1, preprocess_voxceleb2
+from pathlib import Path
 import argparse
-import os
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -23,17 +23,18 @@ if __name__ == "__main__":
     args = vars(parser.parse_args())
 
     # Reformat the arguments
+    args["datasets_root"] = Path(args["datasets_root"])
     args["datasets"] = args["datasets"].split(",")
     if not hasattr(args, "out_dir"):
-        args["out_dir"] = os.path.join(args["datasets_root"], "SV2TTS", "encoder")
-    os.makedirs(args["out_dir"], exist_ok=True)
-    args["datasets"] = args["datasets"].split(",")
+        args["out_dir"] = Path(args["datasets_root"], "SV2TTS", "encoder")
+    args["out_dir"] = Path(args["out_dir"])
+    args["out_dir"].mkdir(exist_ok=True)
     
     # Preprocess the datasets
     preprocess_func = {
-        "librispeech_other": preprocess_librispeech(),
-        "voxceleb1": preprocess_voxceleb1(),
-        "voxceleb2": preprocess_voxceleb2(),
+        "librispeech_other": preprocess_librispeech,
+        "voxceleb1": preprocess_voxceleb1,
+        "voxceleb2": preprocess_voxceleb2,
     }
     for dataset in args.pop("datasets"):
         print("Preprocessing %s" % dataset)
