@@ -42,7 +42,7 @@ def embed_frames_batch(frames_batch):
     embed = _model.forward(frames).detach().cpu().numpy()
     return embed
 
-def compute_partial_slices(n_samples, partial_utterance_n_frames=partial_utterance_n_frames,
+def compute_partial_slices(n_samples, partial_utterance_n_frames=partials_n_frames,
                            min_pad_coverage=0.75, overlap=0.5):
     """
     Computes where to split an utterance waveform and its corresponding mel spectrogram to obtain 
@@ -138,7 +138,7 @@ def embed_utterance(wave, using_partials=True, return_partials=False, **kwargs):
         return embed, partial_embeds, wave_slices
     return embed
     
-def embed_stream(stream, partial_utterance_n_frames=partial_utterance_n_frames, overlap=0.5):
+def embed_stream(stream, partial_utterance_n_frames=partials_n_frames, overlap=0.5):
     raise NotImplemented()
 
 def embed_speaker(waves, normalize=False, **kwargs):

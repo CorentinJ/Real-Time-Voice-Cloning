@@ -1,7 +1,6 @@
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt4.QtGui import *
-from vlibs import fileio, nowarnings
 import sounddevice as sd
 import numpy as np
 import umap

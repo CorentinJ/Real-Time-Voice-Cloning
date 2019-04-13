@@ -1,23 +1,19 @@
-from vlibs.structs.random_cycler import RandomCycler
-from torch.utils.data import Dataset, DataLoader
-from collections import OrderedDict
+from encoder.data_objects.random_cycler import RandomCycler
 from encoder.data_objects.speaker_batch import SpeakerBatch
 from encoder.data_objects.speaker import Speaker
-from encoder.params_data import partial_utterance_n_frames
-from vlibs import fileio
+from encoder.params_data import partials_n_frames
+from torch.utils.data import Dataset, DataLoader
+from pathlib import Path
 
 class SpeakerVerificationDataset(Dataset):
-    def __init__(self, clean_data_root, datasets):
-        self.datasets = datasets
-        self.speakers = []
-        self.root = clean_data_root
-        for dataset in datasets:
-            dataset_root = fileio.join(self.root, dataset) 
-            speaker_dirs = fileio.join(dataset_root, fileio.listdir(dataset_root))
-            self.speakers.extend(Speaker(speaker_dir) for speaker_dir in speaker_dirs)
+    def __init__(self, datasets_root: Path):
+        self.root = datasets_root
+        speaker_dirs = [f for f in self.root.glob('*') if f.is_dir()]
+        if len(speaker_dirs) == 0:
+            raise Exception("No speakers found. Make sure you are pointing to the directory "
+                            "containing all preprocessed speaker directories.")
+        self.speakers = [Speaker(speaker_dir) for speaker_dir in speaker_dirs]
         self.speaker_cycler = RandomCycler(self.speakers)
-        # self.mean_n_utterances = np.mean([len(s.utterances) for s in self.speakers])
-        self.mean_n_utterances = -1
 
     def __len__(self):
         return int(1e10)
@@ -27,18 +23,10 @@ class SpeakerVerificationDataset(Dataset):
     
     def get_logs(self):
         log_string = ""
-        for dataset in self.datasets:
-            log_fpath = fileio.join(self.root, "log_%s.txt" % dataset)
-            log_string += "\n".join(fileio.read_all_lines(log_fpath))
+        for log_fpath in self.root.glob('*.txt'):
+            with log_fpath.open('r') as log_file:
+                log_string += ''.join(log_file.readlines())
         return log_string
-    
-    def get_params(self):
-        params = OrderedDict([
-            ("Total speakers", len(self.speakers)),
-            ("Average utterances per speaker", self.mean_n_utterances),
-            ("Datasets", ', '.join(self.datasets)),
-        ])
-        return params
     
     
 class SpeakerVerificationDataLoader(DataLoader):
@@ -62,4 +50,5 @@ class SpeakerVerificationDataLoader(DataLoader):
         )
 
     def collate(self, speakers):
-        return SpeakerBatch(speakers, self.utterances_per_speaker, partial_utterance_n_frames) 
+        return SpeakerBatch(speakers, self.utterances_per_speaker, partials_n_frames) 
+    

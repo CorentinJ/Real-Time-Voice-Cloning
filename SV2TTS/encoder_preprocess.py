@@ -9,10 +9,10 @@ if __name__ == "__main__":
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument("datasets_root", type=str, help=\
-        "Directory containing your LibriSpeech/TTS and VoxCeleb datasets.")
+        "Path to the directory containing your LibriSpeech/TTS and VoxCeleb datasets.")
     parser.add_argument("-o", "--out_dir", type=str, default=argparse.SUPPRESS, help=\
-        "Output directory that will contain the mel spectrograms. If left out, defaults to "
-        "<datasets_root>/SV2TTS/encoder/")
+        "Path to the output directory that will contain the mel spectrograms. If left out, "
+        "defaults to <datasets_root>/SV2TTS/encoder/")
     parser.add_argument("-d", "--datasets", type=str, 
                         default="librispeech_other,voxceleb1,voxceleb2", help=\
         "Comma-separated list of datasets you want to preprocess. Only the train set of these "

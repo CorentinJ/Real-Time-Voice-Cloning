@@ -15,6 +15,4 @@
 _old
 SV2TTS/encoder/saved_models/*_backups
 tacotron2/logs-*
-waveglow
-torch-tacotron2
 wave-rnn/model_outputs

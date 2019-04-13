@@ -1,3 +1,4 @@
+from encoder.data_objects.speaker_verification_dataset import SpeakerVerificationDataset
 from datetime import datetime
 from time import perf_counter as clock
 import matplotlib.pyplot as plt
@@ -7,7 +8,6 @@ import webbrowser
 import visdom
 import umap
 import sys
-from encoder.data_objects.speaker_verification_dataset import SpeakerVerificationDataset
 
 colormap = np.array([
     [76, 255, 0],
@@ -27,7 +27,7 @@ colormap = np.array([
 
 
 class Visualizations:
-    def __init__(self, env_name=None):
+    def __init__(self, env_name=None, device_name=None):
         now = str(datetime.now().strftime("%d-%m %Hh%M"))
         if env_name is None:
             self.env_name = now
@@ -36,7 +36,7 @@ class Visualizations:
         
         try:
             self.vis = visdom.Visdom(env=self.env_name, raise_exceptions=True)
-        except ConnectionError as e:
+        except ConnectionError:
             print('No visdom server detected, running a temporary instance...\nRun the command '
                   '\'visdom\' in your CLI to start an external server.', file=sys.stderr)
             subprocess.Popen('visdom')
@@ -56,6 +56,9 @@ class Visualizations:
         self.mean_time_per_step = -1
         self.log_params()
         
+        if device_name is not None:
+            self.log_implementation({'Device': device_name})
+        
     def log_params(self):
         from encoder import params_data
         from encoder import params_model
@@ -71,8 +74,7 @@ class Visualizations:
         
     def log_dataset(self, dataset: SpeakerVerificationDataset):
         dataset_string = ""
-        for param, value in dataset.get_params().items():
-            dataset_string += "<b>%s</b>: %s\n" % (param, value)
+        dataset_string += "<b>Speakers</b>: %s\n" % len(dataset.speakers)
         dataset_string += "\n" + dataset.get_logs()
         dataset_string = dataset_string.replace("\n", "<br>")
         self.vis.text(dataset_string, opts={'title': 'Dataset'})
@@ -145,7 +147,7 @@ class Visualizations:
         self.last_step = step
         self.last_update_timestamp = now
         
-    def draw_projections(self, embeds, utterances_per_speaker, step, proj_fpath=None, 
+    def draw_projections(self, embeds, utterances_per_speaker, step, out_fpath=None,
                          max_speakers=10):
         max_speakers = min(max_speakers, len(colormap))
         embeds = embeds[:max_speakers * utterances_per_speaker]
@@ -160,8 +162,8 @@ class Visualizations:
         plt.gca().set_aspect('equal', 'datalim')
         plt.title('UMAP projection (step %d)' % step)
         self.projection_win = self.vis.matplot(plt, win=self.projection_win)
-        if proj_fpath is not None:
-            plt.savefig(proj_fpath + ('_umap_%06d.png' % step))
+        if out_fpath is not None:
+            plt.savefig(out_fpath)
         plt.clf()
         
     def save(self):

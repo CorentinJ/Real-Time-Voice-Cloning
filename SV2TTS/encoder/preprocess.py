@@ -72,13 +72,13 @@ def _preprocess_speaker_dirs(speaker_dirs, dataset_name, datasets_root, out_dir,
         # reference to each source file.
         speaker_out_dir = out_dir.joinpath(speaker_name)
         speaker_out_dir.mkdir(exist_ok=True)
-        sources_fpath = speaker_out_dir.joinpath("sources.txt")
+        sources_fpath = speaker_out_dir.joinpath("_sources.txt")
         
         # There"s a possibility that the preprocessing was interrupted earlier, check if 
         # there already is a sources file.
         if sources_fpath.exists():
             with sources_fpath.open("r") as sources_file:
-                existing_fnames = {line.split(":")[0] for line in sources_file}
+                existing_fnames = {line.split(",")[0] for line in sources_file}
         else:
             existing_fnames = {}
         
@@ -99,13 +99,13 @@ def _preprocess_speaker_dirs(speaker_dirs, dataset_name, datasets_root, out_dir,
             
             # Create the mel spectrogram, discard those that are too short
             frames = audio.wave_to_mel_filterbank(wav)
-            if len(frames) < partial_utterance_n_frames:
+            if len(frames) < partials_n_frames:
                 continue
             
             out_fpath = speaker_out_dir.joinpath(out_fname)
             np.save(out_fpath, frames)
             logger.add_sample(duration=len(wav) / sampling_rate)
-            sources_file.write("%s:%s\n" % (out_fname, in_fpath))
+            sources_file.write("%s,%s\n" % (out_fname, in_fpath))
         
         sources_file.close()
     

@@ -8,7 +8,7 @@ class Utterance:
     def get_frames(self):
         return np.load(self.frames_fpath) 
 
-    def random_partial_utterance(self, n_frames):
+    def random_partial(self, n_frames):
         """
         Crops the frames into a partial utterance of n_frames
         

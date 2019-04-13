@@ -1,23 +1,23 @@
-from vlibs import fileio
-from vlibs.structs.random_cycler import RandomCycler
+from encoder.data_objects.random_cycler import RandomCycler
 from encoder.data_objects.utterance import Utterance
+from pathlib import Path
 
 # Contains the set of utterances of a single speaker
 class Speaker:
-    def __init__(self, root):
+    def __init__(self, root: Path):
         self.root = root
-        self.name = fileio.leaf(root)
+        self.name = root.name
         self.utterances = None
         self.utterance_cycler = None
         
     def _load_utterances(self):
-        sources = fileio.read_all_lines(fileio.join(self.root, 'sources.txt'))
-        sources = list(map(lambda l: l.split(' '), sources))
+        with self.root.joinpath('_sources.txt').open('r') as sources_file:
+            sources = [l.split(',') for l in sources_file]
         sources = {frames_fname: wave_fpath for frames_fname, wave_fpath in sources}
-        self.utterances = [Utterance(fileio.join(self.root, f), w) for f, w in sources.items()]
+        self.utterances = [Utterance(self.root.joinpath(f), w) for f, w in sources.items()]
         self.utterance_cycler = RandomCycler(self.utterances)
                
-    def random_partial_utterances(self, count, n_frames):
+    def random_partial(self, count, n_frames):
         """
         Samples a batch of <count> unique partial utterances from the disk in a way that all 
         utterances come up at least once every two cycles and in a random order every time.
@@ -34,4 +34,4 @@ class Speaker:
             self._load_utterances()
         
         utterances = self.utterance_cycler.sample(count)
-        return [(u,) + u.random_partial_utterance(n_frames) for u in utterances]
+        return [(u,) + u.random_partial(n_frames) for u in utterances]
