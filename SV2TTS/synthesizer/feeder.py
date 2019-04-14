@@ -1,12 +1,11 @@
-import os
+from sklearn.model_selection import train_test_split
+from synthesizer.utils.text import text_to_sequence
+from synthesizer.infolog import log
+import tensorflow as tf
+import numpy as np
 import threading
 import time
-
-import numpy as np
-import tensorflow as tf
-from synthesizer.infolog import log
-from sklearn.model_selection import train_test_split
-from tacotron.utils.text import text_to_sequence
+import os
 
 _batches_per_group = 64
 

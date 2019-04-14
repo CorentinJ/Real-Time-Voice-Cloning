@@ -1,12 +1,11 @@
-import os
-import time
-from time import sleep
-
-import tensorflow as tf
+from synthesizer.synthesizer import Synthesizer
 from synthesizer.hparams import hparams_debug_string
 from synthesizer.infolog import log
-from tacotron.synthesizer import Synthesizer
+import tensorflow as tf
+from time import sleep
 from tqdm import tqdm
+import time
+import os
 
 
 def generate_fast(model, text):

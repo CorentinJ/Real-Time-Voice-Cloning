@@ -2,6 +2,7 @@ from time import perf_counter
 from encoder import inference
 from encoder.params_data import sampling_rate
 from pathlib import Path
+import numpy as np
 import torch
 
 if __name__ == '__main__':
@@ -28,4 +29,5 @@ if __name__ == '__main__':
     torch.cuda.synchronize()
     print("Processed %.2fs long utterance in %.2fs" % (duration, perf_counter() - start))
     
+    np.set_printoptions(precision=2, suppress=True)
     print(embed)

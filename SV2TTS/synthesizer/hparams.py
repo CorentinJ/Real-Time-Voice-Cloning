@@ -1,5 +1,5 @@
-import numpy as np
 import tensorflow as tf
+import numpy as np
 
 # Default hyperparameters
 hparams = tf.contrib.training.HParams(

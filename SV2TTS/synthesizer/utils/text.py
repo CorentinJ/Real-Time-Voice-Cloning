@@ -1,7 +1,6 @@
-import re
-
-from . import cleaners
 from .symbols import symbols
+from . import cleaners
+import re
 
 # Mappings from symbol to numeric ID and vice versa:
 _symbol_to_id = {s: i for i, s in enumerate(symbols)}

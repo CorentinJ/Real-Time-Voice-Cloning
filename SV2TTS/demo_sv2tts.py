@@ -1,19 +1,16 @@
-from datasets.audio import inv_mel_spectrogram
-from tacotron import synthesizer
+from synthesizer.datasets.audio import inv_mel_spectrogram
 from synthesizer.hparams import hparams
+from synthesizer import synthesizer
 from vlibs import fileio
 import sounddevice as sd
 import tensorflow as tf
 import numpy as np
-import sys
-sys.path.append('../wave-rnn')
-from vocoder import inference as vocoder
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-sys.path.append('../encoder')
+from vocoder import inference as vocoder
 from encoder import inference as encoder
 
-encoder.load_model('../encoder/saved_models/all.pt', 'cuda')
+encoder.load_model('SV2TTS/encoder/saved_models/all.pt')
 vocoder.load_model('../wave-rnn/checkpoints/mu_law.pt')
     
 

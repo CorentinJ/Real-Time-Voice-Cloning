@@ -1,9 +1,8 @@
-import argparse
-import os
-from multiprocessing import cpu_count
-from datasets import preprocessor
+from synthesizer.datasets import preprocessor
 from synthesizer.hparams import hparams
 from vlibs import fileio
+import argparse
+import os
 
 
 def preprocess(args, input_folders, out_dir, hparams):
@@ -53,7 +52,6 @@ def main():
     parser.add_argument('--hparams', default='',
                         help='Hyperparameter overrides as a comma-separated list of name=value pairs')
     parser.add_argument('--output', default='Synthesizer')
-    parser.add_argument('--n_jobs', type=int, default=cpu_count())
     
     # Name of the LibriTTS sets to use, separated by spaces 
     # (e.g. "--sets train-other-500 train-clean-360). Defaults to using all the clean training sets 

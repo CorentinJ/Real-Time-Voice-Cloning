@@ -16,11 +16,8 @@ TODO:
     - Proper versions in requirements.txt (do something different for inference and training?)
 - Clean up the rest of the code (' to ")
 - Move root of repo to SV2TTS (the rest isn't necessary)
-- Put on github (INCLUDE VLIBS)
+- Put on github (RECHECK ALL REQUIREMENTS (+VLIBS))
 - Make demo website
 - Write something
 
 Some noisy speakers: 40, 
-
-- moved files
-- removed old saved models for encoder

@@ -1,9 +1,7 @@
 from __future__ import absolute_import, division, print_function
-
 import collections
-
 import tensorflow as tf
-from tacotron.models.helpers import TacoTestHelper, TacoTrainingHelper
+from synthesizer.models.helpers import TacoTestHelper, TacoTrainingHelper
 from tensorflow.contrib.seq2seq.python.ops import decoder
 from tensorflow.contrib.seq2seq.python.ops import helper as helper_py
 from tensorflow.python.framework import ops, tensor_shape

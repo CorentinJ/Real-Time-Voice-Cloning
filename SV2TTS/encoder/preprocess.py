@@ -98,7 +98,7 @@ def _preprocess_speaker_dirs(speaker_dirs, dataset_name, datasets_root, out_dir,
                 continue
             
             # Create the mel spectrogram, discard those that are too short
-            frames = audio.wave_to_mel_filterbank(wav)
+            frames = audio.wav_to_mel_filterbank(wav)
             if len(frames) < partials_n_frames:
                 continue
             

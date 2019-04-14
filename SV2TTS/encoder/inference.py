@@ -116,7 +116,7 @@ def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
     """
     # Process the entire utterance if not using partials
     if not using_partials:
-        frames = audio.wave_to_mel_filterbank(wav)
+        frames = audio.wav_to_mel_filterbank(wav)
         embed = embed_frames_batch(frames[None, ...])[0]
         if return_partials:
             return embed, None, None
@@ -129,7 +129,7 @@ def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
         wav = np.pad(wav, (0, max_wave_length - len(wav)), 'constant')
     
     # Split the utterance into partials
-    frames = audio.wave_to_mel_filterbank(wav)
+    frames = audio.wav_to_mel_filterbank(wav)
     frames_batch = np.array([frames[s] for s in mel_slices])
     partial_embeds = embed_frames_batch(frames_batch)
     

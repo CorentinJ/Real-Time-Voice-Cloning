@@ -1,19 +1,18 @@
-import os
-import time
-import traceback
-from datetime import datetime
-
-from synthesizer import infolog
-import numpy as np
-import tensorflow as tf
-from datasets import audio
+from synthesizer.utils.symbols import symbols
+from synthesizer.utils.text import sequence_to_text
+from synthesizer.datasets import audio
 from synthesizer.hparams import hparams_debug_string
-from tacotron.feeder import Feeder
-from tacotron.models import create_model
-from tacotron.utils import ValueWindow, plot
-from tacotron.utils.text import sequence_to_text
-from tacotron.utils.symbols import symbols
+from synthesizer.feeder import Feeder
+from synthesizer.models import create_model
+from synthesizer.utils import ValueWindow, plot
+from synthesizer import infolog
+from datetime import datetime
 from tqdm import tqdm
+import tensorflow as tf
+import numpy as np
+import traceback
+import time
+import os
 
 log = infolog.log
 

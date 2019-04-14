@@ -1,14 +1,13 @@
-import os
-import wave
-
+from synthesizer.utils.text import text_to_sequence
+from synthesizer.datasets import audio
+from synthesizer.infolog import log
+from synthesizer.models import create_model
+from synthesizer.utils import plot
+import tensorflow as tf
 import numpy as np
 import pyaudio
-import tensorflow as tf
-from datasets import audio
-from synthesizer.infolog import log
-from tacotron.models import create_model
-from tacotron.utils import plot
-from tacotron.utils.text import text_to_sequence
+import wave
+import os
 
 
 class Synthesizer:

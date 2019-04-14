@@ -1,12 +1,10 @@
-import os
+from synthesizer.datasets import audio
+from encoder import inference
 from vlibs import fileio
 import numpy as np
-from datasets import audio
-import sys
-sys.path.append('../encoder')
-encoder_model_fpath = '../encoder/saved_models/all.pt'
-from encoder import inference
+import os
 
+encoder_model_fpath = 'SV2TTS/encoder/saved_models/all.pt'
 
 def build_from_path(hparams, input_dirs, mel_dir, embed_dir, wav_dir):
     """
