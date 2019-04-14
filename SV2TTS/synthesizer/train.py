@@ -1,15 +1,13 @@
-import argparse
 import os
-import subprocess
 import time
 import traceback
 from datetime import datetime
 
-import infolog
+from synthesizer import infolog
 import numpy as np
 import tensorflow as tf
 from datasets import audio
-from hparams import hparams_debug_string
+from synthesizer.hparams import hparams_debug_string
 from tacotron.feeder import Feeder
 from tacotron.models import create_model
 from tacotron.utils import ValueWindow, plot

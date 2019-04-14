@@ -93,10 +93,10 @@ hparams = tf.contrib.training.HParams(
 	# showing black silent regions on top), then restart from step 2.
     num_mels=80,  # Number of mel-spectrogram channels and local conditioning dimensionality
     # num_freq=1025,  # (= n_fft / 2 + 1) only used when adding linear spectrograms post processing
-    num_freq=513,  # (= n_fft / 2 + 1) only used when adding linear spectrograms post processing
+    num_freq=1025,  # (= n_fft / 2 + 1) only used when adding linear spectrograms post processing
     #  network
-    rescale=False,  # Whether to rescale audio prior to preprocessing
-    rescaling_max=0.999,  # Rescaling value
+    rescale=True,  # Whether to rescale audio prior to preprocessing
+    rescaling_max=0.9,  # Rescaling value
     # Whether to clip silence in Audio (at beginning and end of audio only, not the middle)
     # train samples of lengths between 3sec and 14sec are more than enough to make a model capable
     # of good parallelization.
@@ -123,10 +123,10 @@ hparams = tf.contrib.training.HParams(
     # sample_rate=22050,  # 22050 Hz (corresponding to ljspeech dataset) (sox --i <filename>)
     
     # FOR DATASETS IN 16000Hz:
-    n_fft=800,  # Extra window size is filled with 0 paddings to match this parameter
-    hop_size=200,  # For 16000Hz, 200 = 12.5 ms (0.0125 * sample_rate)
-    win_size=800,  # For 16000Hz, 800 = 50 ms (If None, win_size = n_fft) (0.05 * sample_rate)
-    sample_rate=16000,  # 16000Hz (corresponding to librispeech) (sox --i <filename>)
+    n_fft=2048,  # Extra window size is filled with 0 paddings to match this parameter
+    hop_size=300,  # For 24000Hz, 300 = 12.5 ms (0.0125 * sample_rate)
+    win_size=1200,  # For 24000Hz, 1200 = 50 ms (If None, win_size = n_fft) (0.05 * sample_rate)
+    sample_rate=24000,  # 24000Hz (corresponding to libritts) (sox --i <filename>)
     
     frame_shift_ms=None,  # Can replace hop_size parameter. (Recommended: 12.5)
     
@@ -181,7 +181,7 @@ hparams = tf.contrib.training.HParams(
     # Determines whether the decoder should stop when predicting <stop> to any frame or to all of 
     # them (True works pretty well)
     
-    embedding_dim=512,  # dimension of embedding space
+    embedding_dim=512,  # dimension of embedding space (TODO: clarify/delete this)
     
     # Encoder parameters
     enc_conv_num_layers=3,  # number of encoder convolutional layers
@@ -252,7 +252,7 @@ hparams = tf.contrib.training.HParams(
     # major slowdowns! Only use when critical!)
     
     # train/test split ratios, mini-batches sizes
-    tacotron_batch_size=40,  # number of training samples on each training steps (was 32)
+    tacotron_batch_size=36,  # number of training samples on each training steps (was 32)
     # Tacotron Batch synthesis supports ~16x the training batch size (no gradients during 
     # testing). 
     # Training Tacotron with unmasked paddings makes it aware of them, which makes synthesis times

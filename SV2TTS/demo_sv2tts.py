@@ -1,6 +1,6 @@
 from datasets.audio import inv_mel_spectrogram
 from tacotron import synthesizer
-from hparams import hparams
+from synthesizer.hparams import hparams
 from vlibs import fileio
 import sounddevice as sd
 import tensorflow as tf

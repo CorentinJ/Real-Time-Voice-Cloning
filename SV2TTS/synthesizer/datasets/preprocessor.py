@@ -1,5 +1,4 @@
 import os
-import logmmse
 from vlibs import fileio
 import numpy as np
 from datasets import audio
@@ -11,7 +10,7 @@ from encoder import inference
 
 def build_from_path(hparams, input_dirs, mel_dir, embed_dir, wav_dir):
     """
-    Preprocesses the speech dataset from a gven input path to given output directories
+    Preprocesses the speech dataset from a given input path to given output directories
 
     Args:
         - hparams: hyper parameters
@@ -32,23 +31,17 @@ def build_from_path(hparams, input_dirs, mel_dir, embed_dir, wav_dir):
     for input_dir in input_dirs:
         for speaker_dir in fileio.listdir(input_dir, full_path=True):
             print("    " + speaker_dir)
-            for utterance_dir in fileio.listdir(speaker_dir, full_path=True):
-                alignment_file = fileio.get_files(utterance_dir, '.alignment.txt')[0]
-                for line in fileio.read_all_lines(alignment_file):
-                    # Retrieve the audio filepath and its alignment data
-                    basename, words, end_times = line.strip().split(' ')
-                    words = words.replace('\"', '').split(',')
-                    end_times = [float(e) for e in end_times.replace('\"', '').split(',')]
-                    wav_path = fileio.join(utterance_dir, basename + '.flac')
-
-                    # Split utterances on silences
-                    wavs, texts = _clean_and_split_utterance(wav_path, words, end_times, hparams)
-                    
-                    # Process all parts of the utterance
-                    for i, (wav, text) in enumerate(zip(wavs, texts)):
-                        sub_basename = "%s_%02d" % (basename, i)
-                        data.append(_process_utterance(mel_dir, embed_dir, wav_dir, sub_basename,
-                                                       wav, text, hparams))
+            for book_dir in fileio.listdir(speaker_dir, full_path=True):
+                text_fpaths = fileio.get_files(book_dir, '\.normalized\.txt')
+                wav_fpaths = fileio.get_files(book_dir, '\.wav')
+                assert len(text_fpaths) == len(wav_fpaths)
+                
+                for text_fpath, wav_fpath in zip(text_fpaths, wav_fpaths):
+                    basename = os.path.splitext(fileio.leaf(wav_fpath))[0]
+                    text = fileio.read_all_lines(text_fpath)[0].rstrip()
+                    text = text.lower()
+                    data.append(_process_utterance(mel_dir, embed_dir, wav_dir, basename,
+                                                   wav_fpath, text, hparams))
 
     n_all_samples = len(data)
     data = [d for d in data if d is not None]
@@ -57,34 +50,7 @@ def build_from_path(hparams, input_dirs, mel_dir, embed_dir, wav_dir):
           (n_all_samples, n_all_samples - n_remaining_samples, n_remaining_samples))
     return data
 
-def _clean_and_split_utterance(wav_path, words, end_times, hparams):
-    # Load and rescale the audio
-    wav = audio.load_wav(wav_path, sr=hparams.sample_rate)
-    if hparams.rescale:
-        wav = wav / np.abs(wav).max() * hparams.rescaling_max
-        
-    # Suppress the noise
-    wav = logmmse.logmmse(wav, hparams.sample_rate)
-    
-    # Find pauses in the sentence
-    words = np.array(words)
-    start_times = np.array([0.0] + end_times[:-1])
-    end_times = np.array(end_times)
-    assert len(words) == len(end_times) == len(start_times)
-    assert words[0] == '' and words[-1] == ''
-    
-    # Break the sentence on pauses that are too long
-    mask = (words == '') & (end_times - start_times >= hparams.silence_min_duration_split)
-    mask[0] = mask[-1] = True
-    breaks = np.where(mask)[0]
-    segment_times = [[end_times[s], start_times[e]] for s, e in zip(breaks[:-1], breaks[1:])]
-    segment_times = (np.array(segment_times) * hparams.sample_rate).astype(np.int)
-    wavs = [wav[segment_time[0]:segment_time[1]] for segment_time in segment_times]
-    texts = [' '.join(words[s + 1:e]).replace('  ', ' ') for s, e in zip(breaks[:-1], breaks[1:])]
-    
-    return wavs, texts
-
-def _process_utterance(mel_dir, embed_dir, wav_dir, basename, wav, text, hparams):
+def _process_utterance(mel_dir, embed_dir, wav_dir, basename, wav_path, text, hparams):
     """
     Preprocesses a single utterance wav/text pair.
 
@@ -95,13 +61,17 @@ def _process_utterance(mel_dir, embed_dir, wav_dir, basename, wav, text, hparams
         - embed_dir: the directory to write the embedding into
         - wav_dir: the directory to write the preprocessed wav into
         - basename: the source base filename to use in the spectogram filename
-        - wav: the audio waveform unprocessed
+        - wav_path: the path to the audio waveform
         - text: text spoken in the audio
         - hparams: hyper parameters
 
     Returns:
         - A tuple: (audio_filename, mel_filename, embed_filename, time_steps, mel_frames, text)
-    """      
+    """
+    wav = audio.load_wav(wav_path, sr=hparams.sample_rate)
+    if hparams.rescale:
+        wav = (wav / np.abs(wav).max()) * hparams.rescaling_max
+
     # Compute the mel scale spectrogram from the wav
     mel_spectrogram = audio.melspectrogram(wav, hparams).astype(np.float32)
     mel_frames = mel_spectrogram.shape[1]

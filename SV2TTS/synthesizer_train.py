@@ -1,10 +1,10 @@
 import argparse
 import os
 from time import sleep
-import infolog
+from synthesizer import infolog
 import tensorflow as tf
-from hparams import hparams
-from infolog import log
+from synthesizer.hparams import hparams
+from synthesizer.infolog import log
 from tacotron.synthesize import tacotron_synthesize
 from tacotron.train import tacotron_train
 

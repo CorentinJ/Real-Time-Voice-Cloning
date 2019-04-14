@@ -40,6 +40,7 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, vis_every: int, 
             print('No model \"%s\" found, starting training from scratch.' % run_id)
     else:
         print("Starting the training from scratch.")
+    model.train()
     
     # Initialize the visualization environment
     device_name = str(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU')

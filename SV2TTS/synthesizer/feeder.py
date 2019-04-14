@@ -1,11 +1,10 @@
 import os
 import threading
 import time
-import traceback
 
 import numpy as np
 import tensorflow as tf
-from infolog import log
+from synthesizer.infolog import log
 from sklearn.model_selection import train_test_split
 from tacotron.utils.text import text_to_sequence
 

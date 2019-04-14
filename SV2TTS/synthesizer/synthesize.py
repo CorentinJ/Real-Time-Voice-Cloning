@@ -1,12 +1,10 @@
-import argparse
 import os
-import re
 import time
 from time import sleep
 
 import tensorflow as tf
-from hparams import hparams, hparams_debug_string
-from infolog import log
+from synthesizer.hparams import hparams_debug_string
+from synthesizer.infolog import log
 from tacotron.synthesizer import Synthesizer
 from tqdm import tqdm
 

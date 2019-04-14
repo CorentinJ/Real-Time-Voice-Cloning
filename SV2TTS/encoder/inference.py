@@ -9,17 +9,20 @@ from matplotlib import cm
 _model = None # type: SpeakerEncoder
 _device = None # type: torch.device
 
-def load_model(weights_fpath, device):
+def load_model(weights_fpath, device=None):
     """
     Loads the model in memory. If this function is not explicitely called, it will be run on the 
     first call to embed_frames() with the default weights file.
     
     :param weights_fpath: the path to saved model weights.
     :param device: either a torch device or the name of a torch device (e.g. 'cpu', 'cuda'). The 
-    model will be loaded and will run on this device. Outputs will however always be on the cpu.
+    model will be loaded and will run on this device. Outputs will however always be on the cpu. 
+    If None, will default to your GPU if it's available, otherwise your CPU.
     """
     global _model, _device
-    if isinstance(device, str):
+    if device is None:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    elif isinstance(device, str):
         device = torch.device(device)
     _device = device
     _model = SpeakerEncoder(_device)
@@ -76,28 +79,28 @@ def compute_partial_slices(n_samples, partial_utterance_n_frames=partials_n_fram
     frame_step = max(int(np.round(partial_utterance_n_frames * (1 - overlap))), 1)
 
     # Compute the slices
-    wave_slices, mel_slices = [], []
+    wav_slices, mel_slices = [], []
     steps = max(1, n_frames - partial_utterance_n_frames + frame_step + 1)
     for i in range(0, steps, frame_step):
         mel_range = np.array([i, i + partial_utterance_n_frames])
-        wave_range = mel_range * samples_per_frame
+        wav_range = mel_range * samples_per_frame
         mel_slices.append(slice(*mel_range))
-        wave_slices.append(slice(*wave_range))
+        wav_slices.append(slice(*wav_range))
         
     # Evaluate whether extra padding is warranted or not
-    last_wave_range = wave_slices[-1]
-    coverage = (n_samples - last_wave_range.start) / (last_wave_range.stop - last_wave_range.start)
+    last_wav_range = wav_slices[-1]
+    coverage = (n_samples - last_wav_range.start) / (last_wav_range.stop - last_wav_range.start)
     if coverage < min_pad_coverage and len(mel_slices) > 1:
         mel_slices = mel_slices[:-1]
-        wave_slices = wave_slices[:-1]
+        wav_slices = wav_slices[:-1]
     
-    return wave_slices, mel_slices
+    return wav_slices, mel_slices
 
-def embed_utterance(wave, using_partials=True, return_partials=False, **kwargs):
+def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
     """
     Computes an embedding for a single utterance.
     
-    :param wave: the utterance waveform as a numpy array of float32
+    :param wav: the utterance waveform as a numpy array of float32
     :param using_partials: if True, then the utterance is split in partial utterances of 
     <partial_utterance_n_frames> frames and the utterance embedding is computed from their 
     normalized average. If False, the utterance is instead computed from feeding the entire 
@@ -113,20 +116,20 @@ def embed_utterance(wave, using_partials=True, return_partials=False, **kwargs):
     """
     # Process the entire utterance if not using partials
     if not using_partials:
-        frames = audio.wave_to_mel_filterbank(wave)
+        frames = audio.wave_to_mel_filterbank(wav)
         embed = embed_frames_batch(frames[None, ...])[0]
         if return_partials:
             return embed, None, None
         return embed
     
     # Compute where to split the utterance into partials and pad if necessary
-    wave_slices, mel_slices = compute_partial_slices(len(wave), **kwargs)
+    wave_slices, mel_slices = compute_partial_slices(len(wav), **kwargs)
     max_wave_length = wave_slices[-1].stop
-    if max_wave_length >= len(wave):
-        wave = np.pad(wave, (0, max_wave_length - len(wave)), 'constant')
+    if max_wave_length >= len(wav):
+        wav = np.pad(wav, (0, max_wave_length - len(wav)), 'constant')
     
     # Split the utterance into partials
-    frames = audio.wave_to_mel_filterbank(wave)
+    frames = audio.wave_to_mel_filterbank(wav)
     frames_batch = np.array([frames[s] for s in mel_slices])
     partial_embeds = embed_frames_batch(frames_batch)
     
@@ -137,14 +140,11 @@ def embed_utterance(wave, using_partials=True, return_partials=False, **kwargs):
     if return_partials:
         return embed, partial_embeds, wave_slices
     return embed
-    
-def embed_stream(stream, partial_utterance_n_frames=partials_n_frames, overlap=0.5):
+
+def embed_speaker(wavs, normalize=False, **kwargs):
     raise NotImplemented()
 
-def embed_speaker(waves, normalize=False, **kwargs):
-    raise NotImplemented()
-
-def load_and_preprocess_wave(fpath):
+def load_preprocess_waveform(fpath):
     """
     Loads an audio file in memory and applies the same preprocessing operations used in trained 
     the Speaker Encoder. Using this function is not mandatory but recommended.
@@ -178,16 +178,16 @@ if __name__ == '__main__':
     fig, axes = plt.subplots(3, 3)
     for i, ax in enumerate(axes.flatten(), 50):
         fpath = r"E:\Datasets\LJSpeech-1.1\wavs\LJ001-%04d.wav" % (i + 1)
-        wave = load_and_preprocess_wave(fpath)
-        embed = embed_utterance(wave)
+        wav = load_preprocess_waveform(fpath)
+        embed = embed_utterance(wav)
         plot_embedding_as_heatmap(embed, ax)
     plt.show(block=False)
     
     fig, axes = plt.subplots(3, 3)
     for i, ax in enumerate(axes.flatten(), 20):
         fpath = r"E:\Datasets\LibriSpeech\train-other-500\25\123319\25-123319-%04d.flac" % i
-        wave = load_and_preprocess_wave(fpath)
-        embed = embed_utterance(wave)
+        wav = load_preprocess_waveform(fpath)
+        embed = embed_utterance(wav)
         plot_embedding_as_heatmap(embed, ax)
     plt.show()
     

@@ -211,7 +211,7 @@ class UMapDemoUI(QDialog):
                                 self.dataset_box.currentText(),
                                 self.speaker_box.currentText(),
                                 self.utterance_box.currentText())
-        self.utterance = inference.load_and_preprocess_wave(fpath)
+        self.utterance = inference.load_preprocess_waveform(fpath)
         self.is_record = False
 
     def embed_utterance(self, demo, speaker_name=None, go_next=None):

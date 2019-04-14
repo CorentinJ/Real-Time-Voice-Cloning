@@ -1,12 +1,11 @@
 import argparse
 import os
-from warnings import warn
 from time import sleep
 
 import tensorflow as tf
 
-from hparams import hparams
-from infolog import log
+from synthesizer.hparams import hparams
+from synthesizer.infolog import log
 from tacotron.synthesize import tacotron_synthesize
 
 

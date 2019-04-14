@@ -14,5 +14,5 @@
 *.bcf
 _old
 SV2TTS/encoder/saved_models/*_backups
-tacotron2/logs-*
+SV2TTS/synthesizer/saved_models/*
 wave-rnn/model_outputs

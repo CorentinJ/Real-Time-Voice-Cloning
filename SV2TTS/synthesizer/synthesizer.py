@@ -5,7 +5,7 @@ import numpy as np
 import pyaudio
 import tensorflow as tf
 from datasets import audio
-from infolog import log
+from synthesizer.infolog import log
 from tacotron.models import create_model
 from tacotron.utils import plot
 from tacotron.utils.text import text_to_sequence
