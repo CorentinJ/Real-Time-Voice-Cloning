@@ -27,15 +27,15 @@ if __name__ == "__main__":
     parser.add_argument("-b", "--backup_every", type=int, default=3000, help= \
         "Number of steps between backups of the model. Set to 0 to never make backups of the "
         "model.")
-    parser.add_argument('-f', "--force_restart", action="store_true", help= \
+    parser.add_argument("-f", "--force_restart", action="store_true", help= \
         "Do not load any saved model.")
-    args = vars(parser.parse_args())
     
     # Reformat the arguments
-    args['models_dir'] = Path(args['models_dir'])
-    args["models_dir"].mkdir(exist_ok=True)
-    args["clean_data_root"] = Path(args["clean_data_root"])
+    args = parser.parse_args()
+    args.models_dir = Path(args.models_dir)
+    args.models_dir.mkdir(exist_ok=True)
+    args.clean_data_root = Path(args.clean_data_root)
     
     # Run the training
-    train(**args)
+    train(**vars(args))
     

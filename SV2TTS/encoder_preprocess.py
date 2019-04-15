@@ -17,18 +17,18 @@ if __name__ == "__main__":
                         default="librispeech_other,voxceleb1,voxceleb2", help=\
         "Comma-separated list of datasets you want to preprocess. Only the train set of these "
         "datasets will be used.")
-    parser.add_argument("--skip_existing", action="store_true", help=\
+    parser.add_argument("-s", "--skip_existing", action="store_true", help=\
         "Whether to overwrite existing files with the same name. Useful if the preprocessing was "
         "interrupted.")
-    args = vars(parser.parse_args())
 
     # Reformat the arguments
-    args["datasets_root"] = Path(args["datasets_root"])
-    args["datasets"] = args["datasets"].split(",")
+    args = parser.parse_args()
+    args.datasets_root = Path(args.datasets_root)
+    args.datasets = args.datasets.split(",")
     if not hasattr(args, "out_dir"):
-        args["out_dir"] = Path(args["datasets_root"], "SV2TTS", "encoder")
-    args["out_dir"] = Path(args["out_dir"])
-    args["out_dir"].mkdir(exist_ok=True)
+        args.out_dir = Path(args.datasets_root, "SV2TTS", "encoder")
+    args.out_dir = Path(args.out_dir)
+    args.out_dir.mkdir(exist_ok=True)
     
     # Preprocess the datasets
     preprocess_func = {
@@ -36,6 +36,7 @@ if __name__ == "__main__":
         "voxceleb1": preprocess_voxceleb1,
         "voxceleb2": preprocess_voxceleb2,
     }
+    args = vars(args)
     for dataset in args.pop("datasets"):
         print("Preprocessing %s" % dataset)
         preprocess_func[dataset](**args)

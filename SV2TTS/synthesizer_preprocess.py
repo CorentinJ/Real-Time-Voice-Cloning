@@ -1,8 +1,7 @@
 from synthesizer.datasets import preprocessor
 from synthesizer.hparams import hparams
-from vlibs import fileio
+from pathlib import Path
 import argparse
-import os
 
 
 def preprocess(args, input_folders, out_dir, hparams):
@@ -44,22 +43,32 @@ def run_preprocess(args, hparams):
     preprocess(args, input_folders, output_folder, hparams)
 
 def main():
-    print('Initializing preprocessing..')
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Preprocesses audio files from datasets, encodes them as mel spectrograms, "
+                    "retrieves their speaker embedding with the speaker encoder and writes them to "
+                    "the disk. Audio files are also saved, to be used by the vocoder for training.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     
     # Root data directory that contains the LibriTTS directory
-    parser.add_argument('--base_dir', default='')
-    parser.add_argument('--hparams', default='',
-                        help='Hyperparameter overrides as a comma-separated list of name=value pairs')
-    parser.add_argument('--output', default='Synthesizer')
-    
-    # Name of the LibriTTS sets to use, separated by spaces 
-    # (e.g. "--sets train-other-500 train-clean-360). Defaults to using all the clean training sets 
-    # present in the LibriSpeech directory.
-    parser.add_argument('--sets', type=str, nargs='+', default=None)
+    parser.add_argument("datasets_root", type=str, help=\
+        "Path to the directory containing your LibriSpeech/TTS datasets.")
+    parser.add_argument("-e", "--encoder_fpath", type=str, 
+                        default='encoder/saved_models/pretrained.pt', help=\
+        "Path your trained encoder model.")
+    parser.add_argument("-m", "--mel_out_dir", type=str, default=argparse.SUPPRESS, help=\
+        "Path to the output directory that will contain the mel spectrograms and the speaker "
+        "embeddings. Defaults to <datasets_root>/SV2TTS/synthesizer/")
+    parser.add_argument("-w", "--wav_out_dir", type=str, default=argparse.SUPPRESS, help=\
+        "Path to the output directory that will contain the audio wav files to train the"
+        "vocoder. Defaults to <datasets_root>/SV2TTS/vocoder/")
+    parser.add_argument("-h", "--hparams", type=str, default="", help=\
+        "Hyperparameter overrides as a comma-separated list of name-value pairs")
+    parser.add_argument("-s", "--skip_existing", action="store_true", help=\
+        "Whether to overwrite existing files with the same name. Useful if the preprocessing was "
+        "interrupted.")
     
     args = parser.parse_args()
-    
     modified_hp = hparams.parse(args.hparams)
     
     run_preprocess(args, modified_hp)
