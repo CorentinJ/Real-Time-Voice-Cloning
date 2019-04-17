@@ -68,7 +68,7 @@ class SpeakerEncoder(nn.Module):
         :return: the loss and the EER for this batch of embeddings.
         """
         # Computation is significantly faster on the CPU
-        if embeds.device != torch.device('cpu'):
+        if embeds.device != torch.device("cpu"):
             embeds = embeds.cpu()
 
         speakers_per_batch, utterances_per_speaker = embeds.shape[:2]

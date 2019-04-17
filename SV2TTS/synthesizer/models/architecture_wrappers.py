@@ -76,10 +76,10 @@ class TacotronDecoderCell(RNNCell):
 		5) Predict new output y_{i} using s_{i} and c_{i} (concatenated)
 		6) Predict <stop_token> output ys_{i} using s_{i} and c_{i} (concatenated)
 
-	* : This is typically taking a vanilla LSTM, wrapping it using tensorflow's attention wrapper,
+	* : This is typically taking a vanilla LSTM, wrapping it using tensorflow"s attention wrapper,
 	and wrap that with the prenet before doing an input feeding, and with the prediction layer
 	that uses RNN states to project on output space. Actions marked with (*) can be replaced with
-	tensorflow's attention wrapper call if it was using cumulative alignments instead of previous alignments only.
+	tensorflow"s attention wrapper call if it was using cumulative alignments instead of previous alignments only.
 	"""
 
 	def __init__(self, prenet, attention_mechanism, rnn_cell, frame_projection, stop_projection):

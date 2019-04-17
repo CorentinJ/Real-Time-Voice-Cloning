@@ -5,7 +5,7 @@ from tensorflow.contrib.seq2seq import Helper
 
 class TacoTestHelper(Helper):
 	def __init__(self, batch_size, hparams):
-		with tf.name_scope('TacoTestHelper'):
+		with tf.name_scope("TacoTestHelper"):
 			self._batch_size = batch_size
 			self._output_dim = hparams.num_mels
 			self._reduction_factor = hparams.outputs_per_step
@@ -34,8 +34,8 @@ class TacoTestHelper(Helper):
 		return tf.tile([0], [self._batch_size])  # Return all 0; we ignore them
 
 	def next_inputs(self, time, outputs, state, sample_ids, stop_token_prediction, name=None):
-		'''Stop on EOS. Otherwise, pass the last output as the next input and pass through state.'''
-		with tf.name_scope('TacoTestHelper'):
+		"""Stop on EOS. Otherwise, pass the last output as the next input and pass through state."""
+		with tf.name_scope("TacoTestHelper"):
 			#A sequence is finished when the output probability is > 0.5
 			finished = tf.cast(tf.round(stop_token_prediction), tf.bool)
 
@@ -45,7 +45,7 @@ class TacoTestHelper(Helper):
 			#	Stop when the model outputs a p > 0.5 for all r frames (Safer)
 			#Note:
 			#	With enough training steps, the model should be able to predict when to stop correctly
-			#	and the use of stop_at_any = True would be recommended. If however the model didn't
+			#	and the use of stop_at_any = True would be recommended. If however the model didn"t
 			#	learn to stop correctly yet, (stops too soon) one could choose to use the safer option
 			#	to get a correct synthesis
 			if self.stop_at_any:
@@ -62,7 +62,7 @@ class TacoTestHelper(Helper):
 class TacoTrainingHelper(Helper):
 	def __init__(self, batch_size, targets, hparams, gta, evaluating, global_step):
 		# inputs is [N, T_in], targets is [N, T_out, D]
-		with tf.name_scope('TacoTrainingHelper'):
+		with tf.name_scope("TacoTrainingHelper"):
 			self._batch_size = batch_size
 			self._output_dim = hparams.num_mels
 			self._reduction_factor = hparams.outputs_per_step
@@ -103,7 +103,7 @@ class TacoTrainingHelper(Helper):
 		elif self.eval and self._hparams.natural_eval:
 			self._ratio = tf.convert_to_tensor(0.) #Force eval model to always feed predictions
 		else:
-			if self._hparams.tacotron_teacher_forcing_mode == 'scheduled':
+			if self._hparams.tacotron_teacher_forcing_mode == "scheduled":
 				self._ratio = _teacher_forcing_ratio_decay(self._hparams.tacotron_teacher_forcing_init_ratio,
 					self.global_step, self._hparams)
 
@@ -113,7 +113,7 @@ class TacoTrainingHelper(Helper):
 		return tf.tile([0], [self._batch_size])  # Return all 0; we ignore them
 
 	def next_inputs(self, time, outputs, state, sample_ids, stop_token_prediction, name=None):
-		with tf.name_scope(name or 'TacoTrainingHelper'):
+		with tf.name_scope(name or "TacoTrainingHelper"):
 			#synthesis stop (we let the model see paddings as we mask them when computing loss functions)
 			finished = (time + 1 >= self._lengths)
 
@@ -129,7 +129,7 @@ class TacoTrainingHelper(Helper):
 
 
 def _go_frames(batch_size, output_dim):
-	'''Returns all-zero <GO> frames for a given batch size and output dimension'''
+	"""Returns all-zero <GO> frames for a given batch size and output dimension"""
 	return tf.tile([[0.0]], [batch_size, output_dim])
 
 def _teacher_forcing_ratio_decay(init_tfr, global_step, hparams):
@@ -150,7 +150,7 @@ def _teacher_forcing_ratio_decay(init_tfr, global_step, hparams):
 			global_step=global_step - hparams.tacotron_teacher_forcing_start_decay, #tfr = 1 at step 10k
 			decay_steps=hparams.tacotron_teacher_forcing_decay_steps, #tfr = 0 at step ~280k
 			alpha=hparams.tacotron_teacher_forcing_decay_alpha, #tfr = 0% of init_tfr as final value
-			name='tfr_cosine_decay')
+			name="tfr_cosine_decay')
 
 		#force teacher forcing ratio to take initial value when global step < start decay step.
 		narrow_tfr = tf.cond(

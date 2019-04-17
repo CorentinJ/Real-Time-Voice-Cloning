@@ -50,21 +50,21 @@ def _location_sensitive_score(W_query, W_fil, W_keys):
 	#############################################################################
 
 	Args:
-		W_query: Tensor, shape '[batch_size, 1, attention_dim]' to compare to location features.
-		W_location: processed previous alignments into location features, shape '[batch_size, max_time, attention_dim]'
-		W_keys: Tensor, shape '[batch_size, max_time, attention_dim]', typically the encoder outputs.
+		W_query: Tensor, shape "[batch_size, 1, attention_dim]" to compare to location features.
+		W_location: processed previous alignments into location features, shape "[batch_size, max_time, attention_dim]"
+		W_keys: Tensor, shape "[batch_size, max_time, attention_dim]", typically the encoder outputs.
 	Returns:
-		A '[batch_size, max_time]' attention score (energy)
+		A "[batch_size, max_time]" attention score (energy)
 	"""
 	# Get the number of hidden units from the trailing dimension of keys
 	dtype = W_query.dtype
 	num_units = W_keys.shape[-1].value or array_ops.shape(W_keys)[-1]
 
 	v_a = tf.get_variable(
-		'attention_variable_projection', shape=[num_units], dtype=dtype,
+		"attention_variable_projection", shape=[num_units], dtype=dtype,
 		initializer=tf.contrib.layers.xavier_initializer())
 	b_a = tf.get_variable(
-		'attention_bias', shape=[num_units], dtype=dtype,
+		"attention_bias", shape=[num_units], dtype=dtype,
 		initializer=tf.zeros_initializer())
 
 	return tf.reduce_sum(v_a * tf.tanh(W_keys + W_query + W_fil + b_a), [2])
@@ -116,7 +116,7 @@ class LocationSensitiveAttention(BahdanauAttention):
 				 memory_sequence_length=None,
 				 smoothing=False,
 				 cumulate_weights=True,
-				 name='LocationSensitiveAttention'):
+				 name="LocationSensitiveAttention"):
 		"""Construct the Attention mechanism.
 		Args:
 			num_units: The depth of the query mechanism.
@@ -136,7 +136,7 @@ class LocationSensitiveAttention(BahdanauAttention):
 				  vances in Neural Information Processing Systems, 2015, pp.
 				  577–585.
 				This is mainly used if the model wants to attend to multiple input parts
-				at the same decoding step. We probably won't be using it since multiple sound
+				at the same decoding step. We probably won"t be using it since multiple sound
 				frames may depend on the same character/phone, probably not the way around.
 				Note:
 					We still keep it implemented in case we want to test it. They used it in the
@@ -156,10 +156,10 @@ class LocationSensitiveAttention(BahdanauAttention):
 				name=name)
 
 		self.location_convolution = tf.layers.Conv1D(filters=hparams.attention_filters,
-			kernel_size=hparams.attention_kernel, padding='same', use_bias=True,
-			bias_initializer=tf.zeros_initializer(), name='location_features_convolution')
+			kernel_size=hparams.attention_kernel, padding="same", use_bias=True,
+			bias_initializer=tf.zeros_initializer(), name="location_features_convolution")
 		self.location_layer = tf.layers.Dense(units=num_units, use_bias=False,
-			dtype=tf.float32, name='location_features_layer')
+			dtype=tf.float32, name="location_features_layer")
 		self._cumulate = cumulate_weights
 
 	def __call__(self, query, state):
@@ -169,7 +169,7 @@ class LocationSensitiveAttention(BahdanauAttention):
 				`[batch_size, query_depth]`.
 			state (previous alignments): Tensor of dtype matching `self.values` and shape
 				`[batch_size, alignments_size]`
-				(`alignments_size` is memory's `max_time`).
+				(`alignments_size` is memory"s `max_time`).
 		Returns:
 			alignments: Tensor of dtype matching `self.values` and shape
 				`[batch_size, alignments_size]` (`alignments_size` is memory's

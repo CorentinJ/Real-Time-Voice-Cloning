@@ -4,10 +4,10 @@ import tensorflow as tf
 class HighwayNet:
     def __init__(self, units, name=None):
         self.units = units
-        self.scope = 'HighwayNet' if name is None else name
+        self.scope = "HighwayNet" if name is None else name
         
-        self.H_layer = tf.layers.Dense(units=self.units, activation=tf.nn.relu, name='H')
-        self.T_layer = tf.layers.Dense(units=self.units, activation=tf.nn.sigmoid, name='T',
+        self.H_layer = tf.layers.Dense(units=self.units, activation=tf.nn.relu, name="H")
+        self.T_layer = tf.layers.Dense(units=self.units, activation=tf.nn.sigmoid, name="T",
                                        bias_initializer=tf.constant_initializer(-1.))
     
     def __call__(self, inputs):
@@ -28,18 +28,18 @@ class CBHG:
         self.projection_kernel_size = projection_kernel_size
         
         self.is_training = is_training
-        self.scope = 'CBHG' if name is None else name
+        self.scope = "CBHG" if name is None else name
         
         self.highway_units = highway_units
         self.highwaynet_layers = [
-            HighwayNet(highway_units, name='{}_highwaynet_{}'.format(self.scope, i + 1)) for i in
+            HighwayNet(highway_units, name="{}_highwaynet_{}".format(self.scope, i + 1)) for i in
             range(n_highwaynet_layers)]
-        self._fw_cell = tf.nn.rnn_cell.GRUCell(rnn_units, name='{}_forward_RNN'.format(self.scope))
-        self._bw_cell = tf.nn.rnn_cell.GRUCell(rnn_units, name='{}_backward_RNN'.format(self.scope))
+        self._fw_cell = tf.nn.rnn_cell.GRUCell(rnn_units, name="{}_forward_RNN".format(self.scope))
+        self._bw_cell = tf.nn.rnn_cell.GRUCell(rnn_units, name="{}_backward_RNN".format(self.scope))
     
     def __call__(self, inputs, input_lengths):
         with tf.variable_scope(self.scope):
-            with tf.variable_scope('conv_bank'):
+            with tf.variable_scope("conv_bank"):
                 # Convolution bank: concatenate on the last axis to stack channels from all 
                 # convolutions
                 # The convolution bank uses multiple different kernel sizes to have many insights 
@@ -47,7 +47,7 @@ class CBHG:
                 # This makes one of the strengths of the CBHG block on sequences.
                 conv_outputs = tf.concat(
                     [conv1d(inputs, k, self.conv_channels, tf.nn.relu, self.is_training, 0.,
-                            'conv1d_{}'.format(k)) for k in range(1, self.K + 1)],
+                            "conv1d_{}".format(k)) for k in range(1, self.K + 1)],
                     axis=-1
                 )
             
@@ -57,13 +57,13 @@ class CBHG:
                 conv_outputs,
                 pool_size=self.pool_size,
                 strides=1,
-                padding='same')
+                padding="same")
             
             # Two projection layers
             proj1_output = conv1d(maxpool_output, self.projection_kernel_size, self.projections[0],
-                                  tf.nn.relu, self.is_training, 0., 'proj1')
+                                  tf.nn.relu, self.is_training, 0., "proj1")
             proj2_output = conv1d(proj1_output, self.projection_kernel_size, self.projections[1],
-                                  lambda _: _, self.is_training, 0., 'proj2')
+                                  lambda _: _, self.is_training, 0., "proj2")
             
             # Residual connection
             highway_input = proj2_output + inputs
@@ -89,25 +89,25 @@ class CBHG:
 
 
 class ZoneoutLSTMCell(tf.nn.rnn_cell.RNNCell):
-    '''Wrapper for tf LSTM to create Zoneout LSTM Cell
+    """Wrapper for tf LSTM to create Zoneout LSTM Cell
 
     inspired by:
     https://github.com/teganmaharaj/zoneout/blob/master/zoneout_tensorflow.py
 
-    Published by one of 'https://arxiv.org/pdf/1606.01305.pdf' paper writers.
+    Published by one of "https://arxiv.org/pdf/1606.01305.pdf" paper writers.
 
     Many thanks to @Ondal90 for pointing this out. You sir are a hero!
-    '''
+    """
     
     def __init__(self, num_units, is_training, zoneout_factor_cell=0., zoneout_factor_output=0.,
                  state_is_tuple=True, name=None):
-        '''Initializer with possibility to set different zoneout values for cell/hidden states.
-        '''
+        """Initializer with possibility to set different zoneout values for cell/hidden states.
+        """
         zm = min(zoneout_factor_output, zoneout_factor_cell)
         zs = max(zoneout_factor_output, zoneout_factor_cell)
         
         if zm < 0. or zs > 1.:
-            raise ValueError('One/both provided Zoneout factors are not in [0, 1]')
+            raise ValueError("One/both provided Zoneout factors are not in [0, 1]")
         
         self._cell = tf.nn.rnn_cell.LSTMCell(num_units, state_is_tuple=state_is_tuple, name=name)
         self._zoneout_cell = zoneout_factor_cell
@@ -124,8 +124,8 @@ class ZoneoutLSTMCell(tf.nn.rnn_cell.RNNCell):
         return self._cell.output_size
     
     def __call__(self, inputs, state, scope=None):
-        '''Runs vanilla LSTM Cell and applies zoneout.
-        '''
+        """Runs vanilla LSTM Cell and applies zoneout.
+        """
         # Apply vanilla LSTM
         output, new_state = self._cell(inputs, state, scope)
         
@@ -179,7 +179,7 @@ class EncoderConvolutions:
         self.kernel_size = hparams.enc_conv_kernel_size
         self.channels = hparams.enc_conv_channels
         self.activation = activation
-        self.scope = 'enc_conv_layers' if scope is None else scope
+        self.scope = "enc_conv_layers" if scope is None else scope
         self.drop_rate = hparams.tacotron_dropout_rate
         self.enc_conv_num_layers = hparams.enc_conv_num_layers
     
@@ -189,7 +189,7 @@ class EncoderConvolutions:
             for i in range(self.enc_conv_num_layers):
                 x = conv1d(x, self.kernel_size, self.channels, self.activation,
                            self.is_training, self.drop_rate,
-                           'conv_layer_{}_'.format(i + 1) + self.scope)
+                           "conv_layer_{}_".format(i + 1) + self.scope)
         return x
 
 
@@ -211,19 +211,19 @@ class EncoderRNN:
         
         self.size = size
         self.zoneout = zoneout
-        self.scope = 'encoder_LSTM' if scope is None else scope
+        self.scope = "encoder_LSTM" if scope is None else scope
         
         # Create forward LSTM Cell
         self._fw_cell = ZoneoutLSTMCell(size, is_training,
                                         zoneout_factor_cell=zoneout,
                                         zoneout_factor_output=zoneout,
-                                        name='encoder_fw_LSTM')
+                                        name="encoder_fw_LSTM")
         
         # Create backward LSTM Cell
         self._bw_cell = ZoneoutLSTMCell(size, is_training,
                                         zoneout_factor_cell=zoneout,
                                         zoneout_factor_output=zoneout,
-                                        name='encoder_bw_LSTM')
+                                        name="encoder_bw_LSTM")
     
     def __call__(self, inputs, input_lengths):
         with tf.variable_scope(self.scope):
@@ -258,7 +258,7 @@ class Prenet:
         self.activation = activation
         self.is_training = is_training
         
-        self.scope = 'prenet' if scope is None else scope
+        self.scope = "prenet" if scope is None else scope
     
     def __call__(self, inputs):
         x = inputs
@@ -266,11 +266,11 @@ class Prenet:
         with tf.variable_scope(self.scope):
             for i, size in enumerate(self.layers_sizes):
                 dense = tf.layers.dense(x, units=size, activation=self.activation,
-                                        name='dense_{}'.format(i + 1))
+                                        name="dense_{}".format(i + 1))
                 # The paper discussed introducing diversity in generation at inference time
                 # by using a dropout of 0.5 only in prenet layers (in both training and inference).
                 x = tf.layers.dropout(dense, rate=self.drop_rate, training=True,
-                                      name='dropout_{}'.format(i + 1) + self.scope)
+                                      name="dropout_{}".format(i + 1) + self.scope)
         return x
 
 
@@ -293,13 +293,13 @@ class DecoderRNN:
         self.layers = layers
         self.size = size
         self.zoneout = zoneout
-        self.scope = 'decoder_rnn' if scope is None else scope
+        self.scope = "decoder_rnn" if scope is None else scope
         
         # Create a set of LSTM layers
         self.rnn_layers = [ZoneoutLSTMCell(size, is_training,
                                            zoneout_factor_cell=zoneout,
                                            zoneout_factor_output=zoneout,
-                                           name='decoder_LSTM_{}'.format(i + 1)) for i in
+                                           name="decoder_LSTM_{}".format(i + 1)) for i in
                            range(layers)]
         
         self._cell = tf.contrib.rnn.MultiRNNCell(self.rnn_layers, state_is_tuple=True)
@@ -326,16 +326,16 @@ class FrameProjection:
         self.shape = shape
         self.activation = activation
         
-        self.scope = 'Linear_projection' if scope is None else scope
+        self.scope = "Linear_projection" if scope is None else scope
         self.dense = tf.layers.Dense(units=shape, activation=activation,
-                                     name='projection_{}'.format(self.scope))
+                                     name="projection_{}".format(self.scope))
     
     def __call__(self, inputs):
         with tf.variable_scope(self.scope):
             # If activation==None, this returns a simple Linear projection
             # else the projection will be passed through an activation function
             # output = tf.layers.dense(inputs, units=self.shape, activation=self.activation,
-            # 	name='projection_{}'.format(self.scope))
+            # 	name="projection_{}".format(self.scope))
             output = self.dense(inputs)
             
             return output
@@ -359,14 +359,14 @@ class StopProjection:
         
         self.shape = shape
         self.activation = activation
-        self.scope = 'stop_token_projection' if scope is None else scope
+        self.scope = "stop_token_projection" if scope is None else scope
     
     def __call__(self, inputs):
         with tf.variable_scope(self.scope):
             output = tf.layers.dense(inputs, units=self.shape,
-                                     activation=None, name='projection_{}'.format(self.scope))
+                                     activation=None, name="projection_{}".format(self.scope))
             
-            # During training, don't use activation as it is integrated inside the 
+            # During training, don"t use activation as it is integrated inside the 
 			# sigmoid_cross_entropy loss function
             if self.is_training:
                 return output
@@ -394,7 +394,7 @@ class Postnet:
         self.kernel_size = hparams.postnet_kernel_size
         self.channels = hparams.postnet_channels
         self.activation = activation
-        self.scope = 'postnet_convolutions' if scope is None else scope
+        self.scope = "postnet_convolutions" if scope is None else scope
         self.postnet_num_layers = hparams.postnet_num_layers
         self.drop_rate = hparams.tacotron_dropout_rate
     
@@ -404,10 +404,10 @@ class Postnet:
             for i in range(self.postnet_num_layers - 1):
                 x = conv1d(x, self.kernel_size, self.channels, self.activation,
                            self.is_training, self.drop_rate,
-                           'conv_layer_{}_'.format(i + 1) + self.scope)
+                           "conv_layer_{}_".format(i + 1) + self.scope)
             x = conv1d(x, self.kernel_size, self.channels, lambda _: _, self.is_training,
                        self.drop_rate,
-                       'conv_layer_{}_'.format(5) + self.scope)
+                       "conv_layer_{}_".format(5) + self.scope)
         return x
 
 
@@ -418,11 +418,11 @@ def conv1d(inputs, kernel_size, channels, activation, is_training, drop_rate, sc
             filters=channels,
             kernel_size=kernel_size,
             activation=None,
-            padding='same')
+            padding="same")
         batched = tf.layers.batch_normalization(conv1d_output, training=is_training)
         activated = activation(batched)
         return tf.layers.dropout(activated, rate=drop_rate, training=is_training,
-                                 name='dropout_{}'.format(scope))
+                                 name="dropout_{}".format(scope))
 
 
 def _round_up_tf(x, multiple):
@@ -437,8 +437,8 @@ def _round_up_tf(x, multiple):
 
 
 def sequence_mask(lengths, r, expand=True):
-    '''Returns a 2-D or 3-D tensorflow sequence mask depending on the argument 'expand'
-    '''
+    """Returns a 2-D or 3-D tensorflow sequence mask depending on the argument "expand"
+    """
     max_len = tf.reduce_max(lengths)
     max_len = _round_up_tf(max_len, tf.convert_to_tensor(r))
     if expand:
@@ -447,8 +447,8 @@ def sequence_mask(lengths, r, expand=True):
 
 
 def MaskedMSE(targets, outputs, targets_lengths, hparams, mask=None):
-    '''Computes a masked Mean Squared Error
-    '''
+    """Computes a masked Mean Squared Error
+    """
     
     # [batch_size, time_dimension, 1]
     # example:
@@ -470,8 +470,8 @@ def MaskedMSE(targets, outputs, targets_lengths, hparams, mask=None):
 
 
 def MaskedSigmoidCrossEntropy(targets, outputs, targets_lengths, hparams, mask=None):
-    '''Computes a masked SigmoidCrossEntropy with logits
-    '''
+    """Computes a masked SigmoidCrossEntropy with logits
+    """
     
     # [batch_size, time_dimension]
     # example:
@@ -497,8 +497,8 @@ def MaskedSigmoidCrossEntropy(targets, outputs, targets_lengths, hparams, mask=N
 
 
 def MaskedLinearLoss(targets, outputs, targets_lengths, hparams, mask=None):
-    '''Computes a masked MAE loss with priority to low frequencies
-    '''
+    """Computes a masked MAE loss with priority to low frequencies
+    """
     
     # [batch_size, time_dimension, 1]
     # example:

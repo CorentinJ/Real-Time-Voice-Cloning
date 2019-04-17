@@ -11,8 +11,8 @@ class Speaker:
         self.utterance_cycler = None
         
     def _load_utterances(self):
-        with self.root.joinpath('_sources.txt').open('r') as sources_file:
-            sources = [l.split(',') for l in sources_file]
+        with self.root.joinpath("_sources.txt").open("r") as sources_file:
+            sources = [l.split(",") for l in sources_file]
         sources = {frames_fname: wave_fpath for frames_fname, wave_fpath in sources}
         self.utterances = [Utterance(self.root.joinpath(f), w) for f, w in sources.items()]
         self.utterance_cycler = RandomCycler(self.utterances)

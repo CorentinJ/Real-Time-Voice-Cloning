@@ -1,17 +1,16 @@
 from synthesizer.datasets.audio import inv_mel_spectrogram
 from synthesizer.hparams import hparams
 from synthesizer import synthesizer
-from vlibs import fileio
 import sounddevice as sd
 import tensorflow as tf
 import numpy as np
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 from vocoder import inference as vocoder
 from encoder import inference as encoder
 
-encoder.load_model('SV2TTS/encoder/saved_models/all.pt')
-vocoder.load_model('../wave-rnn/checkpoints/mu_law.pt')
+encoder.load_model("SV2TTS/encoder/saved_models/all.pt")
+vocoder.load_model("../wave-rnn/checkpoints/mu_law.pt")
     
 
 def get_random_embed():
@@ -29,8 +28,8 @@ def get_random_embed():
     embed = encoder.embed_utterance(wav)[None, ...]
     return embed, speaker_id, wav
 
-if __name__ == '__main__':
-    checkpoint_dir = os.path.join('logs-two_asr', 'taco_pretrained')
+if __name__ == "__main__":
+    checkpoint_dir = os.path.join("logs-two_asr", "taco_pretrained")
     checkpoint_fpath = tf.train.get_checkpoint_state(checkpoint_dir).model_checkpoint_path
 
     synth = synthesizer.Synthesizer()
@@ -49,7 +48,7 @@ if __name__ == '__main__':
             sleep(2)
             print("Recording 5 seconds!")
             wav_source = preprocess_wave(rec_wave(5))
-            print("Done!", end=' ')
+            print("Done!", end=" ")
             sleep(1)
             print("Here is your audio:")
             sd.play(wav_source, 16000)
@@ -77,9 +76,9 @@ if __name__ == '__main__':
         sd.play(wav_wavernn, 16000)
         sd.wait()
 
-        save_wav(wav_source, "../%s_%s.wav" % (speaker_id, 'source'), 16000)
-        save_wav(wav_griffin, "../%s_%s.wav" % (speaker_id, 'griffin'), 16000)
-        save_wav(wav_wavernn, "../%s_%s.wav" % (speaker_id, 'wavernn'), 16000)
+        save_wav(wav_source, "../%s_%s.wav" % (speaker_id, "source"), 16000)
+        save_wav(wav_griffin, "../%s_%s.wav" % (speaker_id, "griffin"), 16000)
+        save_wav(wav_wavernn, "../%s_%s.wav" % (speaker_id, "wavernn"), 16000)
 
 
         # # Synthesize the text with the embedding
@@ -105,7 +104,7 @@ if __name__ == '__main__':
         #     wav = inv_mel_spectrogram(mel.T, hparams)
         # else:
         #     wav = vocoder.infer_waveform(mel.T)
-        #     print('')
+        #     print("")
         #     
         # # Pad the end of the waveform
         # wav = np.concatenate((wav, [0] * hparams.sample_rate))

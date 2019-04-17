@@ -45,25 +45,25 @@ class Tacotron():
             entries in the mel spectrogram. Only needed for training.
         """
         if mel_targets is None and stop_token_targets is not None:
-            raise ValueError('no multi targets were provided but token_targets were given')
+            raise ValueError("no multi targets were provided but token_targets were given")
         if mel_targets is not None and stop_token_targets is None and not gta:
-            raise ValueError('Mel targets are provided without corresponding token_targets')
+            raise ValueError("Mel targets are provided without corresponding token_targets")
         if not gta and self._hparams.predict_linear == True and linear_targets is None and \
 				is_training:
             raise ValueError(
-                'Model is set to use post processing to predict linear spectrograms in training '
-				'but no linear targets given!')
+                "Model is set to use post processing to predict linear spectrograms in training "
+				"but no linear targets given!")
         if gta and linear_targets is not None:
-            raise ValueError('Linear spectrogram prediction is not supported in GTA mode!')
+            raise ValueError("Linear spectrogram prediction is not supported in GTA mode!")
         if is_training and self._hparams.mask_decoder and targets_lengths is None:
             raise RuntimeError(
-                'Model set to mask paddings but no targets lengths provided for the mask!')
+                "Model set to mask paddings but no targets lengths provided for the mask!")
         if is_training and is_evaluating:
             raise RuntimeError(
-                'Model can not be in training and evaluation modes at the same time!')
+                "Model can not be in training and evaluation modes at the same time!")
         
-        split_device = '/cpu:0' if self._hparams.tacotron_num_gpus > 1 or \
-								   self._hparams.split_on_cpu else '/gpu:{}'.format(
+        split_device = "/cpu:0" if self._hparams.tacotron_num_gpus > 1 or \
+								   self._hparams.split_on_cpu else "/gpu:{}".format(
             self._hparams.tacotron_gpu_start_idx)
         with tf.device(split_device):
             hp = self._hparams
@@ -122,9 +122,9 @@ class Tacotron():
         for i in range(hp.tacotron_num_gpus):
             with tf.device(tf.train.replica_device_setter(ps_tasks=1, ps_device="/cpu:0",
                                                           worker_device=gpus[i])):
-                with tf.variable_scope('inference') as scope:
-                    assert hp.tacotron_teacher_forcing_mode in ('constant', 'scheduled')
-                    if hp.tacotron_teacher_forcing_mode == 'scheduled' and is_training:
+                with tf.variable_scope("inference") as scope:
+                    assert hp.tacotron_teacher_forcing_mode in ("constant", "scheduled")
+                    if hp.tacotron_teacher_forcing_mode == "scheduled" and is_training:
                         assert global_step is not None
                     
                     # GTA is only used for predicting mels to train Wavenet vocoder, so we ommit 
@@ -133,14 +133,14 @@ class Tacotron():
                     
                     # Embeddings ==> [batch_size, sequence_length, embedding_dim]
                     self.embedding_table = tf.get_variable(
-                        'inputs_embedding', [len(symbols), hp.embedding_dim], dtype=tf.float32)
+                        "inputs_embedding", [len(symbols), hp.embedding_dim], dtype=tf.float32)
                     embedded_inputs = tf.nn.embedding_lookup(self.embedding_table, tower_inputs[i])
                     
                     # Encoder Cell ==> [batch_size, encoder_steps, encoder_lstm_units]
                     encoder_cell = TacotronEncoderCell(
-                        EncoderConvolutions(is_training, hparams=hp, scope='encoder_convolutions'),
+                        EncoderConvolutions(is_training, hparams=hp, scope="encoder_convolutions"),
                         EncoderRNN(is_training, size=hp.encoder_lstm_units,
-                                   zoneout=hp.tacotron_zoneout_rate, scope='encoder_LSTM'))
+                                   zoneout=hp.tacotron_zoneout_rate, scope="encoder_LSTM"))
                     
                     encoder_outputs = encoder_cell(embedded_inputs, tower_input_lengths[i])
                     
@@ -163,7 +163,7 @@ class Tacotron():
                     # Decoder Parts
                     # Attention Decoder Prenet
                     prenet = Prenet(is_training, layers_sizes=hp.prenet_layers,
-                                    drop_rate=hp.tacotron_dropout_rate, scope='decoder_prenet')
+                                    drop_rate=hp.tacotron_dropout_rate, scope="decoder_prenet")
                     # Attention Mechanism
                     attention_mechanism = LocationSensitiveAttention(hp.attention_dim,
                                                                      encoder_cond_outputs, 
@@ -178,14 +178,14 @@ class Tacotron():
                     decoder_lstm = DecoderRNN(is_training, layers=hp.decoder_layers,
                                               size=hp.decoder_lstm_units,
                                               zoneout=hp.tacotron_zoneout_rate,
-                                              scope='decoder_LSTM')
+                                              scope="decoder_LSTM")
                     # Frames Projection layer
                     frame_projection = FrameProjection(hp.num_mels * hp.outputs_per_step,
-                                                       scope='linear_transform_projection')
+                                                       scope="linear_transform_projection")
                     # <stop_token> projection layer
                     stop_projection = StopProjection(is_training or is_evaluating, shape=hp
                                                      .outputs_per_step,
-                                                     scope='stop_token_projection')
+                                                     scope="stop_token_projection")
                     
                     # Decoder Cell ==> [batch_size, decoder_steps, num_mels * r] (after decoding)
                     decoder_cell = TacotronDecoderCell(
@@ -223,7 +223,7 @@ class Tacotron():
                     stop_token_prediction = tf.reshape(stop_token_prediction, [batch_size, -1])
                     
                     # Postnet
-                    postnet = Postnet(is_training, hparams=hp, scope='postnet_convolutions')
+                    postnet = Postnet(is_training, hparams=hp, scope="postnet_convolutions")
                     
                     # Compute residual using post-net ==> [batch_size, decoder_steps * r, 
                     # postnet_channels]
@@ -231,7 +231,7 @@ class Tacotron():
                     
                     # Project residual to same dimension as mel spectrogram 
                     # ==> [batch_size, decoder_steps * r, num_mels]
-                    residual_projection = FrameProjection(hp.num_mels, scope='postnet_projection')
+                    residual_projection = FrameProjection(hp.num_mels, scope="postnet_projection")
                     projected_residual = residual_projection(residual)
                     
                     # Compute the mel spectrogram
@@ -244,14 +244,14 @@ class Tacotron():
                                          [hp.cbhg_projection, hp.num_mels],
                                          hp.cbhg_projection_kernel_size, hp.cbhg_highwaynet_layers,
                                          hp.cbhg_highway_units, hp.cbhg_rnn_units, is_training,
-                                         name='CBHG_postnet')
+                                         name="CBHG_postnet")
                         
                         # [batch_size, decoder_steps(mel_frames), cbhg_channels]
                         post_outputs = post_cbhg(mel_outputs, None)
                         
                         # Linear projection of extracted features to make linear spectrogram
                         linear_specs_projection = FrameProjection(hp.num_freq,
-                                                                  scope='cbhg_linear_specs_projection')
+                                                                  scope="cbhg_linear_specs_projection")
                         
                         # [batch_size, decoder_steps(linear_frames), num_freq]
                         linear_outputs = linear_specs_projection(post_outputs)
@@ -272,7 +272,7 @@ class Tacotron():
                     
                     if post_condition:
                         self.tower_linear_outputs.append(linear_outputs)
-            log('initialisation done {}'.format(gpus[i]))
+            log("initialisation done {}".format(gpus[i]))
         
         if is_training:
             self.ratio = self.helper._ratio
@@ -285,32 +285,32 @@ class Tacotron():
         
         self.all_vars = tf.trainable_variables()
         
-        log('Initialized Tacotron model. Dimensions (? = dynamic shape): ')
-        log('  Train mode:               {}'.format(is_training))
-        log('  Eval mode:                {}'.format(is_evaluating))
-        log('  GTA mode:                 {}'.format(gta))
-        log('  Synthesis mode:           {}'.format(not (is_training or is_evaluating)))
-        log('  Input:                    {}'.format(inputs.shape))
+        log("Initialized Tacotron model. Dimensions (? = dynamic shape): ")
+        log("  Train mode:               {}".format(is_training))
+        log("  Eval mode:                {}".format(is_evaluating))
+        log("  GTA mode:                 {}".format(gta))
+        log("  Synthesis mode:           {}".format(not (is_training or is_evaluating)))
+        log("  Input:                    {}".format(inputs.shape))
         for i in range(hp.tacotron_num_gpus + hp.tacotron_gpu_start_idx):
-            log('  device:                   {}'.format(i))
-            log('  embedding:                {}'.format(tower_embedded_inputs[i].shape))
-            log('  enc conv out:             {}'.format(tower_enc_conv_output_shape[i]))
-            log('  encoder out (cond):       {}'.format(tower_encoder_cond_outputs[i].shape))
-            log('  decoder out:              {}'.format(self.tower_decoder_output[i].shape))
-            log('  residual out:             {}'.format(tower_residual[i].shape))
-            log('  projected residual out:   {}'.format(tower_projected_residual[i].shape))
-            log('  mel out:                  {}'.format(self.tower_mel_outputs[i].shape))
+            log("  device:                   {}".format(i))
+            log("  embedding:                {}".format(tower_embedded_inputs[i].shape))
+            log("  enc conv out:             {}".format(tower_enc_conv_output_shape[i]))
+            log("  encoder out (cond):       {}".format(tower_encoder_cond_outputs[i].shape))
+            log("  decoder out:              {}".format(self.tower_decoder_output[i].shape))
+            log("  residual out:             {}".format(tower_residual[i].shape))
+            log("  projected residual out:   {}".format(tower_projected_residual[i].shape))
+            log("  mel out:                  {}".format(self.tower_mel_outputs[i].shape))
             if post_condition:
-                log('  linear out:               {}'.format(self.tower_linear_outputs[i].shape))
-            log('  <stop_token> out:         {}'.format(self.tower_stop_token_prediction[i].shape))
+                log("  linear out:               {}".format(self.tower_linear_outputs[i].shape))
+            log("  <stop_token> out:         {}".format(self.tower_stop_token_prediction[i].shape))
             
             # 1_000_000 is causing syntax problems for some people?! Python please :)
-            log('  Tacotron Parameters       {:.3f} Million.'.format(
+            log("  Tacotron Parameters       {:.3f} Million.".format(
                 np.sum([np.prod(v.get_shape().as_list()) for v in self.all_vars]) / 1000000))
     
     
     def add_loss(self):
-        '''Adds loss to the model. Sets "loss" field. initialize must have been called.'''
+        """Adds loss to the model. Sets "loss" field. initialize must have been called."""
         hp = self._hparams
         
         self.tower_before_loss = []
@@ -333,7 +333,7 @@ class Tacotron():
         for i in range(hp.tacotron_num_gpus):
             with tf.device(tf.train.replica_device_setter(ps_tasks=1, ps_device="/cpu:0",
                                                           worker_device=gpus[i])):
-                with tf.variable_scope('loss') as scope:
+                with tf.variable_scope("loss") as scope:
                     if hp.mask_decoder:
                         # Compute loss of predictions before postnet
                         before = MaskedMSE(self.tower_mel_targets[i], self.tower_decoder_output[i],
@@ -401,11 +401,11 @@ class Tacotron():
                     
                     # Regularize variables
                     # Exclude all types of bias, RNN (Bengio et al. On the difficulty of training recurrent neural networks), embeddings and prediction projection layers.
-                    # Note that we consider attention mechanism v_a weights as a prediction projection layer and we don't regularize it. (This gave better stability)
+                    # Note that we consider attention mechanism v_a weights as a prediction projection layer and we don"t regularize it. (This gave better stability)
                     regularization = tf.add_n([tf.nn.l2_loss(v) for v in self.all_vars
                                                if not (
-                                    'bias' in v.name or 'Bias' in v.name or '_projection' in v.name or 'inputs_embedding' in v.name
-                                    or 'RNN' in v.name or 'LSTM' in v.name)]) * reg_weight
+                                    "bias" in v.name or "Bias" in v.name or "_projection" in v.name or "inputs_embedding" in v.name
+                                    or "RNN" in v.name or "LSTM" in v.name)]) * reg_weight
                     
                     # Compute final loss term
                     self.tower_before_loss.append(before)
@@ -433,10 +433,10 @@ class Tacotron():
         self.loss = total_loss / hp.tacotron_num_gpus
     
     def add_optimizer(self, global_step):
-        '''Adds optimizer. Sets "gradients" and "optimize" fields. add_loss must have been called.
+        """Adds optimizer. Sets "gradients" and "optimize" fields. add_loss must have been called.
         Args:
             global_step: int32 scalar Tensor representing current global step in training
-        '''
+        """
         hp = self._hparams
         tower_gradients = []
         
@@ -444,10 +444,10 @@ class Tacotron():
         gpus = ["/gpu:{}".format(i) for i in
                 range(hp.tacotron_gpu_start_idx, hp.tacotron_gpu_start_idx + hp.tacotron_num_gpus)]
         
-        grad_device = '/cpu:0' if hp.tacotron_num_gpus > 1 else gpus[0]
+        grad_device = "/cpu:0" if hp.tacotron_num_gpus > 1 else gpus[0]
         
         with tf.device(grad_device):
-            with tf.variable_scope('optimizer') as scope:
+            with tf.variable_scope("optimizer") as scope:
                 if hp.tacotron_decay_learning_rate:
                     self.decay_steps = hp.tacotron_decay_steps
                     self.decay_rate = hp.tacotron_decay_rate
@@ -465,7 +465,7 @@ class Tacotron():
             with tf.device(tf.train.replica_device_setter(ps_tasks=1, ps_device="/cpu:0",
                                                           worker_device=gpus[i])):
                 # agg_loss += self.tower_loss[i]
-                with tf.variable_scope('optimizer') as scope:
+                with tf.variable_scope("optimizer") as scope:
                     gradients = optimizer.compute_gradients(self.tower_loss[i])
                     tower_gradients.append(gradients)
         
@@ -478,9 +478,9 @@ class Tacotron():
                 grads = []
                 for g, _ in grad_and_vars:
                     expanded_g = tf.expand_dims(g, 0)
-                    # Append on a 'tower' dimension which we will average over below.
+                    # Append on a "tower" dimension which we will average over below.
                     grads.append(expanded_g)
-                # Average over the 'tower' dimension.
+                # Average over the "tower" dimension.
                 grad = tf.concat(axis=0, values=grads)
                 grad = tf.reduce_mean(grad, 0)
                 
@@ -496,7 +496,7 @@ class Tacotron():
             else:
                 clipped_gradients = avg_grads
             
-            # Add dependency on UPDATE_OPS; otherwise batchnorm won't work correctly. See:
+            # Add dependency on UPDATE_OPS; otherwise batchnorm won"t work correctly. See:
             # https://github.com/tensorflow/tensorflow/issues/1122
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
                 self.optimize = optimizer.apply_gradients(zip(clipped_gradients, vars),
@@ -523,7 +523,7 @@ class Tacotron():
                                         # lr = 1e-3 at step 50k
                                         self.decay_steps,
                                         self.decay_rate,  # lr = 1e-5 around step 310k
-                                        name='lr_exponential_decay')
+                                        name="lr_exponential_decay")
         
         # clip learning rate by max and min values (initial and final values)
         return tf.minimum(tf.maximum(lr, hp.tacotron_final_learning_rate), init_lr)

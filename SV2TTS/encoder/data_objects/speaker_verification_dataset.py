@@ -8,7 +8,7 @@ from pathlib import Path
 class SpeakerVerificationDataset(Dataset):
     def __init__(self, datasets_root: Path):
         self.root = datasets_root
-        speaker_dirs = [f for f in self.root.glob('*') if f.is_dir()]
+        speaker_dirs = [f for f in self.root.glob("*") if f.is_dir()]
         if len(speaker_dirs) == 0:
             raise Exception("No speakers found. Make sure you are pointing to the directory "
                             "containing all preprocessed speaker directories.")
@@ -23,9 +23,9 @@ class SpeakerVerificationDataset(Dataset):
     
     def get_logs(self):
         log_string = ""
-        for log_fpath in self.root.glob('*.txt'):
-            with log_fpath.open('r') as log_file:
-                log_string += ''.join(log_file.readlines())
+        for log_fpath in self.root.glob("*.txt"):
+            with log_fpath.open("r") as log_file:
+                log_string += "".join(log_file.readlines())
         return log_string
     
     

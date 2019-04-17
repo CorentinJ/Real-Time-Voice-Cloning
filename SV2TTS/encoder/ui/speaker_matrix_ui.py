@@ -20,7 +20,7 @@ class SpeakerMatrixUI(QtGui.QDialog):
         
         # Display it and stay in mainloop until the window is closed
         total_utterances = sum(map(len, self.partial_utterances.values()))
-        print('Drawing plots for %d utterances, please wait...' % total_utterances)
+        print("Drawing plots for %d utterances, please wait..." % total_utterances)
         self.setup_ui()
         self.show()
         app.exec_()
@@ -44,7 +44,7 @@ class SpeakerMatrixUI(QtGui.QDialog):
         figure = Figure()
         canvas = FigureCanvas(figure)
         
-        # Load the partial utterance's frames and waveform
+        # Load the partial utterance"s frames and waveform
         utterance, frames, frames_range = partial_utterance
         wave_fpath = utterance.wave_fpath
         wave = audio.load(wave_fpath)
@@ -58,8 +58,8 @@ class SpeakerMatrixUI(QtGui.QDialog):
         librosa.display.specshow(
             librosa.power_to_db(frames.transpose(), ref=np.max),
             hop_length=int(sampling_rate * 0.01),
-            y_axis='mel',
-            x_axis='time',
+            y_axis="mel",
+            x_axis="time",
             sr=sampling_rate,
             ax=ax
         )
@@ -73,7 +73,7 @@ class SpeakerMatrixUI(QtGui.QDialog):
         figure.tight_layout()
         canvas.draw()
         
-        button = QtGui.QPushButton('Play')
+        button = QtGui.QPushButton("Play")
         button.clicked.connect(lambda: audio.play_wave(wave))
     
         layout = QtGui.QVBoxLayout()
@@ -85,8 +85,8 @@ class SpeakerMatrixUI(QtGui.QDialog):
 # from encoder.data_objects.speaker_verification_dataset import SpeakerVerificationDataLoader
 # from encoder.data_objects.speaker_verification_dataset import SpeakerVerificationDataset
 # 
-# if __name__ == '__main__':
-#     dataset = SpeakerVerificationDataset(['voxceleb2'])
+# if __name__ == "__main__":
+#     dataset = SpeakerVerificationDataset(["voxceleb2'])
 #     loader = SpeakerVerificationDataLoader(dataset, 4, 5, num_workers=3)
 #     for batch in loader:
 #         SpeakerMatrixUI(batch.speakers, batch.partial_utterances)

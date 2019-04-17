@@ -20,9 +20,9 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--skip_existing", action="store_true", help=\
         "Whether to overwrite existing files with the same name. Useful if the preprocessing was "
         "interrupted.")
-
-    # Reformat the arguments
     args = parser.parse_args()
+
+    # Process the arguments
     args.datasets_root = Path(args.datasets_root)
     args.datasets = args.datasets.split(",")
     if not hasattr(args, "out_dir"):

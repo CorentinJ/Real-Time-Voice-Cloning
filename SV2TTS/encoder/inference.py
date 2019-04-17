@@ -15,9 +15,9 @@ def load_model(weights_fpath, device=None):
     first call to embed_frames() with the default weights file.
     
     :param weights_fpath: the path to saved model weights.
-    :param device: either a torch device or the name of a torch device (e.g. 'cpu', 'cuda'). The 
+    :param device: either a torch device or the name of a torch device (e.g. "cpu", "cuda"). The 
     model will be loaded and will run on this device. Outputs will however always be on the cpu. 
-    If None, will default to your GPU if it's available, otherwise your CPU.
+    If None, will default to your GPU if it"s available, otherwise your CPU.
     """
     global _model, _device
     if device is None:
@@ -27,7 +27,7 @@ def load_model(weights_fpath, device=None):
     _device = device
     _model = SpeakerEncoder(_device)
     checkpoint = torch.load(weights_fpath)
-    _model.load_state_dict(checkpoint['model_state'])
+    _model.load_state_dict(checkpoint["model_state"])
     _model.eval()
 
 def embed_frames_batch(frames_batch):
@@ -63,7 +63,7 @@ def compute_partial_slices(n_samples, partial_utterance_n_frames=partials_n_fram
     :param min_pad_coverage: when reaching the last partial utterance, it may or may not have 
     enough frames. If at least <min_pad_coverage> of <partial_utterance_n_frames> are present, 
     then the last partial utterance will be considered, as if we padded the audio. Otherwise, 
-    it will be discarded, as if we trimmed the audio. If there aren't enough frames for 1 partial 
+    it will be discarded, as if we trimmed the audio. If there aren"t enough frames for 1 partial 
     utterance, this parameter is ignored so that the function always returns at least 1 slice.
     :param overlap: by how much the partial utterance should overlap. If set to 0, the partial 
     utterances are entirely disjoint. 
@@ -126,7 +126,7 @@ def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
     wave_slices, mel_slices = compute_partial_slices(len(wav), **kwargs)
     max_wave_length = wave_slices[-1].stop
     if max_wave_length >= len(wav):
-        wav = np.pad(wav, (0, max_wave_length - len(wav)), 'constant')
+        wav = np.pad(wav, (0, max_wave_length - len(wav)), "constant")
     
     # Split the utterance into partials
     frames = audio.wav_to_mel_filterbank(wav)
@@ -172,7 +172,7 @@ def plot_embedding_as_heatmap(embed, ax=None, title="", color_range=(0, 0.35)):
     ax.set_xticks([]), ax.set_yticks([])
     ax.set_title(title)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     load_model("../saved_models/all.pt", "cuda")
     
     fig, axes = plt.subplots(3, 3)

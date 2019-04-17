@@ -32,14 +32,14 @@ class Visualizations:
         if env_name is None:
             self.env_name = now
         else:
-            self.env_name = env_name + ' (' + now + ')'
+            self.env_name = env_name + " (" + now + ")"
         
         try:
             self.vis = visdom.Visdom(env=self.env_name, raise_exceptions=True)
         except ConnectionError:
-            print('No visdom server detected, running a temporary instance...\nRun the command '
-                  '\'visdom\' in your CLI to start an external server.', file=sys.stderr)
-            subprocess.Popen('visdom')
+            print("No visdom server detected, running a temporary instance...\nRun the command "
+                  "\"visdom\" in your CLI to start an external server.", file=sys.stderr)
+            subprocess.Popen("visdom")
             self.vis = visdom.Visdom(env=self.env_name)
         webbrowser.open("http://localhost:8097/env/" + self.env_name)
         
@@ -57,27 +57,27 @@ class Visualizations:
         self.log_params()
         
         if device_name is not None:
-            self.log_implementation({'Device': device_name})
+            self.log_implementation({"Device": device_name})
         
     def log_params(self):
         from encoder import params_data
         from encoder import params_model
         param_string = "<b>Model parameters</b>:<br>"
-        for param_name in (p for p in dir(params_model) if not p.startswith('__')):
+        for param_name in (p for p in dir(params_model) if not p.startswith("__")):
             value = getattr(params_model, param_name)
             param_string += "\t%s: %s<br>" % (param_name, value)
         param_string += "<b>Data parameters</b>:<br>"
-        for param_name in (p for p in dir(params_data) if not p.startswith('__')):
+        for param_name in (p for p in dir(params_data) if not p.startswith("__")):
             value = getattr(params_data, param_name)
             param_string += "\t%s: %s<br>" % (param_name, value)
-        self.vis.text(param_string, opts={'title': 'Parameters'})
+        self.vis.text(param_string, opts={"title": "Parameters"})
         
     def log_dataset(self, dataset: SpeakerVerificationDataset):
         dataset_string = ""
         dataset_string += "<b>Speakers</b>: %s\n" % len(dataset.speakers)
         dataset_string += "\n" + dataset.get_logs()
         dataset_string = dataset_string.replace("\n", "<br>")
-        self.vis.text(dataset_string, opts={'title': 'Dataset'})
+        self.vis.text(dataset_string, opts={"title": "Dataset"})
         
     def log_implementation(self, params):
         implementation_string = ""
@@ -87,7 +87,7 @@ class Visualizations:
         self.implementation_string = implementation_string
         self.implementation_win = self.vis.text(
             implementation_string, 
-            opts={'title': 'Training implementation'}
+            opts={"title": "Training implementation"}
         )
 
     def update(self, loss, eer, lr, step):
@@ -96,12 +96,12 @@ class Visualizations:
             [[loss, self.loss_exp]],
             [[step, step]],
             win=self.loss_win,
-            update='append' if self.loss_win else None,
+            update="append" if self.loss_win else None,
             opts=dict(
-                legend=['Loss', 'Avg. loss'],
-                xlabel='Step',
-                ylabel='Loss',
-                title='Loss',
+                legend=["Loss", "Avg. loss"],
+                xlabel="Step",
+                ylabel="Loss",
+                title="Loss",
             )
         )
         self.eer_exp = eer if self.eer_exp is None else 0.985 * self.eer_exp + 0.015 * eer
@@ -109,24 +109,24 @@ class Visualizations:
             [[eer, self.eer_exp]],
             [[step, step]],
             win=self.eer_win,
-            update='append' if self.eer_win else None,
+            update="append" if self.eer_win else None,
             opts=dict(
-                legend=['EER', 'Avg. EER'],
-                xlabel='Step',
-                ylabel='EER',
-                title='Equal error rate'
+                legend=["EER", "Avg. EER"],
+                xlabel="Step",
+                ylabel="EER",
+                title="Equal error rate"
             )
         )
         self.lr_win = self.vis.line(
             [lr],
             [step],
             win=self.lr_win,
-            update='append' if self.lr_win else None,
+            update="append" if self.lr_win else None,
             opts=dict(
-                xlabel='Step',
-                ylabel='Learning rate',
-                ytype='log',
-                title='Learning rate'
+                xlabel="Step",
+                ylabel="Learning rate",
+                ytype="log",
+                title="Learning rate"
             )
         )
         
@@ -142,7 +142,7 @@ class Visualizations:
             self.vis.text(
                 self.implementation_string + time_string, 
                 win=self.implementation_win,
-                opts={'title': 'Training implementation'},
+                opts={"title": "Training implementation"},
             )
         self.last_step = step
         self.last_update_timestamp = now
@@ -159,8 +159,8 @@ class Visualizations:
         reducer = umap.UMAP()
         projected = reducer.fit_transform(embeds)
         plt.scatter(projected[:, 0], projected[:, 1], c=colors)
-        plt.gca().set_aspect('equal', 'datalim')
-        plt.title('UMAP projection (step %d)' % step)
+        plt.gca().set_aspect("equal", "datalim")
+        plt.title("UMAP projection (step %d)" % step)
         self.projection_win = self.vis.matplot(plt, win=self.projection_win)
         if out_fpath is not None:
             plt.savefig(out_fpath)

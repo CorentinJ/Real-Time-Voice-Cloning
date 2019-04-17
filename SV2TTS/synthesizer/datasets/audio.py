@@ -65,7 +65,7 @@ def melspectrogram(wav, hparams):
     return S
 
 def inv_linear_spectrogram(linear_spectrogram, hparams):
-    '''Converts linear spectrogram to waveform using librosa'''
+    """Converts linear spectrogram to waveform using librosa"""
     if hparams.signal_normalization:
         D = _denormalize(linear_spectrogram, hparams)
     else:
@@ -83,7 +83,7 @@ def inv_linear_spectrogram(linear_spectrogram, hparams):
 
 
 def inv_mel_spectrogram(mel_spectrogram, hparams):
-    '''Converts mel spectrogram to waveform using librosa'''
+    """Converts mel spectrogram to waveform using librosa"""
     if hparams.signal_normalization:
         D = _denormalize(mel_spectrogram, hparams)
     else:
@@ -104,9 +104,9 @@ def _lws_processor(hparams):
     return lws.lws(hparams.n_fft, get_hop_size(hparams), fftsize=hparams.win_size, mode="speech")
 
 def _griffin_lim(S, hparams):
-    '''librosa implementation of Griffin-Lim
+    """librosa implementation of Griffin-Lim
     Based on https://github.com/librosa/librosa/issues/434
-    '''
+    """
     angles = np.exp(2j * np.pi * np.random.rand(*S.shape))
     S_complex = np.abs(S).astype(np.complex)
     y = _istft(S_complex * angles, hparams)
@@ -148,8 +148,8 @@ def pad_lr(x, fsize, fshift):
 ##########################################################
 #Librosa correct padding
 def librosa_pad_lr(x, fsize, fshift):
-    '''compute right padding (final frame)
-    '''
+    """compute right padding (final frame)
+    """
     return int(fsize // 2)
 
 

@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     fpath = r"E:\Datasets\LibriSpeech\train-other-500\149\125760\149-125760-0003.flac"
     wav = inference.load_preprocess_waveform(fpath)
 

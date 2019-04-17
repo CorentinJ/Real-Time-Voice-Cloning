@@ -59,9 +59,9 @@ class CustomDecoder(decoder.Decoder):
 		if self._output_layer is None:
 			return size
 		else:
-			# To use layer's compute_output_shape, we need to convert the
-			# RNNCell's output_size entries into shapes with an unknown
-			# batch size.  We then pass this through the layer's
+			# To use layer"s compute_output_shape, we need to convert the
+			# RNNCell"s output_size entries into shapes with an unknown
+			# batch size.  We then pass this through the layer"s
 			# compute_output_shape and read off all but the first (batch)
 			# dimensions to get the output size of the rnn with the layer
 			# applied to the top.
@@ -83,7 +83,7 @@ class CustomDecoder(decoder.Decoder):
 	@property
 	def output_dtype(self):
 		# Assume the dtype of the cell is the output_size structure
-		# containing the input_state's first component's dtype.
+		# containing the input_state"s first component's dtype.
 		# Return that structure and the sample_ids_dtype from the helper.
 		dtype = nest.flatten(self._initial_state)[0].dtype
 		return CustomDecoderOutput(

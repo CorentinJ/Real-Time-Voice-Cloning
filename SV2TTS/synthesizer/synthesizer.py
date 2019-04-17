@@ -11,16 +11,16 @@ import os
 
 
 class Synthesizer:
-	def load(self, checkpoint_path, hparams, gta=False, model_name='Tacotron'):
-		log('Constructing model: %s' % model_name)
+	def load(self, checkpoint_path, hparams, gta=False, model_name="Tacotron"):
+		log("Constructing model: %s" % model_name)
 		#Force the batch size to be known in order to use attention masking in batch synthesis
-		inputs = tf.placeholder(tf.int32, (None, None), name='inputs')
-		input_lengths = tf.placeholder(tf.int32, (None,), name='input_lengths')
+		inputs = tf.placeholder(tf.int32, (None, None), name="inputs")
+		input_lengths = tf.placeholder(tf.int32, (None,), name="input_lengths")
 		speaker_embeddings = tf.placeholder(tf.float32, (None, hparams.speaker_embedding_size),
-					   name='speaker_embeddings')
-		targets = tf.placeholder(tf.float32, (None, None, hparams.num_mels), name='mel_targets')
-		split_infos = tf.placeholder(tf.int32, shape=(hparams.tacotron_num_gpus, None), name='split_infos')
-		with tf.variable_scope('Tacotron_model') as scope:
+					   name="speaker_embeddings")
+		targets = tf.placeholder(tf.float32, (None, None, hparams.num_mels), name="mel_targets")
+		split_infos = tf.placeholder(tf.int32, shape=(hparams.tacotron_num_gpus, None), name="split_infos")
+		with tf.variable_scope("Tacotron_model") as scope:
 			self.model = create_model(model_name, hparams)
 			if gta:
 				self.model.initialize(inputs, input_lengths, speaker_embeddings, targets, gta=gta,
@@ -39,7 +39,7 @@ class Synthesizer:
 		self._hparams = hparams
 		#pad input sequences with the <pad_token> 0 ( _ )
 		self._pad = 0
-		#explicitely setting the padding to a value that doesn't originally exist in the spectogram
+		#explicitely setting the padding to a value that doesn"t originally exist in the spectogram
 		#to avoid any possible conflicts, without affecting the output range of the model too much
 		if hparams.symmetric_mels:
 			self._target_pad = -hparams.max_abs_value
@@ -52,7 +52,7 @@ class Synthesizer:
 		self.targets = targets
 		self.split_infos = split_infos
 
-		log('Loading checkpoint: %s' % checkpoint_path)
+		log("Loading checkpoint: %s" % checkpoint_path)
 		#Memory allocation on the GPUs as needed
 		config = tf.ConfigProto()
 		config.gpu_options.allow_growth = True
@@ -75,7 +75,7 @@ class Synthesizer:
 		"""
 		
 		# Prepare the input
-		cleaner_names = [x.strip() for x in self._hparams.cleaners.split(',')]
+		cleaner_names = [x.strip() for x in self._hparams.cleaners.split(",")]
 		seqs = [np.asarray(text_to_sequence(text, cleaner_names))]
 		input_lengths = [len(seq) for seq in seqs]
 		input_seqs, max_seq_len = self._prepare_inputs(seqs)
@@ -105,7 +105,7 @@ class Synthesizer:
 
 	def synthesize(self, texts, basenames, out_dir, log_dir, mel_filenames, embed_filenames):
 		hparams = self._hparams
-		cleaner_names = [x.strip() for x in hparams.cleaners.split(',')]
+		cleaner_names = [x.strip() for x in hparams.cleaners.split(",")]
 
 		#Repeat last sample until number of samples is dividable by the number of GPUs (last run scenario)
 		while len(texts) % hparams.tacotron_synthesis_batch_size != 0:
@@ -194,10 +194,10 @@ class Synthesizer:
 		if basenames is None:
 			#Generate wav and read it
 			wav = audio.inv_mel_spectrogram(mels.T, hparams)
-			audio.save_wav(wav, 'temp.wav', sr=hparams.sample_rate) #Find a better way
+			audio.save_wav(wav, "temp.wav", sr=hparams.sample_rate) #Find a better way
 
 			chunk = 512
-			f = wave.open('temp.wav', 'rb')
+			f = wave.open("temp.wav", "rb")
 			p = pyaudio.PyAudio()
 			stream = p.open(format=p.get_format_from_width(f.getsampwidth()),
 				channels=f.getnchannels(),
@@ -218,31 +218,31 @@ class Synthesizer:
 		for i, mel in enumerate(mels):
 			# Write the spectrogram to disk
 			# Note: outputs mel-spectrogram files and target ones have same names, just different folders
-			mel_filename = os.path.join(out_dir, 'mel-{}.npy'.format(basenames[i]))
+			mel_filename = os.path.join(out_dir, "mel-{}.npy".format(basenames[i]))
 			np.save(mel_filename, mel, allow_pickle=False)
 			saved_mels_paths.append(mel_filename)
 
 			if log_dir is not None:
 				#save wav (mel -> wav)
 				wav = audio.inv_mel_spectrogram(mel.T, hparams)
-				audio.save_wav(wav, os.path.join(log_dir, 'wavs/wav-{}-mel.wav'.format(basenames[i])), sr=hparams.sample_rate)
+				audio.save_wav(wav, os.path.join(log_dir, "wavs/wav-{}-mel.wav".format(basenames[i])), sr=hparams.sample_rate)
 
 				#save alignments
-				plot.plot_alignment(alignments[i], os.path.join(log_dir, 'plots/alignment-{}.png'.format(basenames[i])),
-					title='{}'.format(texts[i]), split_title=True, max_len=target_lengths[i])
+				plot.plot_alignment(alignments[i], os.path.join(log_dir, "plots/alignment-{}.png".format(basenames[i])),
+					title="{}".format(texts[i]), split_title=True, max_len=target_lengths[i])
 
 				#save mel spectrogram plot
-				plot.plot_spectrogram(mel, os.path.join(log_dir, 'plots/mel-{}.png'.format(basenames[i])),
-					title='{}'.format(texts[i]), split_title=True)
+				plot.plot_spectrogram(mel, os.path.join(log_dir, "plots/mel-{}.png".format(basenames[i])),
+					title="{}".format(texts[i]), split_title=True)
 
 				if hparams.predict_linear:
 					#save wav (linear -> wav)
 					wav = audio.inv_linear_spectrogram(linears[i].T, hparams)
-					audio.save_wav(wav, os.path.join(log_dir, 'wavs/wav-{}-linear.wav'.format(basenames[i])), sr=hparams.sample_rate)
+					audio.save_wav(wav, os.path.join(log_dir, "wavs/wav-{}-linear.wav".format(basenames[i])), sr=hparams.sample_rate)
 
 					#save linear spectrogram plot
-					plot.plot_spectrogram(linears[i], os.path.join(log_dir, 'plots/linear-{}.png'.format(basenames[i])),
-						title='{}'.format(texts[i]), split_title=True, auto_aspect=True)
+					plot.plot_spectrogram(linears[i], os.path.join(log_dir, "plots/linear-{}.png".format(basenames[i])),
+						title="{}".format(texts[i]), split_title=True, auto_aspect=True)
 
 		return saved_mels_paths
 
@@ -255,7 +255,7 @@ class Synthesizer:
 		return np.stack([self._pad_input(x, max_len) for x in inputs]), max_len
 
 	def _pad_input(self, x, length):
-		return np.pad(x, (0, length - x.shape[0]), mode='constant', constant_values=self._pad)
+		return np.pad(x, (0, length - x.shape[0]), mode="constant", constant_values=self._pad)
 
 	def _prepare_targets(self, targets, alignment):
 		max_len = max([len(t) for t in targets])
@@ -263,7 +263,7 @@ class Synthesizer:
 		return np.stack([self._pad_target(t, data_len) for t in targets]), data_len
 
 	def _pad_target(self, t, length):
-		return np.pad(t, [(0, length - t.shape[0]), (0, 0)], mode='constant', constant_values=self._target_pad)
+		return np.pad(t, [(0, length - t.shape[0]), (0, 0)], mode="constant', constant_values=self._target_pad)
 
 	def _get_output_lengths(self, stop_tokens):
 		#Determine each mel length by the stop token predictions. (len = first occurence of 1 in stop_tokens row wise)

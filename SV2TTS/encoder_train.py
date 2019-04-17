@@ -15,7 +15,7 @@ if __name__ == "__main__":
     parser.add_argument("clean_data_root", type=str, help= \
         "Path to the output directory of encoder_preprocess.py. If you left the default "
         "output directory when preprocessing, it should be <datasets_root>/SV2TTS/encoder/.")
-    parser.add_argument("-m", "--models_dir", type=str, default='encoder/saved_models/', help=\
+    parser.add_argument("-m", "--models_dir", type=str, default="encoder/saved_models/", help=\
         "Path to the output directory that will contain the saved model weights, as well as "
         "backups of those weights and plots generated during training.")
     parser.add_argument("-v", "--vis_every", type=int, default=100, help= \
@@ -29,9 +29,9 @@ if __name__ == "__main__":
         "model.")
     parser.add_argument("-f", "--force_restart", action="store_true", help= \
         "Do not load any saved model.")
-    
-    # Reformat the arguments
     args = parser.parse_args()
+    
+    # Process the arguments
     args.models_dir = Path(args.models_dir)
     args.models_dir.mkdir(exist_ok=True)
     args.clean_data_root = Path(args.clean_data_root)

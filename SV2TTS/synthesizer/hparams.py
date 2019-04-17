@@ -5,26 +5,26 @@ import numpy as np
 hparams = tf.contrib.training.HParams(
     # Comma-separated list of cleaners to run on text prior to training and eval. For non-English
     # text, you may want to use "basic_cleaners" or "transliteration_cleaners".
-    cleaners='english_cleaners',
+    cleaners="english_cleaners",
     
     # If you only have 1 GPU or want to use only one GPU, please set num_gpus=0 and specify the 
     # GPU idx on run. example:
     # expample 1 GPU of index 2 (train on "/gpu2" only): CUDA_VISIBLE_DEVICES=2 python train.py 
-    # --model='Tacotron' --hparams='tacotron_gpu_start_idx=2'
+    # --model="Tacotron" --hparams="tacotron_gpu_start_idx=2"
     # If you want to train on multiple GPUs, simply specify the number of GPUs available, 
     # and the idx of the first GPU to use. example:
     # example 4 GPUs starting from index 0 (train on "/gpu0"->"/gpu3"): python train.py 
-    # --model='Tacotron' --hparams='tacotron_num_gpus=4, tacotron_gpu_start_idx=0'
+    # --model="Tacotron" --hparams="tacotron_num_gpus=4, tacotron_gpu_start_idx=0"
     # The hparams arguments can be directly modified on this hparams.py file instead of being 
     # specified on run if preferred!
     
     # If one wants to train both Tacotron and WaveNet in parallel (provided WaveNet will be 
     # trained on True mel spectrograms), one needs to specify different GPU idxes.
     # example Tacotron+WaveNet on a machine with 4 or plus GPUs. Two GPUs for each model: 
-    # CUDA_VISIBLE_DEVICES=0,1 python train.py --model='Tacotron' 
-	# --hparams='tacotron_gpu_start_idx=0, tacotron_num_gpus=2'
-    # Cuda_VISIBLE_DEVICES=2,3 python train.py --model='WaveNet' 
-	# --hparams='wavenet_gpu_start_idx=2; wavenet_num_gpus=2'
+    # CUDA_VISIBLE_DEVICES=0,1 python train.py --model="Tacotron" 
+	# --hparams="tacotron_gpu_start_idx=0, tacotron_num_gpus=2"
+    # Cuda_VISIBLE_DEVICES=2,3 python train.py --model="WaveNet" 
+	# --hparams="wavenet_gpu_start_idx=2; wavenet_num_gpus=2"
     
     # IMPORTANT NOTE: If using N GPUs, please multiply the tacotron_batch_size by N below in the 
     # hparams! (tacotron_batch_size = 32 * N)
@@ -34,7 +34,7 @@ hparams = tf.contrib.training.HParams(
     # Please also apply the synthesis batch size modification likewise. (if N GPUs are used for 
     # synthesis, minimal batch size must be N, minimum of 1 sample per GPU)
     # We did not add an automatic multi-GPU batch size computation to avoid confusion in the 
-    # user's mind and to provide more control to the user for
+    # user"s mind and to provide more control to the user for
     # resources related decisions.
     
     # Acknowledgement:
@@ -108,7 +108,7 @@ hparams = tf.contrib.training.HParams(
 	#  and still getting OOM errors.
     
     # Use LWS (https://github.com/Jonathan-LeRoux/lws) for STFT and phase reconstruction
-    # It's preferred to set True to use with https://github.com/r9y9/wavenet_vocoder
+    # It"s preferred to set True to use with https://github.com/r9y9/wavenet_vocoder
     # Does not work if n_ffit is not multiple of hop_size!!
     use_lws=False,
     # Only used to set as True if using WaveNet, no difference in performance is observed in 
@@ -258,7 +258,7 @@ hparams = tf.contrib.training.HParams(
     # Training Tacotron with unmasked paddings makes it aware of them, which makes synthesis times
     #  different from training. We thus recommend masking the encoder.
     tacotron_synthesis_batch_size=128,
-    # DO NOT MAKE THIS BIGGER THAN 1 IF YOU DIDN'T TRAIN TACOTRON WITH "mask_encoder=True"!!
+    # DO NOT MAKE THIS BIGGER THAN 1 IF YOU DIDN"T TRAIN TACOTRON WITH "mask_encoder=True"!!
     tacotron_test_size=0.05,
     # % of data to keep as test data, if None, tacotron_test_batches must be not None. (5% is 
 	# enough to have a good idea about overfit)
@@ -293,28 +293,28 @@ hparams = tf.contrib.training.HParams(
 	#  teacher-forcing ratio as in training (just for overfit)
     
     # Decoder RNN learning can take be done in one of two ways:
-    #	Teacher Forcing: vanilla teacher forcing (usually with ratio = 1). mode='constant'
+    #	Teacher Forcing: vanilla teacher forcing (usually with ratio = 1). mode="constant"
     #	Curriculum Learning Scheme: From Teacher-Forcing to sampling from previous outputs is 
-    # function of global step. (teacher forcing ratio decay) mode='scheduled'
+    # function of global step. (teacher forcing ratio decay) mode="scheduled"
     # The second approach is inspired by:
     # Bengio et al. 2015: Scheduled Sampling for Sequence Prediction with Recurrent Neural Networks.
     # Can be found under: https://arxiv.org/pdf/1506.03099.pdf
-    tacotron_teacher_forcing_mode='constant',
-    # Can be ('constant' or 'scheduled'). 'scheduled' mode applies a cosine teacher forcing ratio 
+    tacotron_teacher_forcing_mode="constant",
+    # Can be ("constant" or "scheduled"). "scheduled" mode applies a cosine teacher forcing ratio 
     # decay. (Preference: scheduled)
     tacotron_teacher_forcing_ratio=1.,
     # Value from [0., 1.], 0.=0%, 1.=100%, determines the % of times we force next decoder 
-	# inputs, Only relevant if mode='constant'
+	# inputs, Only relevant if mode="constant"
     tacotron_teacher_forcing_init_ratio=1.,
-    # initial teacher forcing ratio. Relevant if mode='scheduled'
+    # initial teacher forcing ratio. Relevant if mode="scheduled"
     tacotron_teacher_forcing_final_ratio=0.,
-    # final teacher forcing ratio. Relevant if mode='scheduled'
+    # final teacher forcing ratio. Relevant if mode="scheduled"
     tacotron_teacher_forcing_start_decay=10000,
-    # starting point of teacher forcing ratio decay. Relevant if mode='scheduled'
+    # starting point of teacher forcing ratio decay. Relevant if mode="scheduled"
     tacotron_teacher_forcing_decay_steps=280000,
-    # Determines the teacher forcing ratio decay slope. Relevant if mode='scheduled'
+    # Determines the teacher forcing ratio decay slope. Relevant if mode="scheduled"
     tacotron_teacher_forcing_decay_alpha=0.,
-    # teacher forcing ratio decay rate. Relevant if mode='scheduled'
+    # teacher forcing ratio decay rate. Relevant if mode="scheduled"
     ###########################################################################################################################################
  
     # Tacotron-2 integration parameters
@@ -326,28 +326,28 @@ hparams = tf.contrib.training.HParams(
 	# used for eval)
     sentences=[
         # From July 8, 2017 New York Times:
-        'Scientists at the CERN laboratory say they have discovered a new particle.',
-        'There\'s a way to measure the acute emotional intelligence that has never gone out of '
-		'style.',
-        'President Trump met with other leaders at the Group of 20 conference.',
-        'The Senate\'s bill to repeal and replace the Affordable Care Act is now imperiled.',
-        # From Google's Tacotron example page:
-        'Generative adversarial network or variational auto-encoder.',
-        'Basilar membrane and otolaryngology are not auto-correlations.',
-        'He has read the whole thing.',
-        'He reads books.',
-        'He thought it was time to present the present.',
-        'Thisss isrealy awhsome.',
-        'Punctuation sensitivity, is working.',
-        'Punctuation sensitivity is working.',
+        "Scientists at the CERN laboratory say they have discovered a new particle.",
+        "There\"s a way to measure the acute emotional intelligence that has never gone out of "
+		"style.",
+        "President Trump met with other leaders at the Group of 20 conference.",
+        "The Senate\"s bill to repeal and replace the Affordable Care Act is now imperiled.",
+        # From Google"s Tacotron example page:
+        "Generative adversarial network or variational auto-encoder.",
+        "Basilar membrane and otolaryngology are not auto-correlations.",
+        "He has read the whole thing.",
+        "He reads books.",
+        "He thought it was time to present the present.",
+        "Thisss isrealy awhsome.",
+        "Punctuation sensitivity, is working.",
+        "Punctuation sensitivity is working.",
         "Peter Piper picked a peck of pickled peppers. How many pickled peppers did Peter Piper pick?",
         "She sells sea-shells on the sea-shore. The shells she sells are sea-shells I'm sure.",
         "Tajima Airport serves Toyooka.",
         # From The web (random long utterance)
-        'Sequence to sequence models have enjoyed great success in a variety of tasks such as machine translation, speech recognition, and text summarization.\
+        "Sequence to sequence models have enjoyed great success in a variety of tasks such as machine translation, speech recognition, and text summarization.\
         This project covers a sequence to sequence model trained to predict a speech representation from an input sequence of characters. We show that\
-        the adopted architecture is able to perform this task with wild success.',
-        'Thank you so much for your support!',
+        the adopted architecture is able to perform this task with wild success.",
+        "Thank you so much for your support!",
     ],
     
     
@@ -360,5 +360,5 @@ hparams = tf.contrib.training.HParams(
 
 def hparams_debug_string():
     values = hparams.values()
-    hp = ['  %s: %s' % (name, values[name]) for name in sorted(values) if name != 'sentences']
-    return 'Hyperparameters:\n' + '\n'.join(hp)
+    hp = ["  %s: %s" % (name, values[name]) for name in sorted(values) if name != "sentences"]
+    return "Hyperparameters:\n" + "\n".join(hp)

@@ -112,12 +112,12 @@ def plot_mel_filterbank(frames):
     librosa.display.specshow(
         librosa.power_to_db(frames.transpose(), ref=np.max),
         hop_length=int(sampling_rate * 0.01),
-        y_axis='mel',
-        x_axis='time',
+        y_axis="mel",
+        x_axis="time",
         sr=sampling_rate
     )
-    plt.colorbar(format='%+2.0f dB')
-    plt.title('Mel spectrogram')
+    plt.colorbar(format="%+2.0f dB")
+    plt.title("Mel spectrogram")
     plt.tight_layout()
     plt.show()
     
@@ -127,10 +127,10 @@ def play_wave(wav, blocking=False):
     
 def rec_wave(duration, blocking=True, verbose=True):
     if verbose:
-        print('Recording %d seconds of audio' % duration)
+        print("Recording %d seconds of audio" % duration)
     wav = sounddevice.rec(duration * sampling_rate, sampling_rate, 1)
     if blocking:
         sounddevice.wait()
         if verbose:
-            print('Done recording!')
+            print("Done recording!")
     return wav.squeeze()

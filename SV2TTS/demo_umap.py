@@ -27,18 +27,18 @@ colormap = np.array([
     [76, 255, 0],
 ], dtype=np.float) / 255 
 recognized_datasets = [
-    'Librispeech/dev-clean',
-    'Librispeech/dev-other',
-    'Librispeech/test-clean',
-    'Librispeech/test-other',
-    'Librispeech/train-other-500',
-    'Librispeech/train-clean-100',
-    'Librispeech/train-clean-360',
-    'LJSpeech-1.1',
-    'VoxCeleb1/wav',
-    'VoxCeleb1/test_wav',
-    'VoxCeleb2/dev/aac',
-    'VCTK-Corpus/wav48',
+    "Librispeech/dev-clean",
+    "Librispeech/dev-other",
+    "Librispeech/test-clean",
+    "Librispeech/test-other",
+    "Librispeech/train-other-500",
+    "Librispeech/train-clean-100",
+    "Librispeech/train-clean-360",
+    "LJSpeech-1.1",
+    "VoxCeleb1/wav",
+    "VoxCeleb1/test_wav",
+    "VoxCeleb2/dev/aac",
+    "VCTK-Corpus/wav48",
 ]
 
 
@@ -52,7 +52,7 @@ class UMapDemoUI(QDialog):
         
         # Load and prime the models
         print("Loading the model in memory, please wait...")
-        inference.load_model('saved_models/all.pt', 'cuda')
+        inference.load_model("saved_models/all.pt", "cuda")
         
         # Create the ui
         # self.setWindowTitle("Voice embedding visualizer")
@@ -71,7 +71,7 @@ class UMapDemoUI(QDialog):
         umap_canvas = FigureCanvas(Figure(figsize=(10, 20)))
         root_layout.addWidget(umap_canvas)
         self.umap_ax = umap_canvas.figure.subplots()
-        self.umap_ax.figure.patch.set_facecolor('#F0F0F0')
+        self.umap_ax.figure.patch.set_facecolor("#F0F0F0")
         self.draw_umap()
         
         ## Menu layout (right)
@@ -82,11 +82,11 @@ class UMapDemoUI(QDialog):
         self.dataset_box = QComboBox()
         self.speaker_box = QComboBox()
         self.utterance_box = QComboBox()
-        random_dataset_button = QPushButton('Random')
-        random_speaker_button = QPushButton('Random')
-        random_utterance_button = QPushButton('Random')
-        play_button = QPushButton('Play')
-        stop_button = QPushButton('Stop')
+        random_dataset_button = QPushButton("Random")
+        random_speaker_button = QPushButton("Random")
+        random_utterance_button = QPushButton("Random")
+        play_button = QPushButton("Play")
+        stop_button = QPushButton("Stop")
         self.dataset_box.currentIndexChanged.connect(lambda: self.select_random(1))
         self.speaker_box.currentIndexChanged.connect(lambda: self.select_random(2))
         self.utterance_box.currentIndexChanged.connect(lambda: self.load_utterance())
@@ -95,9 +95,9 @@ class UMapDemoUI(QDialog):
         random_utterance_button.clicked.connect(lambda: self.select_random(2))
         play_button.clicked.connect(lambda: sd.play(self.utterance, sampling_rate))
         stop_button.clicked.connect(lambda: sd.stop())
-        browser_grid.addWidget(QLabel('Dataset', ), 0, 0)
-        browser_grid.addWidget(QLabel('Speaker'), 0, 1)
-        browser_grid.addWidget(QLabel('Utterance'), 0, 2)
+        browser_grid.addWidget(QLabel("Dataset", ), 0, 0)
+        browser_grid.addWidget(QLabel("Speaker"), 0, 1)
+        browser_grid.addWidget(QLabel("Utterance"), 0, 2)
         browser_grid.addWidget(self.dataset_box, 1, 0)
         browser_grid.addWidget(self.speaker_box, 1, 1)
         browser_grid.addWidget(self.utterance_box, 1, 2)
@@ -116,17 +116,17 @@ class UMapDemoUI(QDialog):
         embed_canvas = FigureCanvas(Figure(figsize=(5, 5)))
         menu_layout.addWidget(embed_canvas)
         self.embed_ax = embed_canvas.figure.subplots()
-        self.embed_ax.figure.patch.set_facecolor('#F0F0F0')
+        self.embed_ax.figure.patch.set_facecolor("#F0F0F0")
         self.embed_ax.set_xticks([]), self.embed_ax.set_yticks([])
         
         ## Embeds (bottom right)
         embeds_grid = QGridLayout()
-        embed_button = QPushButton('Embed utterance (direct)')
-        embed_demo_button = QPushButton('Embed utterance (demo)')
-        self.record_one_button = QPushButton('Record one')
-        self.use_partials_button = QCheckBox('Use partials')
-        self.show_partials_button = QCheckBox('Show partials')
-        self.go_next_button = QCheckBox('Auto pick next')
+        embed_button = QPushButton("Embed utterance (direct)")
+        embed_demo_button = QPushButton("Embed utterance (demo)")
+        self.record_one_button = QPushButton("Record one")
+        self.use_partials_button = QCheckBox("Use partials")
+        self.show_partials_button = QCheckBox("Show partials")
+        self.go_next_button = QCheckBox("Auto pick next")
         self.user_id_box = QSpinBox()
         self.user_id_box.setRange(0, 9)
         self.use_partials_button.setChecked(True)
@@ -146,7 +146,7 @@ class UMapDemoUI(QDialog):
         menu_layout.addLayout(embeds_grid)
         menu_layout.addStretch()
         
-        clear_button = QPushButton('Clear')
+        clear_button = QPushButton("Clear")
         def clear_button_action():
             self.embeds.clear()
             self.draw_umap()
@@ -186,7 +186,7 @@ class UMapDemoUI(QDialog):
                                           self.dataset_box.currentText(),
                                           self.speaker_box.currentText())
             available_utterances = fileio.get_files(utterances_root, 
-                                                    r'(.mp3|.flac|.wav|.m4a)',
+                                                    r"(.mp3|.flac|.wav|.m4a)",
                                                     recursive=True,
                                                     full_path=False) 
             repopulate_box(self.utterance_box, available_utterances)
@@ -216,7 +216,7 @@ class UMapDemoUI(QDialog):
 
     def embed_utterance(self, demo, speaker_name=None, go_next=None):
         if speaker_name is None:
-            speaker_name = '%s/%s' % (self.dataset_box.currentText(), 
+            speaker_name = "%s/%s" % (self.dataset_box.currentText(), 
                                       self.speaker_box.currentText())
         use_partials = self.use_partials_button.isChecked()
         go_next = go_next if go_next is not None else self.go_next_button.isChecked() 
@@ -225,11 +225,11 @@ class UMapDemoUI(QDialog):
         embed, partial_embeds, wave_splits = inference.embed_utterance(
             self.utterance, use_partials, return_partials=True)
         if use_partials:
-            self.embeds.append((embed, 'o', speaker_name))
+            self.embeds.append((embed, "o", speaker_name))
             for partial_embed in partial_embeds:
-                self.embeds.append((partial_embed, '.', speaker_name))
+                self.embeds.append((partial_embed, ".", speaker_name))
         else:
-            self.embeds.append((embed, 's', speaker_name))
+            self.embeds.append((embed, "s", speaker_name))
             
         # Draw the embed and the UMAP projection
         self.draw_embed()
@@ -243,7 +243,7 @@ class UMapDemoUI(QDialog):
         self.record_one_button.setDisabled(True)
         self.utterance = audio.preprocess_wave(audio.rec_wave(4))
         self.record_one_button.setText("Done!")
-        speaker_name = 'user_' + self.user_id_box.text() 
+        speaker_name = "user_" + self.user_id_box.text() 
         self.embed_utterance(False, speaker_name, False)
         self.record_one_button.setText("Record one")
         self.record_one_button.setDisabled(False)
@@ -269,14 +269,14 @@ class UMapDemoUI(QDialog):
         speaker_names = speaker_names[np.argsort(indices)]
         speaker_dict = {s: i for i, s in enumerate(speaker_names)}
         embed_data = np.array([e[0] for e in self.embeds])
-        reducer = umap.UMAP(int(np.ceil(np.sqrt(len(embed_data)))), metric='cosine')
+        reducer = umap.UMAP(int(np.ceil(np.sqrt(len(embed_data)))), metric="cosine")
         projections = reducer.fit_transform(embed_data)
 
         # Hide or show partials
         show_partials = self.show_partials_button.isChecked()
         if not show_partials:
-            projections = [p for e, p in zip(self.embeds, projections) if e[1] != '.']
-            embeds = [e for e in self.embeds if e[1] != '.']
+            projections = [p for e, p in zip(self.embeds, projections) if e[1] != "."]
+            embeds = [e for e in self.embeds if e[1] != "."]
         else:
             embeds = self.embeds
 
@@ -290,13 +290,13 @@ class UMapDemoUI(QDialog):
                 legend = speaker_name
                 legend_done.add(speaker_name)
             self.umap_ax.scatter(projection[0], projection[1], c=color, marker=mark, label=legend)
-        self.umap_ax.set_aspect('equal', 'datalim')
-        self.umap_ax.set_title('UMAP projection')
+        self.umap_ax.set_aspect("equal", "datalim")
+        self.umap_ax.set_title("UMAP projection")
         self.umap_ax.legend()
 
         # figure.tight_layout()
         self.umap_ax.figure.canvas.draw()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     UMapDemoUI()

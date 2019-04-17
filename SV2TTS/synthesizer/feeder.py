@@ -18,18 +18,18 @@ class Feeder:
 		super(Feeder, self).__init__()
 		self._coord = coordinator
 		self._hparams = hparams
-		self._cleaner_names = [x.strip() for x in hparams.cleaners.split(',')]
+		self._cleaner_names = [x.strip() for x in hparams.cleaners.split(",")]
 		self._train_offset = 0
 		self._test_offset = 0
 
 		# Load metadata
-		self._mel_dir = os.path.join(os.path.dirname(metadata_filename), 'mels')
-		self._embed_dir = os.path.join(os.path.dirname(metadata_filename), 'embed')
-		with open(metadata_filename, encoding='utf-8') as f:
-			self._metadata = [line.strip().split('|') for line in f]
+		self._mel_dir = os.path.join(os.path.dirname(metadata_filename), "mels")
+		self._embed_dir = os.path.join(os.path.dirname(metadata_filename), "embed")
+		with open(metadata_filename, encoding="utf-8") as f:
+			self._metadata = [line.strip().split("|") for line in f]
 			frame_shift_ms = hparams.hop_size / hparams.sample_rate
 			hours = sum([int(x[4]) for x in self._metadata]) * frame_shift_ms / (3600)
-			log('Loaded metadata for {} examples ({:.2f} hours)'.format(len(self._metadata), hours))
+			log("Loaded metadata for {} examples ({:.2f} hours)".format(len(self._metadata), hours))
 
 		#Train test split
 		if hparams.tacotron_test_size is None:
@@ -57,7 +57,7 @@ class Feeder:
 
 		#pad input sequences with the <pad_token> 0 ( _ )
 		self._pad = 0
-		#explicitely setting the padding to a value that doesn't originally exist in the spectogram
+		#explicitely setting the padding to a value that doesn"t originally exist in the spectogram
 		#to avoid any possible conflicts, without affecting the output range of the model too much
 		if hparams.symmetric_mels:
 			self._target_pad = -hparams.max_abs_value
@@ -66,27 +66,27 @@ class Feeder:
 		#Mark finished sequences with 1s
 		self._token_pad = 1.
 
-		with tf.device('/cpu:0'):
-			# Create placeholders for inputs and targets. Don't specify batch size because we want
+		with tf.device("/cpu:0"):
+			# Create placeholders for inputs and targets. Don"t specify batch size because we want
 			# to be able to feed different batch sizes at eval time.
 			self._placeholders = [
-				tf.placeholder(tf.int32, shape=(None, None), name='inputs'),
-				tf.placeholder(tf.int32, shape=(None, ), name='input_lengths'),
+				tf.placeholder(tf.int32, shape=(None, None), name="inputs"),
+				tf.placeholder(tf.int32, shape=(None, ), name="input_lengths"),
 				tf.placeholder(tf.float32, shape=(None, None, hparams.num_mels), 
-							   name='mel_targets'),
-				tf.placeholder(tf.float32, shape=(None, None), name='token_targets'),
-				tf.placeholder(tf.int32, shape=(None, ), name='targets_lengths'),
+							   name="mel_targets"),
+				tf.placeholder(tf.float32, shape=(None, None), name="token_targets"),
+				tf.placeholder(tf.int32, shape=(None, ), name="targets_lengths"),
 				tf.placeholder(tf.int32, shape=(hparams.tacotron_num_gpus, None), 
-							   name='split_infos'),
+							   name="split_infos"),
 				
 				# SV2TTS
 				tf.placeholder(tf.float32, shape=(None, hparams.speaker_embedding_size), 
-							   name='speaker_embeddings')
+							   name="speaker_embeddings")
 			]
 
 			# Create queue for buffering data
 			queue = tf.FIFOQueue(8, [tf.int32, tf.int32, tf.float32, tf.float32, 
-									 tf.int32, tf.int32, tf.float32], name='input_queue')
+									 tf.int32, tf.int32, tf.float32], name="input_queue")
 			self._enqueue_op = queue.enqueue(self._placeholders)
 			self.inputs, self.input_lengths, self.mel_targets, self.token_targets, \
 				self.targets_lengths, self.split_infos, self.speaker_embeddings = queue.dequeue()
@@ -101,7 +101,7 @@ class Feeder:
 
 			# Create eval queue for buffering eval data
 			eval_queue = tf.FIFOQueue(1, [tf.int32, tf.int32, tf.float32, tf.float32,  
-										  tf.int32, tf.int32, tf.float32], name='eval_queue')
+										  tf.int32, tf.int32, tf.float32], name="eval_queue")
 			self._eval_enqueue_op = eval_queue.enqueue(self._placeholders)
 			self.eval_inputs, self.eval_input_lengths, self.eval_mel_targets, \
 				self.eval_token_targets, self.eval_targets_lengths, \
@@ -118,11 +118,11 @@ class Feeder:
 
 	def start_threads(self, session):
 		self._session = session
-		thread = threading.Thread(name='background', target=self._enqueue_next_train_group)
+		thread = threading.Thread(name="background", target=self._enqueue_next_train_group)
 		thread.daemon = True #Thread will close when parent quits
 		thread.start()
 
-		thread = threading.Thread(name='background', target=self._enqueue_next_test_group)
+		thread = threading.Thread(name="background", target=self._enqueue_next_test_group)
 		thread.daemon = True #Thread will close when parent quits
 		thread.start()
 
@@ -154,7 +154,7 @@ class Feeder:
 		batches = [examples[i: i+n] for i in range(0, len(examples), n)]
 		np.random.shuffle(batches)
 
-		log('\nGenerated %d test batches of size %d in %.3f sec' % (len(batches), n, time.time() - start))
+		log("\nGenerated %d test batches of size %d in %.3f sec" % (len(batches), n, time.time() - start))
 		return batches, r
 
 	def _enqueue_next_train_group(self):
@@ -171,7 +171,7 @@ class Feeder:
 			batches = [examples[i: i+n] for i in range(0, len(examples), n)]
 			np.random.shuffle(batches)
 
-			log('\nGenerated {} train batches of size {} in {:.3f} sec'.format(len(batches), n, time.time() - start))
+			log("\nGenerated {} train batches of size {} in {:.3f} sec".format(len(batches), n, time.time() - start))
 			for batch in batches:
 				feed_dict = dict(zip(self._placeholders, self._prepare_batch(batch, r)))
 				self._session.run(self._enqueue_op, feed_dict=feed_dict)
@@ -255,13 +255,13 @@ class Feeder:
 		return np.stack([self._pad_token_target(t, data_len) for t in targets]), data_len
 
 	def _pad_input(self, x, length):
-		return np.pad(x, (0, length - x.shape[0]), mode='constant', constant_values=self._pad)
+		return np.pad(x, (0, length - x.shape[0]), mode="constant", constant_values=self._pad)
 
 	def _pad_target(self, t, length):
-		return np.pad(t, [(0, length - t.shape[0]), (0, 0)], mode='constant', constant_values=self._target_pad)
+		return np.pad(t, [(0, length - t.shape[0]), (0, 0)], mode="constant", constant_values=self._target_pad)
 
 	def _pad_token_target(self, t, length):
-		return np.pad(t, (0, length - t.shape[0]), mode='constant', constant_values=self._token_pad)
+		return np.pad(t, (0, length - t.shape[0]), mode="constant", constant_values=self._token_pad)
 
 	def _round_up(self, x, multiple):
 		remainder = x % multiple
