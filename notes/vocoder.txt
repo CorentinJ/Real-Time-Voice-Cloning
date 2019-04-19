@@ -7,17 +7,27 @@ NOTES:
 - best lost on mu_law: 2.935 (????)
 
 TODO:
-- Pruning
+? Pruning (get back to this later)
+    - Read the paper to see if I misunderstood the effectiveness of pruning
 - Begin merging the three projects:
+    ? Quid of LibriSpeech vs LibriTTS
+        - Saving wavs in the synthesizer preprocessor
     - Single inference demo (without GUI)
     - Single big inference tool (with GUI)
     - Single config file (or args???? -> could be both: default to config values)
     - Three hparams files (inside packages?)
     - Proper versions in requirements.txt (do something different for inference and training?)
-- Clean up the rest of the code (' to ")
+- Clean up the rest of the code (' to "), Check all TODOs
 - Move root of repo to SV2TTS (the rest isn't necessary)
 - Put on github (RECHECK ALL REQUIREMENTS (+VLIBS))
 - Make demo website
 - Write something
 
 Some noisy speakers: 40, 
+
+Full:   3.7
+-I      3.9
++-rnn1  4.4
++-rnn2  5.0
++-adds  5.4
++-all  13.3
