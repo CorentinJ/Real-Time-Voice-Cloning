@@ -3,11 +3,9 @@ from datetime import datetime
 from time import perf_counter as clock
 import matplotlib.pyplot as plt
 import numpy as np
-import subprocess
 import webbrowser
 import visdom
 import umap
-import sys
 
 colormap = np.array([
     [76, 255, 0],
@@ -32,15 +30,13 @@ class Visualizations:
         if env_name is None:
             self.env_name = now
         else:
-            self.env_name = env_name + " (" + now + ")"
+            self.env_name = "%s (%s)" % (env_name, now)
         
         try:
             self.vis = visdom.Visdom(env=self.env_name, raise_exceptions=True)
         except ConnectionError:
-            print("No visdom server detected, running a temporary instance...\nRun the command "
-                  "\"visdom\" in your CLI to start an external server.", file=sys.stderr)
-            subprocess.Popen("visdom")
-            self.vis = visdom.Visdom(env=self.env_name)
+            raise Exception("No visdom server detected. Run the command \"visdom\" in your CLI to "
+                            "start it.")
         webbrowser.open("http://localhost:8097/env/" + self.env_name)
         
         self.loss_win = None
@@ -144,6 +140,11 @@ class Visualizations:
                 win=self.implementation_win,
                 opts={"title": "Training implementation"},
             )
+            print("Step %6d   Loss: %.4f   EER: %.4f   LR: %g   Mean step time: %5dms   "
+                  "Last step time: %5dms" %
+                  (step, self.loss_exp, self.eer_exp, lr, int(1000 * self.mean_time_per_step),
+                   int(1000 * time_per_step)))
+            
         self.last_step = step
         self.last_update_timestamp = now
         

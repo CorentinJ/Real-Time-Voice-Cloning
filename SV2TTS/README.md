@@ -20,3 +20,6 @@ Feel free to adapt the code to your needs. Other interesting datasets:
  
 ### Known issues
 - I've tried filtering the non-English speakers out of VoxCeleb1 using the metadata file. However, there is no such file for VoxCeleb2. Right now, the non-English speakers of VoxCeleb2 are unfiltered (hopefully, they're still a minority in the dataset). It's hard to tell if this really has a negative impact on the model.
+- You need visdom to train the encoder. Maybe you don't want fancy visualizations, so in that case I suggest to simply remove every line that uses `self.vis` in encoder/ui/visualizations.py.
+- The training of the encoder uses a very poor exponential mean to display the mean loss/EER. Wait a few hundred steps until it makes sense (or just read the plot).
+- No batch size on the training of the encoder

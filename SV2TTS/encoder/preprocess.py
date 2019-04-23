@@ -1,4 +1,4 @@
-from pathos.multiprocessing import ThreadPool
+from multiprocess.pool import ThreadPool
 from encoder.params_data import *
 from encoder.config import librispeech_datasets, anglophone_nationalites
 from datetime import datetime
@@ -60,7 +60,6 @@ def _init_preprocess_dataset(dataset_name, datasets_root, out_dir) -> (Path, Dat
 
 def _preprocess_speaker_dirs(speaker_dirs, dataset_name, datasets_root, out_dir, extension,
                              skip_existing, logger):
-    speaker_dirs = speaker_dirs[:10]    # TODO
     print("%s: Preprocessing data for %d speakers." % (dataset_name, len(speaker_dirs)))
     
     # Function to preprocess utterances for one speaker
@@ -74,11 +73,14 @@ def _preprocess_speaker_dirs(speaker_dirs, dataset_name, datasets_root, out_dir,
         speaker_out_dir.mkdir(exist_ok=True)
         sources_fpath = speaker_out_dir.joinpath("_sources.txt")
         
-        # There"s a possibility that the preprocessing was interrupted earlier, check if 
+        # There's a possibility that the preprocessing was interrupted earlier, check if 
         # there already is a sources file.
         if sources_fpath.exists():
-            with sources_fpath.open("r") as sources_file:
-                existing_fnames = {line.split(",")[0] for line in sources_file}
+            try:
+                with sources_fpath.open("r") as sources_file:
+                    existing_fnames = {line.split(",")[0] for line in sources_file}
+            except:
+                existing_fnames = {}
         else:
             existing_fnames = {}
         
@@ -90,7 +92,7 @@ def _preprocess_speaker_dirs(speaker_dirs, dataset_name, datasets_root, out_dir,
             out_fname = out_fname.replace(".%s" % extension, ".npy")
             if skip_existing and out_fname in existing_fnames:
                 continue
-            
+                
             # Load and preprocess the waveform
             wav = audio.load(in_fpath)
             wav = audio.preprocess_wave(wav)
@@ -111,8 +113,8 @@ def _preprocess_speaker_dirs(speaker_dirs, dataset_name, datasets_root, out_dir,
     
     # Process the utterances for each speaker
     with ThreadPool(8) as pool:
-        list(tqdm(pool.imap(preprocess_speaker, speaker_dirs), desc=dataset_name, 
-                  unit=" speakers done"))
+        list(tqdm(pool.imap(preprocess_speaker, speaker_dirs), dataset_name, len(speaker_dirs),
+                  unit="speakers"))
     logger.finalize()
     print("Done preprocessing %s.\n" % dataset_name)
 
@@ -145,14 +147,14 @@ def preprocess_voxceleb1(datasets_root: Path, out_dir: Path, skip_existing=False
     nationalities = {line[0]: line[3] for line in metadata}
     keep_speaker_ids = [speaker_id for speaker_id, nationality in nationalities.items() if 
                         nationality.lower() in anglophone_nationalites]
-    print("VoxCeleb1: using samples from %d (assumed anglophone) speakers out of %d." % 
+    print("VoxCeleb1: using samples from %d (presumed anglophone) speakers out of %d." % 
           (len(keep_speaker_ids), len(nationalities)))
     
     # Get the speaker directories for anglophone speakers only
     speaker_dirs = dataset_root.joinpath("wav").glob("*")
     speaker_dirs = [speaker_dir for speaker_dir in speaker_dirs if
                     speaker_dir.name in keep_speaker_ids]
-    print("Found %d anglophone speakers on the disk, %d missing (this is normal)." % 
+    print("VoxCeleb1: found %d anglophone speakers on the disk, %d missing (this is normal)." % 
           (len(speaker_dirs), len(keep_speaker_ids) - len(speaker_dirs)))
 
     # Preprocess all speakers
