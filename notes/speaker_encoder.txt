@@ -57,6 +57,75 @@ About speed (tested on 5x6 batches):
 - It seems that the complexity of the backward pass is at least quadratic with respect to the number of speakers. With 64x10 I get a backward pass of 11s (the rest takes ~500ms) but with 32x10 it's 1.4s.
 - I think I went from 3000ms to 2500ms by normalizing the centroids before doing the cosine similarity. I believe that doing the operation first makes the backward pass faster.
 - The lower bound on the GPU I/O for this task seems to be around 40ms.
+- For the similarity matrix
+    Initially (batch=32):
+    Average execution time over 10 steps:
+      Blocking, waiting for batch (threaded) (10/10):  mean:   61ms   std:   14ms
+      Data to cuda (10/10):                            mean:    2ms   std:    0ms
+      Forward pass (10/10):                            mean:   30ms   std:    1ms
+      Loss (10/10):                                    mean:  325ms   std:    4ms
+      Backward pass (10/10):                           mean: 1353ms   std:   29ms
+      Parameter update (10/10):                        mean:   86ms   std:    2ms
+      Extras (visualizations, saving) (10/10):         mean:   12ms   std:    0ms
+    
+    After vec1:
+    Average execution time over 10 steps:
+      Blocking, waiting for batch (threaded) (10/10):  mean:   64ms   std:   10ms
+      Data to cuda (10/10):                            mean:    2ms   std:    0ms
+      Forward pass (10/10):                            mean:   30ms   std:    0ms
+      Loss (10/10):                                    mean:   48ms   std:    1ms
+      Backward pass (10/10):                           mean:  163ms   std:    4ms
+      Parameter update (10/10):                        mean:   87ms   std:    2ms
+      Extras (visualizations, saving) (10/10):         mean:   12ms   std:    0ms
+
+
+    After vec2:
+    Average execution time over 10 steps:
+      Blocking, waiting for batch (threaded) (10/10):  mean:   59ms   std:   11ms
+      Data to cuda (10/10):                            mean:    2ms   std:    0ms
+      Forward pass (10/10):                            mean:   30ms   std:    0ms
+      Loss (10/10):                                    mean:   11ms   std:    1ms
+      Backward pass (10/10):                           mean:   30ms   std:    1ms
+      Parameter update (10/10):                        mean:   87ms   std:    2ms
+      Extras (visualizations, saving) (10/10):         mean:   12ms   std:    1ms
+      
+      
+    After batch=64:
+    Average execution time over 10 steps:
+      Blocking, waiting for batch (threaded) (10/10):  mean:   75ms   std:   53ms
+      Data to cuda (10/10):                            mean:    4ms   std:    1ms
+      Forward pass (10/10):                            mean:    5ms   std:    0ms
+      Loss (10/10):                                    mean:   80ms   std:    1ms
+      Backward pass (10/10):                           mean:  100ms   std:   18ms
+      Parameter update (10/10):                        mean:  186ms   std:    5ms
+      Extras (visualizations, saving) (10/10):         mean:   12ms   std:    0ms
+      
+      
+    After vec3:
+    Average execution time over 10 steps:
+      Blocking, waiting for batch (threaded) (10/10):  mean:   89ms   std:  106ms
+      Data to cuda (10/10):                            mean:    4ms   std:    1ms
+      Forward pass (10/10):                            mean:    5ms   std:    0ms
+      Loss (10/10):                                    mean:   82ms   std:    1ms
+      Backward pass (10/10):                           mean:  193ms   std:   50ms
+      Parameter update (10/10):                        mean:  185ms   std:    4ms
+      Extras (visualizations, saving) (10/10):         mean:   11ms   std:    1ms
+  
+  
+    Back to vec2 with reshape() instead of view() and vectorized mask computation:
+    Average execution time over 10 steps:
+      Blocking, waiting for batch (threaded) (10/10):  mean:   75ms   std:   53ms
+      Data to cuda (10/10):                            mean:    4ms   std:    1ms
+      Forward pass (10/10):                            mean:    5ms   std:    0ms
+      Loss (10/10):                                    mean:   80ms   std:    2ms
+      Backward pass (10/10):                           mean:   91ms   std:    2ms
+      Parameter update (10/10):                        mean:  182ms   std:    2ms
+      Extras (visualizations, saving) (10/10):         mean:   11ms   std:    0ms
+    -> Tiny backward pass improvement, also now more consistent
+ 
+ 
+ 
+INCREASED BATCH SIZE AT 400k STEPS
 
 
 

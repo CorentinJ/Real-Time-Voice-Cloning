@@ -25,7 +25,7 @@ Generalized End-To-End Loss For Speaker Verification
 - Removal of projection layer
 - Relu at the end of the network
 - (slides) Interpretation of EER
-
+- Thank mr. Louppe, the authors of GE2E and Joeri
 
 ------ Notes ------
 https://stats.stackexchange.com/questions/395345/computing-and-estimating-the-eer-on-an-entire-dataset

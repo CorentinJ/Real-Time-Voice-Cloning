@@ -5,6 +5,8 @@ from encoder.params_data import partials_n_frames
 from torch.utils.data import Dataset, DataLoader
 from pathlib import Path
 
+# TODO: improve with a pool of utterances for data efficiency
+
 class SpeakerVerificationDataset(Dataset):
     def __init__(self, datasets_root: Path):
         self.root = datasets_root
