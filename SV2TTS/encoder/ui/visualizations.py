@@ -45,7 +45,7 @@ class Visualizations:
         except ConnectionError:
             raise Exception("No visdom server detected. Run the command \"visdom\" in your CLI to "
                             "start it.")
-        webbrowser.open("http://localhost:8097/env/" + self.env_name)
+        # webbrowser.open("http://localhost:8097/env/" + self.env_name)
         
         self.loss_win = None
         self.eer_win = None

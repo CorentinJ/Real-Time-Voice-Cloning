@@ -80,18 +80,17 @@ class SpeakerEncoder(nn.Module):
         centroids_excl = centroids_excl.clone() / torch.norm(centroids_excl, dim=2, keepdim=True)
                          
         # Similarity matrix
-        sim_matrix = torch.zeros(speakers_per_batch * utterances_per_speaker, 
+        sim_matrix = torch.zeros(speakers_per_batch, utterances_per_speaker,  
                                  speakers_per_batch).to(self.loss_device)
         for j in range(speakers_per_batch):
-            for i in range(utterances_per_speaker):
-                ji = j * utterances_per_speaker + i
-                for k in range(speakers_per_batch):
-                    centroid = centroids_excl[j, i] if j == k else centroids_incl[k]
-                    # The cosine similarity is the dot product when vectors are normalized
-                    sim_matrix[ji, k] = torch.dot(embeds[j, i], centroid)
+            for k in range(speakers_per_batch):
+                centroid = centroids_excl[j] if j == k else centroids_incl[k]
+                sim_matrix[j, :, k] = (embeds[j] * centroid).sum(dim=1)
         sim_matrix = sim_matrix * self.similarity_weight + self.similarity_bias
 
         # Loss
+        sim_matrix = sim_matrix.view((speakers_per_batch * utterances_per_speaker, 
+                                      speakers_per_batch))
         ground_truth = np.repeat(np.arange(speakers_per_batch), utterances_per_speaker)
         target = torch.from_numpy(ground_truth).long().to(self.loss_device)
         loss = self.loss_fn(sim_matrix, target)

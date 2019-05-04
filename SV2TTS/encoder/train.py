@@ -61,10 +61,13 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, vis_every: int, 
         
         # Forward pass
         inputs = torch.from_numpy(speaker_batch.data).to(device)
+        torch.cuda.synchronize(device)
         profiler.tick("Data to %s" % device)
-        embeds = model(inputs).to(loss_device)
+        embeds = model(inputs)
+        torch.cuda.synchronize(device)
         profiler.tick("Forward pass")
-        loss, eer = model.loss(embeds.view((speakers_per_batch, utterances_per_speaker, -1)))
+        embeds_loss = embeds.view((speakers_per_batch, utterances_per_speaker, -1)).to(loss_device)
+        loss, eer = model.loss(embeds_loss)
         profiler.tick("Loss")
 
         # Backward pass
@@ -84,8 +87,8 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, vis_every: int, 
             print("Drawing and saving projections (step %d)" % step)
             backup_dir.mkdir(exist_ok=True)
             projection_fpath = backup_dir.joinpath("%s_umap_%06d.png" % (run_id, step))
-            embeds_numpy = embeds.detach().numpy()
-            vis.draw_projections(embeds_numpy, utterances_per_speaker, step, projection_fpath)
+            embeds = embeds.detach().cpu().numpy()
+            vis.draw_projections(embeds, utterances_per_speaker, step, projection_fpath)
             vis.save()
 
         # Overwrite the latest version of the model
