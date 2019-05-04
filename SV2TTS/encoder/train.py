@@ -22,6 +22,7 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, vis_every: int, 
     # because the forward pass is faster on the GPU whereas the loss is often (depending on your
     # hyperparameters) faster on the CPU.
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # FIXME: currently, the gradient is incorrect if loss_device is cuda
     loss_device = torch.device("cpu")
     
     # Create the model and the optimizer
@@ -70,7 +71,7 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, vis_every: int, 
         model.zero_grad()
         loss.backward()
         profiler.tick("Backward pass")
-        # model.do_gradient_ops()
+        model.do_gradient_ops()
         optimizer.step()
         profiler.tick("Parameter update")
         
