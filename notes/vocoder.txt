@@ -7,8 +7,8 @@ NOTES:
 - best lost on mu_law: 2.935 (????)
 
 TODO:
-? Pruning (get back to this later)
-    - Read the paper to see if I misunderstood the effectiveness of pruning
+- Pruning
+    - Check if there is any significant speedup with 100% sparsity
 - Begin merging the three projects:
     ? Quid of LibriSpeech vs LibriTTS
         - Saving wavs in the synthesizer preprocessor
@@ -22,6 +22,7 @@ TODO:
 - Put on github (RECHECK ALL REQUIREMENTS (+VLIBS))
 - Make demo website
 - Write something
+- Cite all datasets
 
 Some noisy speakers: 40, 
 

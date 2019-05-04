@@ -2,12 +2,13 @@ from encoder.ui.visualizations import Visualizations
 from encoder.data_objects import SpeakerVerificationDataLoader, SpeakerVerificationDataset
 from encoder.params_model import *
 from encoder.model import SpeakerEncoder
+from utils.profiler import Profiler
 from pathlib import Path
 import torch
 
 
 def train(run_id: str, clean_data_root: Path, models_dir: Path, vis_every: int, save_every: int,
-          backup_every: int, force_restart: bool):
+          backup_every: int, force_restart: bool, visdom_server: str, no_visdom: bool):
     # Create a dataset and a dataloader
     dataset = SpeakerVerificationDataset(clean_data_root)
     loader = SpeakerVerificationDataLoader(
@@ -17,9 +18,14 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, vis_every: int, 
         num_workers=4,
     )
     
-    # Create the model and the optimizer
+    # Setup the device on which to run the forward pass and the loss. These can be different, 
+    # because the forward pass is faster on the GPU whereas the loss is often (depending on your
+    # hyperparameters) faster on the CPU.
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = SpeakerEncoder(device)
+    loss_device = torch.device("cpu")
+    
+    # Create the model and the optimizer
+    model = SpeakerEncoder(device, loss_device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate_init)
     init_step = 1
     
@@ -44,21 +50,29 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, vis_every: int, 
     
     # Initialize the visualization environment
     device_name = str(torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU")
-    vis = Visualizations(run_id, device_name=device_name)
+    vis = Visualizations(run_id, device_name=device_name, server=visdom_server, disabled=no_visdom)
     vis.log_dataset(dataset)
     
     # Training loop
+    profiler = Profiler(summarize_every=10)
     for step, speaker_batch in enumerate(loader, init_step):
+        profiler.tick("Blocking, waiting for batch (threaded)")
+        
         # Forward pass
         inputs = torch.from_numpy(speaker_batch.data).to(device)
-        embeds = model(inputs).cpu()
+        profiler.tick("Data to %s" % device)
+        embeds = model(inputs).to(loss_device)
+        profiler.tick("Forward pass")
         loss, eer = model.loss(embeds.view((speakers_per_batch, utterances_per_speaker, -1)))
-        
+        profiler.tick("Loss")
+
         # Backward pass
         model.zero_grad()
         loss.backward()
-        model.do_gradient_ops()
+        profiler.tick("Backward pass")
+        # model.do_gradient_ops()
         optimizer.step()
+        profiler.tick("Parameter update")
         
         # Update visualizations
         learning_rate = optimizer.param_groups[0]["lr"]
@@ -66,6 +80,7 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, vis_every: int, 
         
         # Draw projections and save them to the backup folder
         if vis_every != 0 and step % vis_every == 0:
+            print("Drawing and saving projections (step %d)" % step)
             backup_dir.mkdir(exist_ok=True)
             projection_fpath = backup_dir.joinpath("%s_umap_%06d.png" % (run_id, step))
             embeds_numpy = embeds.detach().numpy()
@@ -74,6 +89,7 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, vis_every: int, 
 
         # Overwrite the latest version of the model
         if save_every != 0 and step % save_every == 0:
+            print("Saving the model (step %d)" % step)
             torch.save({
                 "step": step + 1,
                 "model_state": model.state_dict(),
@@ -82,6 +98,7 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, vis_every: int, 
             
         # Make a backup
         if backup_every != 0 and step % backup_every == 0:
+            print("Making a backup (step %d)" % step)
             backup_dir.mkdir(exist_ok=True)
             backup_fpath = backup_dir.joinpath("%s_bak_%06d.pt" % (run_id, step))
             torch.save({
@@ -90,3 +107,5 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, vis_every: int, 
                 "optimizer_state": optimizer.state_dict(),
             }, backup_fpath)
             
+        profiler.tick("Extras (visualizations, saving)")
+        

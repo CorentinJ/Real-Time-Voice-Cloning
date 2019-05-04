@@ -25,7 +25,15 @@ colormap = np.array([
 
 
 class Visualizations:
-    def __init__(self, env_name=None, device_name=None):
+    def __init__(self, env_name=None, device_name=None, server="http://localhost", disabled=False):
+        self.last_update_timestamp = clock()
+        self.mean_time_per_step = -1
+        self.loss_exp = None
+        self.eer_exp = None
+        self.disabled = disabled    # TODO: use a better paradigm for that
+        if self.disabled:
+            return 
+        
         now = str(datetime.now().strftime("%d-%m %Hh%M"))
         if env_name is None:
             self.env_name = now
@@ -33,7 +41,7 @@ class Visualizations:
             self.env_name = "%s (%s)" % (env_name, now)
         
         try:
-            self.vis = visdom.Visdom(env=self.env_name, raise_exceptions=True)
+            self.vis = visdom.Visdom(server, env=self.env_name, raise_exceptions=True)
         except ConnectionError:
             raise Exception("No visdom server detected. Run the command \"visdom\" in your CLI to "
                             "start it.")
@@ -44,18 +52,15 @@ class Visualizations:
         self.lr_win = None
         self.implementation_win = None
         self.projection_win = None
-        self.loss_exp = None
-        self.eer_exp = None
         self.implementation_string = ""
-        self.last_step = -1
-        self.last_update_timestamp = -1
-        self.mean_time_per_step = -1
         self.log_params()
         
         if device_name is not None:
             self.log_implementation({"Device": device_name})
         
     def log_params(self):
+        if self.disabled:
+            return 
         from encoder import params_data
         from encoder import params_model
         param_string = "<b>Model parameters</b>:<br>"
@@ -69,6 +74,8 @@ class Visualizations:
         self.vis.text(param_string, opts={"title": "Parameters"})
         
     def log_dataset(self, dataset: SpeakerVerificationDataset):
+        if self.disabled:
+            return 
         dataset_string = ""
         dataset_string += "<b>Speakers</b>: %s\n" % len(dataset.speakers)
         dataset_string += "\n" + dataset.get_logs()
@@ -76,6 +83,8 @@ class Visualizations:
         self.vis.text(dataset_string, opts={"title": "Dataset"})
         
     def log_implementation(self, params):
+        if self.disabled:
+            return 
         implementation_string = ""
         for param, value in params.items():
             implementation_string += "<b>%s</b>: %s\n" % (param, value)
@@ -88,51 +97,54 @@ class Visualizations:
 
     def update(self, loss, eer, lr, step):
         self.loss_exp = loss if self.loss_exp is None else 0.985 * self.loss_exp + 0.015 * loss
-        self.loss_win = self.vis.line(
-            [[loss, self.loss_exp]],
-            [[step, step]],
-            win=self.loss_win,
-            update="append" if self.loss_win else None,
-            opts=dict(
-                legend=["Loss", "Avg. loss"],
-                xlabel="Step",
-                ylabel="Loss",
-                title="Loss",
-            )
-        )
         self.eer_exp = eer if self.eer_exp is None else 0.985 * self.eer_exp + 0.015 * eer
-        self.eer_win = self.vis.line(
-            [[eer, self.eer_exp]],
-            [[step, step]],
-            win=self.eer_win,
-            update="append" if self.eer_win else None,
-            opts=dict(
-                legend=["EER", "Avg. EER"],
-                xlabel="Step",
-                ylabel="EER",
-                title="Equal error rate"
+        if not self.disabled:
+            self.loss_win = self.vis.line(
+                [[loss, self.loss_exp]],
+                [[step, step]],
+                win=self.loss_win,
+                update="append" if self.loss_win else None,
+                opts=dict(
+                    legend=["Loss", "Avg. loss"],
+                    xlabel="Step",
+                    ylabel="Loss",
+                    title="Loss",
+                )
             )
-        )
-        self.lr_win = self.vis.line(
-            [lr],
-            [step],
-            win=self.lr_win,
-            update="append" if self.lr_win else None,
-            opts=dict(
-                xlabel="Step",
-                ylabel="Learning rate",
-                ytype="log",
-                title="Learning rate"
+            self.eer_win = self.vis.line(
+                [[eer, self.eer_exp]],
+                [[step, step]],
+                win=self.eer_win,
+                update="append" if self.eer_win else None,
+                opts=dict(
+                    legend=["EER", "Avg. EER"],
+                    xlabel="Step",
+                    ylabel="EER",
+                    title="Equal error rate"
+                )
             )
-        )
+            self.lr_win = self.vis.line(
+                [lr],
+                [step],
+                win=self.lr_win,
+                update="append" if self.lr_win else None,
+                opts=dict(
+                    xlabel="Step",
+                    ylabel="Learning rate",
+                    ytype="log",
+                    title="Learning rate"
+                )
+            )
         
         now = clock()
-        if self.last_step != -1 and self.implementation_win is not None:
-            time_per_step = (now - self.last_update_timestamp) / (step - self.last_step)
-            if self.mean_time_per_step == -1:
-                self.mean_time_per_step = time_per_step
-            else:
-                self.mean_time_per_step = self.mean_time_per_step * 0.9 + time_per_step * 0.1
+        time_per_step = (now - self.last_update_timestamp)
+        self.last_update_timestamp = now
+        if self.mean_time_per_step == -1:
+            self.mean_time_per_step = time_per_step
+        else:
+            self.mean_time_per_step = self.mean_time_per_step * 0.9 + time_per_step * 0.1
+            
+        if not self.disabled and self.implementation_win is not None:
             time_string = "<b>Mean time per step</b>: %dms" % int(1000 * self.mean_time_per_step)
             time_string += "<br><b>Last step time</b>: %dms" % int(1000 * time_per_step)
             self.vis.text(
@@ -140,13 +152,11 @@ class Visualizations:
                 win=self.implementation_win,
                 opts={"title": "Training implementation"},
             )
-            print("Step %6d   Loss: %.4f   EER: %.4f   LR: %g   Mean step time: %5dms   "
-                  "Last step time: %5dms" %
-                  (step, self.loss_exp, self.eer_exp, lr, int(1000 * self.mean_time_per_step),
-                   int(1000 * time_per_step)))
-            
-        self.last_step = step
-        self.last_update_timestamp = now
+
+        print("Step %6d   Loss: %.4f   EER: %.4f   LR: %g   Mean step time: %5dms   "
+              "Last step time: %5dms" %
+              (step, self.loss_exp, self.eer_exp, lr, int(1000 * self.mean_time_per_step),
+               int(1000 * time_per_step)))
         
     def draw_projections(self, embeds, utterances_per_speaker, step, out_fpath=None,
                          max_speakers=10):
@@ -162,13 +172,13 @@ class Visualizations:
         plt.scatter(projected[:, 0], projected[:, 1], c=colors)
         plt.gca().set_aspect("equal", "datalim")
         plt.title("UMAP projection (step %d)" % step)
-        self.projection_win = self.vis.matplot(plt, win=self.projection_win)
+        if not self.disabled:
+            self.projection_win = self.vis.matplot(plt, win=self.projection_win)
         if out_fpath is not None:
             plt.savefig(out_fpath)
         plt.clf()
         
     def save(self):
-        self.vis.save([self.env_name])
+        if not self.disabled:
+            self.vis.save([self.env_name])
         
-    def draw_speaker_matrix(self, speaker_batch):
-        pass

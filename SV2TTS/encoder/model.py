@@ -1,3 +1,5 @@
+from encoder.params_model import *
+from encoder.params_data import *
 from scipy.interpolate import interp1d
 from sklearn.metrics import roc_curve
 from torch.nn.utils import clip_grad_norm_
@@ -5,13 +7,12 @@ from scipy.optimize import brentq
 from torch import nn
 import numpy as np
 import torch
-from encoder.params_model import *
-from encoder.params_data import *
 
 
 class SpeakerEncoder(nn.Module):
-    def __init__(self, device):
+    def __init__(self, device, loss_device):
         super().__init__()
+        self.loss_device = loss_device
         
         # Network defition
         self.lstm = nn.LSTM(input_size=mel_n_channels,
@@ -23,11 +24,11 @@ class SpeakerEncoder(nn.Module):
         self.relu = torch.nn.ReLU().to(device)
         
         # Cosine similarity scaling (with fixed initial parameter values)
-        self.similarity_weight = nn.Parameter(torch.tensor([10.]))
-        self.similarity_bias = nn.Parameter(torch.tensor([-5.]))
+        self.similarity_weight = nn.Parameter(torch.tensor([10.])).to(loss_device)
+        self.similarity_bias = nn.Parameter(torch.tensor([-5.])).to(loss_device)
 
         # Loss
-        self.loss_fn = nn.CrossEntropyLoss()
+        self.loss_fn = nn.CrossEntropyLoss().to(loss_device)
         
     def do_gradient_ops(self):
         # Gradient scale
@@ -67,10 +68,6 @@ class SpeakerEncoder(nn.Module):
         utterances_per_speaker, embedding_size)
         :return: the loss and the EER for this batch of embeddings.
         """
-        # Computation is significantly faster on the CPU
-        if embeds.device != torch.device("cpu"):
-            embeds = embeds.cpu()
-
         speakers_per_batch, utterances_per_speaker = embeds.shape[:2]
         
         # Inclusive centroids (1 per speaker). Cloning is needed for reverse differentiation
@@ -83,7 +80,8 @@ class SpeakerEncoder(nn.Module):
         centroids_excl = centroids_excl.clone() / torch.norm(centroids_excl, dim=2, keepdim=True)
                          
         # Similarity matrix
-        sim_matrix = torch.zeros(speakers_per_batch * utterances_per_speaker, speakers_per_batch)
+        sim_matrix = torch.zeros(speakers_per_batch * utterances_per_speaker, 
+                                 speakers_per_batch).to(self.loss_device)
         for j in range(speakers_per_batch):
             for i in range(utterances_per_speaker):
                 ji = j * utterances_per_speaker + i
@@ -95,13 +93,14 @@ class SpeakerEncoder(nn.Module):
 
         # Loss
         ground_truth = np.repeat(np.arange(speakers_per_batch), utterances_per_speaker)
-        loss = self.loss_fn(sim_matrix, torch.from_numpy(ground_truth).long())
+        target = torch.from_numpy(ground_truth).long().to(self.loss_device)
+        loss = self.loss_fn(sim_matrix, target)
         
         # EER (not backpropagated)
         with torch.no_grad():
             inv_argmax = lambda i: np.eye(1, speakers_per_batch, i, dtype=np.int)[0]
             labels = np.array([inv_argmax(i) for i in ground_truth])
-            preds = sim_matrix.detach().numpy()
+            preds = sim_matrix.detach().cpu().numpy()
 
             # Snippet from https://yangcha.github.io/EER-ROC/
             fpr, tpr, thresholds = roc_curve(labels.flatten(), preds.flatten())
