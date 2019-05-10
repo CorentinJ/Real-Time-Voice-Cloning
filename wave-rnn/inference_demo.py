@@ -4,6 +4,7 @@ from vocoder import inference
 from vocoder import audio
 import numpy as np
 from vocoder.params import print_params, model_name, use_mu_law
+import torch
 
 print_params()
 
@@ -35,3 +36,4 @@ for i in sorted(np.random.choice(len(dataset), n_samples)):
     audio.save_wav(out_pred_fpath, wav_pred)
     audio.save_wav(out_gt_fpath, wav_gt)
     print('')
+    

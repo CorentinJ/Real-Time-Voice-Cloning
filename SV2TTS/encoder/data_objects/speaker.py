@@ -32,6 +32,9 @@ class Speaker:
         """
         if self.utterances is None:
             self._load_utterances()
-        
+
         utterances = self.utterance_cycler.sample(count)
-        return [(u,) + u.random_partial(n_frames) for u in utterances]
+
+        a = [(u,) + u.random_partial(n_frames) for u in utterances]
+
+        return a

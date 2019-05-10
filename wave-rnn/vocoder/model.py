@@ -104,6 +104,24 @@ class WaveRNN(nn.Module):
         self.fc1 = nn.Linear(rnn_dims + self.aux_dims, fc_dims)
         self.fc2 = nn.Linear(fc_dims + self.aux_dims, fc_dims)
         self.fc3 = nn.Linear(fc_dims, self.n_classes)
+        
+    # def a(self):
+    #     # self.It = self.I.weight.transpose(0, 1)
+    #     # self.Itb = self.I.bias
+    #     # self.fc1t = self.fc1.weight.transpose(0, 1)
+    #     # self.fc1tb = self.fc1.bias
+    #     # self.fc2t = self.fc2.weight.transpose(0, 1)
+    #     # self.fc2tb = self.fc2.bias
+    #     # self.fc3t = self.fc3.weight.transpose(0, 1)
+    #     # self.fc3tb = self.fc3.bias
+    #     self.It = torch.sparse.FloatTensor(*self.I.weight.shape).cuda()
+    #     self.Itb = torch.sparse.FloatTensor(*self.I.bias.shape).cuda()
+    #     self.fc1t = self.fc1.weight.transpose(0, 1)
+    #     self.fc1tb = self.fc1.bias
+    #     self.fc2t = self.fc2.weight.transpose(0, 1)
+    #     self.fc2tb = self.fc2.bias
+    #     self.fc3t = self.fc3.weight.transpose(0, 1)
+    #     self.fc3tb = self.fc3.bias
     
     def forward(self, x, mels):
         bsize = x.size(0)
@@ -152,7 +170,7 @@ class WaveRNN(nn.Module):
                 aux = self.fold_with_overlap(aux, target, overlap)
             
             b_size, seq_len, _ = mels.size()
-            
+
             h1 = torch.zeros(b_size, self.rnn_dims).cuda()
             h2 = torch.zeros(b_size, self.rnn_dims).cuda()
             x = torch.zeros(b_size, 1).cuda()
@@ -166,25 +184,29 @@ class WaveRNN(nn.Module):
                 a1_t, a2_t, a3_t, a4_t = (a[:, i, :] for a in aux_split)
                 
                 x = torch.cat([x, m_t, a1_t], dim=1)
+                # x = torch.sparse.addmm(self.Itb, x, self.It)
                 x = self.I(x)
                 h1 = rnn1(x, h1)
-                
+
                 x = x + h1
                 inp = torch.cat([x, a2_t], dim=1)
                 h2 = rnn2(inp, h2)
-                
+
                 x = x + h2
                 x = torch.cat([x, a3_t], dim=1)
+                # x = F.relu(torch.addmm(self.fc1tb, x, self.fc1t))
                 x = F.relu(self.fc1(x))
-                
+
                 x = torch.cat([x, a4_t], dim=1)
+                # x = F.relu(torch.addmm(self.fc2tb, x, self.fc2t))
                 x = F.relu(self.fc2(x))
-                
+
+                # logits = torch.addmm(self.fc3tb, x, self.fc3t)
                 logits = self.fc3(x)
                 posterior = F.softmax(logits, dim=1)
                 distrib = torch.distributions.Categorical(posterior)
 
-                sample = 2 * distrib.sample().float() / (self.n_classes - 1.) - 1.
+                sample = (2. / (self.n_classes - 1)) * distrib.sample().float()  - 1.
                 output.append(sample)
                 x = sample.unsqueeze(-1)
                 

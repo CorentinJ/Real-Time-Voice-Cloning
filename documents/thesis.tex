@@ -1,17 +1,16 @@
-\documentclass[a4paper, oneside]{article}
+\documentclass[a4paper, oneside, 12pt, english]{article}
+\usepackage{geometry}
+\geometry{
+	a4paper,
+	total={150mm,227mm},
+	left=30mm,
+	top=35mm,
+}
 \usepackage{array}
-\usepackage{shortvrb}
-\usepackage{listings}
-\usepackage{fullpage}
 \usepackage{enumerate}
 \usepackage{graphicx}
 \usepackage{url}
-\usepackage{indentfirst}
-\usepackage{eurosym}
-\usepackage{listings}
 \usepackage{color}
-\usepackage{fancybox}
-\usepackage{ulem}
 \usepackage{wrapfig}
 \usepackage{systeme}
 \usepackage{tabularx}
@@ -31,7 +30,7 @@
 		
 	\HRule \\[0.5cm]
 	{ \huge \bfseries Automatic Multispeaker Voice Cloning}\\[0.2cm]
-	\HRule \\[3cm]
+	\HRule \\[2cm]
 
 	\begin{minipage}{0.4\textwidth}
 		\begin{flushleft} \Large
@@ -47,7 +46,7 @@
 		\end{flushright}
 	\end{minipage}\\[4cm]
 	
-	{\LARGE Academic year 2018 - 2019}\\[2cm]
+	{\LARGE Academic year 2018 - 2019}\\[1cm]
 	
 	\includegraphics{images/uliege_logo.jpg}\\[1.25cm]
 	
@@ -58,36 +57,26 @@
 
 \setcounter{page}{2}
 
-\color{red}
-Possibly, start with a TTS lexicon with some definitions. Meanwhile, I'll make a list of TTS-specific words that may be worth explaining:\\
-coarticulation\\
-linguistic context\\
-spectral envelope\\
-fundamental frequency\\
-contour (a way in which something varies especially the pitch of music or the pattern of tones in an utterance.)\\
-supra-segmental\\
-grapheme
-\color{black}
+%\color{red}
+%Possibly, start with a TTS lexicon with some definitions. Meanwhile, I'll make a list of TTS-specific words that may be worth explaining:\\
+%coarticulation\\
+%linguistic context\\
+%spectral envelope\\
+%fundamental frequency\\
+%contour (a way in which something varies especially the pitch of music or the pattern of tones in an utterance.)\\
+%supra-segmental\\
+%grapheme
+%\color{black}
+%\clearpage
+
+\section*{Abstract}
+Recent advances in deep learning have shown impressive results in the domain of text-to-speech. To this end, a deep neural network is usually trained using a corpus of several hours of professionally recorded speech from a single speaker. Giving a new voice to such a model is highly expensive, as it requires recording a new dataset and retraining the model. A recent research introduced a three-stage pipeline that allows to clone a voice unseen during training from only a few seconds of reference speech, and without retraining the model. The authors share impressively natural-sounding results, but provide no implementation. We reproduce this framework and open-source the first public implementation of it. We adapt the framework with a newer vocoder model, so as to make it run in real-time.
 \clearpage
 
-\section{Abstract}
-We present our implementation of a multispeaker text-to-speech model that performs voice cloning in real time. This work is largely based on \citep{SV2TTS}, an offline framework for multispeaker voice cloning. Our contributions are as follows:
-\begin{itemize}
-	\item Building the first (to our knowledge) system able to clone in real-time a high quality voice with good fidelity using only a few seconds of reference speech. \color{red} Let's hope I won't have to remove this! \color{black}
-	\item Reproducing and open-sourcing the first public implementation of \citep{SV2TTS}.
-	\item Adapting this framework to run in real time.
-	\item Creating a software that integrates this model to clone multiple speakers in a conversation.
-\end{itemize}
-
-\color{red}
-- propose improvements?
-
-- transfer across languages?
-\color{black}
-
-\noindent Audio samples are available here \color{red} link to samples \color{black}.
 
 \section{Introduction}
+
+
 \subsection{Problem definition}
 We aim to develop a framework that, given an audio segment of speech, is able to infer a representation of the voice of the speaker and to generate speech from arbitrary text in that same voice. We also want to meet the following constraints:
 \begin{itemize}
@@ -113,7 +102,7 @@ Try to answer:
 
 
 \subsection{Statistical parametric speech synthesis}
-\color{red} Rewrite all of this and the SOTA to be muuuch shorter \color{black}
+\color{red} Rewrite all of this and the SOTA to be muuuch shorter. Explain how voice cloning came from normal TTS, how they relate. \color{black}
 Statistical parametric speech synthesis (SPSS) refers to a group of data-driven TTS synthesis methods that emerged in the late 1990s. In SPSS, the relation between features computed on the input text and output acoustic features is modeled by a statistical generative model (called the acoustic model). A complete SPSS framework thus also includes a pipeline to extract features from the text to synthesize as well as a system able to reconstruct an audio waveform from the acoustic features produced by the acoustic model (such a system is called a vocoder). Unlike the acoustic model, these two parts of the framework may be entirely engineered and make use of no statistical methods. If it is possible to condition parts of the framework in such a way that the characteristics of the generated voice are modified, then the framework is a multispeaker TTS synthesis system.
 
 The processing of text into features can be nearly inexistent as it can be very extensive. Speech is an intricate process that depends on a wide range of linguistic contexts. Providing these contexts greatly reduces the extent of the task to be learned by the acoustic model, but may require complex natural language processing (NLP) techniques or accuracy trade-offs, especially for rare or unknown words. Linguistic contexts are retrieved on different levels: utterance, phoneme, syllable, word and phrase. For each of those elements, their neighbouring elements of the same level are usually considered, as well as the elements lower in the hierarchy it comprises. For example, a given frame will contain a word, the two previous words, the two following words and the syllables contained in all those words. The position of each element with regard to its parent element can be included (e.g. fifth word in a sentence), as well as grammatical information such as part of speech. For syllables, the lexical stress and accent can be predicted by a statistical model such as a decision tree. For prosody, ToBI \citep{TOBI} is often used. Linguistic contexts are often represented and concatenated into a single vector in order to be exploitable by statistical models. Categorical features are encoded using one-hot representations. It is common for the resulting vector to contain hundreds of values.
@@ -229,7 +218,7 @@ and F0. This has the advantage of making the framework easily transferable to ne
 Skipping the Deep Voice 2 \& 3papers. I'll see later whether or not I should include them
 \color{black}
 
-Published approximately at the same time, Tacotron \citep{Tacotron1} is a sequence-to-sequence model that produces a spectrogram from a sequence of characters alone, further reducing the need for domain expertise. An audio waveform can be estimated from the spectrogram using the Griffin-Lin algorithm. Tacotron is also built fully with neural networks and is trained in an end-to-end fashion. It uses an encoder-decoder architecture where, at each step, the decoder operates on a weighted sum of the encoder outputs. This mechanism described in \citep{Attention} lets the network decide which steps of the input sequence are important with respect to each steps of the output sequence. Tacotron achieves a MOS of 3.85 on a US English dataset, which is more than the 3.69 score obtained in the parametric approach of \citep{LSTM-RNN} but less than the 4.09 score obtained by the concatenative approach of \citep{ConcatenativeGoogle}. The authors mention that Tacotron is merely a step towards a better framework. By the end of 2017, Tacotron 2 is published \citep{Tacotron2}. The architecture of Tacotron 2 remains that of an encoder-decoder with attention although several changes to the types of layers are made. The main difference with Tacotron is the addition of a modified WaveNet for vocoder. On the same dataset, Tacotron 2 achieves a MOS of 4.53 compared to 4.58 for human speech (the difference is not statistically significant), achieving the all-time highest MOS. In a preference study, Tacotron 2 was found to be only slightly less preferred on average than ground truth samples. The ratings from that study are shows in figure 
+Published approximately at the same time, Tacotron \citep{Tacotron1} is a sequence-to-sequence model that produces a spectrogram from a sequence of characters alone, further reducing the need for domain expertise. An audio waveform can be estimated from the spectrogram using the Griffin-Lin algorithm. Tacotron is also built fully with neural networks and is trained in an end-to-end fashion. It uses an encoder-decoder architecture where, at each step, the decoder operates on a weighted sum of the encoder outputs. This mechanism described in \citep{Attention} lets the network decide which steps of the input sequence are important with respect to each steps of the output sequence. Tacotron achieves a MOS of 3.85 on a US English dataset, which is more than the 3.69 score obtained in the parametric approach of \citep{LSTM-RNN} but less than the 4.09 score obtained by the concatenative approach of \citep{ConcatenativeGoogle}. The authors mention that Tacotron is merely a step towards a better framework. By the end of 2017, Tacotron 2 is published \citep{Tacotron2}. The architecture of Tacotron 2 remains that of an encoder-decoder with attention although several changes to the types of layers are made. The main difference with Tacotron is the addition of a modified WaveNet for vocoder. On the same dataset, Tacotron 2 achieves a MOS of 4.53 compared to 4.58 for human speech (the difference is not statistically significant), achieving the all-time highest MOS. In a preference study, Tacotron 2 was found to be only slightly less preferred on average than ground truth samples. The ratings from that study are shown in figure 
 
 \begin{figure}[h]
 	\centering
@@ -250,8 +239,42 @@ Link audio samples for everything where available
 \color{black}
 
 
+\section{Transfer Learning from Speaker Verification to Multispeaker Text-To-Speech Synthesis}
+To achieve our goal of real-time voice cloning, we reproduce \citep{SV2TTS} (referred as SV2TTS throughout this document). It describes an approach to multispeaker speech synthesis. A multispeaker speech synthesis framework is able to generate speech from text using different voices. This set of voices may be encoded into the model or be external to the model. In the first case, 
 
-\color{red}\color{black}
+\color{red}This should come earlier\color{black}
+
+The approach used in SV2TTS is to build three models that are trained separately:
+\begin{itemize}
+	\item A speaker encoder that derives an embedding from the short utterance of a single speaker. The embedding is a meaningful representation of the voice of the speaker, such that similar voices are close in latent space. This model is described in \citep{GE2E} (referred as GE2E throughout this document) and \citep{TE2E}.
+	\item A synthesizer that, conditioned on the embedding of a speaker, generates speech features from a given text. This model is the popular Tacotron 2 \citep{Tacotron2} without WaveNet. The generated features cannot trivially be converted to an audio waveform. 
+	\item A vocoder that infers an audio waveform from the intermediate features generated by the synthesizer. The authors used WaveNet \citep{WaveNet} as vocoder, effectively reusing the entire Tacotron 2 framework.
+\end{itemize}
+
+In the future, we will refer to these three models as respectively the encoder, the synthesizer and the vocoder. At inference time, the encoder is fed a reference utterance of the speaker to clone. It generates an embedding that is fed to the synthesizer, along with a selected text to generate. Finally, the vocoder takes the output of the synthesizer to generate the speech waveform. 
+
+\begin{figure}[t]
+	\centering
+	\caption{Model overview.  Each of the three components are trained independently.}
+	\label{fig.model_overview}
+\end{figure}
+
+
+
+Note that all models are interchangeable provided that they perform the same task. In particular, vanilla WaveNet is extremely slow for inference. Several later papers brought improvements on that aspect to bring the generation near real-time or faster than real-time, e.g. \citep{ParallelWaveNet}, \citep{FastWaveNet}. Note that in this context, real-time is achieved when the generation time is shorter than or equal to the duration of the generated audio. In our implementation, the vocoder used is based on WaveRNN \citep{WaveRNN}.
+
+
+
+
+
+\color{red}
+- audio samples \\
+encoder (or any):- a word about digital audio  \\
+encoder: - meaning of the paper title  \\
+synth: - the need of intermediate audio features  \\
+synth: - advantages of conditioning on embedding rather than \\
+\color{black}
+
 
 \clearpage
 \bibliographystyle{unsrtnat}

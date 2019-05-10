@@ -1,12 +1,13 @@
 import numpy as np
 
+
 class Utterance:
     def __init__(self, frames_fpath, wave_fpath):
         self.frames_fpath = frames_fpath
         self.wave_fpath = wave_fpath
         
     def get_frames(self):
-        return np.load(self.frames_fpath) 
+        return np.load(self.frames_fpath)
 
     def random_partial(self, n_frames):
         """

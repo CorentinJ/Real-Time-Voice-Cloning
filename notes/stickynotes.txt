@@ -27,6 +27,34 @@ Generalized End-To-End Loss For Speaker Verification
 - (slides) Interpretation of EER
 - Thank mr. Louppe, the authors of GE2E and Joeri
 
+
+------ Structure ------
+- Abstract (1/3 page): very briefly talk about the setting, the current SOTA and the goal to achieve
+- Introduction (1 page): go over the abstract and bring more details, pose the central problem that will guide the rest of the thesis
+- State of the art (3-4 pages)
+  - In text to speech (2-3 pages)(cut about half of what I've written to make it a less tedious read)
+  - In voice cloning (1-2 pages)
+- SV2TTS (5-7 pages): present their framework without talking about my implementation. Present the parts of the framework without getting too technical, but rather explain how they work together. Talk about the surrounding context of their work: impressive results, no public implementation yet, one of the many papers on TTS from Google (mention the kind of applications they have for it).
+- My work (~20 pages): 
+    - Encoder (8-10 pages, I'll talk more about it, since I reimplemented it from scratch.)
+        - GE2E
+        - Implementation
+        - Embedding space
+        - Function as a speaker diarizer
+    - Synthesizer (5-8 pages)
+        - Tacotron 2
+        - Convergence
+        - Dataset
+    - Vocoder (3-4 pages)
+        - WaveRNN
+        - Pruning
+        - Speed
+    - Toolbox? (3 pages)
+    - Integration as an application? (2 pages)
+- Conclusion (1/2 page)
+
+
+
 ------ Notes ------
 https://stats.stackexchange.com/questions/395345/computing-and-estimating-the-eer-on-an-entire-dataset
 

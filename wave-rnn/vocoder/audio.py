@@ -7,8 +7,7 @@ def load_wav(fpath):
     return librosa.load(fpath, sr=sample_rate)[0]
 
 def save_wav(path, wav):
-    wav *= 32767 / max(0.01, np.max(np.abs(wav)))
-    wavfile.write(path, sample_rate, wav.astype(np.int16))
+    wavfile.write(path, sample_rate, (wav * 32767).astype(np.int16))
 
 def normalize_mel(mel):
     """

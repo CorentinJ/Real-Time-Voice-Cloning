@@ -169,7 +169,7 @@ class Model(nn.Module):
 
 in_size = 128
 model_size = 512
-start_prune = 10
+start_prune = 1000
 prune_steps = 20000
 sparsity_target = 0.9375
 model = Model(in_size, model_size, start_prune, prune_steps, sparsity_target)
