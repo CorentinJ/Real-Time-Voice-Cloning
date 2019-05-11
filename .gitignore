@@ -12,6 +12,7 @@
 *.blg
 *.bbl
 *.bcf
+*.toc
 _old
 SV2TTS/encoder/saved_models/*_backups
 SV2TTS/synthesizer/saved_models/*
