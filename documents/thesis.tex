@@ -2,9 +2,9 @@
 \usepackage{geometry}
 \geometry{
 	a4paper,
-	total={154mm,227mm},
+	total={154mm,232mm},
 	left=28mm,
-	top=35mm,
+	top=32mm,
 }
 \setlength{\parskip}{0.85em}
 \setlength{\parindent}{2.6em}
@@ -82,41 +82,29 @@ Recent advances in deep learning have shown impressive results in the domain of 
 % What is now possible with deep learning in TTS
 Deep learning models have become predominant in many fields of applied machine learning. Text-to-speech (TTS), the process of synthesizing artificial speech from a text prompt, is no exception. Deep models that would produce more natural-sounding speech than the traditional concatenative TTS approaches begun appearing in 2016. Much of the research focus has been since gathered around making these models more efficient, more natural, or training them in an end-to-end fashion. Inference has come from being hundreds of times slower than real-time on GPU \citep{WaveNet} to possible in real-time on a mobile CPU \citep{EfficientNeuralAudioSynthesis}. As for the quality of the generated speech, \citet{Tacotron2} demonstrate near human naturalness. Interestingly, speech naturalness is best rated with subjective metrics; and comparison with actual human speech leads to the conclusion that there might be such a thing as "speech more natural than human speech". In fact, \citet{MOSNaturalness} argue that the human naturalness threshold has already been crossed.
 
-% The state of things in voice cloning
+% The state of things in TTS
 Datasets of professionally recorded speech are a scarce resource. Synthesizing a natural voice with a correct pronunciation, lively intonation and a minimum background of noise requires training data with the same qualities. Furthermore, data efficiency often remains one of the shortcomings of deep learning. Training a common text-to-speech model such as Tacotron \citep{Tacotron1} typically requires tens of hours of speech. %It is thus no surprise that there seems to be a theme in speech-related applications of reproducing the voice of whomever is the current president of the United States. %-> kinda funny but not necessary
-Yet the ability of generating speech with any voice is attractive for a range of applications be they useful, merely a matter of customization, or mischievous. Research had led to frameworks for voice conversion and voice cloning. They differ in that voice conversion is a form of style transfer on a speech segment from a voice to another, whereas voice cloning consists in capturing the voice of a speaker to perform text-to-speech on arbitrary inputs. 
+Yet the ability of generating speech with any voice is attractive for a range of applications be they useful or merely a matter of customization. Research had led to frameworks for voice conversion and voice cloning. They differ in that voice conversion is a form of style transfer on a speech segment from a voice to another, whereas voice cloning consists in capturing the voice of a speaker to perform text-to-speech on arbitrary inputs. 
 
-% What we want to achieve (problem definition, what is SV2TTS)
+% What voice cloning is about
 While the complete training of a single-speaker TTS model is technically a form of voice cloning, the interest rather lies in creating a fixed model that is able to incorporate newer voices with little data. The common approach is to condition a TTS model trained to generalize to new speakers on an embedding of the voice to clone~\citep{DeepVoice2, CloningFewSamples, SV2TTS}. The embedding is low-dimensional and derived by a speaker encoder model that takes reference speech as input. This approach is typically more data efficient than training a separate TTS model for each speaker, in addition to being orders of magnitude faster and less computationally expensive. Interestingly, there is a large discrepancy between the duration of reference speech needed to clone a voice among the different methods, ranging from half an hour per speaker to only a few seconds.
 
-% Our contributions
+% What we want to achieve
+Our objective is to achieve a powerful form of voice cloning. The resulting framework must be able to operate in a zero-shot setting, that is, for speakers unseen during training. It should incorporate a speaker's voice with only a few seconds of reference speech. These desired results are stated to be fulfilled by \citep{SV2TTS}. Their results are impressive\footnote{\url{https://google.github.io/tacotron/publications/speaker_adaptation/index.html}}, but not backed by any public implementation. We reproduce their framework and make our implementation open-source\footnote{\color{red} repo link}. In addition, we integrate the model of \citep{EfficientNeuralAudioSynthesis} in the framework to make it run in real-time, i.e. to generate speech in a time shorter or equal to the duration of the produced speech. \color{red} a word about our results \color{black}
+
+%Try to answer:
+%\begin{itemize}
+%	\item What is the goal of the application? What are its requirements, what is the setting, what kind of data are we going to use it on?
+%	\item What is zero-shot voice cloning (SV2TTS 2.4)? How does it fit in here (difference between an online and offline approach)?
+%	\item What are the particularities of our implementation (both model and datasets), what are its upsides and downsides (for example: requires huge datasets but fast inference)?
+%	\item What did we ultimately achieve? How good are our results?
+%\end{itemize}
+%
+%
+%\color{red} Update this section to reflect what was actually achieved and is presented in this document \color{black}
 
 
-
-
-\subsection{Problem definition}
-We aim to develop a framework that, given an audio segment of speech, is able to infer a representation of the voice of the speaker and to generate speech from arbitrary text in that same voice. We also want to meet the following constraints:
-\begin{itemize}
-	\item The framework should be able to operate in a zero-shot setting, that is, for speakers unseen during training.
-	\item It should operate in real-time:
-	\begin{itemize}
-		\item The speaker's voice should be incorporated after only a few seconds of speech.
-		\item The framework should be able to generate speech in a time shorter or equal to the duration of the produced speech.
-	\end{itemize}
-\end{itemize}
-
-Try to answer:
-\begin{itemize}
-	\item What is the goal of the application? What are its requirements, what is the setting, what kind of data are we going to use it on?
-	\item What is zero-shot voice cloning (SV2TTS 2.4)? How does it fit in here (difference between an online and offline approach)?
-	\item What are the particularities of our implementation (both model and datasets), what are its upsides and downsides (for example: requires huge datasets but fast inference)?
-	\item What did we ultimately achieve? How good are our results?
-\end{itemize}
-
-
-\color{red} Update this section to reflect what was actually achieved and is presented in this document \color{black}
-
-
+\section{State of the art}
 
 \subsection{Statistical parametric speech synthesis}
 \color{red} Rewrite all of this and the SOTA to be muuuch shorter. Explain how voice cloning came from normal TTS, how they relate. \color{black}
@@ -125,8 +113,6 @@ Statistical parametric speech synthesis (SPSS) refers to a group of data-driven 
 The processing of text into features can be nearly inexistent as it can be very extensive. Speech is an intricate process that depends on a wide range of linguistic contexts. Providing these contexts greatly reduces the extent of the task to be learned by the acoustic model, but may require complex natural language processing (NLP) techniques or accuracy trade-offs, especially for rare or unknown words. Linguistic contexts are retrieved on different levels: utterance, phoneme, syllable, word and phrase. For each of those elements, their neighbouring elements of the same level are usually considered, as well as the elements lower in the hierarchy it comprises. For example, a given frame will contain a word, the two previous words, the two following words and the syllables contained in all those words. The position of each element with regard to its parent element can be included (e.g. fifth word in a sentence), as well as grammatical information such as part of speech. For syllables, the lexical stress and accent can be predicted by a statistical model such as a decision tree. For prosody, ToBI \citep{TOBI} is often used. Linguistic contexts are often represented and concatenated into a single vector in order to be exploitable by statistical models. Categorical features are encoded using one-hot representations. It is common for the resulting vector to contain hundreds of values.
 
 \color{red}Talk about evaluation metrics (mainly MOS)? 50 features? Arpabet? Remove last segment on linguistic contexts? $\rightarrow$ rewrite and summarize methods over the years\color{black}
-
-\section{State of the art}
 
 \subsection{Text-to-speech systems}
 Previous state of the art in SPSS includes hidden Markov models (HMM) based speech synthesis \citep{Tokuda-2013}. The speech generation pipeline is laid out in figure \ref{hmm_spss_framework}. In this framework, the acoustic model is a set of HMMs. The input features are rich linguistic contexts. Ideally, one would train an HMM for each possible context; but as the number of contexts increases exponentially with the number of factors considered, it is not practical to do so. Indeed, not every context will be found in a typical dataset and the training set would then have to be partitioned over the different contexts, which is data inefficient. Instead, contexts are clustered using decision trees and an HMM is learned for each cluster \citep{HMMTTS}. Note that this does not solve entirely the training set fragmentation problem. The HMMs are trained to produce a distribution over mel-frequency cepstral coefficients (MFCC) with energy (called static features), their delta and delta-delta coefficients (called dynamic features) as well as a binary flag that indicates which parts of the audio should contain voice. This is shown in figure \ref{mlpg_features}. A new sequence of static features is retrieved from these static and dynamic features using the maximum likelihood parameter generation (MLPG) algorithm \citep{Tokuda-2000}. These static features are then fed through the MLSA vocoder\citep{MLSA}. It is possible to modify the voice generated by conditioning on a speaker or tuning the generated speech parameters with adaptation or interpolation techniques \citep{HMMSpeakerInterpolation} \color{red} elaborate a bit on these techniques?\color{black}, making HMM-based speech synthesis a multispeaker TTS system. \color{red} Compare with concatenative see \citep{SPSSDNN} and ieeexplore.ieee.org/document/541110.\color{black}
