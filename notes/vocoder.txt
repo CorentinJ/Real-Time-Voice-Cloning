@@ -10,8 +10,7 @@ TODO:
 - Pruning
     - Check if there is any significant speedup with 100% sparsity
 - Begin merging the three projects:
-    ? Quid of LibriSpeech vs LibriTTS
-        - Saving wavs in the synthesizer preprocessor
+    - Fix saving wavs in the synthesizer preprocessor
     - Single inference demo (without GUI)
     - Single big inference tool (with GUI)
     - Single config file (or args???? -> could be both: default to config values)
