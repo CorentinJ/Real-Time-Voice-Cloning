@@ -1,8 +1,9 @@
+PyQt4
 webrtcvad
 librosa>=0.5.1
 matplotlib>=2.0.2
 numpy>=1.14.0
 scipy>=1.0.0
-tqdm>=4.11.2
-sounddevice>=0.3.10
+tqdm
+sounddevice
 umap-learn

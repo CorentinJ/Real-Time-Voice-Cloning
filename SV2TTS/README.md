@@ -23,3 +23,4 @@ Feel free to adapt the code to your needs. Other interesting datasets:
 - You need visdom to train the encoder. Maybe you don't want fancy visualizations, so in that case I suggest to simply remove every line that uses `self.vis` in encoder/ui/visualizations.py.
 - The training of the encoder uses a very poor exponential mean to display the mean loss/EER. Wait a few hundred steps until it makes sense (or just read the plot).
 - No batch size on the training of the encoder
+- The sampling rate is forced to be the same between the encoder and the synthesizer/vocoder if you use the toolbox.
