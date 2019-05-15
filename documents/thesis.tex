@@ -80,7 +80,7 @@ Recent advances in deep learning have shown impressive results in the domain of 
 
 \section{Introduction}
 % What is now possible with deep learning in TTS
-Deep learning models have become predominant in many fields of applied machine learning. Text-to-speech (TTS), the process of synthesizing artificial speech from a text prompt, is no exception. Deep models that would produce more natural-sounding speech than the traditional concatenative approaches begun appearing in 2016. Much of the research focus has been since gathered around making these deep models more efficient, more natural, or training them in an end-to-end fashion. Inference has come from being hundreds of times slower than real-time on GPU \citep{WaveNet} to possible in real-time on a mobile CPU \citep{EfficientNeuralAudioSynthesis}. As for the quality of the generated speech, \citet{Tacotron2} demonstrate near human naturalness. Interestingly, speech naturalness is best rated with subjective metrics; and comparison with actual human speech leads to the conclusion that there might be such a thing as "speech more natural than human speech". In fact, \citet{MOSNaturalness} argue that the human naturalness threshold has already been crossed.
+Deep learning models have become predominant in many fields of applied machine learning. Text-to-speech (TTS), the process of synthesizing artificial speech from a text prompt, is no exception. Deep models that would produce more natural-sounding speech than the traditional concatenative approaches begun appearing in 2016. Much of the research focus has been since gathered around making these deep models more efficient, more natural, or training them in an end-to-end fashion. Inference has come from being hundreds of times slower than real-time on GPU \citep{WaveNet} to possible in real-time on a mobile CPU \citep{EfficientNeuralAudioSynthesis}. As for the quality of the generated speech, \citet{Tacotron2} demonstrate near human naturalness. Interestingly, speech naturalness is best rated with subjective metrics; and comparison with actual human speech leads to the conclusion that there might be such a thing as "speech more natural than human speech". In fact, some argue that the human naturalness threshold has already been crossed \citep{MOSNaturalness}.
 
 % The state of things in TTS
 Datasets of professionally recorded speech are a scarce resource. Synthesizing a natural voice with a correct pronunciation, lively intonation and a minimum of background noise requires training data with the same qualities. Furthermore, data efficiency often remains one of the shortcomings of deep learning. Training a common text-to-speech model such as Tacotron \citep{Tacotron1} typically requires tens of hours of speech. %It is thus no surprise that there seems to be a theme in speech-related applications of reproducing the voice of whomever is the current president of the United States. %-> kinda funny but not necessary
@@ -116,109 +116,69 @@ A common feature extraction technique is to build frames that will integrate sur
 % Spectrogram vs waveform
 One could wonder why the acoustic model does not directly predict an audio waveform. Audio happens to be difficult to model: it is a particularly dense domain and audio signals are typically highly nonlinear. A representation that brings out features in a more tractable manner is the time-frequency domain. Spectrograms are much less dense than their waveform counterpart and also have the benefit of being two-dimensional, thus allowing models to better leverage spatial connectivity. Unfortunately, a spectrogram is a lossy representation of the waveform that discards the phase. There is no unique inverse transformation function, and deriving one that produces natural-sounding results is not trivial. When referring to speech, this generative function is called a vocoder. The choice of the vocoder is an important factor in determining the quality of the generated audio.
 
-\color{red}Talk about evaluation metrics (mainly MOS)?\color{black}
-
-\section{Evolution of the state of the art}
-\subsection{In text-to-speech methods}
-The state of the art in SPSS has for long remained a hidden Markov models (HMM) based framework. \citep{Tokuda-2013}. This approach, laid out in figure \ref{hmm_spss_framework}, consists in clustering linguistic features with a decision tree and to train a HMM per cluster \citep{HMMTTS}. The HMMs are tasked to produce a distribution over
+\color{red}Talk about evaluation metrics (MOS and A/B testing)?\color{black}
 
 
-The HMMs are trained to produce a distribution over mel-frequency cepstral coefficients (MFCC) with energy (called static features), their delta and delta-delta coefficients (called dynamic features) as well as a binary flag that indicates which parts of the audio should contain voice. This is shown in figure \ref{mlpg_features}. A new sequence of static features is retrieved from these static and dynamic features using the maximum likelihood parameter generation (MLPG) algorithm \citep{Tokuda-2000}. These static features are then fed through the MLSA vocoder\citep{MLSA}. It is possible to modify the voice generated by conditioning on a speaker or tuning the generated speech parameters with adaptation or interpolation techniques \citep{HMMSpeakerInterpolation} \color{red} elaborate a bit on these techniques?\color{black}, making HMM-based speech synthesis a multispeaker TTS system.
-
--> note that still inferior to concat
+\subsection{Evolution of the state of the art in text-to-speech}
+The state of the art in SPSS has for long remained a hidden Markov model (HMM) based framework \citep{Tokuda-2013}. This approach, laid out in figure \ref{hmm_spss_framework}, consists in clustering the linguistic features extracted from the input text with a decision tree, and to train a HMM per cluster \citep{HMMTTS}. The HMMs are tasked to produce a distribution over spectrogram coefficients, their derivative, second derivative and a binary flag that indicates which parts of the generated audio should contain voice. With the maximum likelihood parameter generation algorithm (MLPG) \citep{Tokuda-2000}, spectrogram coefficients are sampled from this distribution and eventually fed to the MLSA vocoder \citep{MLSA}. It is possible to modify the voice generated by conditioning the HMMs on a speaker or tuning the generated speech parameters with adaptation or interpolation techniques \citep{HMMSpeakerInterpolation}. Note that, while this framework used to be state of the art for SPSS, it was still inferior in terms of the naturalness of the generated speech compared to the well-established concatenative approaches.
 
 \begin{figure}[h]
 	\centering
 	\begin{minipage}{.45\linewidth}
 		\centering
 		\includegraphics[width=\linewidth]{images/hmm_spss.png}
-		\captionof{figure}{The general HMM-based TTS synthesis approach.}
+		\captionof{figure}{The general HMM-based TTS pipeline.}
 		\label{hmm_spss_framework}
 	\end{minipage}
 	\hspace{.05\linewidth}
 	\begin{minipage}{.45\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{images/mlpg_features.png}
-		\captionof{figure}{Dynamic and static features produced by the HMMs. F0 is the fundamental frequency and V/UV is the voicing flag.}
-		\label{mlpg_features}
+		\begin{tabular}{| l | c |}
+			\hline
+			Method & MOS \\
+			\hline
+			HMM+MLPG & 3.08 ($\pm$0.12) \\
+			HMM+DNN & 2.86 ($\pm$0.12) \\
+			\textbf{DNN+MLPG} & \textbf{3.53 ($\pm$0.12}) \\
+			DNN+DNN & 3.17 ($\pm$0.12) \\
+			\hline
+		\end{tabular}
+		\captionof{table}{MOS of the different methods explored in \citep{Hashimoto-2015}. The first line is the HMM-based framework. For the second and fourth line, the MLPG algorithm is replaced by a fully-connected neural network.}
+		\label{hashimoto_results}
 	\end{minipage}
 \end{figure}
 
-Improvements to this framework were later brought by feed-forward deep neural networks (DNN), as a result of progress in both hardware and software. \citep{SPSSDNN} proposes to replace entirely the decision tree-clustered HMMs in favor of a DNN. They argue for better data efficiency as the training set is no longer fragmented in different clusters of contexts\color{red}, and for a more powerful model?\color{black}. They demonstrate improvements over the speech quality with a number of parameters similar to that of the HMM-based approach. Their best model is a DNN with 4 layers of 256 units using a sigmoid activation function. Subjects assessing the quality of the generated audio samples report that the DNN-based models produces speech that sounds less muffled than that of the HMM-based models. Later researches corroborate these findings \citep{OnTheTrainingAspects}. \citep{Hashimoto-2015} additionally studies the effect of replacing MLPG with another DNN. The combinations of HMM/DNN and MLPG/DNN give rise to four possible frameworks, the novel ones being HMM+DNN and DNN+DNN\footnote{Note that since the two networks are consecutive in the framework, they can be considered a single network.}, while HMM+MLPG and DNN+MLPG are the frameworks described respectively in \citep{Tokuda-2013} and \citep{SPSSDNN}. Each DNN they use is 3 layers deep with 1024 units using a sigmoid activation function. MOS results confirm that DNN+MLPG is significantly better than HMM+MLPG. The DNN+DNN approach performs as well as HMM+MLPG while HMM+DNN is worse. In another experiment, they introduce a DNN before and after MLPG. While both approaches yield a MOS similar to DNN+MLPG, neither are statistically significantly better. \color{red} make this part nicer to read or maybe just remove it? Quid of the MOS? Mention DMDN?\color{black}
+Improvements to this framework were later brought by feed-forward deep neural networks (DNN), as a result of progress in both hardware and software. \cite{SPSSDNN} proposes to replace entirely the decision tree-clustered HMMs in favor of a DNN. They argue for better data efficiency as the training set is no longer fragmented in different clusters of contexts. They demonstrate improvements over the speech quality with a number of parameters similar to that of the HMM-based approach. Later researches corroborate these findings \citep{OnTheTrainingAspects, Hashimoto-2015}. The MOS of different model combinations tried by \citep{Hashimoto-2015} are reported in Table \ref{hashimoto_results}
 
-%\begin{wraptable}{r}{5.5cm}
-%	\begin{tabular}{| l | c |}
-%		\hline
-%		Method & MOS \\
-%		\hline
-%		HMM+MLPG & 3.08 ($\pm$0.12) \\
-%		HMM+DNN & 2.86 ($\pm$0.12) \\
-%		\textbf{DNN+MLPG} & \textbf{3.53 ($\pm$0.12}) \\
-%		DNN+DNN & 3.17 ($\pm$0.12) \\
-%		\hline
-%	\end{tabular}
-%	\caption{MOS of the different methods explored in \citep{Hashimoto-2015}}
-%	\label{hashimoto_results}
-%\end{wraptable}
-
-\citep{BDLSTMTTS} supports that RNNs make natural acoustic models as they are able to learn a compact representation of complex and long-span functions, better so than shallow architectures such as the decision trees used in HMM-based TTS. Furthermore, the internal state of RNNs makes the mapping from an input frame to output acoustic features no longer deterministic, allowing for more variety in the synthesized audio. As RNNs are fit to generate temporally consistent series, the static features can directly be determined by the acoustic model, alleviating the need for dynamic features and MLPG. The authors present two RNNs: Hybrid\_A with three feed-forward layers followed by one bidirectional (BDLSTM) layer and Hybrid\_B with two feed-forward layers followed by two BDLSTM layers. They argue that deeper structures of BDLSTM would worsen the performance due to imprecise gradient computation. They compare these networks against the HMM and DNN based approaches described previously, using objective and subjective measures. The objective measures are compared with the ground truth: log spectral distance (LSD), voiced/unvoiced (V/UV) error rate and fundamental frequency (F0) distortion in root mean squared error (RMSE). The subjective measure is a preference test where participants must choose between two audio samples of different models and have the option to select neither. Results are shown in figures \ref{dblstm_objective} and \ref{dblstm_subjective}. DNN\_A is 6 layers deep with 512 units per layer while DNN\_B is 3 layers deep with 1024 units per layer. These two networks perform very similarly. Hybrid\_B systematically performs better than the other approaches.
-
-%3: Main advantage: long span and compact representation of complex functions. DTs are shallow. Not only memory but also internal hidden states which means non determinism wrt input states.
-%3: Because RNN good for sequences -> direct prediction of same static features without dynamic
-%4.1: Similar input features
-%4.1: Using LSP and not MFCC
-%4.1: Claim to be limited by depth
-%4.2: Preference score
+\citep{BDLSTMTTS} support that RNNs make natural acoustic models as they are able to learn a compact representation of complex and long-span functions. As RNNs are fit to generate temporally consistent series, the static features can directly be determined by the acoustic model, alleviating the need for dynamic features and MLPG. They compare networks of bidirectional LSTMs against the HMM and DNN based approaches described previously. Their A/B testing results are conclusive, we report them in figure \ref{dblstm_subjective}.
 
 \begin{figure}[h]
 	\centering
-	\begin{minipage}{.45\linewidth}
-		\centering
-		\includegraphics[width=\linewidth]{images/bdlstm_objective.png}
-		\captionof{figure}{Performance of the different frameworks evaluated on objective measures. In parentheses are the number of parameters of each acoustic model.}
-		\label{dblstm_objective}
-	\end{minipage}
-	\hspace{.05\linewidth}
-	\begin{minipage}{.45\linewidth}
-		\centering
-		\includegraphics[width=\linewidth]{images/bdlstm_subjective.png}
-		\captionof{figure}{Two by two comparisons of some of the frameworks in terms of preferences.}
-		\label{dblstm_subjective}
-	\end{minipage}
+	\includegraphics[width=0.6\linewidth]{images/bdlstm_subjective.png}
+	\caption{A/B testing of the models. Hybrid\_B is a network with fully-connected and bidirectional LSTM layers.}
+	\label{dblstm_subjective}
 \end{figure}
 
-Later, a substantial breakthrough in TTS is achieved with the coming of WaveNet \citep{WaveNet}. WaveNet is a deep convolutional neural network that, for a raw audio waveform, models the distribution of a single sample given all previous ones. It is thus possible to generate audio by predicting samples one at a time in an autoregressive fashion. WaveNet leverages stacks of one-dimensional dilated convolutions with a dilation factor increasing exponentially with the layer depth, which allows for a very large receptive field.
-% causal convolutions which ensure that only the samples of previous timesteps are used to generate the sample of a given timestep. (Do we really care?)
-The output is a categorical distribution (using a softmax layer) over sample values. For tractability reasons, the output signal is restricted to 256 values that correspond to a $\mu$-law quantization, which is invertible. The MOS resulting from one of the experiments suggests that there is no statistically significant degradation in the naturalness of speech quantized in this manner. The architecture of WaveNet comes with several non-trivial components, described in later sections of this document \color{red}link to the section\color{black}. On its own, a trained WaveNet generates sound alike the training data but without semantics. The network must be locally conditioned on linguistic contexts to achieve TTS synthesis. Furthermore, it allows for conditioning with respect to a vector constant at every timestep (global conditioning), which can be used to designate the speaker identity. The authors suggest that WaveNet is able to encode the embedding of several speakers seen in training with a shared internal representation. Speaker identities are given as a one-hot encoding. The audio generated by WaveNet requires no post-processing other than the inversion of the $\mu$-law. TTS with WaveNet does not exactly fit as an SPSS system considering that it does not produce clear intermediate acoustic features and instead serves as both a statistical model and a vocoder in a single pipeline. Performance scores are reported in Figure \ref{wavenet_results}. The parametric approach is an LSTM-based system while the other is an HMM-driven unit selection concatenative system (not detailed in this document). Notice how the results vary between US English and Mandarin Chinese, showing that TTS performance is not language agnostic. \color{red} recheck all the info on WaveNet later + F0??\color{black}
+The coming of WaveNet \citep{WaveNet} made a substantial breakthrough in TTS. WaveNet is a deep convolutional neural network that, for a raw audio waveform, models the distribution of a single sample given all previous ones. It is thus possible to directly generate audio by predicting samples one at a time in an autoregressive fashion. WaveNet leverages stacks of one-dimensional dilated convolutions with a dilation factor increasing exponentially with the layer depth, allowing for the very large receptive field and the strong nonlinearity needed to model raw audio. Conditioning the model on linguistic features is required to perform TTS. WaveNet acts thus both as an acoustic model and as a vocoder. Note that without the local conditioning, a trained WaveNet generates sound alike the training data but without structure or semantics (essentially babbling). 
+The authors compare WaveNet to an older parametric approach and to a concatenative approach, the results are reported in Figure \ref{wavenet_results}. The parametric approach is an LSTM-based system while the other is an HMM-driven unit selection concatenative system (not detailed in this document). Notice how the results vary between US English and Mandarin Chinese, showing that TTS performance is not language agnostic.
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=.7\linewidth]{images/wavenet_results_chart.png}
-	\caption{MOS of WaveNet's performance compared with a parametric and concatenative approach as well as with natural speech.}
+	\includegraphics[width=.75\linewidth]{images/wavenet_results_chart.png}
+	\caption{MOS of WaveNet's performance compared with a parametric and concatenative approach, as well as with natural speech.}
 	\label{wavenet_results}
 \end{figure}
 
-%1 SOTA TTS \\
-%2.1 Dilated causal convolutions \\
-%2.2 u-law \\
-%2.3 Gated activations - Relu  \\
-%2.4 Residual \\
-%2.5 Condition on speaker identity (one hot) + local conditioning \\
-%2.6 Context stack \\
-%3.1 All speakers embedded in WaveNet and sharing internal representation
-%Annex: Raw audio gen with no postprocessing \\
-%Annex DV: Type of features, direct sampling, white noise
 
-
-Deep Voice \citep{DeepVoice1} proposes a fully neural TTS framework that exploits WaveNet among other deep architectures. Deep Voice stands out by making use of only a few intermediate features: phonemes with stress annotations, phoneme durations,
-and F0. This has the advantage of making the framework easily transferable to new domains with little engineering effort as complex linguistic features need not be derived. The neural networks intervening in Deep Voice are: a grapheme-to-phoneme model that converts text to phonemes, a segmentation model that aligns a sequence of phonemes to an audio segment, a phoneme duration model that predicts the duration of each phoneme at generation time, a fundamental frequency model that predicts the V/UV flag with F0 values for voiced parts and finally, WaveNet which acts as an audio synthesis model. In all the works we presented previously, only the audio synthesis model was not manually engineered. While others have researched the use of neural networks for some of these components, Deep Voice is the first to simultaneously employ them all in a single framework. However, the grapheme-to-phoneme model is only used as a fallback for words not present in a phoneme dictionary. The roles and interactions of these components at training and inference time are shown in figure \ref{deep_voice_1_arch}. Deep Voice also improves on the inference time of WaveNet, with a speedup of up to 400. This allows for real-time or near real-time execution, with a tunable speed/quality trade-off. Deep Voice does not yield state of the art results but instead serves as groundwork for future researches. \color{red} discuss results \color{black}.
-
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=.8\linewidth]{images/deep_voice_1_arch.png}
-	\caption{The training (a) and inference (b) procedure of Deep Voice. On the left of the image are the inputs, on the right are the outputs. Note that the segmentation model is only used for training.}
-	\label{deep_voice_1_arch}
-\end{figure}
+%Deep Voice \citep{DeepVoice1} proposes a fully neural TTS framework that exploits WaveNet among other deep architectures. Deep Voice stands out by making use of only a few intermediate features: phonemes with stress annotations, phoneme durations,
+%and F0. This has the advantage of making the framework easily transferable to new domains with little engineering effort as complex linguistic features need not be derived. The neural networks intervening in Deep Voice are: a grapheme-to-phoneme model that converts text to phonemes, a segmentation model that aligns a sequence of phonemes to an audio segment, a phoneme duration model that predicts the duration of each phoneme at generation time, a fundamental frequency model that predicts the V/UV flag with F0 values for voiced parts and finally, WaveNet which acts as an audio synthesis model. In all the works we presented previously, only the audio synthesis model was not manually engineered. While others have researched the use of neural networks for some of these components, Deep Voice is the first to simultaneously employ them all in a single framework. However, the grapheme-to-phoneme model is only used as a fallback for words not present in a phoneme dictionary. The roles and interactions of these components at training and inference time are shown in figure \ref{deep_voice_1_arch}. Deep Voice also improves on the inference time of WaveNet, with a speedup of up to 400. This allows for real-time or near real-time execution, with a tunable speed/quality trade-off. Deep Voice does not yield state of the art results but instead serves as groundwork for future researches. \color{red} discuss results \color{black}.
+%
+%\begin{figure}[h]
+%	\centering
+%	\includegraphics[width=.8\linewidth]{images/deep_voice_1_arch.png}
+%	\caption{The training (a) and inference (b) procedure of Deep Voice. On the left of the image are the inputs, on the right are the outputs. Note that the segmentation model is only used for training.}
+%	\label{deep_voice_1_arch}
+%\end{figure}
 
 % Up to 400x speedup on WaveNet
 % Some previous research already use models to generate textual features
@@ -227,35 +187,28 @@ and F0. This has the advantage of making the framework easily transferable to ne
 % Near real-time (accuracy/speed tradeoff)
 % No diff when using original WaveNet
 
-\color{red}
-Skipping the Deep Voice 2 \& 3papers. I'll see later whether or not I should include them
-\color{black}
-
-Published approximately at the same time, Tacotron \citep{Tacotron1} is a sequence-to-sequence model that produces a spectrogram from a sequence of characters alone, further reducing the need for domain expertise. An audio waveform can be estimated from the spectrogram using the Griffin-Lin algorithm. Tacotron is also built fully with neural networks and is trained in an end-to-end fashion. It uses an encoder-decoder architecture where, at each step, the decoder operates on a weighted sum of the encoder outputs. This mechanism described in \citep{Attention} lets the network decide which steps of the input sequence are important with respect to each steps of the output sequence. Tacotron achieves a MOS of 3.85 on a US English dataset, which is more than the 3.69 score obtained in the parametric approach of \citep{LSTM-RNN} but less than the 4.09 score obtained by the concatenative approach of \citep{ConcatenativeGoogle}. The authors mention that Tacotron is merely a step towards a better framework. By the end of 2017, Tacotron 2 is published \citep{Tacotron2}. The architecture of Tacotron 2 remains that of an encoder-decoder with attention although several changes to the types of layers are made. The main difference with Tacotron is the addition of a modified WaveNet for vocoder. On the same dataset, Tacotron 2 achieves a MOS of 4.53 compared to 4.58 for human speech (the difference is not statistically significant), achieving the all-time highest MOS. In a preference study, Tacotron 2 was found to be only slightly less preferred on average than ground truth samples. The ratings from that study are shown in figure 
+Follows Tacotron \citep{Tacotron1}, a sequence-to-sequence model that produces a spectrogram from a sequence of characters alone, further reducing the need for domain expertise. In this framework, the vocoder is the Griffin-Lim algorithm. Tacotron uses an encoder-decoder architecture where, at each step, the decoder operates on a weighted sum of the encoder outputs. This attention mechanism, described in \citep{Attention}, lets the network decide which steps of the input sequence are important with respect to each step of the output sequence. Tacotron achieves a MOS of 3.85 on a US English dataset, which is more than the 3.69 score obtained in the parametric approach of \citep{LSTM-RNN} but less than the 4.09 score obtained by the concatenative approach of \citep{ConcatenativeGoogle}. The authors mention that Tacotron is merely a step towards a better framework. Subsequently, Tacotron 2 is published \citep{Tacotron2}. The architecture of Tacotron 2 remains that of an encoder-decoder with attention although several changes to the type of layers are made. The main difference with Tacotron is the use of a modified WaveNet as vocoder. On the same dataset, Tacotron 2 achieves a MOS of 4.53, which compares to the 4.58 for human speech (the difference is not statistically significant), achieving the all-time highest MOS for TTS. With A/B testing, Tacotron 2 was found to be only slightly less preferred on average than ground truth samples. These ratings are shown in figure \ref{tacotron2_results}.
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=.8\linewidth]{images/tacotron2_results.png}
-	\caption{Preference ratings between Tacotron 2 and ground truth samples. 800 ratings on 100 items. The labels are expressed with respect to Tacotron 2.}
+	\caption{Preference ratings between Tacotron 2 and ground truth samples. There are 800 ratings from 100 items. The labels are expressed with respect to Tacotron 2.}
 	\label{tacotron2_results}
 \end{figure}
 
+\color{red} Efficient neural audio synthesis? \color{black}
 
-\color{red}
-Few samples
+\section{Related voice cloning methods}
 
-SV2TTS
 
-Extensions?
-
-Link audio samples for everything where available
-\color{black}
-
+% Wavenet:
+%The output is a categorical distribution over sample values. For tractability reasons, the output signal is restricted to 256 discrete values that correspond to a $\mu$-law quantization, which is invertible. The MOS resulting from one of the experiments suggests that there is no statistically significant degradation in the naturalness of speech quantized in this manner. The architecture of WaveNet comes with several non-trivial components, described in later sections of this document \color{red}link to the section\color{black}. 
+% The audio generated by WaveNet requires no post-processing other than the inversion of the $\mu$-law. 
+%Furthermore, it allows for conditioning with respect to a vector constant at every timestep (global conditioning), which can be used to designate the speaker identity. The authors suggest that WaveNet is able to encode the embedding of several speakers seen in training with a shared internal representation. Speaker identities are given as a one-hot encoding. 
 
 \section{Transfer Learning from Speaker Verification to Multispeaker Text-To-Speech Synthesis}
 To achieve our goal of real-time voice cloning, we reproduce \citep{SV2TTS} (referred as SV2TTS throughout this document). It describes an approach to multispeaker speech synthesis. A multispeaker speech synthesis framework is able to generate speech from text using different voices. This set of voices may be encoded into the model or be external to the model. In the first case, 
 
-\color{red}This should come earlier\color{black}
 
 The approach used in SV2TTS is to build three models that are trained separately:
 \begin{itemize}
