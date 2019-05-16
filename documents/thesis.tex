@@ -80,7 +80,7 @@ Recent advances in deep learning have shown impressive results in the domain of 
 
 \section{Introduction}
 % What is now possible with deep learning in TTS
-Deep learning models have become predominant in many fields of applied machine learning. Text-to-speech (TTS), the process of synthesizing artificial speech from a text prompt, is no exception. Deep models that would produce more natural-sounding speech than the traditional concatenative approaches begun appearing in 2016. Much of the research focus has been since gathered around making these deep models more efficient, more natural, or training them in an end-to-end fashion. Inference has come from being hundreds of times slower than real-time on GPU \citep{WaveNet} to possible in real-time on a mobile CPU \citep{EfficientNeuralAudioSynthesis}. As for the quality of the generated speech, \citet{Tacotron2} demonstrate near human naturalness. Interestingly, speech naturalness is best rated with subjective metrics; and comparison with actual human speech leads to the conclusion that there might be such a thing as "speech more natural than human speech". In fact, some argue that the human naturalness threshold has already been crossed \citep{MOSNaturalness}.
+Deep learning models have become predominant in many fields of applied machine learning. text-to-speech (TTS), the process of synthesizing artificial speech from a text prompt, is no exception. Deep models that would produce more natural-sounding speech than the traditional concatenative approaches begun appearing in 2016. Much of the research focus has been since gathered around making these deep models more efficient, more natural, or training them in an end-to-end fashion. Inference has come from being hundreds of times slower than real-time on GPU \citep{WaveNet} to possible in real-time on a mobile CPU \citep{WaveRNN}. As for the quality of the generated speech, \citet{Tacotron2} demonstrate near human naturalness. Interestingly, speech naturalness is best rated with subjective metrics; and comparison with actual human speech leads to the conclusion that there might be such a thing as "speech more natural than human speech". In fact, some argue that the human naturalness threshold has already been crossed \citep{MOSNaturalness}.
 
 % The state of things in TTS
 Datasets of professionally recorded speech are a scarce resource. Synthesizing a natural voice with a correct pronunciation, lively intonation and a minimum of background noise requires training data with the same qualities. Furthermore, data efficiency often remains one of the shortcomings of deep learning. Training a common text-to-speech model such as Tacotron \citep{Tacotron1} typically requires tens of hours of speech. %It is thus no surprise that there seems to be a theme in speech-related applications of reproducing the voice of whomever is the current president of the United States. %-> kinda funny but not necessary
@@ -90,13 +90,14 @@ Yet the ability of generating speech with any voice is attractive for a range of
 While the complete training of a single-speaker TTS model is technically a form of voice cloning, the interest rather lies in creating a fixed model that is able to incorporate newer voices with little data. The common approach is to condition a TTS model trained to generalize to new speakers on an embedding of the voice to clone~\citep{DeepVoice2, CloningFewSamples, SV2TTS}. The embedding is low-dimensional and derived by a speaker encoder model that takes reference speech as input. This approach is typically more data efficient than training a separate TTS model for each speaker, in addition to being orders of magnitude faster and less computationally expensive. Interestingly, there is a large discrepancy between the duration of reference speech needed to clone a voice among the different methods, ranging from half an hour per speaker to only a few seconds.
 
 % What we want to achieve
-Our objective is to achieve a powerful form of voice cloning. The resulting framework must be able to operate in a zero-shot setting, that is, for speakers unseen during training. It should incorporate a speaker's voice with only a few seconds of reference speech. These desired results are shown to be fulfilled by \citep{SV2TTS}. Their results are impressive\footnote{\url{https://google.github.io/tacotron/publications/speaker_adaptation/index.html}}, but not backed by any public implementation. We reproduce their framework and make our implementation open-source\footnote{\color{red} repo link}. In addition, we integrate the model of \citep{EfficientNeuralAudioSynthesis} in the framework to make it run in real-time, i.e. to generate speech in a time shorter or equal to the duration of the produced speech. \color{red} add a word about our results \color{black}
+Our objective is to achieve a powerful form of voice cloning. The resulting framework must be able to operate in a zero-shot setting, that is, for speakers unseen during training. It should incorporate a speaker's voice with only a few seconds of reference speech. These desired results are shown to be fulfilled by \citep{SV2TTS}. Their results are impressive\footnote{\url{https://google.github.io/tacotron/publications/speaker_adaptation/index.html}}, but not backed by any public implementation. We reproduce their framework and make our implementation open-source\footnote{\color{red} repo link}. In addition, we integrate the model of \citep{WaveRNN} in the framework to make it run in real-time, i.e. to generate speech in a time shorter or equal to the duration of the produced speech. \color{red} add a word about our results \color{black}
 
 % Structure of the thesis
 The structure of this document goes as follows. We begin with a short introduction on TTS methods that involve machine learning. Follows a review of the evolution of the state of the art for TTS and for voice cloning. We then present the work of \citep{SV2TTS} as is, without mention of our own implementation. The remainder of this document focuses on the three individual parts of the framework, and on our implementation of the whole.
 
 
-\section{Statistical parametric speech synthesis}
+\section{A review of text-to-speech methods in machine learning}
+\subsection{Statistical parametric speech synthesis}
 % The SPSS pipeline
 Statistical parametric speech synthesis (SPSS) refers to a group of data-driven TTS methods that emerged in the late 90s. In SPSS, the relationship between the features computed on the input text and the output acoustic features is learned by a statistical generative model (called the acoustic model). A complete SPSS framework thus also includes a pipeline to extract features from the text to synthesize, as well as a system able to reconstruct an audio waveform from the acoustic features produced by the acoustic model (such a system is called a vocoder). Unlike the acoustic model, these two parts of the framework may be entirely engineered and make use of no statistical methods. While modern deep TTS models are usually not referred to as SPSS, the SPSS pipeline as depicted in figure \ref{spss_framework} applies just as well to those newer methods.
 
@@ -206,35 +207,38 @@ Follows Tacotron \citep{Tacotron1}, a sequence-to-sequence model that produces a
 % The audio generated by WaveNet requires no post-processing other than the inversion of the $\mu$-law. 
 %Furthermore, it allows for conditioning with respect to a vector constant at every timestep (global conditioning), which can be used to designate the speaker identity. The authors suggest that WaveNet is able to encode the embedding of several speakers seen in training with a shared internal representation. Speaker identities are given as a one-hot encoding. 
 
+\section{Problem definition}
+
+
 \section{Transfer Learning from Speaker Verification to Multispeaker Text-To-Speech Synthesis}
-To achieve our goal of real-time voice cloning, we reproduce \citep{SV2TTS} (referred as SV2TTS throughout this document). It describes an approach to multispeaker speech synthesis. A multispeaker speech synthesis framework is able to generate speech from text using different voices. This set of voices may be encoded into the model or be external to the model. In the first case, 
+\subsection{Overview}
+Our solution to real-time voice cloning is largely based on \citep{SV2TTS} (referred to as SV2TTS throughout this document). It describes an approach to zero-shot voice cloning that only requires 5 seconds of reference speech. This paper is only one of the many publications from the Tacotron series\footnote{\url{https://google.github.io/tacotron/}} authored at Google. Interestingly, the SV2TTS paper does not bring much innovation of its own, rather it is based on three major earlier works from Google: the GE2E loss \citep{GE2E}, Tacotron \citep{Tacotron1} and WaveNet \citep{WaveNet}. The complete framework is a three-stage pipeline, where the steps correspond to the models listed in order previously. Many of the current TTS tools and functionalities provided by Google, such as the Google assistant\footnote{\url{https://assistant.google.com/}} or the Google cloud services\footnote{\url{https://cloud.google.com/text-to-speech/}}, make use of these same models. While there are many open-source reimplementations of these models online, there is none of the SV2TTS framework to our knowledge (as of May 2019).
 
-
-The approach used in SV2TTS is to build three models that are trained separately:
+The three stages of the framework are as follows:
 \begin{itemize}
 	\item A speaker encoder that derives an embedding from the short utterance of a single speaker. The embedding is a meaningful representation of the voice of the speaker, such that similar voices are close in latent space. This model is described in \citep{GE2E} (referred as GE2E throughout this document) and \citep{TE2E}.
-	\item A synthesizer that, conditioned on the embedding of a speaker, generates speech features from a given text. This model is the popular Tacotron 2 \citep{Tacotron2} without WaveNet. The generated features cannot trivially be converted to an audio waveform. 
-	\item A vocoder that infers an audio waveform from the intermediate features generated by the synthesizer. The authors used WaveNet \citep{WaveNet} as vocoder, effectively reusing the entire Tacotron 2 framework.
+	\item A synthesizer that, conditioned on the embedding of a speaker, generates a spectrogram from a text. This model is the popular Tacotron 2 \citep{Tacotron2} without WaveNet (which is often referred to as just Tacotron because it is largely similar to the first iteration).
+	\item A vocoder that infers an audio waveform from the spectrograms generated by the synthesizer. The authors used WaveNet \citep{WaveNet} as a vocoder, effectively reapplying the entire Tacotron 2 framework.
 \end{itemize}
+At inference time, the speaker encoder is fed a short reference utterance of the speaker to clone. It generates an embedding that is used to condition the synthesizer, and a text processed as a phoneme sequence is given as input to the synthesizer. The vocoder takes the output of the synthesizer to generate the speech waveform. This is illustrated in figure \ref{sv2tts_framework}.
 
-In the future, we will refer to these three models as respectively the encoder, the synthesizer and the vocoder. At inference time, the encoder is fed a reference utterance of the speaker to clone. It generates an embedding that is fed to the synthesizer, along with a selected text to generate. Finally, the vocoder takes the output of the synthesizer to generate the speech waveform. 
-
-\begin{figure}[t]
+\begin{figure}[h]
 	\centering
-	\caption{Model overview.  Each of the three components are trained independently.}
-	\label{fig.model_overview}
+	\includegraphics[width=\linewidth]{images/sv2tts_framework.jpg}
+	\caption{The SV2TTS framework. The blue blocks represent a high-level view of the Tacotron architecture modified to allow conditioning.}
+	\label{sv2tts_framework}
 \end{figure}
 
+A particularity of the SV2TTS framework is that all models can be trained separately and on distinct datasets. For the encoder, one seeks to have a model that is robust to noise and able to capture the many characteristics of the human voice. Additionally, the encoder is trained with the GE2E loss which requires no labels other than the speaker identity! Therefore, a large corpus of many different speakers would be preferable to train the encoder, without any transcripts needed nor any strong requirements on the noise level of the audios. For the synthesizer and the vocoder however, transcripts are required and the quality of the generated audio can only be as good as that of the data. Higher quality datasets are thus required, which often means they are smaller in size.
 
 
-Note that all models are interchangeable provided that they perform the same task. In particular, vanilla WaveNet is extremely slow for inference. Several later papers brought improvements on that aspect to bring the generation near real-time or faster than real-time, e.g. \citep{ParallelWaveNet}, \citep{FastWaveNet}. Note that in this context, real-time is achieved when the generation time is shorter than or equal to the duration of the generated audio. In our implementation, the vocoder used is based on WaveRNN \citep{WaveRNN}.
+%Note that all models are interchangeable provided that they perform the same task. In particular, vanilla WaveNet is extremely slow for inference. Several later papers brought improvements on that aspect to bring the generation near real-time or faster than real-time, e.g. \citep{ParallelWaveNet}, \citep{FastWaveNet}. Note that in this context, real-time is achieved when the generation time is shorter than or equal to the duration of the generated audio. In our implementation, the vocoder used is based on WaveRNN \citep{WaveRNN}.
 
 
 
 
 
 \color{red}
-- audio samples \\
 encoder (or any):- a word about digital audio  \\
 encoder: - meaning of the paper title  \\
 synth: - the need of intermediate audio features  \\

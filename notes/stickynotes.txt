@@ -26,6 +26,7 @@ Generalized End-To-End Loss For Speaker Verification
 - Relu at the end of the network
 - (slides) Interpretation of EER
 - Thank mr. Louppe, the authors of GE2E and Joeri
+- LibriTTS, Improving data efficiency in end-to-end, 
 
 
 ------ Structure ------
