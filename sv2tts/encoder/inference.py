@@ -156,13 +156,15 @@ def load_preprocess_waveform(fpath):
     wave = audio.preprocess_wave(wave)
     return wave
 
-def plot_embedding_as_heatmap(embed, ax=None, title="", color_range=(0, 0.35)):
+def plot_embedding_as_heatmap(embed, ax=None, title="", shape=None, color_range=(0, 0.35)):
     if ax is None:
         ax = plt.gca()
     
-    height = int(np.sqrt(len(embed)))
-    assert len(embed) % height == 0
-    embed = embed.reshape((height, -1))
+    if shape is None:
+        height = int(np.sqrt(len(embed)))
+        shape = (height, -1)
+    assert np.prod(shape) == embed.nsize
+    embed = embed.reshape(shape)
     
     cmap = cm.get_cmap()
     mappable = ax.imshow(embed, cmap=cmap)

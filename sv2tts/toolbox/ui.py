@@ -4,6 +4,7 @@ from PyQt4.QtGui import *
 from encoder import audio as encoder_audio
 from encoder import inference as encoder
 from pathlib import Path
+from typing import List
 import sounddevice as sd
 import numpy as np
 import umap
@@ -26,36 +27,150 @@ colormap = np.array([
     [183, 183, 183],
     [76, 255, 0],
 ], dtype=np.float) / 255 
-recognized_datasets = [
-    "Librispeech/dev-clean",
-    "Librispeech/dev-other",
-    "Librispeech/test-clean",
-    "Librispeech/test-other",
-    "Librispeech/train-other-500",
-    "Librispeech/train-clean-100",
-    "Librispeech/train-clean-360",
-    "LJSpeech-1.1",
-    "VoxCeleb1/wav",
-    "VoxCeleb1/test_wav",
-    "VoxCeleb2/dev/aac",
-    "VCTK-Corpus/wav48",
-]
 
-def clean_figure(figure, axs, square=True):
-    figure.patch.set_facecolor("#F0F0F0")
-    for ax in axs:
+   
+class UI(QDialog):
+    min_umap_points = 5
+    
+    def draw_embed_heatmap(self, embed, speaker_name, which):
+        ax = self.embed_axs[0 if which == "current" else 1]
+        
+        # Clear the plot
+        if len(ax.images) > 0:
+            ax.images[0].colorbar.remove()
+        ax.clear()
+        
+        # Draw the embed
+        if embed is not None:
+            encoder.plot_embedding_as_heatmap(embed, ax, speaker_name)
         ax.set_xticks([])
         ax.set_yticks([])
-        if square:
-            ax.set_aspect("equal", "datalim")
-    
+        ax.set_aspect("equal", "datalim")
+        ax.figure.canvas.draw()
+            
+    def draw_spec(self, spec, utterance_name, which):
+        ax = self.spec_axs[0 if which == "current" else 1]
+        
+        # Clear the plot
+        ax.clear()
+        
+        # Draw the spectrogram
+        if spec is not None:
+            # TODO
+            pass
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.figure.canvas.draw()
 
-class UI(QDialog):
+    def draw_umap(self, embeds):
+        self.umap_ax.clear()
+        
+        # Display a message if there aren't enough points
+        if len(embeds) <= self.min_umap_points:
+            self.umap_ax.text(.5, .5, "Add %d more points to\ngenerate the projections" % 
+                              (self.min_umap_points - len(embeds)), horizontalalignment='center',
+                              fontsize=15)
+            self.umap_ax.set_xticks([])
+            self.umap_ax.set_yticks([])
+            self.umap_ax.figure.canvas.draw()
+            return
+    
+        # Compute the projections
+        speaker_names, indices = np.unique([e[2] for e in embeds], return_index=True)
+        speaker_names = speaker_names[np.argsort(indices)]
+        speaker_dict = {s: i for i, s in enumerate(speaker_names)}
+        embed_data = np.array([e[0] for e in embeds])
+        reducer = umap.UMAP(int(np.ceil(np.sqrt(len(embed_data)))), metric="cosine")
+        projections = reducer.fit_transform(embed_data)
+    
+        # Hide or show partials
+        show_partials = self.show_partials_button.isChecked()
+        if not show_partials:
+            projections = [p for e, p in zip(embeds, projections) if e[1] != "."]
+            embeds = [e for e in embeds if e[1] != "."]
+        else:
+            embeds = embeds
+    
+        # TODO: lines
+    
+        legend_done = set()
+        for projection, (embed, mark, speaker_name) in zip(projections, embeds):
+            color = [colormap[speaker_dict[speaker_name]]]
+            legend = None
+            if not speaker_name in legend_done:
+                legend = speaker_name
+                legend_done.add(speaker_name)
+            self.umap_ax.scatter(projection[0], projection[1], c=color, marker=mark, label=legend)
+        self.umap_ax.set_title("UMAP projection")
+        self.umap_ax.legend()
+    
+        # figure.tight_layout()
+        self.umap_ax.figure.canvas.draw()
+        
+    @property        
+    def current_dataset_name(self):
+        return self.dataset_box.currentText()
+
+    @property
+    def current_speaker_name(self):
+        return self.speaker_box.currentText()
+    
+    @property
+    def current_utterance_name(self):
+        return self.utterance_box.currentText()
+    
+    def populate_browser(self, datasets_root: Path, recognized_datasets: List, level: int,
+                         random=True):
+        def repopulate_box(box, items):
+            box.blockSignals(True)
+            box.clear()
+            box.addItems(map(str, items))
+            box.setCurrentIndex(np.random.randint(len(items)) if random else 0)
+            box.blockSignals(False)
+    
+        # Select a random dataset
+        if level <= 0:
+            datasets = [datasets_root.joinpath(d) for d in recognized_datasets]
+            datasets = [d.relative_to(datasets_root) for d in datasets if d.exists()]
+            repopulate_box(self.dataset_box, datasets)
+    
+        # Select a random speaker
+        if level <= 1:
+            speakers_root = Path(datasets_root, self.current_dataset_name())
+            speaker_names = [d.stem for d in speakers_root.glob("*") if d.is_dir()]
+            repopulate_box(self.speaker_box, speaker_names)
+    
+        # Select a random utterance
+        if level <= 2:
+            utterances_root = Path(datasets_root, 
+                                   self.current_dataset_name, 
+                                   self.current_speaker_name)
+            utterances = Path(utterances_root).glob("*/**")
+            utterances = [fpath for fpath in utterances if fpath.suffix in "[.mp3|.flac|.wav|.m4a]"]
+            repopulate_box(self.utterance_box, utterances)
+
+    def browser_select_next(self):
+        def select_next_box(box):
+            index = (box.currentIndex() + 1) % len(box)
+            box.setCurrentIndex(index)
+            return index == 0
+    
+        if select_next_box(self.utterance_box):
+            if select_next_box(self.speaker_box):
+                select_next_box(self.dataset_box)
+
+    def reset_interface(self):
+        self.draw_embed_heatmap(None, "", "current")
+        self.draw_embed_heatmap(None, "", "generated")
+        self.draw_spec(None, "", "current")
+        self.draw_spec(None, "", "generated")
+        self.draw_umap([])
+
     def __init__(self):
         ## Initialize the application
-        # self.setWindowTitle("SV2TTS toolbox")
-        app = QApplication(sys.argv)
+        self.app = QApplication(sys.argv)
         super().__init__(None)
+        self.setWindowTitle("SV2TTS toolbox")
         
         
         ## Main layouts
@@ -81,12 +196,10 @@ class UI(QDialog):
 
 
         ## Projections
-        umap_canvas = FigureCanvas(Figure(figsize=(10, 20)))
+        umap_canvas = FigureCanvas(Figure(figsize=(10, 10)))
         proj_layout.addWidget(umap_canvas)
         self.umap_ax = umap_canvas.figure.subplots()
-        clean_figure(umap_canvas.figure, [self.umap_ax])
-        # self.draw_umap()
-
+        umap_canvas.figure.patch.set_facecolor("#F0F0F0")
 
         ## Browser
         # Dataset & speaker selection
@@ -137,15 +250,13 @@ class UI(QDialog):
         ## Embed & spectrograms
         embed_canvas = FigureCanvas(Figure(figsize=(5, 5)))
         vis_layout.addWidget(embed_canvas)
-        self.embed_fig = embed_canvas.figure
-        self.embed_axs = self.embed_fig.subplots(2, 1)
-        clean_figure(self.embed_fig, self.embed_axs)
+        self.embed_axs = embed_canvas.figure.subplots(2, 1)
+        embed_canvas.figure.patch.set_facecolor("#F0F0F0")
         
         spec_canvas = FigureCanvas(Figure(figsize=(5, 10)))
         vis_layout.addWidget(spec_canvas)
-        self.spec_fig = spec_canvas.figure
-        self.spec_axs = self.spec_fig.subplots(2, 1)
-        clean_figure(self.spec_fig, self.spec_axs, False)
+        self.spec_axs = spec_canvas.figure.subplots(2, 1)
+        spec_canvas.figure.patch.set_facecolor("#F0F0F0")
 
 
         # ## Embeds (bottom right)
@@ -186,67 +297,15 @@ class UI(QDialog):
         # 
         # root_layout.addLayout(menu_layout)
         
-
-        ## Run the application
+        
+        ## Finalize the display
         max_size = QDesktopWidget().availableGeometry(self).size()
         self.resize(max_size * 0.8)
+        self.reset_interface()
         self.show()
-        app.exec_()
-        
-    def select_random(self, level):
-        def repopulate_box(box, items):
-            box.blockSignals(True)
-            box.clear()
-            box.addItems(items)
-            box.setCurrentIndex(np.random.randint(len(items)))
-            box.blockSignals(False)
-            
-        # Select a random dataset
-        if level <= 0:
-            available_datasets = [d for d in recognized_datasets if 
-                                  fileio.exists(fileio.join(demo_datasets_root, d))]
-            repopulate_box(self.dataset_box, available_datasets)
-            
-        # Select a random speaker
-        if level <= 1:
-            speakers_root = fileio.join(demo_datasets_root, self.dataset_box.currentText())
-            available_speakers = [d for d in fileio.listdir(speakers_root) if 
-                                  os.path.isdir(fileio.join(speakers_root, d))]
-            repopulate_box(self.speaker_box, available_speakers)
-            
-        # Select a random utterance
-        if level <= 2:
-            utterances_root = fileio.join(demo_datasets_root, 
-                                          self.dataset_box.currentText(),
-                                          self.speaker_box.currentText())
-            available_utterances = fileio.get_files(utterances_root, 
-                                                    r"(.mp3|.flac|.wav|.m4a)",
-                                                    recursive=True,
-                                                    full_path=False) 
-            repopulate_box(self.utterance_box, available_utterances)
-            
-        # Reload the new utterance
-        self.load_utterance()
 
-    def select_next(self):
-        def select_next_box(box):
-            index = (box.currentIndex() + 1) % len(box)
-            box.setCurrentIndex(index)
-            return index == 0
-        
-        if select_next_box(self.utterance_box):
-            if select_next_box(self.speaker_box):
-                select_next_box(self.dataset_box)
-        self.load_utterance()
-
-    def load_utterance(self, fpath=None):
-        if fpath is None:
-            fpath = fileio.join(demo_datasets_root,
-                                self.dataset_box.currentText(),
-                                self.speaker_box.currentText(),
-                                self.utterance_box.currentText())
-        self.utterance = inference.load_preprocess_waveform(fpath)
-        self.is_record = False
+    def start(self):
+        self.app.exec_()
 
     def embed_utterance(self, demo, speaker_name=None, go_next=None):
         if speaker_name is None:
@@ -270,7 +329,7 @@ class UI(QDialog):
         self.draw_umap()
         
         if go_next:
-            self.select_next()
+            self.browser_select_next()
 
     def record_one(self):
         self.record_one_button.setText("Recording...")
@@ -282,54 +341,6 @@ class UI(QDialog):
         self.record_one_button.setText("Record one")
         self.record_one_button.setDisabled(False)
     
-    def draw_embed(self):
-        if len(self.embeds) != 0:
-            embed, _, speaker_name = self.embeds[-1]
-            if len(self.embed_ax.images) > 0:
-                self.embed_ax.images[0].colorbar.remove()
-            self.embed_ax.clear()
-            inference.plot_embedding_as_heatmap(embed, self.embed_ax, 
-                                                "Last embedding for %s" % speaker_name)
-        self.embed_ax.figure.canvas.draw()
-    
-    def draw_umap(self):
-        self.umap_ax.clear()
-        if len(self.embeds) < 5:
-            self.umap_ax.figure.canvas.draw()
-            return
-
-        # Compute the projections
-        speaker_names, indices = np.unique([e[2] for e in self.embeds], return_index=True)
-        speaker_names = speaker_names[np.argsort(indices)]
-        speaker_dict = {s: i for i, s in enumerate(speaker_names)}
-        embed_data = np.array([e[0] for e in self.embeds])
-        reducer = umap.UMAP(int(np.ceil(np.sqrt(len(embed_data)))), metric="cosine")
-        projections = reducer.fit_transform(embed_data)
-
-        # Hide or show partials
-        show_partials = self.show_partials_button.isChecked()
-        if not show_partials:
-            projections = [p for e, p in zip(self.embeds, projections) if e[1] != "."]
-            embeds = [e for e in self.embeds if e[1] != "."]
-        else:
-            embeds = self.embeds
-
-        # TODO: lines
-        
-        legend_done = set()
-        for projection, (embed, mark, speaker_name) in zip(projections, embeds):
-            color = [colormap[speaker_dict[speaker_name]]]
-            legend = None
-            if not speaker_name in legend_done:
-                legend = speaker_name
-                legend_done.add(speaker_name)
-            self.umap_ax.scatter(projection[0], projection[1], c=color, marker=mark, label=legend)
-        self.umap_ax.set_title("UMAP projection")
-        self.umap_ax.legend()
-
-        # figure.tight_layout()
-        self.umap_ax.figure.canvas.draw()
-
 
 if __name__ == "__main__":
     UI()
