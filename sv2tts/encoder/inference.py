@@ -63,7 +63,7 @@ def compute_partial_slices(n_samples, partial_utterance_n_frames=partials_n_fram
     :param min_pad_coverage: when reaching the last partial utterance, it may or may not have 
     enough frames. If at least <min_pad_coverage> of <partial_utterance_n_frames> are present, 
     then the last partial utterance will be considered, as if we padded the audio. Otherwise, 
-    it will be discarded, as if we trimmed the audio. If there aren"t enough frames for 1 partial 
+    it will be discarded, as if we trimmed the audio. If there aren't enough frames for 1 partial 
     utterance, this parameter is ignored so that the function always returns at least 1 slice.
     :param overlap: by how much the partial utterance should overlap. If set to 0, the partial 
     utterances are entirely disjoint. 
