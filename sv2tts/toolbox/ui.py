@@ -124,7 +124,7 @@ class UI(QDialog):
         def repopulate_box(box, items):
             box.blockSignals(True)
             box.clear()
-            box.addItems(map(str, items))
+            box.addItems(list(map(str, items)))
             box.setCurrentIndex(np.random.randint(len(items)) if random else 0)
             box.blockSignals(False)
     
@@ -132,21 +132,27 @@ class UI(QDialog):
         if level <= 0:
             datasets = [datasets_root.joinpath(d) for d in recognized_datasets]
             datasets = [d.relative_to(datasets_root) for d in datasets if d.exists()]
+            if len(datasets) == 0:
+                raise Exception("Could not find any of the datasets %s under %s" %
+                                (recognized_datasets, datasets_root))
             repopulate_box(self.dataset_box, datasets)
     
         # Select a random speaker
         if level <= 1:
-            speakers_root = Path(datasets_root, self.current_dataset_name())
+            speakers_root = datasets_root.joinpath(self.current_dataset_name)
             speaker_names = [d.stem for d in speakers_root.glob("*") if d.is_dir()]
             repopulate_box(self.speaker_box, speaker_names)
     
         # Select a random utterance
         if level <= 2:
-            utterances_root = Path(datasets_root, 
-                                   self.current_dataset_name, 
-                                   self.current_speaker_name)
-            utterances = Path(utterances_root).glob("*/**")
-            utterances = [fpath for fpath in utterances if fpath.suffix in "[.mp3|.flac|.wav|.m4a]"]
+            utterances_root = datasets_root.joinpath(
+                self.current_dataset_name, 
+                self.current_speaker_name
+            )
+            utterances = []
+            for extension in ['mp3', 'flac', 'wav', 'm4a']:
+                utterances.extend(Path(utterances_root).glob("**/*.%s" % extension))
+            utterances = [fpath.relative_to(utterances_root) for fpath in utterances]
             repopulate_box(self.utterance_box, utterances)
 
     def browser_select_next(self):
@@ -158,6 +164,13 @@ class UI(QDialog):
         if select_next_box(self.utterance_box):
             if select_next_box(self.speaker_box):
                 select_next_box(self.dataset_box)
+
+    def log(self, line):
+        self.logs.append(line)
+        if len(self.logs) > 10:
+            del self.logs[0]
+        log_text = '\n'.join(reversed(self.logs))
+        self.log_window.setText(log_text)
 
     def reset_interface(self):
         self.draw_embed_heatmap(None, "", "current")
@@ -202,39 +215,53 @@ class UI(QDialog):
         umap_canvas.figure.patch.set_facecolor("#F0F0F0")
 
         ## Browser
-        # Dataset & speaker selection
+        i = 0
+        
+        # Dataset, speaker and utterance selection
         self.dataset_box = QComboBox()
-        browser_layout.addWidget(self.dataset_box, 0, 0)
+        browser_layout.addWidget(QLabel("<b>Dataset</b>"), i, 0)
+        browser_layout.addWidget(self.dataset_box, i + 1, 0)
         self.speaker_box = QComboBox()
-        browser_layout.addWidget(self.speaker_box, 0, 1)
+        browser_layout.addWidget(QLabel("<b>Speaker</b>"), i, 1)
+        browser_layout.addWidget(self.speaker_box, i + 1, 1)
+        self.utterance_box = QComboBox()
+        browser_layout.addWidget(QLabel("<b>Utterance</b>"), i, 2)
+        browser_layout.addWidget(self.utterance_box, i + 1, 2)
+        self.browser_load_button = QPushButton("Load")
+        browser_layout.addWidget(self.browser_load_button, i + 1, 3)
+        i += 2
         
-        # Random dataset & speaker buttons
-        self.random_dataset_button = QPushButton("Random dataset")
-        browser_layout.addWidget(self.random_dataset_button, 1, 0)
-        self.random_speaker_button = QPushButton("Random speaker")
-        browser_layout.addWidget(self.random_speaker_button, 1, 1)
-        
-        # Random & next utterance buttons
-        self.random_utterance_button = QPushButton("Random utterance")
-        browser_layout.addWidget(self.random_utterance_button, 2, 0)
-        self.next_utterance_button = QPushButton("Next utterance")
-        browser_layout.addWidget(self.next_utterance_button, 2, 1)
-        
-        # History selection & take generated button
-        self.history_box = QComboBox()
-        browser_layout.addWidget(self.history_box, 3, 0)
-        self.take_generated_button = QPushButton("Take generated")
-        browser_layout.addWidget(self.take_generated_button, 3, 1)
+        # Random buttons
+        self.random_dataset_button = QPushButton("Random")
+        browser_layout.addWidget(self.random_dataset_button, i, 0)
+        self.random_speaker_button = QPushButton("Random")
+        browser_layout.addWidget(self.random_speaker_button, i, 1)
+        self.random_utterance_button = QPushButton("Random")
+        browser_layout.addWidget(self.random_utterance_button, i, 2)
+        self.auto_next_checkbox = QCheckBox("Auto select next")
+        self.auto_next_checkbox.setChecked(True)
+        browser_layout.addWidget(self.auto_next_checkbox, i, 3)
+        i += 1
         
         # Utterance box
-        self.utterance_box = QComboBox()
-        browser_layout.addWidget(self.utterance_box, 4, 0, 1, 2)
-
+        browser_layout.addWidget(QLabel("<b>Recent utterances</b>"), i, 0)
+        self.current_load_button = QPushButton("Reload")
+        browser_layout.addWidget(self.current_load_button, i + 1, 3)
+        i += 1
+        
+        # Random & next utterance buttons
+        self.current_utterance_button = QComboBox()
+        browser_layout.addWidget(self.current_utterance_button, i, 0, 1, 3)
+        i += 1
+        
         # Random & next utterance buttons
         self.play_button = QPushButton("Play")
-        browser_layout.addWidget(self.play_button, 5, 0)
-        self.record_button = QPushButton("Next utterance")
-        browser_layout.addWidget(self.record_button, 5, 1)
+        browser_layout.addWidget(self.play_button, i, 0)
+        self.record_button = QPushButton("Record")
+        browser_layout.addWidget(self.record_button, i, 1)
+        self.take_generated_button = QPushButton("Take generated")
+        browser_layout.addWidget(self.take_generated_button, i, 2)
+        i += 1
         
         # self.dataset_box.currentIndexChanged.connect(lambda: self.select_random(1))
         # self.speaker_box.currentIndexChanged.connect(lambda: self.select_random(2))
@@ -258,6 +285,12 @@ class UI(QDialog):
         self.spec_axs = spec_canvas.figure.subplots(2, 1)
         spec_canvas.figure.patch.set_facecolor("#F0F0F0")
 
+
+        ## Generation
+        self.log_window = QLabel()
+        self.logs = []
+        gen_layout.addWidget(self.log_window)
+        
 
         # ## Embeds (bottom right)
         # embeds_grid = QGridLayout()
