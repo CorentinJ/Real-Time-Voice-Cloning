@@ -13,8 +13,9 @@ def sync(device: torch.device):
     if device.type == "cuda":
         torch.cuda.synchronize(device)
 
-def train(run_id: str, clean_data_root: Path, models_dir: Path, vis_every: int, save_every: int,
-          backup_every: int, force_restart: bool, visdom_server: str, no_visdom: bool):
+def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int, save_every: int,
+          backup_every: int, vis_every: int, force_restart: bool, visdom_server: str,
+          no_visdom: bool):
     # Create a dataset and a dataloader
     dataset = SpeakerVerificationDataset(clean_data_root)
     loader = SpeakerVerificationDataLoader(
@@ -56,9 +57,11 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, vis_every: int, 
     model.train()
     
     # Initialize the visualization environment
-    device_name = str(torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU")
-    vis = Visualizations(run_id, device_name=device_name, server=visdom_server, disabled=no_visdom)
+    vis = Visualizations(run_id, vis_every, server=visdom_server, disabled=no_visdom)
     vis.log_dataset(dataset)
+    vis.log_params()
+    device_name = str(torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU")
+    vis.log_implementation({"Device": device_name})
     
     # Training loop
     profiler = Profiler(summarize_every=10, disabled=False)
@@ -86,11 +89,11 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, vis_every: int, 
         profiler.tick("Parameter update")
         
         # Update visualizations
-        learning_rate = optimizer.param_groups[0]["lr"]
-        vis.update(loss.item(), eer, learning_rate, step)
+        # learning_rate = optimizer.param_groups[0]["lr"]
+        vis.update(loss.item(), eer, step)
         
         # Draw projections and save them to the backup folder
-        if vis_every != 0 and step % vis_every == 0:
+        if umap_every != 0 and step % umap_every == 0:
             print("Drawing and saving projections (step %d)" % step)
             backup_dir.mkdir(exist_ok=True)
             projection_fpath = backup_dir.joinpath("%s_umap_%06d.png" % (run_id, step))

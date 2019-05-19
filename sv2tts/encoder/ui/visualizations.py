@@ -1,6 +1,6 @@
 from encoder.data_objects.speaker_verification_dataset import SpeakerVerificationDataset
 from datetime import datetime
-from time import perf_counter as clock
+from time import perf_counter as timer
 import matplotlib.pyplot as plt
 import numpy as np
 import webbrowser
@@ -25,21 +25,28 @@ colormap = np.array([
 
 
 class Visualizations:
-    def __init__(self, env_name=None, device_name=None, server="http://localhost", disabled=False):
-        self.last_update_timestamp = clock()
-        self.mean_time_per_step = -1
-        self.loss_exp = None
-        self.eer_exp = None
-        self.disabled = disabled    # TODO: use a better paradigm for that
+    def __init__(self, env_name=None, update_every=10, server="http://localhost", disabled=False):
+        # Tracking data
+        self.last_update_timestamp = timer()
+        self.update_every = update_every
+        self.step_times = []
+        self.losses = []
+        self.eers = []
+        print("Updating the visualizations every %d steps." % update_every)
+        
+        # If visdom is disabled TODO: use a better paradigm for that
+        self.disabled = disabled    
         if self.disabled:
             return 
         
+        # Set the environment name
         now = str(datetime.now().strftime("%d-%m %Hh%M"))
         if env_name is None:
             self.env_name = now
         else:
             self.env_name = "%s (%s)" % (env_name, now)
         
+        # Connect to visdom and open the corresponding window in the browser
         try:
             self.vis = visdom.Visdom(server, env=self.env_name, raise_exceptions=True)
         except ConnectionError:
@@ -47,16 +54,13 @@ class Visualizations:
                             "start it.")
         # webbrowser.open("http://localhost:8097/env/" + self.env_name)
         
+        # Create the windows
         self.loss_win = None
         self.eer_win = None
-        self.lr_win = None
+        # self.lr_win = None
         self.implementation_win = None
         self.projection_win = None
         self.implementation_string = ""
-        self.log_params()
-        
-        if device_name is not None:
-            self.log_implementation({"Device": device_name})
         
     def log_params(self):
         if self.disabled:
@@ -95,68 +99,58 @@ class Visualizations:
             opts={"title": "Training implementation"}
         )
 
-    def update(self, loss, eer, lr, step):
-        self.loss_exp = loss if self.loss_exp is None else 0.985 * self.loss_exp + 0.015 * loss
-        self.eer_exp = eer if self.eer_exp is None else 0.985 * self.eer_exp + 0.015 * eer
+    def update(self, loss, eer, step):
+        # Update the tracking data
+        now = timer()
+        self.step_times.append(1000 * (now - self.last_update_timestamp))
+        self.last_update_timestamp = now
+        self.losses.append(loss)
+        self.eers.append(eer)
+        print(".", end="")
+        
+        # Update the plots every <update_every> steps
+        if step % self.update_every != 0:
+            return
+        time_string = "Step time:  mean: %5dms  std: %5dms" % \
+                      (int(np.mean(self.step_times)), int(np.std(self.step_times)))
+        print("\nStep %6d   Loss: %.4f   EER: %.4f   %s" %
+              (step, np.mean(self.losses), np.mean(self.eers), time_string), end="")
         if not self.disabled:
             self.loss_win = self.vis.line(
-                [[loss, self.loss_exp]],
-                [[step, step]],
+                [np.mean(self.losses)],
+                [step],
                 win=self.loss_win,
                 update="append" if self.loss_win else None,
                 opts=dict(
-                    legend=["Loss", "Avg. loss"],
+                    legend=["Avg. loss"],
                     xlabel="Step",
                     ylabel="Loss",
                     title="Loss",
                 )
             )
             self.eer_win = self.vis.line(
-                [[eer, self.eer_exp]],
-                [[step, step]],
+                [np.mean(self.eers)],
+                [step],
                 win=self.eer_win,
                 update="append" if self.eer_win else None,
                 opts=dict(
-                    legend=["EER", "Avg. EER"],
+                    legend=["Avg. EER"],
                     xlabel="Step",
                     ylabel="EER",
                     title="Equal error rate"
                 )
             )
-            self.lr_win = self.vis.line(
-                [lr],
-                [step],
-                win=self.lr_win,
-                update="append" if self.lr_win else None,
-                opts=dict(
-                    xlabel="Step",
-                    ylabel="Learning rate",
-                    ytype="log",
-                    title="Learning rate"
+            if self.implementation_win is not None:
+                self.vis.text(
+                    self.implementation_string + ("<b>%s</b>" % time_string), 
+                    win=self.implementation_win,
+                    opts={"title": "Training implementation"},
                 )
-            )
-        
-        now = clock()
-        time_per_step = (now - self.last_update_timestamp)
-        self.last_update_timestamp = now
-        if self.mean_time_per_step == -1:
-            self.mean_time_per_step = time_per_step
-        else:
-            self.mean_time_per_step = self.mean_time_per_step * 0.9 + time_per_step * 0.1
-            
-        if not self.disabled and self.implementation_win is not None:
-            time_string = "<b>Mean time per step</b>: %dms" % int(1000 * self.mean_time_per_step)
-            time_string += "<br><b>Last step time</b>: %dms" % int(1000 * time_per_step)
-            self.vis.text(
-                self.implementation_string + time_string, 
-                win=self.implementation_win,
-                opts={"title": "Training implementation"},
-            )
 
-        print("Step %6d   Loss: %.4f   EER: %.4f   LR: %g   Mean step time: %5dms   "
-              "Last step time: %5dms" %
-              (step, self.loss_exp, self.eer_exp, lr, int(1000 * self.mean_time_per_step),
-               int(1000 * time_per_step)))
+        # Reset the tracking
+        self.losses.clear()
+        self.eers.clear()
+        self.step_times.clear()
         
     def draw_projections(self, embeds, utterances_per_speaker, step, out_fpath=None,
                          max_speakers=10):

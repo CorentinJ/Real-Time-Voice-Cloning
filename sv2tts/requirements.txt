@@ -1,3 +1,4 @@
+visdom
 PyQt4
 webrtcvad
 librosa>=0.5.1
