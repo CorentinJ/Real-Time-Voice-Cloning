@@ -6,9 +6,11 @@ mel_n_channels = 40
 
 
 ## Audio
-# Number of spectrogram frames in a partial utterance
-partials_n_frames = 160  
 sampling_rate = 16000
+# Number of spectrogram frames in a partial utterance
+partials_n_frames = 160     # 1600 ms
+# Number of spectrogram frames at inference
+inference_n_frames = 80     #  800 ms
 
 
 ## Voice Activation Detection
