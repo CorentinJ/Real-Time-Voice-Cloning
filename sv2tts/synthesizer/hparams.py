@@ -47,8 +47,6 @@ hparams = tf.contrib.training.HParams(
     # Synthesis also uses the following hardware parameters for multi-GPU parallel synthesis.
     tacotron_gpu_start_idx=0,  # idx of the first GPU to be used for Tacotron training.
     tacotron_num_gpus=1,  # Determines the number of gpus in use for Tacotron training.
-    wavenet_gpu_start_idx=0,  # idx of the first GPU to be used for WaveNet training. (WIP)
-    wavenet_num_gpus=1,  # Determines the number of gpus in use for WaveNet training. (WIP)
     split_on_cpu=True,
     # Determines whether to split data on CPU or on first GPU. This is automatically True when 
 	# more than 1 GPU is used.
@@ -115,18 +113,11 @@ hparams = tf.contrib.training.HParams(
     # either cases.
     silence_threshold=2,  # silence threshold used for sound trimming for wavenet preprocessing
     
-    # Mel spectrogram
-    # # FOR DATASETS IN 22050Hz:
-    # n_fft=2048,  # Extra window size is filled with 0 paddings to match this parameter
-    # hop_size=275,  # For 22050Hz, 275 ~= 12.5 ms (0.0125 * sample_rate)
-    # win_size=1100,  # For 22050Hz, 1100 ~= 50 ms (If None, win_size = n_fft) (0.05 * sample_rate)
-    # sample_rate=22050,  # 22050 Hz (corresponding to ljspeech dataset) (sox --i <filename>)
-    
-    # FOR DATASETS IN 16000Hz:
-    n_fft=2048,  # Extra window size is filled with 0 paddings to match this parameter
-    hop_size=300,  # For 24000Hz, 300 = 12.5 ms (0.0125 * sample_rate)
-    win_size=1200,  # For 24000Hz, 1200 = 50 ms (If None, win_size = n_fft) (0.05 * sample_rate)
-    sample_rate=24000,  # 24000Hz (corresponding to libritts) (sox --i <filename>)
+    # Mel spectrogram  
+    n_fft=800,  # Extra window size is filled with 0 paddings to match this parameter
+    hop_size=200,  # For 16000Hz, 200 = 12.5 ms (0.0125 * sample_rate)
+    win_size=800,  # For 16000Hz, 800 = 50 ms (If None, win_size = n_fft) (0.05 * sample_rate)
+    sample_rate=16000,  # 16000Hz (corresponding to librispeech) (sox --i <filename>)
     
     frame_shift_ms=None,  # Can replace hop_size parameter. (Recommended: 12.5)
     

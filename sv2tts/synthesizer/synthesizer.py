@@ -263,7 +263,7 @@ class Synthesizer:
 		return np.stack([self._pad_target(t, data_len) for t in targets]), data_len
 
 	def _pad_target(self, t, length):
-		return np.pad(t, [(0, length - t.shape[0]), (0, 0)], mode="constant', constant_values=self._target_pad)
+		return np.pad(t, [(0, length - t.shape[0]), (0, 0)], mode="constant", constant_values=self._target_pad)
 
 	def _get_output_lengths(self, stop_tokens):
 		#Determine each mel length by the stop token predictions. (len = first occurence of 1 in stop_tokens row wise)
