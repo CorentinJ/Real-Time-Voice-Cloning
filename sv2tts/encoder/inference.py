@@ -25,10 +25,13 @@ def load_model(weights_fpath, device=None):
     elif isinstance(device, str):
         device = torch.device(device)
     _device = device
-    _model = SpeakerEncoder(_device)
+    _model = SpeakerEncoder(_device, torch.device("cpu"))
     checkpoint = torch.load(weights_fpath)
     _model.load_state_dict(checkpoint["model_state"])
     _model.eval()
+    
+def is_loaded():
+    return _model is not None
 
 def embed_frames_batch(frames_batch):
     """
@@ -141,7 +144,7 @@ def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
         return embed, partial_embeds, wave_slices
     return embed
 
-def embed_speaker(wavs, normalize=False, **kwargs):
+def embed_speaker(wavs, **kwargs):
     raise NotImplemented()
 
 def load_preprocess_waveform(fpath):

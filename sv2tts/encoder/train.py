@@ -1,4 +1,4 @@
-from encoder.ui.visualizations import Visualizations
+from encoder.visualizations import Visualizations
 from encoder.data_objects import SpeakerVerificationDataLoader, SpeakerVerificationDataset
 from encoder.params_model import *
 from encoder.model import SpeakerEncoder
@@ -22,14 +22,14 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int,
         dataset,
         speakers_per_batch,
         utterances_per_speaker,
-        num_workers=4,
+        num_workers=8,
     )
     
     # Setup the device on which to run the forward pass and the loss. These can be different, 
     # because the forward pass is faster on the GPU whereas the loss is often (depending on your
     # hyperparameters) faster on the CPU.
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # FIXME: currently, the gradient is incorrect if loss_device is cuda
+    # FIXME: currently, the gradient is None if loss_device is cuda
     loss_device = torch.device("cpu")
     
     # Create the model and the optimizer

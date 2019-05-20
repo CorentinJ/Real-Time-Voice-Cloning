@@ -129,7 +129,7 @@ class SpeakerEncoder(nn.Module):
             preds = sim_matrix.detach().cpu().numpy()
 
             # Snippet from https://yangcha.github.io/EER-ROC/
-            fpr, tpr, thresholds = roc_curve(labels.flatten(), preds.flatten())
+            fpr, tpr, thresholds = roc_curve(labels.flatten(), preds.flatten())           
             eer = brentq(lambda x: 1. - x - interp1d(fpr, tpr)(x), 0., 1.)
             
         return loss, eer

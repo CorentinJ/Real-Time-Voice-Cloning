@@ -185,13 +185,6 @@ class UI(QDialog):
         self.draw_spec(None, "", "generated")
         self.draw_umap([])
 
-    @staticmethod
-    def fixed_size_grid(grid, size):
-        for i in range(grid.rowCount()):
-            grid.setRowMinimumHeight(i, size.height() // grid.rowCount())
-        for i in range(grid.columnCount()):
-            grid.setColumnMinimumWidth(i, size.width() // grid.columnCount())
-
     def __init__(self):
         ## Initialize the application
         self.app = QApplication(sys.argv)
@@ -202,22 +195,15 @@ class UI(QDialog):
         ## Main layouts
         # Root
         root_layout = QGridLayout()
-        # root_layout.setHorizontalSpacing(20)
         self.setLayout(root_layout)
-        
-        # Projections
-        proj_layout = QVBoxLayout()
-        root_layout.addLayout(proj_layout, 0, 0, 2, 1)
         
         # Browser
         browser_layout = QGridLayout()
-        # browser_layout.setHorizontalSpacing(7)
         root_layout.addLayout(browser_layout, 0, 1)
-        # print(browser_layout.horizontalSpacing())
         
         # Visualizations
         vis_layout = QHBoxLayout()
-        root_layout.addLayout(vis_layout, 1, 1, 1, 2)
+        root_layout.addLayout(vis_layout, 1, 1, 2, 3)
         
         # Generation
         gen_layout = QVBoxLayout()
@@ -225,10 +211,16 @@ class UI(QDialog):
 
 
         ## Projections
-        umap_canvas = FigureCanvas(Figure(figsize=(10, 10)))
-        proj_layout.addWidget(umap_canvas)
+        # Legend
+        self.legend_layout = QVBoxLayout()
+        root_layout.addLayout(self.legend_layout, 0, 0)
+        
+        # UMap
+        umap_canvas = FigureCanvas(Figure(figsize=(5, 5)))
         self.umap_ax = umap_canvas.figure.subplots()
         umap_canvas.figure.patch.set_facecolor("#F0F0F0")
+        root_layout.addWidget(umap_canvas, 1, 0)
+
 
         ## Browser
         i = 0
@@ -277,7 +269,7 @@ class UI(QDialog):
         browser_layout.addWidget(self.record_button, i, 1)
         self.take_generated_button = QPushButton("Take generated")
         browser_layout.addWidget(self.take_generated_button, i, 2)
-        i += 1
+
         
         # self.dataset_box.currentIndexChanged.connect(lambda: self.select_random(1))
         # self.speaker_box.currentIndexChanged.connect(lambda: self.select_random(2))
@@ -287,19 +279,18 @@ class UI(QDialog):
         # random_utterance_button.clicked.connect(lambda: self.select_random(2))
         # play_button.clicked.connect(lambda: sd.play(self.utterance, sampling_rate))
         # stop_button.clicked.connect(lambda: sd.stop())
-        # self.select_random(0)
-
 
         ## Embed & spectrograms
-        embed_canvas = FigureCanvas(Figure(figsize=(5, 5)))
+        embed_canvas = FigureCanvas(Figure(figsize=(2, 2)))
         vis_layout.addWidget(embed_canvas)
         self.embed_axs = embed_canvas.figure.subplots(2, 1)
-        embed_canvas.figure.patch.set_facecolor("#F0F0F0")
+        # embed_canvas.figure.patch.set_facecolor("#F0F0F0")
+        vis_layout.addStretch()
         
-        spec_canvas = FigureCanvas(Figure(figsize=(5, 10)))
+        spec_canvas = FigureCanvas(Figure(figsize=(2, 2)))
         vis_layout.addWidget(spec_canvas)
         self.spec_axs = spec_canvas.figure.subplots(2, 1)
-        spec_canvas.figure.patch.set_facecolor("#F0F0F0")
+        # spec_canvas.figure.patch.set_facecolor("#F0F0F0")
 
 
         ## Generation
@@ -313,6 +304,7 @@ class UI(QDialog):
         self.log_window.setAlignment(Qt.AlignBottom | Qt.AlignLeft)
         gen_layout.addWidget(self.log_window)
         self.logs = []
+        gen_layout.addStretch()
         
         
 
@@ -358,14 +350,6 @@ class UI(QDialog):
         ## Set the size of the window and of the elements
         max_size = QDesktopWidget().availableGeometry(self).size() * 0.8
         self.resize(max_size)
-
-        # root_size = root_layout.sizeHint()
-        # browser_size = QSize(root_size.width() // root_layout.columnCount(),
-        #                      root_size.height() // root_layout.rowCount())
-        # print(root_size)
-        # print(browser_size)
-        # self.fixed_size_grid(root_layout, root_size)
-        # self.fixed_size_grid(browser_layout, browser_size)
         
         ## Finalize the display
         self.reset_interface()
@@ -373,30 +357,6 @@ class UI(QDialog):
 
     def start(self):
         self.app.exec_()
-
-    def embed_utterance(self, demo, speaker_name=None, go_next=None):
-        if speaker_name is None:
-            speaker_name = "%s/%s" % (self.dataset_box.currentText(), 
-                                      self.speaker_box.currentText())
-        use_partials = self.use_partials_button.isChecked()
-        go_next = go_next if go_next is not None else self.go_next_button.isChecked() 
-        
-        # Compute the embedding(s)
-        embed, partial_embeds, wave_splits = inference.embed_utterance(
-            self.utterance, use_partials, return_partials=True)
-        if use_partials:
-            self.embeds.append((embed, "o", speaker_name))
-            for partial_embed in partial_embeds:
-                self.embeds.append((partial_embed, ".", speaker_name))
-        else:
-            self.embeds.append((embed, "s", speaker_name))
-            
-        # Draw the embed and the UMAP projection
-        self.draw_embed()
-        self.draw_umap()
-        
-        if go_next:
-            self.browser_select_next()
 
     def record_one(self):
         self.record_one_button.setText("Recording...")
