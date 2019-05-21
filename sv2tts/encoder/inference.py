@@ -9,6 +9,7 @@ from matplotlib import cm
 _model = None # type: SpeakerEncoder
 _device = None # type: torch.device
 
+
 def load_model(weights_fpath, device=None):
     """
     Loads the model in memory. If this function is not explicitely called, it will be run on the 

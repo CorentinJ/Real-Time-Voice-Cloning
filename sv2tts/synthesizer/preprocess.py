@@ -2,7 +2,7 @@ from synthesizer.datasets import audio
 from multiprocessing.pool import Pool 
 from functools import partial
 from itertools import chain
-from encoder import inference as speaker_encoder
+# from encoder import inference as speaker_encoder
 from pathlib import Path
 from tqdm import tqdm
 import numpy as np
@@ -32,7 +32,7 @@ def preprocess_librispeech(datasets_root: Path, out_dir: Path, wav_out_dir: Path
     speaker_dirs = list(chain.from_iterable(input_dir.glob("*") for input_dir in input_dirs))
     func = partial(preprocess_speaker, mel_out_dir=mel_out_dir, wav_out_dir=wav_out_dir,
                    skip_existing=skip_existing, hparams=hparams)
-    job = Pool().imap(func, speaker_dirs)
+    job = Pool(1).imap(func, speaker_dirs)
     for speaker_metadata in tqdm(job, "LibriSpeech", len(speaker_dirs), unit="speakers"):
         for metadatum in speaker_metadata:
             metadata_file.write("|".join(str(x) for x in metadatum) + "\n")

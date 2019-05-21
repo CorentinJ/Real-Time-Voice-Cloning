@@ -1,4 +1,4 @@
-from synthesizer.datasets.audio import inv_mel_spectrogram
+from synthesizer.audio import inv_mel_spectrogram
 from synthesizer.hparams import hparams
 from synthesizer import synthesizer
 import sounddevice as sd
