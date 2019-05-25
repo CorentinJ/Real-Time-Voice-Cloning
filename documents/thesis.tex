@@ -290,20 +290,20 @@ While all parts of the framework are trained separately, there is still the requ
 The encoder model and its training procedure are described over several papers \citep{SV2TTS, GE2E, TE2E}. We synthesize the parts that are pertinent to SV2TTS as well as our choices of implementation.
 
 \subsubsection{Model architecture}
-The model is a 3-layer LSTM with 768 hidden nodes followed by a projection layer of 256 units. While there is no reference in any of the papers to what a projection layer could be, the intuition is that it is simply a 256 outputs fully-connected layer per LSTM that is repeatedly applied to every output of the LSTM. When we first implemented the speaker encoder, we directly used 256 units LSTM layers instead, for the sake of quick prototyping, simplicity and for a lighter training load. The latter is important, as the authors have trained their own model for 50 million steps (although on a larger dataset), which is technically difficult for us to reproduce. We found this smaller model to perform extremely well, and we haven't found the time to train the larger version later on. \color{red} move to experiments? \color{black}
+The model is a 3-layer LSTM with 768 hidden nodes followed by a projection layer of 256 units. While there is no reference in any of the papers as to what a projection layer is, the intuition is that it is simply a 256 outputs fully-connected layer per LSTM that is repeatedly applied to every output of the LSTM. When we first implemented the speaker encoder, we directly used 256 units LSTM layers instead, for the sake of quick prototyping, simplicity and for a lighter training load. This last part is important, as the authors have trained their own model for 50 million steps (although on a larger dataset), which is technically difficult for us to reproduce. We found this smaller model to perform extremely well, and we haven't found the time to train the larger version later on. \color{red} move to experiments? \color{black}
 
 The inputs to the model are 40-channels log-mel spectrograms with a 25ms window width and a 10ms step. The output is the L2-normalized hidden state of the last layer, which is a vector of 256 elements. Our implementation also features a ReLU layer before the normalization, with the goal in mind to make embeddings sparse and thus more easily interpretable.
 
 \subsubsection{Generalized End-to-End loss}
 The speaker encoder is trained on a speaker verification task. Speaker verification is a typical application of biometrics where the identity of a person is verified through their voice. A template is created for a person by deriving their speaker embedding (see equation \ref{speaker_embedding}) from a few utterances. This process is called enrollment. At runtime, a user identifies himself with a short utterance and the system compares the embedding of that utterance with the enrolled speaker embeddings. Above a given similarity threshold, the user is identified. The GE2E loss simulates this process to optimize the model. 
 
-At training time, the model computes the embeddings $\ve_{ij}\ (1 \leq i \leq N, 1 \leq j \leq M)$ of $M$ utterances from $N$ speakers. A speaker embedding is derived for each speaker: $\vc_i=\frac{1}{M}\sum_{j}^{M}\ve_{ij}\ (1 \leq i \leq N)$. The similarity matrix $\ms_{ij,k}$ is the result of the two-by-two comparison of all embeddings $\ve_{ij}$ against every speaker embedding $\vc_{k}\ (1 \leq k \leq N)$ in the batch. This measure is the scaled cosine similarity:
+At training time, the model computes the embeddings $\ve_{ij}\ (1 \leq i \leq N, 1 \leq j \leq M)$ of $M$ utterances of fixed duration from $N$ speakers. A speaker embedding $\vc_i$ is derived for each speaker: $\vc_i=\frac{1}{M}\sum_{j}^{M}\ve_{ij}\ (1 \leq i \leq N)$. The similarity matrix $\ms_{ij,k}$ is the result of the two-by-two comparison of all embeddings $\ve_{ij}$ against every speaker embedding $\vc_{k}\ (1 \leq k \leq N)$ in the batch. This measure is the scaled cosine similarity:
 
 \begin{equation} \label{similarity_simple}
 	\ms_{ij,k} = w \cdot cos(\ve_{ij}, \vc_{k}) + b = w \cdot \ve_{ij} \cdot ||\vc_{k}||_2 + b
 \end{equation}
 
-where $w$ and $b$ are learnable parameters. This entire process is illustrated in figure \ref{sim_matrix}.  From a computing perspective, the cosine similarity of two L2-normed vectors is simply their dot product, hence the rightmost hand side of the equation \ref{similarity_simple}. An optimal model is expected to output high similarity values when an utterance matches the speaker $(i = k)$ and lower values elsewhere $(i \neq k)$. To this end, the loss is the sum of row-wise softmax losses.
+where $w$ and $b$ are learnable parameters. This entire process is illustrated in figure \ref{sim_matrix}.  From a computing perspective, the cosine similarity of two L2-normed vectors is simply their dot product, hence the rightmost hand side of equation \ref{similarity_simple}. An optimal model is expected to output high similarity values when an utterance matches the speaker $(i = k)$ and lower values elsewhere $(i \neq k)$. To optimize in this direction, the loss is the sum of row-wise softmax losses.
 
 \begin{figure}[h]
 	\centering
@@ -312,7 +312,7 @@ where $w$ and $b$ are learnable parameters. This entire process is illustrated i
 	\label{sim_matrix}
 \end{figure}
 
-Note that each utterance $\ve_{ij}$ is included in the centroid $\vc_{i}$ of the same speaker when computing the loss. This creates a bias towards the correct speaker independently of the accuracy of the model. To prevent this, an utterance that compared against its own speaker's embedding will be removed from the computation of the speaker embedding. The similarity matrix is then defined as:
+Note that each utterance $\ve_{ij}$ is included in the centroid $\vc_{i}$ of the same speaker when computing the loss. This creates a bias towards the correct speaker independently of the accuracy of the model. To prevent this, an utterance that is compared against its own speaker's embedding will be removed from the computation of the speaker embedding. The similarity matrix is then defined as:
 \begin{equation} \label{similarity_exclusive}
 \ms_{ji,k} =
 \begin{cases}
@@ -325,10 +325,19 @@ where the exclusive centroids $\vc_{i}^{(-j)}$ are defined as:
 \vc_{i}^{(-j)} = \frac{1}{M-1}\sum_{\substack{m=1\\m\neq j}}^{M}\ve_{im}
 \end{equation}
 
+The fixed duration of the utterances in a training batch is of 1.6 seconds. These utterances are partial utterances sampled from the longer complete utterances in the dataset. While the model architecture is able to handle inputs of variable length, it is reasonable to expect that it performs best with utterances of the same duration as those seen in training. Therefore, at inference time an utterance is split in segments of 1.6 seconds overlapping by 50\%, and the encoder forwards each segment individually. The resulting outputs are averaged then normalized to produce the utterance embedding. This is illustrated in figure \ref{encoder_inference}. Curiously, the authors of SV2TTS advocate for 800ms windows at inference time but still 1.6 seconds ones during training. We prefer to keep 1.6 seconds for both, as is done in GE2E.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.65\linewidth]{images/encoder_inference.png}
+	\caption{Computing the embedding of a complete utterance. The d-vectors are simply the unnormalized outputs of the model. This figure is extracted from \citep{GE2E}.}
+	\label{encoder_inference}
+\end{figure}
+
 The authors use $N = 64$ and $M = 10$ as parameters for the batch size. When enrolling a speaker in a practical application, one should expect to have several utterances from each user but likely not an order of magnitude above that of 10, so this choice is reasonable. As for the number of speakers, it is good to observe that the time complexity of computing the similarity matrix is $O(N^2M)$. Therefore this parameter should be chosen not too large so as to not slow down substantially the training, as opposed to simply picking the largest batch size that fits on the GPU. It is still of course possible to parallelize multiple batches on the same GPU while synchronizing the operations across batches for efficiency. We found it particularly important to vectorize all operations when computing the similarity matrix, so as to minimize the number of GPU transactions.
 
 \subsubsection{Experiments}
-The utterances to feed to the model are expected to be 1.6 seconds long. To this end we sample partial utterances of 1.6s from the full utterances in the dataset. To avoid segments that are mostly silent, we use the webrtcvad\footnote{\url{https://github.com/wiseman/py-webrtcvad}} python package to perform Voice Activity Detection (VAD). This yields a binary flag over the audio corresponding to whether or no the segment is voice. We perform a moving average on this binary flag to smooth out short spikes in the detection, which we then binarize again. Finally, we perform a dilation on the flag with a kernel size of $n + 1$, where $n$ is the maximum silence duration tolerated. The audio is then trimmed of the unvoiced parts. We found the value $n=0.2$s to be a good choice that retains a natural speech prosody. This process is illustrated in figure \ref{encoder_preprocess_vad}.
+To avoid segments that are mostly silent when sampling partial utterances from complete utterances, we use the webrtcvad\footnote{\url{https://github.com/wiseman/py-webrtcvad}} python package to perform Voice Activity Detection (VAD). This yields a binary flag over the audio corresponding to whether or not the segment is voiced. We perform a moving average on this binary flag to smooth out short spikes in the detection, which we then binarize again. Finally, we perform a dilation on the flag with a kernel size of $s + 1$, where $s$ is the maximum silence duration tolerated. The audio is then trimmed of the unvoiced parts. We found the value $s=0.2$s to be a good choice that retains a natural speech prosody. This process is illustrated in figure \ref{encoder_preprocess_vad}. A last preprocessing step applied to the audio waveforms is normalization, to make up for the varying volume of the speakers in the dataset.
 
 \begin{figure}[h]
 	\centering
@@ -337,7 +346,7 @@ The utterances to feed to the model are expected to be 1.6 seconds long. To this
 	\label{encoder_preprocess_vad}
 \end{figure}
 
-The authors combined several noisy datasets to make for a large corpus of speech of quality similar to what is found in the wild. These datasets are LibriSpeech \citep{LibriSpeech}, VoxCeleb1 \citep{VoxCeleb1}, VoxCeleb2 \citep{VoxCeleb2} and an internal dataset, to which we do not have access. LibriSpeech is a corpus of audiobooks making up for 1000 hours of audio from 2400 speakers, split equally in two sets "clean" and "other". The clean set is supposedly made up of cleaner speech than the other set, even though some parts of the clean set still contain a lot of noise \citep{LibriTTS}. VoxCeleb1 and VoxCeleb2 are made up from audio segments extracted from youtube videos of celebrities (often in the context of an interview). VoxCeleb1 has 1.2k speakers, while VoxCeleb2 has about 6k. Both these datasets have non-English speakers. We used heuristics based on the nationality of the speaker to filter non-English ones out of the training set in VoxCeleb1, but couldn't apply those same heuristics to VoxCeleb2 as the nationality is not referenced in that set. Note that it is unclear without experimentation as to whether having non-English speaker hurts the training of the encoder (the authors make no note of it either). All these datasets are sampled at 16kHz.
+The authors combined several noisy datasets to make for a large corpus of speech of quality similar to what is found in the wild. These datasets are LibriSpeech \citep{LibriSpeech}, VoxCeleb1 \citep{VoxCeleb1}, VoxCeleb2 \citep{VoxCeleb2} and an internal dataset, to which we do not have access. LibriSpeech is a corpus of audiobooks making up for 1000 hours of audio from 2400 speakers, split equally in two sets "clean" and "other". The clean set is supposedly made up of cleaner speech than the other set, even though some parts of the clean set still contain a lot of noise \citep{LibriTTS}. VoxCeleb1 and VoxCeleb2 are made up from audio segments extracted from youtube videos of celebrities (often in the context of an interview). VoxCeleb1 has 1.2k speakers, while VoxCeleb2 has about 6k. Both these datasets have non-English speakers. We used heuristics based on the nationality of the speaker to filter non-English ones out of the training set in VoxCeleb1, but couldn't apply those same heuristics to VoxCeleb2 as the nationality is not referenced in that set. Note that it is unclear without experimentation as to whether having non-English speakers hurts the training of the encoder (the authors make no note of it either). All these datasets are sampled at 16kHz.
 
 The authors test different combinations of these datasets and observe the effect on the quality of the embeddings. They adjust the output size of LSTM model (the size of the embeddings) to 64 or 256 according to the number of speakers. They evaluate the subjective naturalness and similarity with ground truth of the speech generated by a synthesizer trained from the embeddings produced by each model. They also report the equal error rate of the encoder on speaker verification, which we discuss later in this section. These results can be found in Table \ref{encoder_training_datasets}.
 
@@ -370,16 +379,16 @@ The authors test different combinations of these datasets and observe the effect
 	\label{encoder_training_datasets}
 \end{table}
 
-These results indicate that the number of speakers is strongly correlated with the good performance of not only the encoder on the verification task, but also of the entire framework on the quality of the speech generated and on its ability to clone a voice. The small jump in naturalness, similarity and EER gained by including VoxCeleb2 could hint that the variation of languages is hurting the training. The internal dataset of the authors
+These results indicate that the number of speakers is strongly correlated with the good performance of not only the encoder on the verification task, but also of the entire framework on the quality of the speech generated and on its ability to clone a voice. The small jump in naturalness, similarity and EER gained by including VoxCeleb2 could indicate that the variation of languages is hurting the training. The internal dataset of the authors is a proprietary voice search corpus from 18k English speakers. The encoder trained on this dataset performs significantly better, however we only have access to public datasets. We thus proceed with LibriSpeech, VoxCeleb1 and VoxCeleb2.
 
+We train the speaker encoder for one million steps. To monitor the training we report the EER and we observe the ability of the model to cluster speakers. We periodically sample a batch of 10 speakers with 10 utterances each, compute the utterance embeddings and project them in a two-dimensional space with UMAP \citep{UMAP}. As embeddings of different speakers are expected to be further apart in the latent space than embeddings from the same speakers, it is expected that clusters of utterance from a same speaker form as the training progresses. We report our UMAP projections in figure \ref{training_umap}, where this behaviour can be observed.
 
-We train the speaker encoder for one million steps.
-
+- hasnt converged
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=\linewidth]{images/training_umap.png}
-	\caption{UMAP projections of utterance embeddings from randomly selected batches from the train set at different iterations of our model. Utterances from the same speaker are represented by a dot of the same color. We specifically omit to pass labels to UMAP, so the clustering in the later steps is entirely done by the model.}
+	\caption{UMAP projections of utterance embeddings from randomly selected batches from the train set at different iterations of our model. Utterances from the same speaker are represented by a dot of the same color. We specifically omit to pass labels to UMAP, so the clustering is entirely done by the model.}
 	\label{training_umap}
 \end{figure}
 

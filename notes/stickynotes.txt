@@ -10,20 +10,11 @@ Generalized End-To-End Loss For Speaker Verification
 - How stable is the encoding w.r.t. the length of the utterance? Compare side by side embeddings of several utterances cut at 1.6s, 2.4s, 3.2s... Show the distribution of the distance to the centroids w.r.t. to the length of the utterances, the EER
 - Analyze the components of the embeddings
 - Technically, you could do voice morphing in the same sentence
-- If librispeech works, maybe consider adding VCTK then train-other
-- Also retrain with better encoder network
 - Check out this dataset http://www.robots.ox.ac.uk/~vgg/data/lip_reading/
-
-
------- Old ideas ------
-- Embed speaker audios in visdom
-- Try the encoder withou relu
 
 
 ------ Things to not forget to write about ------
 - The contents of problems.txt, improvements.txt, encoder.txt, synthesizer.txt, questions.txt.
-- Removal of projection layer
-- Relu at the end of the network
 - (slides) Interpretation of EER
 - Thank mr. Louppe, the authors of GE2E and Joeri
 - LibriTTS, Improving data efficiency in end-to-end, 
