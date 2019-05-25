@@ -3,7 +3,7 @@
 ### Papers implemented  
 | URL | Designation | Title | Implementation source |
 | --- | ----------- | ----- | --------------------- |
-|[1811.00002](https://arxiv.org/pdf/1811.00002.pdf) | WaveGlow | Waveglow: A Flow-Based Generative Network For Speech Synthesis | [NVIDIA/waveglow](https://github.com/NVIDIA/waveglow) |
+|[1811.00002](https://arxiv.org/pdf/1802.08435v1.pdf) | WaveRNN | Efficient Neural Audio Synthesis | [fatchord/WaveRNN](https://github.com/fatchord/WaveRNN) |
 |[**1806.04558**](https://arxiv.org/pdf/1806.04558.pdf) | **SV2TTS** | **Transfer Learning from Speaker Verification to Multispeaker Text-To-Speech Synthesis** | This repo |
 |[1712.05884](https://arxiv.org/pdf/1712.05884.pdf) | Tacotron 2 | Natural TTS Synthesis by Conditioning Wavenet on Mel Spectrogram Predictions | [Rayhane-mamah/Tacotron-2](https://github.com/Rayhane-mamah/Tacotron-2)
 |[1710.10467](https://arxiv.org/pdf/1710.10467.pdf) | GE2E | Generalized End-To-End Loss for Speaker Verification | This repo |
