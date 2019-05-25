@@ -1,5 +1,5 @@
 from synthesizer.utils.text import text_to_sequence
-from synthesizer.datasets import audio
+from synthesizer import audio
 from synthesizer.infolog import log
 from synthesizer.models import create_model
 from synthesizer.utils import plot

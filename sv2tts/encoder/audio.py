@@ -38,9 +38,10 @@ def trim_long_silences(wav):
     
     # Trim the end of the audio to have a multiple of the window size
     wav = wav[:len(wav) - (len(wav) % samples_per_window)]
-    # plt.subplot(611)
-    # plt.plot(wav)
-    
+    # _, axs = plt.subplots(3, 1, sharex=True)
+    # for ax in axs:
+    #     ax.plot((wav / np.max(np.abs(wav)) + 1) / 2)
+
     # Convert the float waveform to 16-bit mono PCM
     pcm_wave = struct.pack("%dh" % len(wav), *(np.round(wav * int16_max)).astype(np.int16))
     
@@ -52,8 +53,8 @@ def trim_long_silences(wav):
         voice_flags.append(vad.is_speech(pcm_wave[window_start * 2:window_end * 2],
                                          sample_rate=sampling_rate))
     voice_flags = np.array(voice_flags)
-    # plt.subplot(612)
-    # plt.plot(voice_flags)
+    # axs[0].set_title("Raw VAD")
+    # axs[0].plot(np.repeat(voice_flags, samples_per_window))
         
     # Smooth the voice detection with a moving average
     def moving_average(array, width):
@@ -63,27 +64,24 @@ def trim_long_silences(wav):
         return ret[width - 1:] / width
     audio_mask = moving_average(voice_flags, vad_moving_average_width)
     audio_mask = np.round(audio_mask).astype(np.bool)
-    # plt.subplot(613)
-    # plt.plot(audio_mask)
+    # axs[1].set_title("Moving average + Binarization")
+    # axs[1].plot(np.repeat(audio_mask, samples_per_window))
     
     # Dilate the voiced regions
     audio_mask = binary_dilation(audio_mask, np.ones(vad_max_silence_length + 1))
-    # plt.subplot(614)
-    # plt.plot(audio_mask)
+    audio_mask = np.repeat(audio_mask, samples_per_window)
+    
+    # axs[2].set_title("Binary dilation")
+    # axs[2].plot(audio_mask)
+    # for ax in axs:
+    #     ax.set_yticks([])
+    # xticks = np.arange(0, len(wav), sampling_rate)
+    # plt.xticks(xticks, ["%ds" % (xi // sampling_rate) for xi in xticks])
+    # plt.show()
+    # quit()
     
     # Trim away the long silences in the audio
-    audio_mask = np.repeat(audio_mask, samples_per_window)
-    # plt.subplot(615)
-    # plt.plot(wav)
-    # plt.plot(audio_mask * 10000)
-    
-    wav = wav[audio_mask == True]
-    # plt.subplot(616)
-    # plt.plot(wav)
-    # play_wave(wav)
-    # plt.show()
-    
-    return wav
+    return wav[audio_mask == True]
   
 def normalize_volume(wav, target_dBFS, increase_only=False, decrease_only=False):
     if increase_only and decrease_only:
@@ -95,7 +93,7 @@ def normalize_volume(wav, target_dBFS, increase_only=False, decrease_only=False)
         return wav
     return wav * (10 ** (dBFS_change / 20))
 
-def preprocess_wave(wav):
+def preprocess_wav(wav):
     """ 
     This is the standard routine that should be used on every audio file before being used in 
     this project.

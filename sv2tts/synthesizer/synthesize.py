@@ -137,7 +137,7 @@ def tacotron_synthesize(args, hparams, checkpoint, sentences=None):
     
     if args.mode == "eval":
         return run_eval(args, checkpoint_path, output_dir, hparams, sentences)
-    elif args.mode == "synthesis':
+    elif args.mode == "synthesis":
         return run_synthesis(args, checkpoint_path, output_dir, hparams)
     else:
         run_live(args, checkpoint_path, hparams)

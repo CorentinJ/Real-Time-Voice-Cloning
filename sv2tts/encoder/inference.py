@@ -2,15 +2,17 @@ import numpy as np
 import torch
 from encoder.params_data import *
 from encoder.model import SpeakerEncoder
-from encoder import audio
+from encoder.audio import preprocess_wav
 import matplotlib.pyplot as plt
 from matplotlib import cm
+from encoder import audio
+from pathlib import Path
 
 _model = None # type: SpeakerEncoder
 _device = None # type: torch.device
 
 
-def load_model(weights_fpath, device=None):
+def load_model(weights_fpath: Path, device=None):
     """
     Loads the model in memory. If this function is not explicitely called, it will be run on the 
     first call to embed_frames() with the default weights file.
@@ -30,6 +32,7 @@ def load_model(weights_fpath, device=None):
     checkpoint = torch.load(weights_fpath)
     _model.load_state_dict(checkpoint["model_state"])
     _model.eval()
+    print("Loaded model %s trained to step %d" % (weights_fpath.name, checkpoint["step"]))
     
 def is_loaded():
     return _model is not None
@@ -104,6 +107,7 @@ def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
     """
     Computes an embedding for a single utterance.
     
+    # TODO: handle multiple wavs to benefit from batching on GPU
     :param wav: the utterance waveform as a numpy array of float32
     :param using_partials: if True, then the utterance is split in partial utterances of 
     <partial_utterance_n_frames> frames and the utterance embedding is computed from their 
@@ -157,7 +161,7 @@ def load_preprocess_waveform(fpath):
     :return: the audio waveform as a numpy array of float32.
     """
     wave = audio.load(fpath)
-    wave = audio.preprocess_wave(wave)
+    wave = audio.preprocess_wav(wave)
     return wave
 
 def plot_embedding_as_heatmap(embed, ax=None, title="", shape=None, color_range=(0, 0.35)):

@@ -1,11 +1,10 @@
 from synthesizer.utils.symbols import symbols
 from synthesizer.utils.text import sequence_to_text
-from synthesizer.datasets import audio
 from synthesizer.hparams import hparams_debug_string
 from synthesizer.feeder import Feeder
 from synthesizer.models import create_model
 from synthesizer.utils import ValueWindow, plot
-from synthesizer import infolog
+from synthesizer import infolog, audio
 from datetime import datetime
 from tqdm import tqdm
 import tensorflow as tf
@@ -128,15 +127,11 @@ def train(log_dir, args, hparams):
     os.makedirs(tensorboard_dir, exist_ok=True)
     os.makedirs(meta_folder, exist_ok=True)
     
-    checkpoint_path = os.path.join(save_dir, "tacotron_model.ckpt")
-    input_path = os.path.join(args.base_dir, args.tacotron_input)
+    checkpoint_fpath = os.path.join(save_dir, "tacotron_model.ckpt")
+    metadat_fpath = os.path.join(args.synthesizer_root, "train.txt")
     
-    if hparams.predict_linear:
-        linear_dir = os.path.join(log_dir, "linear-spectrograms")
-        os.makedirs(linear_dir, exist_ok=True)
-    
-    log("Checkpoint path: {}".format(checkpoint_path))
-    log("Loading training data from: {}".format(input_path))
+    log("Checkpoint path: {}".format(checkpoint_fpath))
+    log("Loading training data from: {}".format(metadat_fpath))
     log("Using model: Tacotron")
     log(hparams_debug_string())
     
@@ -146,7 +141,7 @@ def train(log_dir, args, hparams):
     # Set up data feeder
     coord = tf.train.Coordinator()
     with tf.variable_scope("datafeeder") as scope:
-        feeder = Feeder(coord, input_path, hparams)
+        feeder = Feeder(coord, metadat_fpath, hparams)
     
     # Set up model:
     global_step = tf.Variable(0, name="global_step", trainable=False)
@@ -198,13 +193,13 @@ def train(log_dir, args, hparams):
                     
                     else:
                         log("No model to load at {}".format(save_dir), slack=True)
-                        saver.save(sess, checkpoint_path, global_step=global_step)
+                        saver.save(sess, checkpoint_fpath, global_step=global_step)
                 
                 except tf.errors.OutOfRangeError as e:
                     log("Cannot restore checkpoint: {}".format(e), slack=True)
             else:
                 log("Starting new training!", slack=True)
-                saver.save(sess, checkpoint_path, global_step=global_step)
+                saver.save(sess, checkpoint_fpath, global_step=global_step)
             
             # initializing feeder
             feeder.start_threads(sess)
@@ -332,7 +327,7 @@ def train(log_dir, args, hparams):
                 if step % args.checkpoint_interval == 0 or step == args.tacotron_train_steps or \
                         step == 300:
                     # Save model and current global step
-                    saver.save(sess, checkpoint_path, global_step=global_step)
+                    saver.save(sess, checkpoint_fpath, global_step=global_step)
                     
                     log("\nSaving alignment, Mel-Spectrograms and griffin-lim inverted waveform..")
                     if hparams.predict_linear:

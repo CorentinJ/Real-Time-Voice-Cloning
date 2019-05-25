@@ -24,7 +24,7 @@ class Feeder:
 
 		# Load metadata
 		self._mel_dir = os.path.join(os.path.dirname(metadata_filename), "mels")
-		self._embed_dir = os.path.join(os.path.dirname(metadata_filename), "embed")
+		self._embed_dir = os.path.join(os.path.dirname(metadata_filename), "embeds")
 		with open(metadata_filename, encoding="utf-8") as f:
 			self._metadata = [line.strip().split("|") for line in f]
 			frame_shift_ms = hparams.hop_size / hparams.sample_rate

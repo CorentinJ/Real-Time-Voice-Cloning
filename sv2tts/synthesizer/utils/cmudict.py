@@ -42,7 +42,7 @@ _alt_re = re.compile(r"\([0-9]+\)")
 def _parse_cmudict(file):
   cmudict = {}
   for line in file:
-    if len(line) and (line[0] >= "A" and line[0] <= "Z" or line[0] == """):
+    if len(line) and (line[0] >= "A" and line[0] <= "Z" or line[0] == "'"):
       parts = line.split("  ")
       word = re.sub(_alt_re, "", parts[0])
       pronunciation = _get_pronunciation(parts[1])
@@ -59,4 +59,4 @@ def _get_pronunciation(s):
   for part in parts:
     if part not in _valid_symbol_set:
       return None
-  return " '.join(parts)
+  return " ".join(parts)

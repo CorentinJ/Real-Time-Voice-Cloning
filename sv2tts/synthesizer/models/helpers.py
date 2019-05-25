@@ -150,7 +150,7 @@ def _teacher_forcing_ratio_decay(init_tfr, global_step, hparams):
 			global_step=global_step - hparams.tacotron_teacher_forcing_start_decay, #tfr = 1 at step 10k
 			decay_steps=hparams.tacotron_teacher_forcing_decay_steps, #tfr = 0 at step ~280k
 			alpha=hparams.tacotron_teacher_forcing_decay_alpha, #tfr = 0% of init_tfr as final value
-			name="tfr_cosine_decay')
+			name="tfr_cosine_decay")
 
 		#force teacher forcing ratio to take initial value when global step < start decay step.
 		narrow_tfr = tf.cond(

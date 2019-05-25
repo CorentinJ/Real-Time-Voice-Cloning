@@ -1,4 +1,4 @@
-from synthesizer.datasets.preprocessor import preprocess_librispeech
+from synthesizer.preprocess import preprocess_librispeech
 from synthesizer.hparams import hparams
 from pathlib import Path
 import argparse
@@ -13,13 +13,9 @@ def main():
     )
     parser.add_argument("datasets_root", type=str, help=\
         "Path to the directory containing your LibriSpeech/TTS datasets.")
-    parser.add_argument("-m", "--out_dir", type=str, default=argparse.SUPPRESS, help=\
-        "Path to the output directory that will contain the mel spectrograms. Defaults to "
-        "<datasets_root>/SV2TTS/synthesizer/")
-    parser.add_argument("-w", "--wav_out_dir", type=str, default=argparse.SUPPRESS, help=\
-        "Path to the output directory that will contain the audio wav files to train the"
-        "vocoder. Defaults to <datasets_root>/SV2TTS/vocoder/ if out_dir is not set either."
-        "If out_dir is set but wav_out_dir is not, wav_out_dir will default to out_dir.")
+    parser.add_argument("-o", "--out_dir", type=str, default=argparse.SUPPRESS, help=\
+        "Path to the output directory that will contain the mel spectrograms, the audios and the "
+        "embeds. Defaults to <datasets_root>/SV2TTS/synthesizer/")
     parser.add_argument("-s", "--skip_existing", action="store_true", help=\
         "Whether to overwrite existing files with the same name. Useful if the preprocessing was "
         "interrupted.")
@@ -30,20 +26,13 @@ def main():
     
     # Process the arguments
     args.datasets_root = Path(args.datasets_root)
-    if not hasattr(args, "wav_out_dir"):
-        if not hasattr(args, "out_dir"):
-            args.wav_out_dir = Path(args.datasets_root, "SV2TTS", "vocoder")
-        else:
-            args.wav_out_dir = args.out_dir
     if not hasattr(args, "out_dir"):
         args.out_dir = Path(args.datasets_root, "SV2TTS", "synthesizer")
     args.out_dir = Path(args.out_dir)
-    args.wav_out_dir = Path(args.wav_out_dir)
 
     # Create directories
     assert args.datasets_root.exists()
     args.out_dir.mkdir(exist_ok=True, parents=True)
-    args.wav_out_dir.mkdir(exist_ok=True, parents=True)
 
     # Preprocess the dataset
     preprocess_librispeech(**vars(args))    

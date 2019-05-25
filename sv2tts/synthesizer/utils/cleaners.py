@@ -51,8 +51,7 @@ def expand_numbers(text):
 
 
 def lowercase(text):
-  """lowercase input tokens.
-  """
+  """lowercase input tokens."""
   return text.lower()
 
 
@@ -80,7 +79,7 @@ def transliteration_cleaners(text):
 
 
 def english_cleaners(text):
-  """Pipeline for English text, including number and abbreviation expansion.""'
+  """Pipeline for English text, including number and abbreviation expansion."""
   text = convert_to_ascii(text)
   text = lowercase(text)
   text = expand_numbers(text)

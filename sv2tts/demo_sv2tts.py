@@ -42,12 +42,12 @@ if __name__ == "__main__":
     while True:
         # Retrieve the embedding
         if user:
-            from encoder.audio import rec_wave, preprocess_wave
+            from encoder.audio import rec_wave, preprocess_wav
             from time import sleep
             print("Watch out, recording in 2 seconds...")
             sleep(2)
             print("Recording 5 seconds!")
-            wav_source = preprocess_wave(rec_wave(5))
+            wav_source = preprocess_wav(rec_wave(5))
             print("Done!", end=" ")
             sleep(1)
             print("Here is your audio:")
