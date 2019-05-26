@@ -1,4 +1,4 @@
-# Automatic Multispeaker Voice Cloning Across Languages
+# Real-Time Voice Cloning
 
 ### Papers implemented  
 | URL | Designation | Title | Implementation source |
