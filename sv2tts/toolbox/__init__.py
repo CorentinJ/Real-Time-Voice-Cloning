@@ -33,7 +33,16 @@ class Toolbox:
         self.ui.start()
         
     def setup_events(self):
+        ## All the nasty UI events code
         self.ui.browser_load_button.clicked.connect(self.load_from_browser)
+        random_func = lambda level: lambda: self.ui.populate_browser(self.datasets_root,
+                                                                     recognized_datasets,
+                                                                     level)
+        self.ui.random_dataset_button.clicked.connect(random_func(0))
+        self.ui.random_speaker_button.clicked.connect(random_func(1))
+        self.ui.random_utterance_button.clicked.connect(random_func(2))
+        self.ui.dataset_box.currentIndexChanged.connect(random_func(1))
+        self.ui.speaker_box.currentIndexChanged.connect(random_func(2))
 
     def load_from_browser(self):
         fpath = Path(self.datasets_root,
@@ -61,12 +70,12 @@ class Toolbox:
         
         # Add the embedding to the speaker
         if not speaker_name in self.embeds:
+            # TODO: ordereddict
             self.embeds[speaker_name] = dict()
         self.embeds[speaker_name][utterance_name] = (embed, partial_embeds, wav_splits)
         
         # Draw the embed and the UMAP projection
-        self.draw_embed()
-        self.draw_umap()
+        self.ui.draw_umap(self.embeds)
     
 
     def init(self):

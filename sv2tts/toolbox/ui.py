@@ -1,7 +1,8 @@
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from PyQt4.QtGui import *
 from PyQt4.QtCore import QSize, Qt
+from PyQt4.QtGui import *
+from itertools import chain
 from encoder import audio as encoder_audio
 from encoder import inference as encoder
 from pathlib import Path
@@ -31,7 +32,7 @@ colormap = np.array([
 
    
 class UI(QDialog):
-    min_umap_points = 5
+    min_umap_points = 4
     max_log_lines = 4
     
     def draw_embed_heatmap(self, embed, speaker_name, which):
@@ -64,49 +65,47 @@ class UI(QDialog):
         ax.set_yticks([])
         ax.figure.canvas.draw()
 
-    def draw_umap(self, embeds):
+    def draw_umap(self, embeds: dict):
         self.umap_ax.clear()
+
+        if len(embeds) > len(colormap):
+            print("Warning: maximum number of speakers/colors reached", file=sys.stderr)
         
-        # Display a message if there aren't enough points
-        if len(embeds) <= self.min_umap_points:
-            self.umap_ax.text(.5, .5, "Add %d more points to\ngenerate the projections" % 
-                              (self.min_umap_points - len(embeds)), horizontalalignment='center',
-                              fontsize=15)
-            self.umap_ax.set_xticks([])
-            self.umap_ax.set_yticks([])
-            self.umap_ax.figure.canvas.draw()
-            return
-    
-        # Compute the projections
-        speaker_names, indices = np.unique([e[2] for e in embeds], return_index=True)
-        speaker_names = speaker_names[np.argsort(indices)]
-        speaker_dict = {s: i for i, s in enumerate(speaker_names)}
-        embed_data = np.array([e[0] for e in embeds])
-        reducer = umap.UMAP(int(np.ceil(np.sqrt(len(embed_data)))), metric="cosine")
-        projections = reducer.fit_transform(embed_data)
-    
-        # Hide or show partials
-        show_partials = self.show_partials_button.isChecked()
-        if not show_partials:
-            projections = [p for e, p in zip(embeds, projections) if e[1] != "."]
-            embeds = [e for e in embeds if e[1] != "."]
-        else:
-            embeds = embeds
-    
+        # Gather the embeddings to be plotted
+        to_plot = []        # List of tuples (color, mark)
+        embed_data = []     # List of embeds
+        for speaker_dict, color in zip(embeds.values(), colormap):
+            to_plot.extend([(color, "o")] * len(speaker_dict))
+            embed_data.extend(embed for embed, _, _ in speaker_dict.values())
+        # # Hide or show partials
+        # show_partials = self.show_partials_button.isChecked()
+        # if not show_partials:
+        #     projections = [p for e, p in zip(embeds, projections) if e[1] != "."]
+        #     embeds = [e for e in embeds if e[1] != "."]
+        # else:
+        #     embeds = embeds
+        # 
         # TODO: lines
+
+        # Display a message if there aren't enough points
+        if len(embed_data) < self.min_umap_points:
+            self.umap_ax.text(.5, .5, "Add %d more points to\ngenerate the projections" % 
+                              (self.min_umap_points - len(embed_data)), 
+                              horizontalalignment='center', fontsize=15)
+            self.umap_ax.set_title("")
+            
+        # Compute the projections
+        else:
+            reducer = umap.UMAP(int(np.ceil(np.sqrt(len(embed_data)))), metric="cosine")
+            projections = reducer.fit_transform(embed_data)
     
-        legend_done = set()
-        for projection, (embed, mark, speaker_name) in zip(projections, embeds):
-            color = [colormap[speaker_dict[speaker_name]]]
-            legend = None
-            if not speaker_name in legend_done:
-                legend = speaker_name
-                legend_done.add(speaker_name)
-            self.umap_ax.scatter(projection[0], projection[1], c=color, marker=mark, label=legend)
-        self.umap_ax.set_title("UMAP projection")
-        self.umap_ax.legend()
-    
-        # figure.tight_layout()
+            for projection, (color, mark) in zip(projections, to_plot):
+                self.umap_ax.scatter(projection[0], projection[1], c=[color], marker=mark)
+            self.umap_ax.set_title("UMAP projections")
+        
+        # Draw the plot
+        self.umap_ax.set_xticks([])
+        self.umap_ax.set_yticks([])
         self.umap_ax.figure.canvas.draw()
         
     @property        
@@ -158,14 +157,8 @@ class UI(QDialog):
             repopulate_box(self.utterance_box, utterances)
 
     def browser_select_next(self):
-        def select_next_box(box):
-            index = (box.currentIndex() + 1) % len(box)
-            box.setCurrentIndex(index)
-            return index == 0
-    
-        if select_next_box(self.utterance_box):
-            if select_next_box(self.speaker_box):
-                select_next_box(self.dataset_box)
+        index = (self.utterance_box.currentIndex() + 1) % len(self.utterance_box)
+        self.utterance_box.setCurrentIndex(index)
 
     def log(self, line):
         self.logs.append(line)
@@ -183,7 +176,7 @@ class UI(QDialog):
         self.draw_embed_heatmap(None, "", "generated")
         self.draw_spec(None, "", "current")
         self.draw_spec(None, "", "generated")
-        self.draw_umap([])
+        self.draw_umap({})
 
     def __init__(self):
         ## Initialize the application
@@ -270,15 +263,6 @@ class UI(QDialog):
         self.take_generated_button = QPushButton("Take generated")
         browser_layout.addWidget(self.take_generated_button, i, 2)
 
-        
-        # self.dataset_box.currentIndexChanged.connect(lambda: self.select_random(1))
-        # self.speaker_box.currentIndexChanged.connect(lambda: self.select_random(2))
-        # self.utterance_box.currentIndexChanged.connect(lambda: self.load_utterance())
-        # random_dataset_button.clicked.connect(lambda: self.select_random(0))
-        # random_speaker_button.clicked.connect(lambda: self.select_random(1))
-        # random_utterance_button.clicked.connect(lambda: self.select_random(2))
-        # play_button.clicked.connect(lambda: sd.play(self.utterance, sampling_rate))
-        # stop_button.clicked.connect(lambda: sd.stop())
 
         ## Embed & spectrograms
         embed_canvas = FigureCanvas(Figure(figsize=(2, 2)))
