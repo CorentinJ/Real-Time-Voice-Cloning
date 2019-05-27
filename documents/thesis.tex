@@ -379,11 +379,9 @@ The authors test different combinations of these datasets and observe the effect
 	\label{encoder_training_datasets}
 \end{table}
 
-These results indicate that the number of speakers is strongly correlated with the good performance of not only the encoder on the verification task, but also of the entire framework on the quality of the speech generated and on its ability to clone a voice. The small jump in naturalness, similarity and EER gained by including VoxCeleb2 could indicate that the variation of languages is hurting the training. The internal dataset of the authors is a proprietary voice search corpus from 18k English speakers. The encoder trained on this dataset performs significantly better, however we only have access to public datasets. We thus proceed with LibriSpeech, VoxCeleb1 and VoxCeleb2.
+These results indicate that the number of speakers is strongly correlated with the good performance of not only the encoder on the verification task, but also of the entire framework on the quality of the speech generated and on its ability to clone a voice. The small jump in naturalness, similarity and EER gained by including VoxCeleb2 could indicate that the variation of languages is hurting the training. The internal dataset of the authors is a proprietary voice search corpus from 18k English speakers. The encoder trained on this dataset performs significantly better, however we only have access to public datasets. We thus proceed with LibriSpeech-Other, VoxCeleb1 and VoxCeleb2.
 
-We train the speaker encoder for one million steps. To monitor the training we report the EER and we observe the ability of the model to cluster speakers. We periodically sample a batch of 10 speakers with 10 utterances each, compute the utterance embeddings and project them in a two-dimensional space with UMAP \citep{UMAP}. As embeddings of different speakers are expected to be further apart in the latent space than embeddings from the same speakers, it is expected that clusters of utterance from a same speaker form as the training progresses. We report our UMAP projections in figure \ref{training_umap}, where this behaviour can be observed.
-
-- hasnt converged
+We train the speaker encoder for one million steps. To monitor the training we report the EER and we observe the ability of the model to cluster speakers. We periodically sample a batch of 10 speakers with 10 utterances each, compute the utterance embeddings and projecting them in a two-dimensional space with UMAP \citep{UMAP}. As embeddings of different speakers are expected to be further apart in the latent space than embeddings from the same speakers, it is expected that clusters of utterances from a same speaker form as the training progresses. We report our UMAP projections in figure \ref{training_umap}, where this behaviour can be observed.
 
 \begin{figure}[h]
 	\centering
@@ -392,17 +390,61 @@ We train the speaker encoder for one million steps. To monitor the training we r
 	\label{training_umap}
 \end{figure}
 
+As mentioned before, the authors have trained their model for 50 million steps on their proprietary dataset. While both our dataset and our model are smaller, our model still hasn't converged at 1 million steps. The loss decreases steadily with little variance and can still decrease more, but we are bound by the time.
 
-%It is expected that the embeddings created this way
+\color{red} loss plot + test set? + EER \color{black}
+
 
 
 \subsection{Synthesizer} \label{synthesizer}
+The synthesizer is documented in several papers \citep{Tacotron1, Tacotron2, SV2TTS}, its architecture is that of Tacotron 2 without Wavenet \citep{WaveNet}. We use an open-source implementation\footnote{\url{https://github.com/Rayhane-mamah/Tacotron-2}} of Tacotron 2 from which we strip Wavenet and implement the modifications added by SV2TTS.
+
+\subsubsection{Model architecture}
+\color{red} architecture \color{black}
+
+The target mel spectrograms for the synthesizer present more features than those used for the speaker encoder. They are computed from a 50ms window with a 12.5ms step and have 80 channels. The input texts are not processed for pronunciation.
+
+As was shown in figure \ref{sv2tts_framework}, the conditioning of the synthesizer on an embedding is done by appending the embedding to each input frame of the Tacotron attention module. A noteworthy property of presenting the embedding at every input step is that it allows to change a voice through a sentence, e.g. by morphing a voice to another with a linear interpolation between their respective embedding.
+
+\subsubsection{Experiments}
+In SV2TTS, the authors consider two datasets for training both the synthesizer and the vocoder. These are LibriSpeech-Clean which we have mentioned earlier and VCTK\footnote{\url{https://homepages.inf.ed.ac.uk/jyamagis/page3/page58/page58.html}} which is a corpus of only 109 native English speakers recorded with professional equipment. The speech in VCTK is sampled at 48kHz and downsampled to 24kHz in their experiments, which is still higher than the 16kHz of LibriSpeech. They find that a synthesizer trained on LibriSpeech generalizes better than on VCTK when it comes to similarity but not naturalness. They assess this by training the synthesizer on one set, and testing it on the other. These results are in Table \ref{libri_vctk_cross}. We decided to work with the dataset that would offer the best voice cloning similarity on unseen speakers, and therefore picked LibriSpeech. We have also tried using the newer LibriTTS~\citep{LibriTTS} dataset created by the Tacotron team. This dataset is a cleaner version of the whole LibriSpeech corpus with noisy speakers pruned out, a higher sampling rate of 24kHz and the punctuation that LibriSpeech lacks. Unfortunately, the synthesizer could not produce meaningful alignments on this dataset for reasons we ignore. We kept the original LibriSpeech dataset instead.
+
+\begin{table}[h]
+	\begin{center}
+		\begin{small}
+			\begin{tabular}{cccc}
+				\toprule
+				Synthesizer Training Set & Testing Set & Naturalness & Similarity \\
+				\midrule
+				VCTK & LibriSpeech & $4.28 \pm 0.05$ & $1.82 \pm 0.08$ \\
+				LibriSpeech & VCTK & $4.01 \pm 0.06$ & $2.77 \pm 0.08$ \\
+				\bottomrule
+			\end{tabular}
+		\end{small}
+	\end{center}
+	\caption{Cross-dataset evaluation on naturalness and speaker similarity for unseen speakers. This table is extracted from \citep{SV2TTS}}
+	\label{libri_vctk_cross}
+\end{table}
+
+Following the preprocessing methods of the authors, we use an Automatic Speech Recognition (ASR) model to force-align the LibriSpeech transcripts to text. We found the Montreal Forced Aligner\footnote{\url{https://montreal-forced-aligner.readthedocs.io/en/latest/}} to perform this task well. We've also made a cleaner version of these alignments public\footnote{\url{https://github.com/CorentinJ/librispeech-alignments}} to save some time for other users in need of them. With the audio aligned to the text, we can split utterances on silences. This helps the synthesizer to converge, both because of the removal of silences in the target spectrogram, but also due to the reduction of the median duration of the utterances in the dataset, as shorter sequences offer less room for timing errors. Additionally, isolating the silences allows to create a profile of the noise for all utterances of the same speaker. We found a Fourier-analysis based noise removal algorithm to perform well on this task, but unfortunately could not reimplement this algorithm in our preprocessing pipeline.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{images/librispeech_durations.png}
+	\caption{Histogram of the duration of the utterances in LibriSpeech-Clean before (left) and after (right) splitting utterances on silences.}
+	\label{librispeech_durations}
+\end{figure}
+
+
+
+
 %- authors say themselves large variation within same speaker, and synthesizer trained to produce *same* spectrogram -> might want to be as accurate as possible with the embedding
 %- the utterance embedding is used at inference
 %- confusion as to whether speaker embeddings are normalized or not
 %- minimum duration of the utterances in the dataset
 
 \subsection{Vocoder} \label{vocoder}
+
 
 
 %\section{Speed}
