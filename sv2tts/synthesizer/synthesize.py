@@ -51,7 +51,8 @@ def run_eval(args, checkpoint_path, output_dir, hparams, sentences):
     synth.load(checkpoint_path, hparams)
     
     #Set inputs batch wise
-    sentences = [sentences[i: i+hparams.tacotron_synthesis_batch_size] for i in range(0, len(sentences), hparams.tacotron_synthesis_batch_size)]
+    sentences = [sentences[i: i+hparams.tacotron_synthesis_batch_size] for i 
+                 in range(0, len(sentences), hparams.tacotron_synthesis_batch_size)]
     
     log("Starting Synthesis")
     with open(os.path.join(eval_dir, "map.txt"), "w") as file:
@@ -65,41 +66,36 @@ def run_eval(args, checkpoint_path, output_dir, hparams, sentences):
     log("synthesized mel spectrograms at {}".format(eval_dir))
     return eval_dir
 
-def run_synthesis(args, checkpoint_path, output_dir, hparams):
-    GTA = (args.GTA == "True")
-    if GTA:
-        synth_dir = os.path.join(output_dir, "gta")
-        
-        #Create output path if it doesn"t exist
-        os.makedirs(synth_dir, exist_ok=True)
-    else:
-        synth_dir = os.path.join(output_dir, "natural")
-        
-        #Create output path if it doesn"t exist
-        os.makedirs(synth_dir, exist_ok=True)
+def run_synthesis(in_dir, out_dir, model_dir, hparams):
+    synth_dir = os.path.join(out_dir, "mels_gta")
+    os.makedirs(synth_dir, exist_ok=True)
+    metadata_filename = os.path.join(in_dir, "train.txt")
+    print(hparams_debug_string())
     
-    
-    metadata_filename = os.path.join(args.input_dir, "train.txt")
-    log(hparams_debug_string())
+    # Load the model in memory
     synth = Synthesizer()
-    synth.load(checkpoint_path, hparams, gta=GTA)
+    weights_dir = os.path.join(model_dir, "taco_pretrained")
+    checkpoint_fpath = tf.train.get_checkpoint_state(weights_dir).model_checkpoint_path
+    synth.load(checkpoint_fpath, hparams, gta=True)
+    
+    # Load the metadata
     with open(metadata_filename, encoding="utf-8") as f:
         metadata = [line.strip().split("|") for line in f]
         frame_shift_ms = hparams.hop_size / hparams.sample_rate
         hours = sum([int(x[4]) for x in metadata]) * frame_shift_ms / 3600
-        log("Loaded metadata for {} examples ({:.2f} hours)".format(len(metadata), hours))
+        print("Loaded metadata for {} examples ({:.2f} hours)".format(len(metadata), hours))
         
     #Set inputs batch wise
-    metadata = [metadata[i: i+hparams.tacotron_synthesis_batch_size] for i in
+    metadata = [metadata[i: i + hparams.tacotron_synthesis_batch_size] for i in
                 range(0, len(metadata), hparams.tacotron_synthesis_batch_size)]
     # Quick and dirty fix to make sure that all batches have the same size 
     metadata = metadata[:-1]
     
-    log("Starting Synthesis")
-    mel_dir = os.path.join(args.input_dir, "mels")
-    wav_dir = os.path.join(args.input_dir, "audio")
-    embed_dir = os.path.join(args.input_dir, "embed")
-    meta_out_fpath = os.path.join(args.input_dir, "synthesized.txt")
+    print("Starting Synthesis")
+    mel_dir = os.path.join(in_dir, "mels")
+    # wav_dir = os.path.join(in_dir, "audio")
+    embed_dir = os.path.join(in_dir, "embeds")
+    meta_out_fpath = os.path.join(out_dir, "synthesized.txt")
     with open(meta_out_fpath, "w") as file:
         for i, meta in enumerate(tqdm(metadata)):
             texts = [m[5] for m in meta]
@@ -112,7 +108,7 @@ def run_synthesis(args, checkpoint_path, output_dir, hparams):
             for elems in meta:
                 file.write("|".join([str(x) for x in elems]) + "\n")
                 
-    log("Synthesized mel spectrograms at {}".format(synth_dir))
+    print("Synthesized mel spectrograms at {}".format(synth_dir))
     return meta_out_fpath
 
 

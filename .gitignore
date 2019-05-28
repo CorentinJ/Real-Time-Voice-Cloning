@@ -16,6 +16,6 @@
 *.wav
 *.sh
 _old
-SV2TTS/encoder/saved_models/*_backups
-SV2TTS/synthesizer/saved_models/*
-wave-rnn/model_outputs
+sv2tts/encoder/saved_models/*_backups
+sv2tts/synthesizer/saved_models/*
+sv2tts/vocoder/saved_models/*

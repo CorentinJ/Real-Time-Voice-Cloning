@@ -43,7 +43,3 @@ other_datasets = [
 ]
 
 anglophone_nationalites = ["australia", "canada", "ireland", "uk", "usa"]
-# 
-# model_dir = fileio.join(project_root, "saved_models")
-# 
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
