@@ -107,12 +107,12 @@ class Synthesizer:
         hparams = self._hparams
         cleaner_names = [x.strip() for x in hparams.cleaners.split(",")]
         
-        #Repeat last sample until number of samples is divisible by the number of GPUs (last run scenario)
-        while len(texts) % hparams.tacotron_synthesis_batch_size != 0:
-            texts.append(texts[-1])
-            basenames.append(basenames[-1])
-            if mel_filenames is not None:
-                mel_filenames.append(mel_filenames[-1])
+        # #Repeat last sample until number of samples is divisible by the number of GPUs (last run scenario)
+        # while len(texts) % hparams.tacotron_synthesis_batch_size != 0:
+        #     texts.append(texts[-1])
+        #     basenames.append(basenames[-1])
+        #     if mel_filenames is not None:
+        #         mel_filenames.append(mel_filenames[-1])
         
         assert 0 == len(texts) % self._hparams.tacotron_num_gpus
         seqs = [np.asarray(text_to_sequence(text, cleaner_names)) for text in texts]

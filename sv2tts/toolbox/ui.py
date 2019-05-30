@@ -33,7 +33,7 @@ colormap = np.array([
    
 class UI(QDialog):
     min_umap_points = 4
-    max_log_lines = 4
+    max_log_lines = 5
     
     def draw_embed_heatmap(self, embed, speaker_name, which):
         ax = self.embed_axs[0 if which == "current" else 1]
@@ -120,15 +120,22 @@ class UI(QDialog):
     def current_utterance_name(self):
         return self.utterance_box.currentText()
     
+    @staticmethod
+    def repopulate_box(box, items, random=False):
+        """
+        Resets a box and adds a list of items. Pass a list of (item, data) pairs instead to join 
+        data to the items
+        """
+        box.blockSignals(True)
+        box.clear()
+        for item in items:
+            item = list(item) if isinstance(item, tuple) else [item]
+            box.addItem(str(item[0]), *item[1:])
+        box.setCurrentIndex(np.random.randint(len(items)) if random else 0)
+        box.blockSignals(False)
+    
     def populate_browser(self, datasets_root: Path, recognized_datasets: List, level: int,
                          random=True):
-        def repopulate_box(box, items):
-            box.blockSignals(True)
-            box.clear()
-            box.addItems(list(map(str, items)))
-            box.setCurrentIndex(np.random.randint(len(items)) if random else 0)
-            box.blockSignals(False)
-    
         # Select a random dataset
         if level <= 0:
             datasets = [datasets_root.joinpath(d) for d in recognized_datasets]
@@ -136,13 +143,13 @@ class UI(QDialog):
             if len(datasets) == 0:
                 raise Exception("Could not find any of the datasets %s under %s" %
                                 (recognized_datasets, datasets_root))
-            repopulate_box(self.dataset_box, datasets)
+            self.repopulate_box(self.dataset_box, datasets, random)
     
         # Select a random speaker
         if level <= 1:
             speakers_root = datasets_root.joinpath(self.current_dataset_name)
             speaker_names = [d.stem for d in speakers_root.glob("*") if d.is_dir()]
-            repopulate_box(self.speaker_box, speaker_names)
+            self.repopulate_box(self.speaker_box, speaker_names, random)
     
         # Select a random utterance
         if level <= 2:
@@ -154,18 +161,47 @@ class UI(QDialog):
             for extension in ['mp3', 'flac', 'wav', 'm4a']:
                 utterances.extend(Path(utterances_root).glob("**/*.%s" % extension))
             utterances = [fpath.relative_to(utterances_root) for fpath in utterances]
-            repopulate_box(self.utterance_box, utterances)
+            self.repopulate_box(self.utterance_box, utterances, random)
 
     def browser_select_next(self):
         index = (self.utterance_box.currentIndex() + 1) % len(self.utterance_box)
         self.utterance_box.setCurrentIndex(index)
 
+    @property
+    def current_encoder_fpath(self):
+        return self.encoder_box.itemData(self.encoder_box.currentIndex())
+    
+    @property
+    def current_synthesizer_model_dir(self):
+        return self.synthesizer_box.itemData(self.synthesizer_box.currentIndex())
+    
+    @property
+    def current_vocoder_fpath(self):
+        return self.vocoder_box.itemData(self.vocoder_box.currentIndex())
+
+    def populate_models(self, encoder_models_dir: Path, synthesizer_models_dir: Path, 
+                        vocoder_models_dir: Path):
+        # Encoder
+        encoder_fpaths = list(encoder_models_dir.glob("*.pt"))
+        self.repopulate_box(self.encoder_box, [(f.stem, f) for f in encoder_fpaths])
+        
+        # Synthesizer
+        synthesizer_model_dirs = list(synthesizer_models_dir.glob("*"))
+        synthesizer_items = [(f.name.replace("logs-", ""), f) for f in synthesizer_model_dirs]
+        self.repopulate_box(self.synthesizer_box, synthesizer_items)
+
+        # Vocoder
+        vocoder_fpaths = list(vocoder_models_dir.glob("**/*.pt"))
+        vocoder_items = [(f.stem, f) for f in vocoder_fpaths] + [("Griffin-Lim", None)]
+        self.repopulate_box(self.vocoder_box, vocoder_items)
+        
     def log(self, line):
         self.logs.append(line)
         if len(self.logs) > self.max_log_lines:
             del self.logs[0]
         log_text = '\n'.join(self.logs)
         self.log_window.setText(log_text)
+        self.app.processEvents()
 
     def set_loading(self, value, maximum):
         self.loading_bar.setValue(value)
@@ -262,6 +298,19 @@ class UI(QDialog):
         browser_layout.addWidget(self.record_button, i, 1)
         self.take_generated_button = QPushButton("Take generated")
         browser_layout.addWidget(self.take_generated_button, i, 2)
+        i += 2
+
+        # Model selection
+        self.encoder_box = QComboBox()
+        browser_layout.addWidget(QLabel("<b>Encoder</b>"), i, 0)
+        browser_layout.addWidget(self.encoder_box, i + 1, 0)
+        self.synthesizer_box = QComboBox()
+        browser_layout.addWidget(QLabel("<b>Synthesizer</b>"), i, 1)
+        browser_layout.addWidget(self.synthesizer_box, i + 1, 1)
+        self.vocoder_box = QComboBox()
+        browser_layout.addWidget(QLabel("<b>Vocoder</b>"), i, 2)
+        browser_layout.addWidget(self.vocoder_box, i + 1, 2)
+        i += 2
 
 
         ## Embed & spectrograms

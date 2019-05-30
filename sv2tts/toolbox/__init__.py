@@ -1,7 +1,11 @@
 from toolbox.ui import UI
 from encoder import inference as encoder
+from synthesizer.synthesizer import Synthesizer
+from synthesizer.hparams import hparams as synthesizer_hparams
 from pathlib import Path
 from time import perf_counter as timer
+# from 
+from tensorflow.train import get_checkpoint_state
 
 
 recognized_datasets = [
@@ -21,19 +25,21 @@ recognized_datasets = [
 
 
 class Toolbox:
-    def __init__(self, datasets_root, encoder_fpath):
+    def __init__(self, datasets_root, encoder_models_dir, synthesizer_models_dir, 
+                 vocoder_models_dir):
         self.datasets_root = datasets_root
         self.embeds = dict()
-        self.encoder_fpath = encoder_fpath
+        self.synthesizer = None
         
         # Initialize the events and the interface
         self.ui = UI()
+        self.reset_ui(encoder_models_dir, synthesizer_models_dir, vocoder_models_dir)
         self.setup_events()
-        self.init()
         self.ui.start()
         
     def setup_events(self):
         ## All the nasty UI events code
+        # Dataset, speaker and utterance selection
         self.ui.browser_load_button.clicked.connect(self.load_from_browser)
         random_func = lambda level: lambda: self.ui.populate_browser(self.datasets_root,
                                                                      recognized_datasets,
@@ -43,6 +49,14 @@ class Toolbox:
         self.ui.random_utterance_button.clicked.connect(random_func(2))
         self.ui.dataset_box.currentIndexChanged.connect(random_func(1))
         self.ui.speaker_box.currentIndexChanged.connect(random_func(2))
+        
+        # Model selection
+        self.ui.encoder_box.currentIndexChanged.connect(self.init_encoder)
+        self.ui.synthesizer_box.currentIndexChanged.connect(self.init_synthesizer)
+        self.ui.vocoder_box.currentIndexChanged.connect(self.init_vocoder)
+        
+        # Generation
+        self.ui.generate_button.clicked.connect(self.generate)
 
     def load_from_browser(self):
         fpath = Path(self.datasets_root,
@@ -76,14 +90,34 @@ class Toolbox:
         
         # Draw the embed and the UMAP projection
         self.ui.draw_umap(self.embeds)
-    
+        
+    def generate(self):
+        # TODO
+        self.init_synthesizer()
 
-    def init(self):
+    def reset_ui(self, encoder_models_dir, synthesizer_models_dir, vocoder_models_dir):
         self.ui.populate_browser(self.datasets_root, recognized_datasets, 0, False)
+        self.ui.populate_models(encoder_models_dir, synthesizer_models_dir, vocoder_models_dir)
         
     def init_encoder(self):
-        self.ui.log("Loading the encoder for the first time...")
-        start = timer()
-        encoder.load_model(self.encoder_fpath)
-        self.ui.log("Loaded the encoder in %dms" % int(1000 * (timer() - start)))
+        model_fpath = self.ui.current_encoder_fpath
         
+        self.ui.log("Loading the encoder %s" % model_fpath)
+        start = timer()
+        encoder.load_model(model_fpath)
+        self.ui.log("Loaded the encoder in %dms." % int(1000 * (timer() - start)))
+        
+    def init_synthesizer(self):
+        model_dir = self.ui.current_synthesizer_model_dir
+        checkpoints_dir = model_dir.joinpath("taco_pretrained")
+        checkpoint_fpath = get_checkpoint_state(checkpoints_dir).model_checkpoint_path
+
+        display_path = Path(checkpoint_fpath).relative_to(model_dir.parent)
+        self.ui.log("Loading the synthesizer %s" % display_path)
+        start = timer()
+        synth = Synthesizer()
+        synth.load(checkpoint_fpath, synthesizer_hparams)
+        self.ui.log("Loaded the synthesizer in %dms." % int(1000 * (timer() - start)))
+    
+    def init_vocoder(self):
+        pass
