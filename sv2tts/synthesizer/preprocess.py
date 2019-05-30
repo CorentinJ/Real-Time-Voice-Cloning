@@ -9,7 +9,8 @@ import numpy as np
 import librosa
 
 
-def preprocess_librispeech(datasets_root: Path, out_dir: Path, skip_existing: bool, hparams):
+def preprocess_librispeech(datasets_root: Path, out_dir: Path, n_processes: int, 
+                           skip_existing: bool, hparams):
     # Gather the input directories
     dataset_root = datasets_root.joinpath("LibriSpeech")
     input_dirs = [dataset_root.joinpath("train-clean-100"), 
@@ -29,7 +30,7 @@ def preprocess_librispeech(datasets_root: Path, out_dir: Path, skip_existing: bo
     speaker_dirs = list(chain.from_iterable(input_dir.glob("*") for input_dir in input_dirs))
     func = partial(preprocess_speaker, out_dir=out_dir, skip_existing=skip_existing, 
                    hparams=hparams)
-    job = Pool().imap(func, speaker_dirs)
+    job = Pool(n_processes).imap(func, speaker_dirs)
     for speaker_metadata in tqdm(job, "LibriSpeech", len(speaker_dirs), unit="speakers"):
         for metadatum in speaker_metadata:
             metadata_file.write("|".join(str(x) for x in metadatum) + "\n")
@@ -78,9 +79,9 @@ def preprocess_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hparams)
     return [m for m in metadata if m is not None]
 
 
-def split_on_silences(audio_fpath, words, end_times, hparams):
+def split_on_silences(wav_fpath, words, end_times, hparams):
     # Load the audio waveform
-    wav, _ = librosa.load(audio_fpath, hparams.sample_rate)
+    wav, _ = librosa.load(wav_fpath, hparams.sample_rate)
     if hparams.rescale:
         wav = wav / np.abs(wav).max() * hparams.rescaling_max
     
@@ -93,13 +94,39 @@ def split_on_silences(audio_fpath, words, end_times, hparams):
     # Break the sentence on pauses that are too long
     mask = (words == '') & (end_times - start_times >= hparams.silence_min_duration_split)
     mask[0] = mask[-1] = True
+    
+    # Re-attach segments that are too short
     breaks = np.where(mask)[0]
-    segment_times = [[end_times[s], start_times[e]] for s, e in zip(breaks[:-1], breaks[1:])]
+    segments = list(zip(breaks[:-1], breaks[1:]))
+    segment_durations = [start_times[end] - end_times[start] for start, end in segments]
+    i = 0
+    while i < len(segments) and len(segments) > 1:
+        if segment_durations[i] < hparams.utterance_min_duration:
+            # See if the segment can be re-attached with the right or the left segment
+            left_duration = float("inf") if i == 0 else segment_durations[i - 1]
+            right_duration = float("inf") if i == len(segments) - 1 else segment_durations[i + 1]
+            joined_duration = segment_durations[i] + min(left_duration, right_duration)
+
+            # Do not re-attach if it causes the joined utterance to be too long
+            if joined_duration > hparams.hop_size * hparams.max_mel_frames / hparams.sample_rate:
+                i += 1
+                continue
+
+            # Re-attach the segment with the neighbour of shortest duration
+            j = i - 1 if left_duration <= right_duration else i
+            segments[j] = (segments[j][0], segments[j + 1][1])
+            segment_durations[j] = joined_duration
+            del segments[j + 1], segment_durations[j + 1]
+        else:
+            i += 1
+    
+    # Split the utterance
+    segment_times = [[end_times[start], start_times[end]] for start, end in segments]
     segment_times = (np.array(segment_times) * hparams.sample_rate).astype(np.int)
     wavs = [wav[segment_time[0]:segment_time[1]] for segment_time in segment_times]
-    texts = [' '.join(words[s + 1:e]).replace("  ", " ") for s, e in zip(breaks[:-1], breaks[1:])]
+    texts = [' '.join(words[start + 1:end]).replace("  ", " ") for start, end in segments]
     
-    ## DEBUG: play the audio segments
+    # # DEBUG: play the audio segments
     # import sounddevice as sd
     # print("From %s" % audio_fpath)
     # if len(wavs) > 1:
@@ -125,6 +152,10 @@ def process_utterance(wav: np.ndarray, text: str, out_dir: Path, basename: str,
     if skip_existing and mel_fpath.exists() and wav_fpath.exists():
         return None
     
+    # Skip utterances that are too short
+    if len(wav) < hparams.utterance_min_duration * hparams.sample_rate:
+        return None
+    
     # Compute the mel spectrogram
     mel_spectrogram = audio.melspectrogram(wav, hparams).astype(np.float32)
     mel_frames = mel_spectrogram.shape[1]
@@ -132,7 +163,7 @@ def process_utterance(wav: np.ndarray, text: str, out_dir: Path, basename: str,
     # Skip utterances that are too long
     if mel_frames > hparams.max_mel_frames and hparams.clip_mels_length:
         return None
-    
+
     # Write the spectrogram, embed and audio to disk
     np.save(mel_fpath, mel_spectrogram.T, allow_pickle=False)
     np.save(wav_fpath, wav, allow_pickle=False)

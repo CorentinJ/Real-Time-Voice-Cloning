@@ -16,6 +16,8 @@ def main():
     parser.add_argument("-o", "--out_dir", type=str, default=argparse.SUPPRESS, help=\
         "Path to the output directory that will contain the mel spectrograms, the audios and the "
         "embeds. Defaults to <datasets_root>/SV2TTS/synthesizer/")
+    parser.add_argument("-n", "--n_processes", type=int, default=None, help=\
+        "Number of processes in parallel.")
     parser.add_argument("-s", "--skip_existing", action="store_true", help=\
         "Whether to overwrite existing files with the same name. Useful if the preprocessing was "
         "interrupted.")

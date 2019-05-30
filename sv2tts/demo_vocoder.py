@@ -10,7 +10,7 @@ import torch
 print_params()
 
 
-model_fpath = "vocoder/saved_models/pretrained/pretrained.pt"
+model_fpath = "vocoder/saved_models/new/new.pt"
 inference.load_model(model_fpath)
 
 syn_dir = Path("E:\\Datasets\\SV2TTS\\Synthesizer")
@@ -22,7 +22,7 @@ dataset = VocoderDataset(metadata_fpath, gta_dir, wav_dir)
 
 # Generate Samples
 n_samples = 5
-print('Generating...')
+print("Generating...")
 for i in sorted(np.random.choice(len(dataset), n_samples)):
     mel, wav_gt = dataset[i]
     

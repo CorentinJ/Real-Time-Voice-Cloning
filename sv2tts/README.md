@@ -25,5 +25,6 @@ Feel free to adapt the code to your needs. Other interesting datasets that you c
 
 ### TODO
 - I'd like to eventually merge the `audio` module of each package to `utils/audio`.
-- I'm looking for a Tacotron framework that is pytorch-based, but that is as good as the tensorflow implementation of Rayhane Mamah
-- The toolbox can always be improved
+- I'm looking for a Tacotron framework that is pytorch-based, but that is as good as the tensorflow implementation of Rayhane Mamah.
+- Let the user decide if they want to use speaker embeddings or utterance embeddings for training the synthesizer.
+- The toolbox can always be improved.
