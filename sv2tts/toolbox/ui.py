@@ -1,16 +1,18 @@
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from PyQt4.QtCore import QSize, Qt
+from PyQt4.QtCore import Qt
 from PyQt4.QtGui import *
-from itertools import chain
-from encoder import audio as encoder_audio
-from encoder import inference as encoder
+from encoder.inference import plot_embedding_as_heatmap
+from toolbox.utterance import Utterance
 from pathlib import Path
-from typing import List
+from typing import List, Set
 import sounddevice as sd
+import matplotlib.pyplot as plt
 import numpy as np
 import umap
 import sys
+from warnings import filterwarnings
+filterwarnings("ignore")
 
 
 colormap = np.array([
@@ -34,79 +36,73 @@ colormap = np.array([
 class UI(QDialog):
     min_umap_points = 4
     max_log_lines = 5
+    max_saved_utterances = 20
     
-    def draw_embed_heatmap(self, embed, speaker_name, which):
-        ax = self.embed_axs[0 if which == "current" else 1]
+    def draw_utterance(self, utterance: Utterance, which):
+        embed_ax, spec_ax = self.current_ax if which == "current" else self.gen_ax
+        embed_ax.figure.suptitle("" if utterance is None else utterance.name)
         
+        ## Embedding
         # Clear the plot
-        if len(ax.images) > 0:
-            ax.images[0].colorbar.remove()
-        ax.clear()
+        if len(embed_ax.images) > 0:
+            embed_ax.images[0].colorbar.remove()
+        embed_ax.clear()
         
         # Draw the embed
-        if embed is not None:
-            encoder.plot_embedding_as_heatmap(embed, ax, speaker_name)
-        ax.set_xticks([])
-        ax.set_yticks([])
-        ax.set_aspect("equal", "datalim")
-        ax.figure.canvas.draw()
-            
-    def draw_spec(self, spec, utterance_name, which):
-        ax = self.spec_axs[0 if which == "current" else 1]
+        if utterance is not None:
+            plot_embedding_as_heatmap(utterance.embed, embed_ax)
+            embed_ax.set_title("embedding")
+        embed_ax.set_aspect("equal", "datalim")
+        embed_ax.set_xticks([])
+        embed_ax.set_yticks([])
+        embed_ax.figure.canvas.draw()
         
-        # Clear the plot
-        ax.clear()
-        
+        ## Spectrogram
         # Draw the spectrogram
-        if spec is not None:
-            # TODO
-            pass
-        ax.set_xticks([])
-        ax.set_yticks([])
-        ax.figure.canvas.draw()
+        spec_ax.clear()
+        if utterance is not None:
+            im = spec_ax.imshow(utterance.spec, aspect="auto", interpolation="none")
+            # ax1.set_title("Target Mel-Spectrogram")
+            # spec_ax.figure.colorbar(mappable=im, shrink=0.65, orientation="horizontal", spec_ax=spec_ax)
+            spec_ax.set_title("mel spectrogram")
 
-    def draw_umap(self, embeds: dict):
+        spec_ax.set_xticks([])
+        spec_ax.set_yticks([])
+        spec_ax.figure.canvas.draw()
+
+    def draw_umap(self, utterances: Set[Utterance]):
         self.umap_ax.clear()
 
-        if len(embeds) > len(colormap):
-            print("Warning: maximum number of speakers/colors reached", file=sys.stderr)
-        
-        # Gather the embeddings to be plotted
-        to_plot = []        # List of tuples (color, mark)
-        embed_data = []     # List of embeds
-        for speaker_dict, color in zip(embeds.values(), colormap):
-            to_plot.extend([(color, "o")] * len(speaker_dict))
-            embed_data.extend(embed for embed, _, _ in speaker_dict.values())
-        # # Hide or show partials
-        # show_partials = self.show_partials_button.isChecked()
-        # if not show_partials:
-        #     projections = [p for e, p in zip(embeds, projections) if e[1] != "."]
-        #     embeds = [e for e in embeds if e[1] != "."]
-        # else:
-        #     embeds = embeds
-        # 
-        # TODO: lines
+        speakers = np.unique([u.speaker_name for u in utterances])
+        colors = {speaker_name: colormap[i] for i, speaker_name in enumerate(speakers)}
+        embeds = [u.embed for u in utterances]
 
         # Display a message if there aren't enough points
-        if len(embed_data) < self.min_umap_points:
+        if len(utterances) < self.min_umap_points:
             self.umap_ax.text(.5, .5, "Add %d more points to\ngenerate the projections" % 
-                              (self.min_umap_points - len(embed_data)), 
+                              (self.min_umap_points - len(utterances)), 
                               horizontalalignment='center', fontsize=15)
             self.umap_ax.set_title("")
             
         # Compute the projections
         else:
-            reducer = umap.UMAP(int(np.ceil(np.sqrt(len(embed_data)))), metric="cosine")
-            projections = reducer.fit_transform(embed_data)
-    
-            for projection, (color, mark) in zip(projections, to_plot):
+            reducer = umap.UMAP(int(np.ceil(np.sqrt(len(embeds)))), metric="cosine")
+            projections = reducer.fit_transform(embeds)
+
+            for projection, utterance in zip(projections, utterances):
+                color = colors[utterance.speaker_name]
+                mark = "o"
                 self.umap_ax.scatter(projection[0], projection[1], c=[color], marker=mark)
             self.umap_ax.set_title("UMAP projections")
-        
+
         # Draw the plot
         self.umap_ax.set_xticks([])
         self.umap_ax.set_yticks([])
         self.umap_ax.figure.canvas.draw()
+        
+    def play(self, wav, sample_rate):
+        sd.stop()
+        sd.play(wav, sample_rate)
         
     @property        
     def current_dataset_name(self):
@@ -140,9 +136,13 @@ class UI(QDialog):
         if level <= 0:
             datasets = [datasets_root.joinpath(d) for d in recognized_datasets]
             datasets = [d.relative_to(datasets_root) for d in datasets if d.exists()]
+            self.browser_load_button.setDisabled(len(datasets) == 0)
             if len(datasets) == 0:
-                raise Exception("Could not find any of the datasets %s under %s" %
-                                (recognized_datasets, datasets_root))
+                print("Warning: you do not have any of the recognized datasets in %s.\n"
+                      "The recognized datasets are:\n\t%s\nFeel free to add your own. You can "
+                      "still use the toolbox by recording samples yourself." % 
+                      (datasets_root, "\n\t".join(recognized_datasets)), file=sys.stderr)
+                return 
             self.repopulate_box(self.dataset_box, datasets, random)
     
         # Select a random speaker
@@ -195,6 +195,22 @@ class UI(QDialog):
         vocoder_items = [(f.stem, f) for f in vocoder_fpaths] + [("Griffin-Lim", None)]
         self.repopulate_box(self.vocoder_box, vocoder_items)
         
+    @property
+    def selected_utterance(self):
+        return self.utterance_history.itemData(self.utterance_history.currentIndex())
+        
+    def register_utterance(self, utterance: Utterance):
+        self.utterance_history.blockSignals(True)
+        self.utterance_history.insertItem(0, utterance.name, utterance)
+        self.utterance_history.setCurrentIndex(0)
+        self.utterance_history.blockSignals(False)
+        
+        if len(self.utterance_history) > self.max_saved_utterances:
+            self.utterance_history.removeItem(self.max_saved_utterances)
+
+        self.play_button.setDisabled(False)
+        self.generate_button.setDisabled(False)
+        
     def log(self, line):
         self.logs.append(line)
         if len(self.logs) > self.max_log_lines:
@@ -208,11 +224,11 @@ class UI(QDialog):
         self.loading_bar.setMaximum(maximum)
 
     def reset_interface(self):
-        self.draw_embed_heatmap(None, "", "current")
-        self.draw_embed_heatmap(None, "", "generated")
-        self.draw_spec(None, "", "current")
-        self.draw_spec(None, "", "generated")
-        self.draw_umap({})
+        self.draw_utterance(None, "current")
+        self.draw_utterance(None, "generated")
+        self.draw_umap(set())
+        self.play_button.setDisabled(True)
+        self.generate_button.setDisabled(True)
 
     def __init__(self):
         ## Initialize the application
@@ -231,7 +247,7 @@ class UI(QDialog):
         root_layout.addLayout(browser_layout, 0, 1)
         
         # Visualizations
-        vis_layout = QHBoxLayout()
+        vis_layout = QVBoxLayout()
         root_layout.addLayout(vis_layout, 1, 1, 2, 3)
         
         # Generation
@@ -281,14 +297,12 @@ class UI(QDialog):
         i += 1
         
         # Utterance box
-        browser_layout.addWidget(QLabel("<b>Recent utterances</b>"), i, 0)
-        self.current_load_button = QPushButton("Reload")
-        browser_layout.addWidget(self.current_load_button, i + 1, 3)
+        browser_layout.addWidget(QLabel("<b>Use embedding from:</b>"), i, 0)
         i += 1
         
         # Random & next utterance buttons
-        self.current_utterance_button = QComboBox()
-        browser_layout.addWidget(self.current_utterance_button, i, 0, 1, 3)
+        self.utterance_history = QComboBox()
+        browser_layout.addWidget(self.utterance_history, i, 0, 1, 3)
         i += 1
         
         # Random & next utterance buttons
@@ -314,24 +328,34 @@ class UI(QDialog):
 
 
         ## Embed & spectrograms
-        embed_canvas = FigureCanvas(Figure(figsize=(2, 2)))
-        vis_layout.addWidget(embed_canvas)
-        self.embed_axs = embed_canvas.figure.subplots(2, 1)
-        # embed_canvas.figure.patch.set_facecolor("#F0F0F0")
         vis_layout.addStretch()
         
-        spec_canvas = FigureCanvas(Figure(figsize=(2, 2)))
-        vis_layout.addWidget(spec_canvas)
-        self.spec_axs = spec_canvas.figure.subplots(2, 1)
-        # spec_canvas.figure.patch.set_facecolor("#F0F0F0")
-
-
+        gridspec_kw = {"width_ratios": [1, 4]}
+        fig, self.current_ax = plt.subplots(1, 2, figsize=(10, 2.25), facecolor="#F0F0F0", 
+                                            gridspec_kw=gridspec_kw)
+        fig.subplots_adjust(left=0, bottom=0.1, right=1, top=0.8)
+        vis_layout.addWidget(FigureCanvas(fig))
+        
+        fig, self.gen_ax = plt.subplots(1, 2, figsize=(10, 2.25), facecolor="#F0F0F0", 
+                                        gridspec_kw=gridspec_kw)
+        fig.subplots_adjust(left=0, bottom=0.1, right=1, top=0.8)
+        vis_layout.addWidget(FigureCanvas(fig))
+        
+        for ax in self.current_ax.tolist() + self.gen_ax.tolist():
+            ax.set_facecolor("#F0F0F0")
+            for side in ["top", "right", "bottom", "left"]:
+                ax.spines[side].set_visible(False)
+        
+        
         ## Generation
-        self.loading_bar = QProgressBar()
-        gen_layout.addWidget(self.loading_bar)
+        self.text_prompt = QTextEdit("This is the default text. How do you like it?")
+        gen_layout.addWidget(self.text_prompt, stretch=1)
         
         self.generate_button = QPushButton("Generate")
         gen_layout.addWidget(self.generate_button)
+        
+        self.loading_bar = QProgressBar()
+        gen_layout.addWidget(self.loading_bar)
         
         self.log_window = QLabel()
         self.log_window.setAlignment(Qt.AlignBottom | Qt.AlignLeft)

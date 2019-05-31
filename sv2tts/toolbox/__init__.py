@@ -1,21 +1,18 @@
 from toolbox.ui import UI
 from encoder import inference as encoder
-from synthesizer.synthesizer import Synthesizer
-from synthesizer.hparams import hparams as synthesizer_hparams
+from synthesizer import inference as synthesizer
 from pathlib import Path
 from time import perf_counter as timer
-# from 
-from tensorflow.train import get_checkpoint_state
-
+from toolbox.utterance import Utterance
 
 recognized_datasets = [
-    "Librispeech/dev-clean",
-    "Librispeech/dev-other",
-    "Librispeech/test-clean",
-    "Librispeech/test-other",
-    "Librispeech/train-clean-100",
-    "Librispeech/train-clean-360",
-    "Librispeech/train-other-500",
+    "LibriSpeech/dev-clean",
+    "LibriSpeech/dev-other",
+    "LibriSpeech/test-clean",
+    "LibriSpeech/test-other",
+    "LibriSpeech/train-clean-100",
+    "LibriSpeech/train-clean-360",
+    "LibriSpeech/train-other-500",
     "LJSpeech-1.1",
     "VoxCeleb1/wav",
     "VoxCeleb1/test_wav",
@@ -28,8 +25,7 @@ class Toolbox:
     def __init__(self, datasets_root, encoder_models_dir, synthesizer_models_dir, 
                  vocoder_models_dir):
         self.datasets_root = datasets_root
-        self.embeds = dict()
-        self.synthesizer = None
+        self.utterances = set()
         
         # Initialize the events and the interface
         self.ui = UI()
@@ -55,49 +51,79 @@ class Toolbox:
         self.ui.synthesizer_box.currentIndexChanged.connect(self.init_synthesizer)
         self.ui.vocoder_box.currentIndexChanged.connect(self.init_vocoder)
         
+        # Utterance selection
+        func = lambda: self.ui.draw_utterance(self.ui.selected_utterance, "current")
+        self.ui.utterance_history.currentIndexChanged.connect(func)
+        func = lambda: self.ui.play(self.ui.selected_utterance.wav, synthesizer.sample_rate)
+        self.ui.play_button.clicked.connect(func)
+        
         # Generation
         self.ui.generate_button.clicked.connect(self.generate)
 
+    def reset_ui(self, encoder_models_dir, synthesizer_models_dir, vocoder_models_dir):
+        self.ui.populate_browser(self.datasets_root, recognized_datasets, 0, False)
+        self.ui.populate_models(encoder_models_dir, synthesizer_models_dir, vocoder_models_dir)
+        
     def load_from_browser(self):
         fpath = Path(self.datasets_root,
                      self.ui.current_dataset_name,
                      self.ui.current_speaker_name,
                      self.ui.current_utterance_name)
-        utterance_name = str(fpath.relative_to(self.datasets_root))
+        name = str(fpath.relative_to(self.datasets_root))
         speaker_name = self.ui.current_dataset_name + '_' + self.ui.current_speaker_name
         
         # Select the next utterance
         if self.ui.auto_next_checkbox.isChecked():
             self.ui.browser_select_next()
         
-        # Get the wav from the disk
-        wav = encoder.load_preprocess_waveform(fpath)
-        self.ui.log("Loaded %s" % utterance_name)
-        self.embed_utterance(utterance_name, wav, speaker_name)
-            
-    def embed_utterance(self, utterance_name, wav, speaker_name):
+        # Get the wav from the disk. We take the wav with the vocoder/synthesizer format for
+        # playback, so as to have a fair comparison with the generated audio
+        wav = synthesizer.load_preprocess_wav(fpath)
+        duration = len(wav) / synthesizer.sample_rate
+        self.ui.log("Loaded %s" % name)
+
+        # Compute the mel spectrogram
+        spec = synthesizer.make_spectrogram(wav)
+        
+        # Compute the embedding
         if not encoder.is_loaded():
             self.init_encoder()
+        encoder_wav = encoder.load_preprocess_wav(fpath)
+        embed, partial_embeds, _ = encoder.embed_utterance(encoder_wav, return_partials=True)
         
-        # Compute the embeddings
-        embed, partial_embeds, wav_splits = encoder.embed_utterance(wav, return_partials=True)
+        # Add the utterance
+        utterance = Utterance(name, speaker_name, wav, spec, embed, partial_embeds)
+        self.utterances.add(utterance)
+        self.ui.register_utterance(utterance)
         
-        # Add the embedding to the speaker
-        if not speaker_name in self.embeds:
-            # TODO: ordereddict
-            self.embeds[speaker_name] = dict()
-        self.embeds[speaker_name][utterance_name] = (embed, partial_embeds, wav_splits)
-        
-        # Draw the embed and the UMAP projection
-        self.ui.draw_umap(self.embeds)
+        # Plot it
+        self.ui.draw_umap(self.utterances)
+        self.ui.draw_utterance(utterance, "current")
         
     def generate(self):
-        # TODO
-        self.init_synthesizer()
-
-    def reset_ui(self, encoder_models_dir, synthesizer_models_dir, vocoder_models_dir):
-        self.ui.populate_browser(self.datasets_root, recognized_datasets, 0, False)
-        self.ui.populate_models(encoder_models_dir, synthesizer_models_dir, vocoder_models_dir)
+        if not synthesizer.is_loaded():
+            self.init_synthesizer()
+        self.ui.log("Generating a mel spectrogram...")
+        
+        # Synthesize the spectrogram
+        text = self.ui.text_prompt.toPlainText()
+        embed = self.ui.selected_utterance.embed
+        spec = synthesizer.synthesize_spectrogram(text, embed)
+        
+        
+        # Add the utterance
+        speaker_name = "User"
+        name = speaker_name + "_001"
+        import numpy as np
+        wav = np.zeros(2000)
+        embed = np.zeros(256)
+        partial_embeds = []
+        utterance = Utterance(name, speaker_name, wav, spec, embed, partial_embeds)
+        self.utterances.add(utterance)
+        
+        # Plot it
+        self.ui.draw_umap(self.utterances)
+        self.ui.draw_utterance(utterance, "generated")
         
     def init_encoder(self):
         model_fpath = self.ui.current_encoder_fpath
@@ -110,13 +136,11 @@ class Toolbox:
     def init_synthesizer(self):
         model_dir = self.ui.current_synthesizer_model_dir
         checkpoints_dir = model_dir.joinpath("taco_pretrained")
-        checkpoint_fpath = get_checkpoint_state(checkpoints_dir).model_checkpoint_path
 
-        display_path = Path(checkpoint_fpath).relative_to(model_dir.parent)
-        self.ui.log("Loading the synthesizer %s" % display_path)
+        # display_path = Path(checkpoint_fpath).relative_to(model_dir.parent)
+        self.ui.log("Loading the synthesizer %s" % checkpoints_dir)
         start = timer()
-        synth = Synthesizer()
-        synth.load(checkpoint_fpath, synthesizer_hparams)
+        synthesizer.load_model(checkpoints_dir)
         self.ui.log("Loaded the synthesizer in %dms." % int(1000 * (timer() - start)))
     
     def init_vocoder(self):

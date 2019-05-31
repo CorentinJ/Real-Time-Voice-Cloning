@@ -1,3 +1,5 @@
+from typing import Union
+
 import numpy as np
 import torch
 from encoder.params_data import *
@@ -32,7 +34,7 @@ def load_model(weights_fpath: Path, device=None):
     checkpoint = torch.load(weights_fpath)
     _model.load_state_dict(checkpoint["model_state"])
     _model.eval()
-    print("Loaded model %s trained to step %d" % (weights_fpath.name, checkpoint["step"]))
+    print("Loaded encoder \"%s\" trained to step %d" % (weights_fpath.name, checkpoint["step"]))
     
 def is_loaded():
     return _model is not None
@@ -114,11 +116,11 @@ def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
     normalized average. If False, the utterance is instead computed from feeding the entire 
     spectogram to the network.
     :param return_partials: if True, the partial embeddings will also be returned along with the 
-    wave slices that correspond to the partial embeddings.
+    wav slices that correspond to the partial embeddings.
     :param kwargs: additional arguments to compute_partial_splits()
     :return: the embedding as a numpy array of float32 of shape (model_embedding_size,). If 
     <return_partials> is True, the partial utterances as a numpy array of float32 of shape 
-    (n_partials, model_embedding_size) and the wave partials as a list of slices will also be 
+    (n_partials, model_embedding_size) and the wav partials as a list of slices will also be 
     returned. If <using_partials> is simultaneously set to False, both these values will be None 
     instead.
     """
@@ -152,17 +154,17 @@ def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
 def embed_speaker(wavs, **kwargs):
     raise NotImplemented()
 
-def load_preprocess_waveform(fpath):
+def load_preprocess_wav(fpath_or_wav: Union[str, Path, np.ndarray]):
     """
     Loads an audio file in memory and applies the same preprocessing operations used in trained 
     the Speaker Encoder. Using this function is not mandatory but recommended.
-    
-    :param fpath: the path to an audio file. Several extensions are supported (mp3, wav, flac, ...)
-    :return: the audio waveform as a numpy array of float32.
     """
-    wave = audio.load(fpath)
-    wave = audio.preprocess_wav(wave)
-    return wave
+    if isinstance(fpath_or_wav, str) or isinstance(fpath_or_wav, Path):
+        wav = audio.load(fpath_or_wav)
+    else:
+        wav = fpath_or_wav
+    wav = audio.preprocess_wav(wav)
+    return wav
 
 def plot_embedding_as_heatmap(embed, ax=None, title="", shape=None, color_range=(0, 0.35)):
     if ax is None:
@@ -171,7 +173,6 @@ def plot_embedding_as_heatmap(embed, ax=None, title="", shape=None, color_range=
     if shape is None:
         height = int(np.sqrt(len(embed)))
         shape = (height, -1)
-    assert np.prod(shape) == embed.nsize
     embed = embed.reshape(shape)
     
     cmap = cm.get_cmap()
@@ -188,7 +189,7 @@ if __name__ == "__main__":
     fig, axes = plt.subplots(3, 3)
     for i, ax in enumerate(axes.flatten(), 50):
         fpath = r"E:\Datasets\LJSpeech-1.1\wavs\LJ001-%04d.wav" % (i + 1)
-        wav = load_preprocess_waveform(fpath)
+        wav = load_preprocess_wav(fpath)
         embed = embed_utterance(wav)
         plot_embedding_as_heatmap(embed, ax)
     plt.show(block=False)
@@ -196,7 +197,7 @@ if __name__ == "__main__":
     fig, axes = plt.subplots(3, 3)
     for i, ax in enumerate(axes.flatten(), 20):
         fpath = r"E:\Datasets\LibriSpeech\train-other-500\25\123319\25-123319-%04d.flac" % i
-        wav = load_preprocess_waveform(fpath)
+        wav = load_preprocess_wav(fpath)
         embed = embed_utterance(wav)
         plot_embedding_as_heatmap(embed, ax)
     plt.show()
