@@ -1,9 +1,10 @@
-from synthesizer import audio
 from multiprocessing.pool import Pool 
+from synthesizer import audio
 from functools import partial
 from itertools import chain
 from encoder import inference as encoder
 from pathlib import Path
+from utils import logmmse
 from tqdm import tqdm
 import numpy as np
 import librosa
@@ -89,14 +90,22 @@ def split_on_silences(wav_fpath, words, end_times, hparams):
     start_times = np.array([0.0] + end_times[:-1])
     end_times = np.array(end_times)
     assert len(words) == len(end_times) == len(start_times)
-    assert words[0] == '' and words[-1] == ''
+    assert words[0] == "" and words[-1] == ""
     
-    # Break the sentence on pauses that are too long
-    mask = (words == '') & (end_times - start_times >= hparams.silence_min_duration_split)
+    # Find pauses that are too long
+    mask = (words == "") & (end_times - start_times >= hparams.silence_min_duration_split)
     mask[0] = mask[-1] = True
+    breaks = np.where(mask)[0]
+
+    # Profile the noise from the silences and perform noise reduction on the waveform
+    silence_times = [[start_times[i], end_times[i]] for i in breaks]
+    silence_times = (np.array(silence_times) * hparams.sample_rate).astype(np.int)
+    noisy_wav = np.concatenate([wav[stime[0]:stime[1]] for stime in silence_times])
+    if len(noisy_wav) > hparams.sample_rate * 0.02:
+        profile = logmmse.profile_noise(noisy_wav, hparams.sample_rate)
+        wav = logmmse.denoise(wav, profile, eta=0)
     
     # Re-attach segments that are too short
-    breaks = np.where(mask)[0]
     segments = list(zip(breaks[:-1], breaks[1:]))
     segment_durations = [start_times[end] - end_times[start] for start, end in segments]
     i = 0
@@ -124,11 +133,10 @@ def split_on_silences(wav_fpath, words, end_times, hparams):
     segment_times = [[end_times[start], start_times[end]] for start, end in segments]
     segment_times = (np.array(segment_times) * hparams.sample_rate).astype(np.int)
     wavs = [wav[segment_time[0]:segment_time[1]] for segment_time in segment_times]
-    texts = [' '.join(words[start + 1:end]).replace("  ", " ") for start, end in segments]
+    texts = [" ".join(words[start + 1:end]).replace("  ", " ") for start, end in segments]
     
-    # # DEBUG: play the audio segments
+    # # DEBUG: play the audio segments (run with -n=1)
     # import sounddevice as sd
-    # print("From %s" % audio_fpath)
     # if len(wavs) > 1:
     #     print("This sentence was split in %d segments:" % len(wavs))
     # else:
