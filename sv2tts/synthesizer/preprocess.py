@@ -76,7 +76,7 @@ def preprocess_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hparams)
                 sub_basename = "%s_%02d" % (wav_fname, i)
                 metadata.append(process_utterance(wav, text, out_dir, sub_basename, 
                                                   skip_existing, hparams))
-                
+    
     return [m for m in metadata if m is not None]
 
 

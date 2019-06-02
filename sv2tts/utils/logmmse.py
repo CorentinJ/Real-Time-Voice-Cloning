@@ -30,7 +30,6 @@ import math
 from scipy.special import expn
 from collections import namedtuple
 
-np.seterr('raise')
 NoiseProfile = namedtuple("NoiseProfile", "sampling_rate window_size len1 len2 win n_fft noise_mu2")
 
 
@@ -119,7 +118,7 @@ def denoise(wav, noise_profile: NoiseProfile, eta=0.15):
 
         a = ksi / (1 + ksi)
         vk = a * gammak
-        ei_vk = 0.5 * expn(1, vk)
+        ei_vk = 0.5 * expn(1, np.maximum(vk, 1e-8))
         hw = a * np.exp(ei_vk)
         sig = sig * hw
         xk_prev = sig ** 2
