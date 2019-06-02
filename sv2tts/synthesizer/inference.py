@@ -3,21 +3,21 @@ from synthesizer.synthesizer import Synthesizer
 from synthesizer import audio
 from pathlib import Path
 from typing import Union
+import tensorflow as tf
 import numpy as np
 import librosa
-# from tensorflow.train import get_checkpoint_state         # Pick your poison
-from tensorflow._api.v1.train import get_checkpoint_state 
 
 _model = None   # type: Synthesizer
 sample_rate = hparams.sample_rate
 
+# TODO: allow for custom hparams throughout this module?
 
 def load_model(checkpoints_dir: Path):
     global _model
     
-    if _model is None:
-        _model = Synthesizer()
-    checkpoint_fpath = get_checkpoint_state(checkpoints_dir).model_checkpoint_path
+    tf.reset_default_graph()
+    _model = Synthesizer()
+    checkpoint_fpath = tf.train.get_checkpoint_state(checkpoints_dir).model_checkpoint_path
     _model.load(checkpoint_fpath, hparams)
     
     model_name = checkpoints_dir.parent.name.replace("logs-", "")
@@ -47,3 +47,6 @@ def make_spectrogram(fpath_or_wav: Union[str, Path, np.ndarray]):
     
     mel_spectrogram = audio.melspectrogram(wav, hparams).astype(np.float32)
     return mel_spectrogram
+
+def griffin_lim(mel):
+    return audio.inv_mel_spectrogram(mel, hparams)

@@ -1,9 +1,12 @@
 from toolbox.ui import UI
 from encoder import inference as encoder
 from synthesizer import inference as synthesizer
+from vocoder import inference as vocoder
 from pathlib import Path
 from time import perf_counter as timer
 from toolbox.utterance import Utterance
+import numpy as np
+
 
 recognized_datasets = [
     "LibriSpeech/dev-clean",
@@ -101,23 +104,38 @@ class Toolbox:
         self.ui.draw_utterance(utterance, "current")
         
     def generate(self):
+        # Synthesize the spectrogram
         if not synthesizer.is_loaded():
             self.init_synthesizer()
-        self.ui.log("Generating a mel spectrogram...")
-        
-        # Synthesize the spectrogram
+        self.ui.log("Generating the mel spectrogram...")
         text = self.ui.text_prompt.toPlainText()
         embed = self.ui.selected_utterance.embed
         spec = synthesizer.synthesize_spectrogram(text, embed)
         
+        # Synthesize the waveform
+        if not vocoder.is_loaded():
+            self.init_vocoder()
+        self.ui.log("Generating the waveform...")
+        if self.ui.current_vocoder_fpath is not None:
+            wav = vocoder.infer_waveform(spec)
+        else:
+            wav = synthesizer.griffin_lim(spec)
+        wav = wav / np.abs(wav).max() * 0.97
+        
+        # Play it
+        self.ui.log("Playing the generated waveform")
+        self.ui.play(wav, synthesizer.sample_rate)
+
+        # Compute the embedding
+        # TODO: this is problematic with different sampling rates, gotta fix it
+        if not encoder.is_loaded():
+            self.init_encoder()
+        encoder_wav = encoder.load_preprocess_wav(wav)
+        embed, partial_embeds, _ = encoder.embed_utterance(encoder_wav, return_partials=True)
         
         # Add the utterance
         speaker_name = "User"
         name = speaker_name + "_001"
-        import numpy as np
-        wav = np.zeros(2000)
-        embed = np.zeros(256)
-        partial_embeds = []
         utterance = Utterance(name, speaker_name, wav, spec, embed, partial_embeds)
         self.utterances.add(utterance)
         
@@ -144,4 +162,12 @@ class Toolbox:
         self.ui.log("Loaded the synthesizer in %dms." % int(1000 * (timer() - start)))
     
     def init_vocoder(self):
-        pass
+        model_fpath = self.ui.current_vocoder_fpath
+        # Case of Griffin-lim
+        if model_fpath is None:
+            return 
+    
+        self.ui.log("Loading the vocoder %s" % model_fpath)
+        start = timer()
+        vocoder.load_model(model_fpath)
+        self.ui.log("Loaded the vocoder in %dms." % int(1000 * (timer() - start)))

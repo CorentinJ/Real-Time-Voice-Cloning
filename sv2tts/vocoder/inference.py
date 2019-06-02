@@ -31,6 +31,8 @@ def load_model(weights_fpath, verbose=True):
     _model.load_state_dict(checkpoint['model_state'])
     _model.eval()
 
+def is_loaded():
+    return _model is not None
 
 def infer_waveform(mel, normalize=True, batched=True, target=8000, overlap=800):
     """
