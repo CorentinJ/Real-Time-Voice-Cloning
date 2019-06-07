@@ -85,7 +85,7 @@ While the complete training of a single-speaker TTS model is technically a form 
 Our objective is to achieve a powerful form of voice cloning. The resulting framework must be able to operate in a zero-shot setting, that is, for speakers unseen during training. It should incorporate a speaker's voice with only a few seconds of reference speech. These desired results are shown to be fulfilled by \citep{SV2TTS}. Their results are impressive\footnote{\url{https://google.github.io/tacotron/publications/speaker_adaptation/index.html}}, but not backed by any public implementation. We reproduce their framework and make our implementation open-source\footnote{\color{red} repo link}. In addition, we integrate a model based on \citep{WaveRNN} in the framework to make it run in real-time, i.e. to generate speech in a time shorter or equal to the duration of the produced speech. \color{red} add a word about our results \color{black}
 
 % Structure of the thesis
-The structure of this document goes as follows. We begin with a short introduction on TTS methods that involve machine learning. Follows a review of the evolution of the state of the art for TTS and for voice cloning. We then present the work of \citep{SV2TTS} along with our own implementation. We conclude with a presentation of a toolbox we designed to interface the framework.
+The structure of this document goes as follows. We begin with a short introduction on TTS methods that involve machine learning. Follows a review of the evolution of the state of the art for TTS with speech naturalness as the core metric. We then present the work of \citep{SV2TTS} along with our own implementation. We conclude with a presentation of a toolbox we designed to interface the framework.
 
 
 \section{A review of text-to-speech methods in machine learning}
@@ -110,6 +110,9 @@ A common feature extraction technique is to build frames that will integrate sur
 The reason why the acoustic model does not directly predict an audio waveform is that audio happens to be difficult to model: it is a particularly dense domain and audio signals are typically highly nonlinear. A representation that brings out features in a more tractable manner is the time-frequency domain. Spectrograms are smoother and much less dense than their waveform counterpart. They also have the benefit of being two-dimensional, thus allowing models to better leverage spatial connectivity. Unfortunately, a spectrogram is a lossy representation of the waveform that discards the phase. There is no unique inverse transformation function, and deriving one that produces natural-sounding results is not trivial. When referring to speech, this generative function is called a vocoder. The choice of the vocoder is an important factor in determining the quality of the generated audio.
 
 % Evaluation metrics
+As is often the case with tasks that involve generating perceptual data such as images or audio, a formal and objective evaluation of the performance of the model is difficult. In our case, we're concerned with evaluating speech naturalness and voice similarity of the generated audio. Older TTS methods often relied on statistics computed on the waveform or on the acoustic features to compare different models. Not only are those metrics often only weakly correlated with the human perception of sound, but they would also typically be what the model was aiming to minimize. "When a measure becomes a target, it ceases to be a good measure" \citep{WhenAMetric}. A recent tendency adopted in TTS is to perform a subjective evaluation with human subjects and to report their Mean Opinion Score (MOS). The subjects are presented with a series of audio segments and are asked to rate their naturalness (or similarity when comparing two segments) on a Likert scale from 1 to 5. Because subjects do not necessarily rate actual human speech with a 5, it may be possible for TTS systems to surpass humans on this metric in the future. \citep{MOSNaturalness} argue that MOS is not a metric adapted to evaluate TTS systems, and they advocate using A/B testing instead, where subjects are asked to say which audio segment they prefer among two (a neutral vote is usually also possible). To account for the variance of opinion within subjects, one should aim to perform these studies at a large scale, with hundreds of subjects. Crowdsourcing services such as Amazon Mechanical Turk\footnote{\url{https://www.mturk.com/}} are commonly involved. 
+
+%Unfortunately reproducing such a study for our own results would be very time-intensive, and we therefore have little ways to evaluate our models. -> wrong place for this
 
 
 \subsection{Evolution of the state of the art in text-to-speech}
@@ -161,7 +164,7 @@ The authors compare WaveNet to an older parametric approach and to a concatenati
 	\caption[Figure]{MOS of WaveNet's performance compared with a parametric and concatenative approach, as well as with natural speech.\protect\footnotemark}
 	\label{wavenet_results}
 \end{figure}
-\footnotetext{Figure extracted from \url{https://deepmind.com/blog/wavenet-generative-model-raw-audio/}}
+\footnotetext{Figure extracted from \url{https://deepmind.com/blog/wavenet-generative-model-raw-audio/. Audio samples are available at the same URL.}}
 
 
 %Deep Voice \citep{DeepVoice1} proposes a fully neural TTS framework that exploits WaveNet among other deep architectures. Deep Voice stands out by making use of only a few intermediate features: phonemes with stress annotations, phoneme durations,
@@ -190,9 +193,14 @@ Follows Tacotron \citep{Tacotron1}, a sequence-to-sequence model that produces a
 	\label{tacotron2_results}
 \end{figure}
 
-\color{red} Efficient neural audio synthesis? \\ The plot summarizing everything \color{black}
+For a global comparison of the techniques described in this section, we report in figure \ref{mos_all} all the MOS of each new state of the art method. Note that we have more than one result for human speech, as two studies evaluate it independently. The MOS for human speech is consistent across both, and the difference between them is not statistically significant. However note that the two studies have authors in common, and thus might share a bias. Slightly different evaluation methods of the MOS may yield different results, which is one of the reasons why MOS is subject to criticism.
 
-\section{Related voice cloning methods}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{images/mos_all.png}
+	\caption{MOS for the methods presented in this section.}
+	\label{mos_all}
+\end{figure}
 
 
 % Wavenet:
@@ -202,7 +210,7 @@ Follows Tacotron \citep{Tacotron1}, a sequence-to-sequence model that produces a
 
 \section{Transfer Learning from Speaker Verification to Multispeaker Text-To-Speech Synthesis}
 \subsection{Overview}
-Our solution to real-time voice cloning is largely based on \citep{SV2TTS} (referred to as SV2TTS throughout this document). It describes an approach to zero-shot voice cloning that only requires 5 seconds of reference speech. This paper is only one of the many publications from the Tacotron series\footnote{\url{https://google.github.io/tacotron/}} authored at Google. Interestingly, the SV2TTS paper does not bring much innovation of its own, rather it is based on three major earlier works from Google: the GE2E loss \citep{GE2E}, Tacotron \citep{Tacotron1} and WaveNet \citep{WaveNet}. The complete framework is a three-stage pipeline, where the steps correspond to the models listed in order previously. Many of the current TTS tools and functionalities provided by Google, such as the Google assistant\footnote{\url{https://assistant.google.com/}} or the Google cloud services\footnote{\url{https://cloud.google.com/text-to-speech/}}, make use of these same models. While there are many open-source reimplementations of these models online, there is none of the SV2TTS framework to our knowledge (as of May 2019).
+Our approach to real-time voice cloning is largely based on \citep{SV2TTS} (referred to as SV2TTS throughout this document). It describes an approach to zero-shot voice cloning that only requires 5 seconds of reference speech. This paper is only one of the many publications from the Tacotron series\footnote{\url{https://google.github.io/tacotron/}} authored at Google. Interestingly, the SV2TTS paper does not bring much innovation of its own, rather it is based on three major earlier works from Google: the GE2E loss \citep{GE2E}, Tacotron \citep{Tacotron1} and WaveNet \citep{WaveNet}. The complete framework is a three-stage pipeline, where the steps correspond to the models listed in order previously. Many of the current TTS tools and functionalities provided by Google, such as the Google assistant\footnote{\url{https://assistant.google.com/}} or the Google cloud services\footnote{\url{https://cloud.google.com/text-to-speech/}}, make use of these same models. While there are many open-source reimplementations of these models online, there is none of the SV2TTS framework to our knowledge (as of May 2019).
 
 The three stages of the framework are as follows:
 \begin{itemize}
@@ -221,8 +229,7 @@ At inference time, the speaker encoder is fed a short reference utterance of the
 
 A particularity of the SV2TTS framework is that all models can be trained separately and on distinct datasets. For the encoder, one seeks to have a model that is robust to noise and able to capture the many characteristics of the human voice. Therefore, a large corpus of many different speakers would be preferable to train the encoder, without any strong requirement on the noise level of the audios. Additionally, the encoder is trained with the GE2E loss which requires no labels other than the speaker identity. With GE2E, the task to be learned by the model is a speaker verification task, which by itself has little to do with voice cloning. However, the task is stipulated in way that the network will output an embedding that is a meaningful representation of the voice of the speaker. This embedding is suitable for conditioning the synthesizer on a voice, hence the name of the paper: "Transfer Learning from Speaker Verification to Multispeaker Text-To-Speech Synthesis". For the datasets of the synthesizer and the vocoder, transcripts are required and the quality of the generated audio can only be as good as that of the data. Higher quality and annotated datasets are thus required, which often means they are smaller in size.
 
-%In subsection \ref{problem_definition}, we formally define the task that SV2TTS aims to solve. In the remaining subsections, we present the three parts of the framework as described in \citep{SV2TTS}.
-
+In the following subsection, we formally define the task that SV2TTS aims to solve. In the remaining subsections, we present the three parts of the framework as described in \citep{SV2TTS}, our implementation of each and the result of our experiments.
 
 \subsection{Problem definition} \label{problem_definition}
 \newcommand{\vx}{\mathbf{x}}
@@ -235,9 +242,9 @@ A particularity of the SV2TTS framework is that all models can be trained separa
 \newcommand{\enc}{\mathcal{E}}
 \newcommand{\syn}{\mathcal{S}}
 \newcommand{\voc}{\mathcal{V}}
-Consider a dataset of utterances grouped by their speaker. We denote the $j$th utterance of the $i$th speaker as $\vu_{ij}$. Utterances are in the waveform domain. We denote by $\vx_{ij}$ the log-mel spectrogram of the utterance $\vu_{ij}$. A log-mel spectrogram is a deterministic, non-invertible (lossy) but derivable function that extracts speech features from a waveform, so as to handle audio in a more tractable fashion in machine learning.
+Consider a dataset of utterances grouped by their speaker. We denote the $j$th utterance of the $i$th speaker as $\vu_{ij}$. Utterances are in the waveform domain. We denote by $\vx_{ij}$ the log-mel spectrogram of the utterance $\vu_{ij}$. A log-mel spectrogram is a deterministic, non-invertible (lossy) but derivable function that extracts speech features from a waveform, so as to handle speech in a more tractable fashion in machine learning.
 
-The encoder $\enc$ computes the embedding $\ve_{ij} = \enc(\vx_{ij}; \vw_\enc)$ corresponding to the utterance $\vu_{ij}$, where $\vw_\enc$ are the parameters of the encoder. Additionally, the authors define a speaker embedding as the centroid of the embedding of the speaker's utterances:
+The encoder $\enc$ computes the embedding $\ve_{ij} = \enc(\vx_{ij}; \vw_\enc)$ corresponding to the utterance $\vu_{ij}$, where $\vw_\enc$ are the parameters of the encoder. Additionally, the authors define a speaker embedding as the centroid of the embeddings of the speaker's utterances:
 \begin{equation}\label{speaker_embedding}
 \vc_i=\frac{1}{n}\sum_{j}^{n}\ve_{ij}
 \end{equation}
@@ -251,14 +258,14 @@ $$ min_{\vw_\enc, \vw_\syn, \vw_\voc} L_\voc(\vu_{ij}, \voc(\syn(\enc(\vx_{ij}; 
 Where $L_\voc$ is a loss function in the waveform domain. This approach has drawbacks:
 \begin{itemize}
 	\item It requires training all three models on a same dataset, meaning that this dataset would ideally need to meet the requirements for all models: a large number of speakers for the encoder but at the same time transcripts for the synthesizer and a low level noise for the synthesizer and somehow an average noise level for the encoder (so as to be able to handle noisy input speech). These conflicts are problematic and would lead to training models that could perform better if trained separately on distinct datasets. Specifically, a small dataset will likely lead to poor generalization and thus poor zero-shot performance.
-	\item The convergence of the combined model could be very hard to reach. In particular, the Tacotron synthesizer typically takes a significant time before producing correct alignments (see \rw).
+	\item The convergence of the combined model could be very hard to reach. In particular, the Tacotron synthesizer typically takes a significant time before producing correct alignments.
 \end{itemize}
 
 An evident way of addressing the second issue is to separate the training of the synthesizer and of the vocoder. Assuming a pretrained encoder, the synthesizer can be trained to directly predict the mel spectrograms of the target audio:
 $$ min_{\vw_\syn} L_\syn(\vx_{ij}, \syn(\ve_{ij}, \vt_{ij}; \vw_\syn)) $$
 Where $L_\syn$ is a loss function in the time-frequency domain. 
 
-The vocoder is then trained directly on the spectrograms. Note that both the approaches of training on ground truth spectrograms or on synthesizer-generated spectrograms are valid (see \rw). The latter requires a pretrained synthesizer.
+The vocoder is then trained directly on the spectrograms. Note that both the approaches of training on ground truth spectrograms or on synthesizer-generated spectrograms are valid. The latter requires a pretrained synthesizer.
 $$ min_{\vw_\voc} L_\voc(\vu_{ij}, \voc(\vx_{ij}; \vw_\voc)) \ \ \text{or} \ \ 
    min_{\vw_\voc} L_\voc(\vu_{ij}, \voc(\hat\vx_{ij}; \vw_\voc)) $$
 
@@ -277,7 +284,7 @@ While all parts of the framework are trained separately, there is still the requ
 The encoder model and its training procedure are described over several papers \citep{SV2TTS, GE2E, TE2E}. We reproduced this model with a PyTorch implementation of our own. We synthesize the parts that are pertinent to SV2TTS as well as our choices of implementation.
 
 \subsubsection{Model architecture}
-The model is a 3-layer LSTM with 768 hidden nodes followed by a projection layer of 256 units. While there is no reference in any of the papers as to what a projection layer is, the intuition is that it is simply a 256 outputs fully-connected layer per LSTM that is repeatedly applied to every output of the LSTM. When we first implemented the speaker encoder, we directly used 256 units LSTM layers instead, for the sake of quick prototyping, simplicity and for a lighter training load. This last part is important, as the authors have trained their own model for 50 million steps (although on a larger dataset), which is technically difficult for us to reproduce. We found this smaller model to perform extremely well, and we haven't found the time to train the larger version later on. \color{red} move to experiments? \color{black}
+The model is a 3-layer LSTM with 768 hidden nodes followed by a projection layer of 256 units. While there is no reference in any of the papers as to what a projection layer is, our intuition is that it is simply a 256 outputs fully-connected layer per LSTM that is repeatedly applied to every output of the LSTM. When we first implemented the speaker encoder, we directly used 256 units LSTM layers instead, for the sake of quick prototyping, simplicity and for a lighter training load. This last part is important, as the authors have trained their own model for 50 million steps (although on a larger dataset), which is technically difficult for us to reproduce. We found this smaller model to perform extremely well, and we haven't found the time to train the larger version later on.
 
 The inputs to the model are 40-channels log-mel spectrograms with a 25ms window width and a 10ms step. The output is the L2-normalized hidden state of the last layer, which is a vector of 256 elements. Our implementation also features a ReLU layer before the normalization, with the goal in mind to make embeddings sparse and thus more easily interpretable.
 
@@ -299,7 +306,7 @@ where $w$ and $b$ are learnable parameters. This entire process is illustrated i
 	\label{sim_matrix}
 \end{figure}
 
-Note that each utterance $\ve_{ij}$ is included in the centroid $\vc_{i}$ of the same speaker when computing the loss. This creates a bias towards the correct speaker independently of the accuracy of the model. To prevent this, an utterance that is compared against its own speaker's embedding will be removed from the computation of the speaker embedding. The similarity matrix is then defined as:
+Note that each utterance $\ve_{ij}$ is included in the centroid $\vc_{i}$ of the same speaker when computing the loss. This creates a bias towards the correct speaker independently of the accuracy of the model; and the authors argue that it also leaves room for trivial solutions. To prevent this, an utterance that is compared against its own speaker's embedding will be removed from the speaker embedding. The similarity matrix is then defined as:
 \begin{equation} \label{similarity_exclusive}
 \ms_{ji,k} =
 \begin{cases}
@@ -312,7 +319,7 @@ where the exclusive centroids $\vc_{i}^{(-j)}$ are defined as:
 \vc_{i}^{(-j)} = \frac{1}{M-1}\sum_{\substack{m=1\\m\neq j}}^{M}\ve_{im}
 \end{equation}
 
-The fixed duration of the utterances in a training batch is of 1.6 seconds. These utterances are partial utterances sampled from the longer complete utterances in the dataset. While the model architecture is able to handle inputs of variable length, it is reasonable to expect that it performs best with utterances of the same duration as those seen in training. Therefore, at inference time an utterance is split in segments of 1.6 seconds overlapping by 50\%, and the encoder forwards each segment individually. The resulting outputs are averaged then normalized to produce the utterance embedding. This is illustrated in figure \ref{encoder_inference}. Curiously, the authors of SV2TTS advocate for 800ms windows at inference time but still 1.6 seconds ones during training. We prefer to keep 1.6 seconds for both, as is done in GE2E.
+The fixed duration of the utterances in a training batch is of 1.6 seconds. These are partial utterances sampled from the longer complete utterances in the dataset. While the model architecture is able to handle inputs of variable length, it is reasonable to expect that it performs best with utterances of the same duration as those seen in training. Therefore, at inference time an utterance is split in segments of 1.6 seconds overlapping by 50\%, and the encoder forwards each segment individually. The resulting outputs are averaged then normalized to produce the utterance embedding. This is illustrated in figure \ref{encoder_inference}. Curiously, the authors of SV2TTS advocate for 800ms windows at inference time but still 1.6 seconds ones during training. We prefer to keep 1.6 seconds for both, as is done in GE2E.
 
 \begin{figure}[h]
 	\centering
@@ -328,7 +335,7 @@ To avoid segments that are mostly silent when sampling partial utterances from c
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=\linewidth]{images/encoder_preprocess_vad.png}
+	\includegraphics[width=0.95\linewidth]{images/encoder_preprocess_vad.png}
 	\caption{The steps to silence removal with VAD, from top to bottom. The orange line is the binary voice flag where the upper value means that the segment is voiced, and unvoiced when lower.}
 	\label{encoder_preprocess_vad}
 \end{figure}
@@ -366,7 +373,7 @@ The authors test different combinations of these datasets and observe the effect
 	\label{encoder_training_datasets}
 \end{table}
 
-These results indicate that the number of speakers is strongly correlated with the good performance of not only the encoder on the verification task, but also of the entire framework on the quality of the speech generated and on its ability to clone a voice. The small jump in naturalness, similarity and EER gained by including VoxCeleb2 could indicate that the variation of languages is hurting the training. The internal dataset of the authors is a proprietary voice search corpus from 18k English speakers. The encoder trained on this dataset performs significantly better, however we only have access to public datasets. We thus proceed with LibriSpeech-Other, VoxCeleb1 and VoxCeleb2.
+These results indicate that the number of speakers is strongly correlated with the good performance of not only the encoder on the verification task, but also of the entire framework on the quality of the speech generated and on its ability to clone a voice. The small jump in naturalness, similarity and EER gained by including VoxCeleb2 could possibly indicate that the variation of languages is hurting the training. The internal dataset of the authors is a proprietary voice search corpus from 18k English speakers. The encoder trained on this dataset performs significantly better, however we only have access to public datasets. We thus proceed with LibriSpeech-Other, VoxCeleb1 and VoxCeleb2.
 
 We train the speaker encoder for one million steps. To monitor the training we report the EER and we observe the ability of the model to cluster speakers. We periodically sample a batch of 10 speakers with 10 utterances each, compute the utterance embeddings and projecting them in a two-dimensional space with UMAP \citep{UMAP}. As embeddings of different speakers are expected to be further apart in the latent space than embeddings from the same speakers, it is expected that clusters of utterances from a same speaker form as the training progresses. We report our UMAP projections in figure \ref{training_umap}, where this behaviour can be observed.
 
@@ -377,10 +384,32 @@ We train the speaker encoder for one million steps. To monitor the training we r
 	\label{training_umap}
 \end{figure}
 
-As mentioned before, the authors have trained their model for 50 million steps on their proprietary dataset. While both our dataset and our model are smaller, our model still hasn't converged at 1 million steps. The loss decreases steadily with little variance and can still decrease more, but we are bound by the time.
+As mentioned before, the authors have trained their model for 50 million steps on their proprietary dataset. While both our dataset and our model are smaller, our model still hasn't converged at 1 million steps. The loss decreases steadily with little variance and could still decrease more, but we are bound by time. 
 
-\color{red} loss plot + test set? + EER \color{black}
+The resulting model yields very strong results nonetheless. In fact, we computed the test set EER to be $\mathbf{4.5\%}$. This is an astonishingly low value in light of the $10.14\%$ of the authors for the same set with 50 times more steps. We do not know whether our model is actually performing that well or if the EER computation procedure of the authors is different enough than ours to produce values so far apart.
 
+We find the clustering in latent space produced by our model to be impressively robust and to generalize well. In all our tests, the UMAP projections perfectly separate utterances from the test set of each of the three datasets, with large inter-cluster distances and small intra-cluster variance. An example is given in figure \ref{umap_projections}. The test set used for this evaluation is the combination of the test sets of LibriSpeech, VoxCeleb1 and VoxCeleb2. Speakers annotated with an F are female speakers, those with an M are male speakers. We compare our results with \citep[Figure 3]{SV2TTS}. We find that our projections also separate the gender of speakers linearly in the projected space. In the author's figure the utterances are from LibriSpeech only. We include VoxCeleb1 and VoxCeleb2 as well, with some of the randomly selected speakers who do not speak English. Note that our clusters are denser than those of the authors, but that this is only a result of using a different dimension reduction technique. We find results similar to theirs when using T-SNE \citep{TSNE}.
+
+\begin{figure}[h]
+	\centering
+	\begin{minipage}{.46\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{images/umap_projections.png}
+		\captionof{figure}{UMAP projections of 120 embeddings, 10 for each of the 12 speakers. Six male and six female speakers are selected at random from the test sets}
+		\label{umap_projections}
+	\end{minipage}
+	\hspace{.05\linewidth}
+	\begin{minipage}{.46\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{images/test_eer.png}
+		\captionof{figure}{Speaker verification EER on the test set with respect to the number of enrollment utterances. Each speaker is tested against $n + 1$ utterances used for enrollment.}
+		\label{test_eer}
+\end{minipage}
+\end{figure}
+
+The Equal Error Rate (EER) is a measure typically used in biometric systems to evaluate the accuracy of the system. It is the value of the false positive rate when it is equal to the true negative rate. Equating those terms is done by varying the similarity threshold above which a user is recognized by the biometric system. The authors of SV2TTS do not make mention of their procedure to evaluate the EER. This is problematic as the EER is tricky to compute, and highly depends on the number of enrollment utterances chosen. We refer to GE2E and use 6 utterances for enrollment and compare those to 7 utterances. For different numbers of utterances, refer to Figure \ref{test_eer}. They authors do not mention either if the utterances they use (both for enrollment and test) are complete or partial utterances. In light of our results, we uses partial utterances; but complete utterances would yield an even lower EER.
+
+Due to the lack of information provided by the authors of SV2TTS and as we found no reliable source indicating how the EER is computed for such a system, we cannot guarantee the correctness nor fairness of the comparison of our results against those of the authors. Independently of them however, our tests certainly demonstrate that our speaker encoder is performing very well on the task of speaker verification. With that taken into account, we are confident that the speaker encoder will generate meaningful embeddings; refer to section \rw for our final results.
 
 
 \subsection{Synthesizer} \label{synthesizer}
@@ -486,7 +515,7 @@ In WaveRNN, the entire 60 convolutions from WaveNet are replaced by a single GRU
 
 The authors improve on the factors $c(op_i)$ and $d(op_i)$ by implementing the sampling operation as a custom GPU operation. We do not replicate this. They also sparsify the network with the pruning strategy from \citep{SparsityRNN, 2PruneOrNot2Prune}. This method gradually prunes weights during training, as opposed to more classical pruning algorithms that operate between several trainings. The algorithm creates a binary mask over the weights that indicates whether the weight should be forced set to 0 or remain as is. The proportion of zero weights compared to the total number of weights in the network is called sparsity. Results from \citep{SparsityRNN, 2PruneOrNot2Prune} indicate that large networks with sparsity levels between 90 and 95\% significantly outperform their dense versions. The authors of WaveRNN additionally argue that $c(op_i)$ is proportional to the number of nonzero weights. We experiment with this form of pruning and report our results in section \rw.
 
-Finally, they propose 
+%Finally, they propose 
 
 
 
