@@ -9,6 +9,8 @@ from typing import List, Set
 import sounddevice as sd
 import matplotlib.pyplot as plt
 import numpy as np
+# from sklearn.manifold import TSNE         # You can try with TSNE if you like, I prefer UMAP 
+from time import sleep
 import umap
 import sys
 from warnings import filterwarnings
@@ -39,8 +41,12 @@ class UI(QDialog):
     max_saved_utterances = 20
     
     def draw_utterance(self, utterance: Utterance, which):
-        embed_ax, spec_ax = self.current_ax if which == "current" else self.gen_ax
-        embed_ax.figure.suptitle("" if utterance is None else utterance.name)
+        self.draw_spec(utterance.spec, which)
+        self.draw_embed(utterance.embed, utterance.name, which)
+    
+    def draw_embed(self, embed, name, which):
+        embed_ax, _ = self.current_ax if which == "current" else self.gen_ax
+        embed_ax.figure.suptitle("" if embed is None else name)
         
         ## Embedding
         # Clear the plot
@@ -49,28 +55,31 @@ class UI(QDialog):
         embed_ax.clear()
         
         # Draw the embed
-        if utterance is not None:
-            plot_embedding_as_heatmap(utterance.embed, embed_ax)
+        if embed is not None:
+            plot_embedding_as_heatmap(embed, embed_ax)
             embed_ax.set_title("embedding")
         embed_ax.set_aspect("equal", "datalim")
         embed_ax.set_xticks([])
         embed_ax.set_yticks([])
         embed_ax.figure.canvas.draw()
-        
+
+    def draw_spec(self, spec, which):
+        _, spec_ax = self.current_ax if which == "current" else self.gen_ax
+
         ## Spectrogram
         # Draw the spectrogram
         spec_ax.clear()
-        if utterance is not None:
-            im = spec_ax.imshow(utterance.spec, aspect="auto", interpolation="none")
-            # ax1.set_title("Target Mel-Spectrogram")
-            # spec_ax.figure.colorbar(mappable=im, shrink=0.65, orientation="horizontal", spec_ax=spec_ax)
+        if spec is not None:
+            im = spec_ax.imshow(spec, aspect="auto", interpolation="none")
+            # spec_ax.figure.colorbar(mappable=im, shrink=0.65, orientation="horizontal", 
+            # spec_ax=spec_ax)
             spec_ax.set_title("mel spectrogram")
-
+    
         spec_ax.set_xticks([])
         spec_ax.set_yticks([])
         spec_ax.figure.canvas.draw()
 
-    def draw_umap(self, utterances: Set[Utterance]):
+    def draw_umap_projections(self, utterances: Set[Utterance]):
         self.umap_ax.clear()
 
         speakers = np.unique([u.speaker_name for u in utterances])
@@ -83,19 +92,29 @@ class UI(QDialog):
                               (self.min_umap_points - len(utterances)), 
                               horizontalalignment='center', fontsize=15)
             self.umap_ax.set_title("")
+        elif not self.umap_hot:
+            self.log("Drawing UMAP projections for the first time, this will take a few seconds.")
+            self.umap_hot = True
             
         # Compute the projections
         else:
             reducer = umap.UMAP(int(np.ceil(np.sqrt(len(embeds)))), metric="cosine")
+            # reducer = TSNE()
             projections = reducer.fit_transform(embeds)
-
+            
+            speakers_done = set()
             for projection, utterance in zip(projections, utterances):
                 color = colors[utterance.speaker_name]
-                mark = "o"
-                self.umap_ax.scatter(projection[0], projection[1], c=[color], marker=mark)
-            self.umap_ax.set_title("UMAP projections")
+                mark = "x" if "_gen_" in utterance.name else "o"
+                label = None if utterance.speaker_name in speakers_done else utterance.speaker_name
+                speakers_done.add(utterance.speaker_name)
+                self.umap_ax.scatter(projection[0], projection[1], c=[color], marker=mark,
+                                     label=label)
+            # self.umap_ax.set_title("UMAP projections")
+            self.umap_ax.legend(prop={'size': 10})
 
         # Draw the plot
+        self.umap_ax.set_aspect("equal", "datalim")
         self.umap_ax.set_xticks([])
         self.umap_ax.set_yticks([])
         self.umap_ax.figure.canvas.draw()
@@ -103,7 +122,33 @@ class UI(QDialog):
     def play(self, wav, sample_rate):
         sd.stop()
         sd.play(wav, sample_rate)
+
+    def record_one(self, sample_rate, duration):
+        self.record_button.setText("Recording...")
+        self.record_button.setDisabled(True)
         
+        self.log("Recording %d seconds of audio" % duration)
+        sd.stop()
+        try:
+            wav = sd.rec(duration * sample_rate, sample_rate, 1)
+        except Exception as e:
+            print(e)
+            self.log("Could not record anything. Is your recording device enabled?")
+            self.log("Your device must be connected before you start the toolbox.")
+            return None
+        
+        for i in np.arange(0, duration, 0.1):
+            self.set_loading(i, duration)
+            sleep(0.1)
+        self.set_loading(duration, duration)
+        sd.wait()
+        
+        self.log("Done recording.")
+        self.record_button.setText("Record one")
+        self.record_button.setDisabled(False)
+        
+        return wav.squeeze()
+
     @property        
     def current_dataset_name(self):
         return self.dataset_box.currentText()
@@ -219,14 +264,19 @@ class UI(QDialog):
         self.log_window.setText(log_text)
         self.app.processEvents()
 
-    def set_loading(self, value, maximum):
-        self.loading_bar.setValue(value)
-        self.loading_bar.setMaximum(maximum)
+    def set_loading(self, value, maximum=1):
+        self.loading_bar.setValue(value * 100)
+        self.loading_bar.setMaximum(maximum * 100)
+        self.loading_bar.setTextVisible(value != 0)
+        self.app.processEvents()
 
     def reset_interface(self):
-        self.draw_utterance(None, "current")
-        self.draw_utterance(None, "generated")
-        self.draw_umap(set())
+        self.draw_embed(None, None, "current")
+        self.draw_embed(None, None, "generated")
+        self.draw_spec(None, "current")
+        self.draw_spec(None, "generated")
+        self.draw_umap_projections(set())
+        self.set_loading(0)
         self.play_button.setDisabled(True)
         self.generate_button.setDisabled(True)
 
@@ -253,24 +303,25 @@ class UI(QDialog):
         # Generation
         gen_layout = QVBoxLayout()
         root_layout.addLayout(gen_layout, 0, 2)
+        
+        # Projections
+        self.projections_layout = QVBoxLayout()
+        root_layout.addLayout(self.projections_layout, 1, 0)
 
 
         ## Projections
-        # Legend
-        self.legend_layout = QVBoxLayout()
-        root_layout.addLayout(self.legend_layout, 0, 0)
-        
         # UMap
-        umap_canvas = FigureCanvas(Figure(figsize=(5, 5)))
-        self.umap_ax = umap_canvas.figure.subplots()
-        umap_canvas.figure.patch.set_facecolor("#F0F0F0")
-        root_layout.addWidget(umap_canvas, 1, 0)
+        fig, self.umap_ax = plt.subplots(figsize=(4, 4), facecolor="#F0F0F0")
+        fig.subplots_adjust(left=0.02, bottom=0.02, right=0.98, top=0.98)
+        self.projections_layout.addWidget(FigureCanvas(fig))
+        self.umap_hot = False
+        self.clear_button = QPushButton("Clear")
+        self.projections_layout.addWidget(self.clear_button)
 
 
         ## Browser
-        i = 0
-        
         # Dataset, speaker and utterance selection
+        i = 0
         self.dataset_box = QComboBox()
         browser_layout.addWidget(QLabel("<b>Dataset</b>"), i, 0)
         browser_layout.addWidget(self.dataset_box, i + 1, 0)
@@ -329,18 +380,18 @@ class UI(QDialog):
 
         ## Embed & spectrograms
         vis_layout.addStretch()
-        
+
         gridspec_kw = {"width_ratios": [1, 4]}
         fig, self.current_ax = plt.subplots(1, 2, figsize=(10, 2.25), facecolor="#F0F0F0", 
                                             gridspec_kw=gridspec_kw)
         fig.subplots_adjust(left=0, bottom=0.1, right=1, top=0.8)
         vis_layout.addWidget(FigureCanvas(fig))
-        
+
         fig, self.gen_ax = plt.subplots(1, 2, figsize=(10, 2.25), facecolor="#F0F0F0", 
                                         gridspec_kw=gridspec_kw)
         fig.subplots_adjust(left=0, bottom=0.1, right=1, top=0.8)
         vis_layout.addWidget(FigureCanvas(fig))
-        
+
         for ax in self.current_ax.tolist() + self.gen_ax.tolist():
             ax.set_facecolor("#F0F0F0")
             for side in ["top", "right", "bottom", "left"]:
@@ -354,6 +405,13 @@ class UI(QDialog):
         self.generate_button = QPushButton("Generate")
         gen_layout.addWidget(self.generate_button)
         
+        layout = QHBoxLayout()
+        self.synthesize_button = QPushButton("Synthesize only")
+        layout.addWidget(self.synthesize_button)
+        self.vocode_button = QPushButton("Vocode only")
+        layout.addWidget(self.vocode_button)
+        gen_layout.addLayout(layout)
+
         self.loading_bar = QProgressBar()
         gen_layout.addWidget(self.loading_bar)
         
@@ -362,47 +420,7 @@ class UI(QDialog):
         gen_layout.addWidget(self.log_window)
         self.logs = []
         gen_layout.addStretch()
-        
-        
 
-        # ## Embeds (bottom right)
-        # embeds_grid = QGridLayout()
-        # embed_button = QPushButton("Embed utterance (direct)")
-        # embed_demo_button = QPushButton("Embed utterance (demo)")
-        # self.record_one_button = QPushButton("Record one")
-        # self.use_partials_button = QCheckBox("Use partials")
-        # self.show_partials_button = QCheckBox("Show partials")
-        # self.go_next_button = QCheckBox("Auto pick next")
-        # self.user_id_box = QSpinBox()
-        # self.user_id_box.setRange(0, 9)
-        # self.use_partials_button.setChecked(True)
-        # self.show_partials_button.setChecked(True)
-        # self.go_next_button.setChecked(True)
-        # embed_button.clicked.connect(lambda: self.embed_utterance(False))
-        # embed_demo_button.clicked.connect(lambda: self.embed_utterance(True))
-        # self.record_one_button.clicked.connect(self.record_one)
-        # embeds_grid.addWidget(self.use_partials_button, 0, 0)
-        # embeds_grid.addWidget(self.show_partials_button, 1, 0)
-        # embeds_grid.addWidget(self.go_next_button, 2, 0)
-        # embeds_grid.addWidget(embed_button, 3, 0)
-        # embeds_grid.addWidget(embed_demo_button, 3, 1)
-        # embeds_grid.addWidget(self.record_one_button, 4, 0)
-        # embeds_grid.addWidget(self.user_id_box, 4, 1)
-        # # TODO add overlap and n_frames
-        # menu_layout.addLayout(embeds_grid)
-        # menu_layout.addStretch()
-        # 
-        # clear_button = QPushButton("Clear")
-        # 
-        # def clear_button_action():
-        #     self.embeds.clear()
-        #     self.draw_umap()
-        # 
-        # clear_button.clicked.connect(clear_button_action)
-        # menu_layout.addWidget(clear_button)
-        # 
-        # root_layout.addLayout(menu_layout)
-        
         
         ## Set the size of the window and of the elements
         max_size = QDesktopWidget().availableGeometry(self).size() * 0.8
@@ -414,17 +432,3 @@ class UI(QDialog):
 
     def start(self):
         self.app.exec_()
-
-    def record_one(self):
-        self.record_one_button.setText("Recording...")
-        self.record_one_button.setDisabled(True)
-        self.utterance = audio.preprocess_wave(audio.rec_wave(4))
-        self.record_one_button.setText("Done!")
-        speaker_name = "user_" + self.user_id_box.text() 
-        self.embed_utterance(False, speaker_name, False)
-        self.record_one_button.setText("Record one")
-        self.record_one_button.setDisabled(False)
-    
-
-if __name__ == "__main__":
-    UI()
