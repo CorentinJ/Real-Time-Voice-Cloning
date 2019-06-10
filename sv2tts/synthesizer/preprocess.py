@@ -171,6 +171,14 @@ def process_utterance(wav: np.ndarray, text: str, out_dir: Path, basename: str,
     # Skip utterances that are too long
     if mel_frames > hparams.max_mel_frames and hparams.clip_mels_length:
         return None
+    
+    # TODO: settle on this
+    # # Pad he audio signal to avoid frame inconsistency
+    # l_pad, r_pad = audio.librosa_pad_lr(wav, hparams.n_fft, audio.get_hop_size(hparams))
+    # wav = np.pad(wav, (l_pad, r_pad), mode='constant')
+    # assert len(wav) >= mel_frames * audio.get_hop_size(hparams)
+    # wav = wav[:mel_frames * audio.get_hop_size(hparams)]
+    # assert len(wav) % audio.get_hop_size(hparams) == 0
 
     # Write the spectrogram, embed and audio to disk
     np.save(mel_fpath, mel_spectrogram.T, allow_pickle=False)

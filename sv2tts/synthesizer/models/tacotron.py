@@ -348,20 +348,12 @@ class Tacotron():
                             self.tower_stop_token_targets[i],
                             self.tower_stop_token_prediction[i], self.tower_targets_lengths[i],
                             hparams=self._hparams)
-                        # SV2TTS extra L1 loss
-                        linear_loss = MaskedLinearLoss(self.tower_mel_targets[i],
-                                                       self.tower_decoder_output[i],
-                                                       self.tower_targets_lengths[i],
-                                                       hparams=self._hparams)
-                        # # Compute masked linear loss
-                        # if hp.predict_linear:
-                        #     # Compute Linear L1 mask loss (priority to low frequencies)
-                        #     linear_loss = MaskedLinearLoss(self.tower_linear_targets[i],
-                        #                                    self.tower_linear_outputs[i],
-                        #                                    self.targets_lengths,
-                        #                                    hparams=self._hparams)
-                        # else:
-                        #     linear_loss = 0.
+                        # SV2TTS extra L1 loss (disabled for now)
+                        # linear_loss = MaskedLinearLoss(self.tower_mel_targets[i],
+                        #                                self.tower_decoder_output[i],
+                        #                                self.tower_targets_lengths[i],
+                        #                                hparams=self._hparams)
+                        linear_loss = 0.
                     else:
                         # Compute loss of predictions before postnet
                         before = tf.losses.mean_squared_error(self.tower_mel_targets[i],

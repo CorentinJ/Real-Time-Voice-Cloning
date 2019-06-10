@@ -90,8 +90,6 @@ hparams = tf.contrib.training.HParams(
     #	6- If audio quality is too metallic or fragmented (or if linear spectrogram plots are 
 	# showing black silent regions on top), then restart from step 2.
     num_mels=80,  # Number of mel-spectrogram channels and local conditioning dimensionality
-    # num_freq=1025,  # (= n_fft / 2 + 1) only used when adding linear spectrograms post processing
-    num_freq=1025,  # (= n_fft / 2 + 1) only used when adding linear spectrograms post processing
     #  network
     rescale=True,  # Whether to rescale audio prior to preprocessing
     rescaling_max=0.9,  # Rescaling value

@@ -81,7 +81,6 @@ def inv_linear_spectrogram(linear_spectrogram, hparams):
     else:
         return inv_preemphasis(_griffin_lim(S ** hparams.power, hparams), hparams.preemphasis, hparams.preemphasize)
 
-
 def inv_mel_spectrogram(mel_spectrogram, hparams):
     """Converts mel spectrogram to waveform using librosa"""
     if hparams.signal_normalization:
@@ -148,10 +147,7 @@ def pad_lr(x, fsize, fshift):
 ##########################################################
 #Librosa correct padding
 def librosa_pad_lr(x, fsize, fshift):
-    """compute right padding (final frame)
-    """
-    return int(fsize // 2)
-
+    return 0, (x.shape[0] // fshift + 1) * fshift - x.shape[0]
 
 # Conversions
 _mel_basis = None
