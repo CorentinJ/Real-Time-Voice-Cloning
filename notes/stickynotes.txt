@@ -1,11 +1,6 @@
 Generalized End-To-End Loss For Speaker Verification
 
------- Todo ------
-- Analyze perf of the encoder on the test set (join vc1_test and vc2_test, they're small)
-- Behaviour of the encoder outputs on a sequence (when does it converge, what if another speaker comes in etc) -> try to achieve speaker diarization from this
-
 ------ Ideas ------
-- Add a term in the loss that forces centroid of synthesized utterances to be close to that of ground truth utterances
 - How much is the encoding affected by the quality of the microphone? Record the same sentences on 2 or 3 different microphones and project the embeddings. Look at how far they are from the rest of the dataset.
 - How stable is the encoding w.r.t. the length of the utterance? Compare side by side embeddings of several utterances cut at 1.6s, 2.4s, 3.2s... Show the distribution of the distance to the centroids w.r.t. to the length of the utterances, the EER
 - Analyze the components of the embeddings
@@ -16,7 +11,7 @@ Generalized End-To-End Loss For Speaker Verification
 ------ Things to not forget to write about ------
 - The contents of problems.txt, improvements.txt, encoder.txt, synthesizer.txt, questions.txt.
 - (slides) Interpretation of EER
-- Thank mr. Louppe, the authors of GE2E and Joeri
+- Thank mr. Louppe, the authors of GE2E, Joeri, Virgine, github users
 - LibriTTS, Improving data efficiency in end-to-end, 
 
 

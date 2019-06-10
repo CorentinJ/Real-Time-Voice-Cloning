@@ -20,3 +20,5 @@ Notes on alignment:
 - Some users report their number of training steps (https://github.com/Rayhane-mamah/Tacotron-2/issues/175)
 
 Using the L1 loss (section 2.2) didn't change anything.
+    -> Actually made things way worse because I forgot to scale it, like a complete idiot.
+    
