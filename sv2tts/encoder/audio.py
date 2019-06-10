@@ -119,16 +119,3 @@ def plot_mel_filterbank(frames):
     plt.tight_layout()
     plt.show()
     
-# def play_wave(wav, blocking=False):
-#     sounddevice.stop()
-#     sounddevice.play(wav, sampling_rate, blocking=blocking)
-#     
-# def rec_wave(duration, blocking=True, verbose=True):
-#     if verbose:
-#         print("Recording %d seconds of audio" % duration)
-#     wav = sounddevice.rec(duration * sampling_rate, sampling_rate, 1)
-#     if blocking:
-#         sounddevice.wait()
-#         if verbose:
-#             print("Done recording!")
-#     return wav.squeeze()

@@ -17,6 +17,7 @@
 *.sh
 _old
 sv2tts/encoder/saved_models/*
-sv2tts/encoder/_evaluate.py
 sv2tts/synthesizer/saved_models/*
 sv2tts/vocoder/saved_models/*
+sv2tts/utils/_*.py
+sv2tts/vocoder_old
