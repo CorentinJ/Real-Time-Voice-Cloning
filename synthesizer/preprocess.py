@@ -164,8 +164,7 @@ def process_utterance(wav: np.ndarray, text: str, out_dir: Path, basename: str,
     #   is why we re-apply it on the audio on the side of the vocoder.
     # - Librosa pads the waveform before computing the mel spectrogram. Here, the waveform is saved
     #   without extra padding. This means that you won't have an exact relation between the length
-    #   of the wav and of the mel spectrogram. I still don't know if that's necessary.
-    # TODO: double-check this
+    #   of the wav and of the mel spectrogram. See the vocoder data loader.
     
     
     # Skip existing utterances if needed

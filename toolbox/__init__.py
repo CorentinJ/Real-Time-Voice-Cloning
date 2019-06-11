@@ -40,7 +40,6 @@ class Toolbox:
         self.ui.start()
         
     def setup_events(self):
-        ## All the nasty UI events code
         # Dataset, speaker and utterance selection
         self.ui.browser_load_button.clicked.connect(self.load_from_browser)
         random_func = lambda level: lambda: self.ui.populate_browser(self.datasets_root,
@@ -74,7 +73,7 @@ class Toolbox:
         self.ui.clear_button.clicked.connect(self.clear_utterances)
 
     def reset_ui(self, encoder_models_dir, synthesizer_models_dir, vocoder_models_dir):
-        self.ui.populate_browser(self.datasets_root, recognized_datasets, 0, False)
+        self.ui.populate_browser(self.datasets_root, recognized_datasets, 0, True)
         self.ui.populate_models(encoder_models_dir, synthesizer_models_dir, vocoder_models_dir)
         
     def load_from_browser(self):
@@ -135,9 +134,12 @@ class Toolbox:
         if not synthesizer.is_loaded():
             self.init_synthesizer()
         self.ui.log("Generating the mel spectrogram...")
-        text = self.ui.text_prompt.toPlainText()
+        
+        texts = self.ui.text_prompt.toPlainText().split("\n")
         embed = self.ui.selected_utterance.embed
-        spec = synthesizer.synthesize_spectrogram(text, embed)
+        embeds = np.stack([embed] * len(texts))
+        specs = synthesizer.synthesize_spectrograms(texts, embeds, extra_silence=0.15)
+        spec = np.concatenate(specs, axis=1)
         
         self.ui.draw_spec(spec, "generated")
         self.current_generated = (self.ui.selected_utterance.speaker_name, spec, None)

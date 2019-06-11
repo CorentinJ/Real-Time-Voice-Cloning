@@ -15,9 +15,7 @@
 *.toc
 *.wav
 *.sh
-_old
-sv2tts/encoder/saved_models/*
-sv2tts/synthesizer/saved_models/*
-sv2tts/vocoder/saved_models/*
-sv2tts/utils/_*.py
-sv2tts/vocoder_old
+encoder/saved_models/*
+synthesizer/saved_models/*
+vocoder/saved_models/*
+utils/_*.py

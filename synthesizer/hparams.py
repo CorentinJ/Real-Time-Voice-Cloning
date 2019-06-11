@@ -169,7 +169,7 @@ hparams = HParams(
     # Determines whether the decoder should stop when predicting <stop> to any frame or to all of 
     # them (True works pretty well)
     
-    embedding_dim=512,  # dimension of embedding space (TODO: clarify/delete this)
+    embedding_dim=512,  # dimension of embedding space (these are NOT the speaker embeddings)
     
     # Encoder parameters
     enc_conv_num_layers=3,  # number of encoder convolutional layers

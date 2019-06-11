@@ -3,7 +3,7 @@ from datetime import datetime
 from time import perf_counter as timer
 import matplotlib.pyplot as plt
 import numpy as np
-import webbrowser
+# import webbrowser
 import visdom
 import umap
 
