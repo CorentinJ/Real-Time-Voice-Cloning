@@ -88,12 +88,12 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
     #Set inputs batch wise
     metadata = [metadata[i: i + hparams.tacotron_synthesis_batch_size] for i in
                 range(0, len(metadata), hparams.tacotron_synthesis_batch_size)]
+    # TODO: come on big boy, fix this
     # Quick and dirty fix to make sure that all batches have the same size 
     metadata = metadata[:-1]
     
     print("Starting Synthesis")
     mel_dir = os.path.join(in_dir, "mels")
-    # wav_dir = os.path.join(in_dir, "audio")
     embed_dir = os.path.join(in_dir, "embeds")
     meta_out_fpath = os.path.join(out_dir, "synthesized.txt")
     with open(meta_out_fpath, "w") as file:

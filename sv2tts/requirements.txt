@@ -1,3 +1,6 @@
+torch>=0.4.1
+tensorflow-gpu>=1.10.0,<=1.14.0
+umap-learn
 visdom
 PyQt4
 webrtcvad
@@ -7,4 +10,3 @@ numpy>=1.14.0
 scipy>=1.0.0
 tqdm
 sounddevice
-umap-learn

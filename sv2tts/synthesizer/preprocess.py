@@ -154,6 +154,20 @@ def split_on_silences(wav_fpath, words, end_times, hparams):
     
 def process_utterance(wav: np.ndarray, text: str, out_dir: Path, basename: str, 
                       skip_existing: bool, hparams):
+    ## FOR REFERENCE:
+    # For you not to lose your head if you ever wish to change things here or implement your own
+    # synthesizer.
+    # - Both the audios and the mel spectrograms are saved as numpy arrays
+    # - There is no processing done to the audios that will be saved to disk beyond volume  
+    #   normalization (in split_on_silences)
+    # - However, pre-emphasis is applied to the audios before computing the mel spectrogram. This
+    #   is why we re-apply it on the audio on the side of the vocoder.
+    # - Librosa pads the waveform before computing the mel spectrogram. Here, the waveform is saved
+    #   without extra padding. This means that you won't have an exact relation between the length
+    #   of the wav and of the mel spectrogram. I still don't know if that's necessary.
+    # TODO: double-check this
+    
+    
     # Skip existing utterances if needed
     mel_fpath = out_dir.joinpath("mels", "mel-%s.npy" % basename)
     wav_fpath = out_dir.joinpath("audio", "audio-%s.npy" % basename)
@@ -172,14 +186,6 @@ def process_utterance(wav: np.ndarray, text: str, out_dir: Path, basename: str,
     if mel_frames > hparams.max_mel_frames and hparams.clip_mels_length:
         return None
     
-    # TODO: settle on this
-    # # Pad he audio signal to avoid frame inconsistency
-    # l_pad, r_pad = audio.librosa_pad_lr(wav, hparams.n_fft, audio.get_hop_size(hparams))
-    # wav = np.pad(wav, (l_pad, r_pad), mode='constant')
-    # assert len(wav) >= mel_frames * audio.get_hop_size(hparams)
-    # wav = wav[:mel_frames * audio.get_hop_size(hparams)]
-    # assert len(wav) % audio.get_hop_size(hparams) == 0
-
     # Write the spectrogram, embed and audio to disk
     np.save(mel_fpath, mel_spectrogram.T, allow_pickle=False)
     np.save(wav_fpath, wav, allow_pickle=False)

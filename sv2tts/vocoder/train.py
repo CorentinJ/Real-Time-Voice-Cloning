@@ -1,133 +1,119 @@
-# ## Alternative Model (Training)
-# I've found WaveRNN quite slow to train so here's an alternative that utilises the optimised rnn 
-# kernels in Pytorch. The model below is much much faster to train, it will converge in 48hrs when 
-# training on 22.5kHz samples (or 24hrs using 16kHz samples) on a single GTX1080. It also works 
-# quite well with predicted GTA features. 
-# The model is simply two residual GRUs in sequence and then three dense layers with a 512 softmax 
-# output. This is supplemented with an upsampling network.
-# Since the Pytorch rnn kernels are 'closed', the options for conditioning sites are greatly 
-# reduced. Here's the strategy I went with given that restriction:  
-# 1 - Upsampling: Nearest neighbour upsampling followed by 2d convolutions with 'horizontal' kernels
-# to interpolate. Split up into two or three layers depending on the stft hop length.
-# 2 - A 1d resnet with a 5 wide conv input and 1x1 res blocks. Not sure if this is necessary, but 
-# the thinking behind it is: the upsampled features give a local view of the conditioning - why not
-# supplement that with a much wider view of conditioning features, including a peek at the future. 
-# One thing to note is that the resnet is computed only once and in parallel, so it shouldn't slow 
-# down training/generation much. 
-# Train this model to ~500k steps for 8/9bit linear samples or ~1M steps for 10bit linear or 9+bit 
-# mu_law. 
-
-import torch
-import torch.nn as nn
-from torch import optim
+from vocoder.models.fatchord_version import WaveRNN
+from vocoder.utils.vocoder_dataset import VocoderDataset, collate_vocoder
+from vocoder.utils.distribution import discretized_mix_logistic_loss
+from vocoder.utils.display import stream, simple_table
+from vocoder.gen_wavernn import gen_testset
 from torch.utils.data import DataLoader
-from vocoder.vocoder_dataset import VocoderDataset
-from vocoder.model import WaveRNN
-from vocoder.params import *
 from pathlib import Path
-import time
+from torch import optim
+import torch.nn.functional as F
+import vocoder.hparams as hp
 import numpy as np
+import time
 
 
-def collate(batch) :
-    max_offsets = [x[0].shape[-1] - (mel_win + 2 * pad) for x in batch]
-    mel_offsets = [np.random.randint(0, offset) for offset in max_offsets]
-    sig_offsets = [(offset + pad) * hop_length for offset in mel_offsets]
+def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_truth: bool,
+          save_every: int, backup_every: int, force_restart: bool):
+    # Check to make sure the hop length is correctly factorised
+    assert np.cumprod(hp.voc_upsample_factors)[-1] == hp.hop_length
     
-    mels = [x[0][:, mel_offsets[i]:mel_offsets[i] + mel_win] for i, x in enumerate(batch)]
-    coarse = [x[1][sig_offsets[i]:sig_offsets[i] + seq_len + 1] for i, x in enumerate(batch)]
-    mels = np.stack(mels).astype(np.float32)
-    coarse = np.stack(coarse).astype(np.int64)
-    mels = torch.FloatTensor(mels)
-    coarse = torch.LongTensor(coarse)
-    
-    x_input = 2 * coarse[:, :seq_len].float() / (2 ** bits - 1.) - 1.
-    y_coarse = coarse[:, 1:]
-    
-    return x_input, mels, y_coarse
-
-
-def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, force_restart: bool):
-    print_params()
-    
-    # Initialize the dataset
-    wav_dir = syn_dir.joinpath("audio")
-    gta_dir = voc_dir.joinpath("mels_gta")
-    metadata_fpath = voc_dir.joinpath("synthesized.txt")
-    dataset = VocoderDataset(metadata_fpath, gta_dir, wav_dir)
-    
-    # Initialize the model with default weights
+    # Instantiate the model
+    print("Initializing the model...")
     model = WaveRNN(
-        rnn_dims=rnn_dims, 
-        fc_dims=fc_dims, 
-        bits=bits,
-        pad=pad,
-        upsample_factors=upsample_factors, 
-        feat_dims=feat_dims,
-        compute_dims=compute_dims, 
-        res_out_dims=res_out_dims, 
-        res_blocks=res_blocks,
-        hop_length=hop_length,
-        sample_rate=sample_rate
-    )
-    model = model.cuda()
-    
+        rnn_dims=hp.voc_rnn_dims,
+        fc_dims=hp.voc_fc_dims,
+        bits=hp.bits,
+        pad=hp.voc_pad,
+        upsample_factors=hp.voc_upsample_factors,
+        feat_dims=hp.num_mels,
+        compute_dims=hp.voc_compute_dims,
+        res_out_dims=hp.voc_res_out_dims,
+        res_blocks=hp.voc_res_blocks,
+        hop_length=hp.hop_length,
+        sample_rate=hp.sample_rate,
+        mode=hp.voc_mode
+    ).cuda()
+       
+    # Initialize the optimizer
+    optimizer = optim.Adam(model.parameters())
+    for p in optimizer.param_groups: 
+        p["lr"] = hp.voc_lr
+    loss_func = F.cross_entropy if model.mode == "RAW" else discretized_mix_logistic_loss
+
     # Load the weights
-    global step
     model_dir = models_dir.joinpath(run_id)
     model_dir.mkdir(exist_ok=True)
-    model_fpath = model_dir.joinpath(run_id + ".pt")
-    if not force_restart and model_fpath.exists():
-        checkpoint = torch.load(model_fpath)
-        step = checkpoint['step']
-        model.load_state_dict(checkpoint['model_state'])
-        print("Loaded from step %d." % step)
+    weights_fpath = model_dir.joinpath(run_id + ".pt")
+    if force_restart or not weights_fpath.exists():
+        print("\nStarting the training of WaveRNN from scratch\n")
+        model.save(weights_fpath, optimizer)
     else:
-        step = 0
-        print("Starting from scratch.")
+        print("\nLoading weights at %s" % weights_fpath)
+        model.load(weights_fpath, optimizer)
+        print("WaveRNN weights loaded from step %d" % model.step)
     
-    # Train the model
-    def train(model, optimiser, epochs, batch_size, classes, seq_len, step, lr=1e-4):
-        for p in optimiser.param_groups:
-            p['lr'] = lr
-        criterion = nn.NLLLoss().cuda()
-        
-        for e in range(epochs):
-            trn_loader = DataLoader(dataset, collate_fn=collate, batch_size=batch_size, 
-                                    num_workers=2, shuffle=True, pin_memory=True)
-            start = time.time()
-            running_loss = 0.
+    # Initialize the dataset
+    metadata_fpath = syn_dir.joinpath("train.txt") if ground_truth else \
+        voc_dir.joinpath("synthesized.txt")
+    mel_dir = syn_dir.joinpath("mels") if ground_truth else voc_dir.joinpath("mels_gta")
+    wav_dir = syn_dir.joinpath("audio")
+    dataset = VocoderDataset(metadata_fpath, mel_dir, wav_dir)
+    test_loader = DataLoader(dataset,
+                             batch_size=1,
+                             shuffle=True,
+                             pin_memory=True)
+
+    # Begin the training
+    simple_table([('Batch size', hp.voc_batch_size),
+                  ('LR', hp.voc_lr),
+                  ('Sequence Len', hp.voc_seq_len)])
     
-            iters = len(trn_loader)
-    
-            for i, (x, m, y) in enumerate(trn_loader):
-                x, m, y = x.cuda(), m.cuda(), y.cuda()
-    
-                y_hat = model(x, m)
+    for epoch in range(1, 350):
+        data_loader = DataLoader(dataset,
+                                 collate_fn=collate_vocoder,
+                                 batch_size=hp.voc_batch_size,
+                                 num_workers=2,
+                                 shuffle=True,
+                                 pin_memory=True)
+        start = time.time()
+        running_loss = 0.
+
+        for i, (x, y, m) in enumerate(data_loader, 1):
+            x, m, y = x.cuda(), m.cuda(), y.cuda()
+            
+            # Forward pass
+            y_hat = model(x, m)
+            if model.mode == 'RAW':
                 y_hat = y_hat.transpose(1, 2).unsqueeze(-1)
-                y = y.unsqueeze(-1)
-                loss = criterion(y_hat, y)
-                
-                optimiser.zero_grad()
-                loss.backward()
-                optimiser.step()
-                running_loss += loss.item()
-                
-                speed = (i + 1) / (time.time() - start)
-                avg_loss = running_loss / (i + 1)
-                
-                step += 1
-                k = step // 1000
-                print('\rEpoch: %i/%i -- Batch: %i/%i -- Loss: %.3f -- %.2f steps/sec -- '
-                       'Step: %ik' % (e + 1, epochs, i + 1, iters, avg_loss, speed, k), end='')
-                
-                if (i + 1) % 1000 == 0:
-                    torch.save({'step': step, 'model_state': model.state_dict()}, model_fpath)
+            elif model.mode == 'MOL':
+                y = y.float()
+            y = y.unsqueeze(-1)
             
-            torch.save({'step': step, 'model_state': model.state_dict()}, model_fpath)
-            print('<saved>')
-            
-    optimizer = optim.Adam(model.parameters())
-    train(model, optimizer, epochs=100, batch_size=100, classes=2 ** bits,
-          seq_len=seq_len, step=step, lr=1e-4)
-    
+            # Backward pass
+            loss = loss_func(y_hat, y)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            running_loss += loss.item()
+            speed = i / (time.time() - start)
+            avg_loss = running_loss / i
+
+            step = model.get_step()
+            k = step // 1000
+
+            if backup_every != 0 and step % backup_every == 0 :
+                model.checkpoint(model_dir, optimizer)
+                
+            if save_every != 0 and step % save_every == 0 :
+                model.save(weights_fpath, optimizer)
+
+            msg = f"| Epoch: {epoch} ({i}/{len(data_loader)}) | " \
+                f"Loss: {avg_loss:.4f} | {speed:.1f} " \
+                f"steps/s | Step: {k}k | "
+            stream(msg)
+
+
+        gen_testset(model, test_loader, hp.voc_gen_at_checkpoint, hp.voc_gen_batched,
+                    hp.voc_target, hp.voc_overlap, model_dir)
+        print("")

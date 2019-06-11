@@ -64,19 +64,14 @@ class Synthesizer:
         saver = tf.train.Saver()
         saver.restore(self.session, checkpoint_path)
     
-    def my_synthesize(self, speaker_embed, text, raise_exception=False):
+    def my_synthesize(self, speaker_embeds, texts):
         """
         Lighter synthesis function that directly returns the mel spectrogram.
-        
-        :param speaker_embed: 
-        :param text: the text to synthesize 
-        :param raise_exception: 
-        :return: 
         """
         
         # Prepare the input
         cleaner_names = [x.strip() for x in self._hparams.cleaners.split(",")]
-        seqs = [np.asarray(text_to_sequence(text, cleaner_names))]
+        seqs = [np.asarray(text_to_sequence(text, cleaner_names)) for text in texts]
         input_lengths = [len(seq) for seq in seqs]
         input_seqs, max_seq_len = self._prepare_inputs(seqs)
         split_infos = [[max_seq_len, 0, 0, 0]]
@@ -84,36 +79,30 @@ class Synthesizer:
             self.inputs: input_seqs,
             self.input_lengths: np.asarray(input_lengths, dtype=np.int32),
             self.split_infos: np.asarray(split_infos, dtype=np.int32),
-            self.speaker_embeddings: speaker_embed
+            self.speaker_embeddings: speaker_embeds
         }
         
         # Forward it
         mels, alignments, stop_tokens = self.session.run(
             [self.mel_outputs, self.alignments, self.stop_token_prediction],
             feed_dict=feed_dict)
-        mel, alignment, stop_token = mels[0][0], alignments[0][0], stop_tokens[0][0]
+        mels, alignments, stop_tokens = list(mels[0]), alignments[0], stop_tokens[0]
         
         # Trim the output
-        try:
-            target_length = np.round(stop_token).index(1)
-            mel = mel[:target_length, :]
-        except:
-            if raise_exception:
-                raise Exception("Tacotron could not generate a stop token.")
+        for i in range(len(mels)):
+            try:
+                target_length = list(np.round(stop_tokens[i])).index(1)
+                mels[i] = mels[i][:target_length, :]
+            except ValueError:
+                # If no token is generated, we simply do not trim the output
+                continue
         
-        return mel
+        return [mel.T for mel in mels], alignments
     
     def synthesize(self, texts, basenames, out_dir, log_dir, mel_filenames, embed_filenames):
         hparams = self._hparams
         cleaner_names = [x.strip() for x in hparams.cleaners.split(",")]
-        
-        # #Repeat last sample until number of samples is divisible by the number of GPUs (last run scenario)
-        # while len(texts) % hparams.tacotron_synthesis_batch_size != 0:
-        #     texts.append(texts[-1])
-        #     basenames.append(basenames[-1])
-        #     if mel_filenames is not None:
-        #         mel_filenames.append(mel_filenames[-1])
-        
+              
         assert 0 == len(texts) % self._hparams.tacotron_num_gpus
         seqs = [np.asarray(text_to_sequence(text, cleaner_names)) for text in texts]
         input_lengths = [len(seq) for seq in seqs]

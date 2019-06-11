@@ -2,7 +2,7 @@ from synthesizer.hparams import hparams
 from synthesizer.synthesizer import Synthesizer
 from synthesizer import audio
 from pathlib import Path
-from typing import Union
+from typing import Union, List
 import tensorflow as tf
 import numpy as np
 import librosa
@@ -27,11 +27,34 @@ def load_model(checkpoints_dir: Path):
 def is_loaded():
     return _model is not None
 
-def synthesize_spectrogram(text: str, embedding: np.ndarray):
+def synthesize_spectrograms(texts: List[str], embeddings: np.ndarray, return_alignments=False,
+                            extra_silence=0.):
+    """
+    Synthesizes mel spectrograms from texts and speaker embeddings.
+    
+    :param texts: a list of N text prompts to be synthesized
+    :param embeddings: a numpy array of (N, 256) speaker embeddings
+    :param return_alignments: if True, a matrix representing the alignments between the characters
+    and each decoder output step will be returned for each spectrogram
+    :param extra_silence: adds <extra_silence> seconds of silence at the end of each spectrogram
+    :return: a list of N melspectrograms as numpy arrays of shape (80, M), and possibly the 
+    alignments.
+    """
     if not is_loaded():
         raise Exception("Load a model first")
-    spec = _model.my_synthesize(embedding[None, ...], text).T
-    return spec
+    
+    specs, alignments = _model.my_synthesize(embeddings, texts)
+    
+    if extra_silence > 0:
+        n_frames = (extra_silence / hparams.hop_size) * hparams.sample_rate
+        silence = np.full((hparams.num_mels, int(n_frames)), -hparams.max_abs_value)
+        for i in range(len(specs)):
+            specs[i] = np.concatenate((specs[i], silence), axis=1)
+    
+    if return_alignments:
+        return specs, alignments
+    else:
+        return specs
 
 def load_preprocess_wav(fpath):
     wav = librosa.load(fpath, hparams.sample_rate)[0]
@@ -50,3 +73,5 @@ def make_spectrogram(fpath_or_wav: Union[str, Path, np.ndarray]):
 
 def griffin_lim(mel):
     return audio.inv_mel_spectrogram(mel, hparams)
+
+
