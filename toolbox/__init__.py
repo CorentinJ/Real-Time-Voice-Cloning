@@ -61,6 +61,7 @@ class Toolbox:
         self.ui.utterance_history.currentIndexChanged.connect(func)
         func = lambda: self.ui.play(self.ui.selected_utterance.wav, synthesizer.sample_rate)
         self.ui.play_button.clicked.connect(func)
+        self.ui.stop_button.clicked.connect(self.ui.stop)
         self.ui.record_button.clicked.connect(self.record)
         
         # Generation
@@ -151,15 +152,22 @@ class Toolbox:
         # Synthesize the waveform
         if not vocoder.is_loaded():
             self.init_vocoder()
-        self.ui.log("Generating the waveform...")
+        self.ui.log("")
+        def vocoder_progress(i, seq_len, b_size, gen_rate):
+            real_time_factor = (gen_rate / synthesizer.hparams.sample_rate) * 1000
+            line = "Waveform generation %d/%d (batch size: %d, rate: %.1fkHz - %.2fx real time)" % \
+                   (i * b_size, seq_len * b_size, b_size, gen_rate, real_time_factor)
+            self.ui.log(line, "overwrite")
+            self.ui.set_loading(i, seq_len)
         if self.ui.current_vocoder_fpath is not None:
-            wav = vocoder.infer_waveform(spec)
+            wav = vocoder.infer_waveform(spec, progress_callback=vocoder_progress)
         else:
             wav = synthesizer.griffin_lim(spec)
-        wav = wav / np.abs(wav).max() * 0.97
+        self.ui.set_loading(0)
+        self.ui.log(" Done!", "append")
         
         # Play it
-        self.ui.log("Playing the generated waveform")
+        wav = wav / np.abs(wav).max() * 0.97
         self.ui.play(wav, synthesizer.sample_rate)
 
         # Compute the embedding
@@ -178,25 +186,26 @@ class Toolbox:
         self.ui.draw_embed(embed, name, "generated")
         self.ui.draw_umap_projections(self.utterances)
         
+        
     def init_encoder(self):
         model_fpath = self.ui.current_encoder_fpath
         
-        self.ui.log("Loading the encoder %s" % model_fpath)
+        self.ui.log("Loading the encoder %s... " % model_fpath)
         self.ui.set_loading(1)
         start = timer()
         encoder.load_model(model_fpath)
-        self.ui.log("Loaded the encoder in %dms." % int(1000 * (timer() - start)))
+        self.ui.log("Done (%dms)." % int(1000 * (timer() - start)), "append")
         self.ui.set_loading(0)
         
     def init_synthesizer(self):
         model_dir = self.ui.current_synthesizer_model_dir
         checkpoints_dir = model_dir.joinpath("taco_pretrained")
 
-        self.ui.log("Loading the synthesizer %s" % checkpoints_dir)
+        self.ui.log("Loading the synthesizer %s... " % checkpoints_dir)
         self.ui.set_loading(1)
         start = timer()
         synthesizer.load_model(checkpoints_dir)
-        self.ui.log("Loaded the synthesizer in %dms." % int(1000 * (timer() - start)))
+        self.ui.log("Done (%dms)." % int(1000 * (timer() - start)), "append")
         self.ui.set_loading(0)
     
     def init_vocoder(self):
@@ -205,9 +214,9 @@ class Toolbox:
         if model_fpath is None:
             return 
     
-        self.ui.log("Loading the vocoder %s" % model_fpath)
+        self.ui.log("Loading the vocoder %s... " % model_fpath)
         self.ui.set_loading(1)
         start = timer()
         vocoder.load_model(model_fpath)
-        self.ui.log("Loaded the vocoder in %dms." % int(1000 * (timer() - start)))
+        self.ui.log("Done (%dms)." % int(1000 * (timer() - start)), "append")
         self.ui.set_loading(0)

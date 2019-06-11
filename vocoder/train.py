@@ -1,7 +1,7 @@
 from vocoder.models.fatchord_version import WaveRNN
-from vocoder.utils.vocoder_dataset import VocoderDataset, collate_vocoder
-from vocoder.utils.distribution import discretized_mix_logistic_loss
-from vocoder.utils.display import stream, simple_table
+from vocoder.vocoder_dataset import VocoderDataset, collate_vocoder
+from vocoder.distribution import discretized_mix_logistic_loss
+from vocoder.display import stream, simple_table
 from vocoder.gen_wavernn import gen_testset
 from torch.utils.data import DataLoader
 from pathlib import Path

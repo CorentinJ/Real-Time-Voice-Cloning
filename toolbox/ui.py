@@ -91,6 +91,8 @@ class UI(QDialog):
         spec_ax.set_xticks([])
         spec_ax.set_yticks([])
         spec_ax.figure.canvas.draw()
+        if which != "current":
+            self.vocode_button.setDisabled(spec is None)
 
     def draw_umap_projections(self, utterances: Set[Utterance]):
         self.umap_ax.clear()
@@ -105,12 +107,14 @@ class UI(QDialog):
                               (self.min_umap_points - len(utterances)), 
                               horizontalalignment='center', fontsize=15)
             self.umap_ax.set_title("")
-        elif not self.umap_hot:
-            self.log("Drawing UMAP projections for the first time, this will take a few seconds.")
-            self.umap_hot = True
             
         # Compute the projections
         else:
+            if not self.umap_hot:
+                self.log(
+                    "Drawing UMAP projections for the first time, this will take a few seconds.")
+                self.umap_hot = True
+            
             reducer = umap.UMAP(int(np.ceil(np.sqrt(len(embeds)))), metric="cosine")
             # reducer = TSNE()
             projections = reducer.fit_transform(embeds)
@@ -135,6 +139,9 @@ class UI(QDialog):
     def play(self, wav, sample_rate):
         sd.stop()
         sd.play(wav, sample_rate)
+        
+    def stop(self):
+        sd.stop()
 
     def record_one(self, sample_rate, duration):
         self.record_button.setText("Recording...")
@@ -268,12 +275,19 @@ class UI(QDialog):
 
         self.play_button.setDisabled(False)
         self.generate_button.setDisabled(False)
-        
-    def log(self, line):
-        self.logs.append(line)
-        if len(self.logs) > self.max_log_lines:
-            del self.logs[0]
+        self.synthesize_button.setDisabled(False)
+
+    def log(self, line, mode="newline"):
+        if mode == "newline":
+            self.logs.append(line)
+            if len(self.logs) > self.max_log_lines:
+                del self.logs[0]
+        elif mode == "append":
+            self.logs[-1] += line
+        elif mode == "overwrite":
+            self.logs[-1] = line
         log_text = '\n'.join(self.logs)
+        
         self.log_window.setText(log_text)
         self.app.processEvents()
 
@@ -292,6 +306,9 @@ class UI(QDialog):
         self.set_loading(0)
         self.play_button.setDisabled(True)
         self.generate_button.setDisabled(True)
+        self.synthesize_button.setDisabled(True)
+        self.vocode_button.setDisabled(True)
+        [self.log("") for _ in range(self.max_log_lines)]
 
     def __init__(self):
         ## Initialize the application
@@ -370,12 +387,14 @@ class UI(QDialog):
         i += 1
         
         # Random & next utterance buttons
-        self.play_button = QPushButton("Play")
-        browser_layout.addWidget(self.play_button, i, 0)
+        self.take_generated_button = QPushButton("Take generated")
+        browser_layout.addWidget(self.take_generated_button, i, 0)
         self.record_button = QPushButton("Record")
         browser_layout.addWidget(self.record_button, i, 1)
-        self.take_generated_button = QPushButton("Take generated")
-        browser_layout.addWidget(self.take_generated_button, i, 2)
+        self.play_button = QPushButton("Play")
+        browser_layout.addWidget(self.play_button, i, 2)
+        self.stop_button = QPushButton("Stop")
+        browser_layout.addWidget(self.stop_button, i, 3)
         i += 2
 
         # Model selection
@@ -415,7 +434,7 @@ class UI(QDialog):
         self.text_prompt = QTextEdit(default_text.replace("\n", "<br>"))
         gen_layout.addWidget(self.text_prompt, stretch=1)
         
-        self.generate_button = QPushButton("Generate")
+        self.generate_button = QPushButton("Synthesize and vocode")
         gen_layout.addWidget(self.generate_button)
         
         layout = QHBoxLayout()

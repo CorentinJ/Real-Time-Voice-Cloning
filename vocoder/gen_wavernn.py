@@ -1,5 +1,5 @@
 from vocoder.models.fatchord_version import  WaveRNN
-from vocoder.utils.audio import *
+from vocoder.audio import *
 
 
 def gen_testset(model: WaveRNN, test_set, samples, batched, target, overlap, save_path):

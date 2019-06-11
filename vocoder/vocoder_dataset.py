@@ -1,6 +1,6 @@
 from torch.utils.data import Dataset
 from pathlib import Path
-from vocoder.utils import audio
+from vocoder import audio
 import vocoder.hparams as hp
 import numpy as np
 import torch
@@ -24,7 +24,7 @@ class VocoderDataset(Dataset):
     def __getitem__(self, index):  
         mel_path, wav_path = self.samples_fpaths[index]
         
-        # Load the mel spectrogram and adjust its range
+        # Load the mel spectrogram and adjust its range to [-1, 1]
         mel = np.load(mel_path).T.astype(np.float32) / hp.mel_max_abs_value
         
         # Load the wav
@@ -53,6 +53,7 @@ class VocoderDataset(Dataset):
 
     def __len__(self):
         return len(self.samples_fpaths)
+        
         
 def collate_vocoder(batch):
     mel_win = hp.voc_seq_len // hp.hop_length + 2 * hp.voc_pad
