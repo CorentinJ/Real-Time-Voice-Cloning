@@ -17,10 +17,10 @@ def prepare_run(args):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("name", help="Name of the run and of the logging directory.")
     parser.add_argument("synthesizer_root", type=str, help=\
         "Path to the synthesizer training data that contains the audios and the train.txt file. "
         "If you let everything as default, it should be <datasets_root>/SV2TTS/synthesizer/.")
-    parser.add_argument("name", help="Name of the run and of the logging directory.")
     parser.add_argument("-m", "--models_dir", type=str, default="synthesizer/saved_models/", help=\
         "Path to the output directory that will contain the saved model weights and the logs.")
     parser.add_argument("--mode", default="synthesis",

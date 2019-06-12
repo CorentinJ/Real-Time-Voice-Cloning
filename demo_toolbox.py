@@ -6,7 +6,7 @@ import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description="",
+        description="Runs the toolbox",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     
