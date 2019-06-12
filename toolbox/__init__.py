@@ -31,7 +31,7 @@ class Toolbox:
                  vocoder_models_dir):
         self.datasets_root = datasets_root
         self.utterances = set()
-        self.current_generated = (None, None, None) # speaker name, spec, wav
+        self.current_generated = (None, None, None, None) # speaker name, spec, breaks, wav
         
         # Initialize the events and the interface
         self.ui = UI()
@@ -139,14 +139,15 @@ class Toolbox:
         texts = self.ui.text_prompt.toPlainText().split("\n")
         embed = self.ui.selected_utterance.embed
         embeds = np.stack([embed] * len(texts))
-        specs = synthesizer.synthesize_spectrograms(texts, embeds, extra_silence=0.15)
+        specs = synthesizer.synthesize_spectrograms(texts, embeds)
+        breaks = [spec.shape[1] for spec in specs]
         spec = np.concatenate(specs, axis=1)
         
         self.ui.draw_spec(spec, "generated")
-        self.current_generated = (self.ui.selected_utterance.speaker_name, spec, None)
+        self.current_generated = (self.ui.selected_utterance.speaker_name, spec, breaks, None)
         
     def vocode(self):
-        speaker_name, spec, _ = self.current_generated
+        speaker_name, spec, breaks, _ = self.current_generated
         assert spec is not None
 
         # Synthesize the waveform
@@ -155,8 +156,8 @@ class Toolbox:
         self.ui.log("")
         def vocoder_progress(i, seq_len, b_size, gen_rate):
             real_time_factor = (gen_rate / synthesizer.hparams.sample_rate) * 1000
-            line = "Waveform generation %d/%d (batch size: %d, rate: %.1fkHz - %.2fx real time)" % \
-                   (i * b_size, seq_len * b_size, b_size, gen_rate, real_time_factor)
+            line = "Waveform generation: %d/%d (batch size: %d, rate: %.1fkHz - %.2fx real time)" \
+                   % (i * b_size, seq_len * b_size, b_size, gen_rate, real_time_factor)
             self.ui.log(line, "overwrite")
             self.ui.set_loading(i, seq_len)
         if self.ui.current_vocoder_fpath is not None:
@@ -166,6 +167,13 @@ class Toolbox:
         self.ui.set_loading(0)
         self.ui.log(" Done!", "append")
         
+        # Add breaks
+        b_ends = np.cumsum(np.array(breaks) * synthesizer.hparams.hop_size)
+        b_starts = np.concatenate(([0], b_ends[:-1]))
+        wavs = [wav[start:end] for start, end, in zip(b_starts, b_ends)]
+        breaks = [np.zeros(int(0.15 * synthesizer.hparams.sample_rate))] * len(breaks)
+        wav = np.concatenate([i for w, b in zip(wavs, breaks) for i in (w, b)])
+
         # Play it
         wav = wav / np.abs(wav).max() * 0.97
         self.ui.play(wav, synthesizer.sample_rate)
