@@ -44,9 +44,9 @@ default_text = \
     "spectrogram. Use the vocoder to generate audio.\nThe vocoder generates almost in constant " \
     "time, so it will be more time efficient for longer inputs like this one.\nOn the left you " \
     "have the embedding projections. Load or record more utterances to see them.\n If you have " \
-    "at least 2 or 3 utterances from a same user, a cluster should form.\n Synthesized " \
-    "utterances are of the same color as the user whose voice was used, but they're represented " \
-    "with a cross."
+    "at least 2 or 3 utterances from a same speaker, a cluster should form.\n Synthesized " \
+    "utterances are of the same color as the speaker whose voice was used, but they're " \
+    "represented with a cross."
 
    
 class UI(QDialog):
@@ -193,7 +193,9 @@ class UI(QDialog):
         for item in items:
             item = list(item) if isinstance(item, tuple) else [item]
             box.addItem(str(item[0]), *item[1:])
-        box.setCurrentIndex(np.random.randint(len(items)) if random else 0)
+        if len(items) > 0:
+            box.setCurrentIndex(np.random.randint(len(items)) if random else 0)
+        box.setDisabled(len(items) == 0)
         box.blockSignals(False)
     
     def populate_browser(self, datasets_root: Path, recognized_datasets: List, level: int,
@@ -208,6 +210,12 @@ class UI(QDialog):
                       "The recognized datasets are:\n\t%s\nFeel free to add your own. You can "
                       "still use the toolbox by recording samples yourself." % 
                       (datasets_root, "\n\t".join(recognized_datasets)), file=sys.stderr)
+                self.random_utterance_button.setDisabled(True)
+                self.random_speaker_button.setDisabled(True)
+                self.random_dataset_button.setDisabled(True)
+                self.utterance_box.setDisabled(True)
+                self.speaker_box.setDisabled(True)
+                self.dataset_box.setDisabled(True)
                 return 
             self.repopulate_box(self.dataset_box, datasets, random)
     
@@ -228,7 +236,7 @@ class UI(QDialog):
                 utterances.extend(Path(utterances_root).glob("**/*.%s" % extension))
             utterances = [fpath.relative_to(utterances_root) for fpath in utterances]
             self.repopulate_box(self.utterance_box, utterances, random)
-
+            
     def browser_select_next(self):
         index = (self.utterance_box.currentIndex() + 1) % len(self.utterance_box)
         self.utterance_box.setCurrentIndex(index)
@@ -249,11 +257,17 @@ class UI(QDialog):
                         vocoder_models_dir: Path):
         # Encoder
         encoder_fpaths = list(encoder_models_dir.glob("*.pt"))
+        if len(encoder_fpaths) == 0:
+            raise Exception("No encoder models found in %s" % encoder_models_dir)
         self.repopulate_box(self.encoder_box, [(f.stem, f) for f in encoder_fpaths])
         
         # Synthesizer
         synthesizer_model_dirs = list(synthesizer_models_dir.glob("*"))
         synthesizer_items = [(f.name.replace("logs-", ""), f) for f in synthesizer_model_dirs]
+        if len(synthesizer_model_dirs) == 0:
+            raise Exception("No synthesizer models found in %s. For the synthesizer, the expected "
+                            "structure is <syn_models_dir>/logs-<model_name>/taco_pretrained/"
+                            "checkpoint" % synthesizer_models_dir)
         self.repopulate_box(self.synthesizer_box, synthesizer_items)
 
         # Vocoder

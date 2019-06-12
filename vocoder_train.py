@@ -1,13 +1,13 @@
-from vocoder.train import train
 from utils.argutils import print_args
+from vocoder.train import train
 from pathlib import Path
 import argparse
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         description="Trains the vocoder from the synthesizer audios and the GTA synthesized mels, "
-                    "or ground truth mels. The model is saved each epoch.",
+                    "or ground truth mels.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     
@@ -54,3 +54,6 @@ if __name__ == "__main__":
     print_args(args, parser)
     train(**vars(args))
     
+    
+if __name__ == "__main__":
+    main()

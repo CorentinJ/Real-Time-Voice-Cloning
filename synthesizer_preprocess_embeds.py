@@ -1,17 +1,18 @@
 from synthesizer.preprocess import create_embeddings
+from utils.argutils import print_args
 from pathlib import Path
 import argparse
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Creates embedding from the utterances for the synthesizer.",
+        description="Creates embeddings for the synthesizer from the LibriSpeech utterances.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument("synthesizer_root", type=str, help=\
+    parser.add_argument("synthesizer_root", type=Path, help=\
         "Path to the synthesizer training data that contains the audios and the train.txt file. "
         "If you let everything as default, it should be <datasets_root>/SV2TTS/synthesizer/.")
-    parser.add_argument("-e", "--encoder_model_fpath", type=str, 
+    parser.add_argument("-e", "--encoder_model_fpath", type=Path, 
                         default="encoder/saved_models/pretrained.pt", help=\
         "Path your trained encoder model.")
     parser.add_argument("-n", "--n_processes", type=int, default=4, help= \
@@ -19,11 +20,8 @@ def main():
         "this value on GPUs with low memory. Set it to 1 if CUDA is unhappy.")
     args = parser.parse_args()
     
-    # Process the arguments
-    args.synthesizer_root = Path(args.synthesizer_root)
-    args.encoder_model_fpath = Path(args.encoder_model_fpath)
-
     # Preprocess the dataset
+    print_args(args, parser)
     create_embeddings(**vars(args))    
 
 

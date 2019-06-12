@@ -1,6 +1,8 @@
 from encoder.preprocess import preprocess_librispeech, preprocess_voxceleb1, preprocess_voxceleb2
+from utils.argutils import print_args
 from pathlib import Path
 import argparse
+
 
 if __name__ == "__main__":
     class MyFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter):
@@ -22,9 +24,9 @@ if __name__ == "__main__":
                     "    -dev",
         formatter_class=MyFormatter
     )
-    parser.add_argument("datasets_root", type=str, help=\
+    parser.add_argument("datasets_root", type=Path, help=\
         "Path to the directory containing your LibriSpeech/TTS and VoxCeleb datasets.")
-    parser.add_argument("-o", "--out_dir", type=str, default=argparse.SUPPRESS, help=\
+    parser.add_argument("-o", "--out_dir", type=Path, default=argparse.SUPPRESS, help=\
         "Path to the output directory that will contain the mel spectrograms. If left out, "
         "defaults to <datasets_root>/SV2TTS/encoder/")
     parser.add_argument("-d", "--datasets", type=str, 
@@ -38,15 +40,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Process the arguments
-    args.datasets_root = Path(args.datasets_root)
     args.datasets = args.datasets.split(",")
     if not hasattr(args, "out_dir"):
-        args.out_dir = Path(args.datasets_root, "SV2TTS", "encoder")
-    args.out_dir = Path(args.out_dir)
+        args.out_dir = args.datasets_root.joinpath("SV2TTS", "encoder")
     assert args.datasets_root.exists()
     args.out_dir.mkdir(exist_ok=True, parents=True)
     
     # Preprocess the datasets
+    print_args(args, parser)
     preprocess_func = {
         "librispeech_other": preprocess_librispeech,
         "voxceleb1": preprocess_voxceleb1,

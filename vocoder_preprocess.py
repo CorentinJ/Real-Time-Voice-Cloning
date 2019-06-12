@@ -1,14 +1,16 @@
 from synthesizer.synthesize import run_synthesis
 from synthesizer.hparams import hparams
+from utils.argutils import print_args
 import argparse
 import os
 
-if __name__ == "__main__":
+
+def main():
     class MyFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter):
         pass
     
     parser = argparse.ArgumentParser(
-        description="",
+        description="Creates ground-truth aligned (GTA) spectrograms from the vocoder.",
         formatter_class=MyFormatter
     )
     parser.add_argument("datasets_root", type=str, help=\
@@ -27,6 +29,7 @@ if __name__ == "__main__":
                         help="Hyperparameter overrides as a comma-separated list of name=value "
                              "pairs")
     args = parser.parse_args()
+    print_args(args, parser)
     modified_hp = hparams.parse(args.hparams)
     
     if not hasattr(args, "in_dir"):
@@ -35,3 +38,7 @@ if __name__ == "__main__":
         args.out_dir = os.path.join(args.datasets_root, "SV2TTS", "vocoder")
     
     run_synthesis(args.in_dir, args.out_dir, args.model_dir, modified_hp)
+
+if __name__ == "__main__":
+    main()
+    

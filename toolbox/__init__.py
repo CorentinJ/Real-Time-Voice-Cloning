@@ -27,15 +27,14 @@ recognized_datasets = [
 
 
 class Toolbox:
-    def __init__(self, datasets_root, encoder_models_dir, synthesizer_models_dir, 
-                 vocoder_models_dir):
+    def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir):
         self.datasets_root = datasets_root
         self.utterances = set()
         self.current_generated = (None, None, None, None) # speaker name, spec, breaks, wav
         
         # Initialize the events and the interface
         self.ui = UI()
-        self.reset_ui(encoder_models_dir, synthesizer_models_dir, vocoder_models_dir)
+        self.reset_ui(enc_models_dir, syn_models_dir, voc_models_dir)
         self.setup_events()
         self.ui.start()
         

@@ -236,7 +236,7 @@ class WaveRNN(nn.Module):
         fade_out = np.linspace(1, 0, 20 * self.hop_length)
         output = output[:wave_len]
         output[-20 * self.hop_length:] *= fade_out
-
+        
         self.train()
 
         return output

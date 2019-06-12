@@ -168,7 +168,7 @@ def load_preprocess_wav(fpath_or_wav: Union[str, Path, np.ndarray]):
     wav = audio.preprocess_wav(wav)
     return wav
 
-def plot_embedding_as_heatmap(embed, ax=None, title="", shape=None, color_range=(0, 0.35)):
+def plot_embedding_as_heatmap(embed, ax=None, title="", shape=None, color_range=(0, 0.30)):
     if ax is None:
         ax = plt.gca()
     
@@ -184,24 +184,3 @@ def plot_embedding_as_heatmap(embed, ax=None, title="", shape=None, color_range=
     
     ax.set_xticks([]), ax.set_yticks([])
     ax.set_title(title)
-
-if __name__ == "__main__":
-    load_model("../saved_models/all.pt", "cuda")
-    
-    fig, axes = plt.subplots(3, 3)
-    for i, ax in enumerate(axes.flatten(), 50):
-        fpath = r"E:\Datasets\LJSpeech-1.1\wavs\LJ001-%04d.wav" % (i + 1)
-        wav = load_preprocess_wav(fpath)
-        embed = embed_utterance(wav)
-        plot_embedding_as_heatmap(embed, ax)
-    plt.show(block=False)
-    
-    fig, axes = plt.subplots(3, 3)
-    for i, ax in enumerate(axes.flatten(), 20):
-        fpath = r"E:\Datasets\LibriSpeech\train-other-500\25\123319\25-123319-%04d.flac" % i
-        wav = load_preprocess_wav(fpath)
-        embed = embed_utterance(wav)
-        plot_embedding_as_heatmap(embed, ax)
-    plt.show()
-    
-    

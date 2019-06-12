@@ -1,26 +1,37 @@
 # Real-Time Voice Cloning
+This repository is an implementation of [Transfer Learning from Speaker Verification to
+Multispeaker Text-To-Speech Synthesis](https://arxiv.org/pdf/1806.04558.pdf) with a vocoder that works in real-time.
+
+It is a three-stage deep learning framework that allows to create a numerical representation of a voice from a few seconds of audio, and to use it to condition a text-to-speech model trained to generalize to new voices.
+
+Video demonstration:
+[![Toolbox demo](https://i.imgur.com/UzCAVbk.png)](https://youtu.be/7pjOHW3SCcg)
+
+
 
 ### Papers implemented  
 | URL | Designation | Title | Implementation source |
 | --- | ----------- | ----- | --------------------- |
-|[1811.00002](https://arxiv.org/pdf/1802.08435v1.pdf) | WaveRNN | Efficient Neural Audio Synthesis | [fatchord/WaveRNN](https://github.com/fatchord/WaveRNN) |
 |[**1806.04558**](https://arxiv.org/pdf/1806.04558.pdf) | **SV2TTS** | **Transfer Learning from Speaker Verification to Multispeaker Text-To-Speech Synthesis** | This repo |
-|[1712.05884](https://arxiv.org/pdf/1712.05884.pdf) | Tacotron 2 | Natural TTS Synthesis by Conditioning Wavenet on Mel Spectrogram Predictions | [Rayhane-mamah/Tacotron-2](https://github.com/Rayhane-mamah/Tacotron-2)
-|[1710.10467](https://arxiv.org/pdf/1710.10467.pdf) | GE2E | Generalized End-To-End Loss for Speaker Verification | This repo |
+|[1802.08435](https://arxiv.org/pdf/1802.08435.pdf) | WaveRNN (vocoder) | Efficient Neural Audio Synthesis | [fatchord/WaveRNN](https://github.com/fatchord/WaveRNN) |
+|[1712.05884](https://arxiv.org/pdf/1712.05884.pdf) | Tacotron 2 (synthesizer) | Natural TTS Synthesis by Conditioning Wavenet on Mel Spectrogram Predictions | [Rayhane-mamah/Tacotron-2](https://github.com/Rayhane-mamah/Tacotron-2)
+|[1710.10467](https://arxiv.org/pdf/1710.10467.pdf) | GE2E (encoder)| Generalized End-To-End Loss for Speaker Verification | This repo |
 
-### Related papers 
-| URL | Designation | Title |
-| --- | ----------- | ----- |
-|[1808.10128](https://arxiv.org/pdf/1808.10128.pdf) | SST4TTS | Semi-Supervised Training for Improving Data Efficiency in End-to-End Speech Synthesis |
-|[1710.07654](https://arxiv.org/pdf/1710.07654.pdf) | Deep Voice 3 | Deep Voice 3: Scaling Text-to-Speech with Convolutional Sequence Learning |
-|[1705.08947](https://arxiv.org/pdf/1705.08947.pdf) | Deep Voice 2 | Deep Voice 2: Multi-Speaker Neural Text-to-Speech |
-|[1703.10135](https://arxiv.org/pdf/1703.10135.pdf) | Tacotron | Tacotron: Towards End-To-End Speech Synthesis |
-|[1702.07825](https://arxiv.org/pdf/1702.07825.pdf) | Deep Voice 1 | Deep Voice: Real-time Neural Text-to-Speech |
-|[1609.03499](https://arxiv.org/pdf/1609.03499.pdf) | Wavenet | Wavenet: A Generative Model for Raw Audio |
-|[1506.07503](https://arxiv.org/pdf/1506.07503.pdf) | Attention | Attention-Based Models for Speech Recognition |
+### Requirements
+You will need the following whether you plan to use the toolbox only or to retrain the models.
+
+**Python 3.7**. Python 3.6 might work too, but I wouldn't go lower because I make extensive use of pathlib.
+
+See **requirements.txt** for the list of packages. You will need both Tensorflow (>=1.10, <=1.14) and PyTorch (>=0.4.1).
+
+A GPU is *highly* recommended (CPU-only is currently not implemented), but you don't necessarily need a high tier GPU if you only want to use the toolbox.
+
+### Pretrained models
+Downloadable [here](https://drive.google.com/file/d/1n1sPXvT34yXFLT47QZA6FIRGrwMeSsZc/view?usp=sharing) (375mb). Merge the contents of the archive with the contents of the repository.
 
 
-### Datasets and preprocessing
+## Datasets, preprocessing and training
+### Datasets
 Ideally, you want to keep all your datasets under a same directory. All prepreprocessing scripts will, by default, output the clean data to a new directory  `SV2TTS` created in your datasets root directory. Inside this directory will be created a directory for each model: the encoder, synthesizer and vocoder.
 
 You will need the following datasets:
@@ -33,9 +44,27 @@ For the encoder:
 For the synthesizer and the vocoder: 
 - **[LibriSpeech](http://www.openslr.org/12/):** train-clean-100, train-clean-360 (extract as `LibriSpeech/train-clean-100` and `LibriSpeech/train-clean-360`)
  
-Feel free to adapt the code to your needs. Other interesting datasets that you could use:
-- **[VCTK](https://homepages.inf.ed.ac.uk/jyamagis/page3/page58/page58.html)**, used in the SV2TTS paper.
-- **[M-AILABS](https://www.caito.de/2019/01/the-m-ailabs-speech-dataset/)**
+Feel free to adapt the code to your needs. Other interesting datasets that you could use include **[VCTK](https://homepages.inf.ed.ac.uk/jyamagis/page3/page58/page58.html)** (used in the SV2TTS paper) or **[M-AILABS](https://www.caito.de/2019/01/the-m-ailabs-speech-dataset/)**.
+
+### Preprocessing and training
+![Visdom](https://i.imgur.com/rB1xk0b.png)
  
  
+## TODO list and planned features
+### Implementation
+- [ ] Let the user decide if they want to use speaker embeddings or utterance embeddings for training the synthesizer.
+- [ ] Move on to a pytorch implementation of the synthesizer?
+- [ ] Post-generation cleaning routines for the vocoder?
+
+### Toolbox
+- [ ] Handle multiple users in the toolbox
+- [ ] Allow for saving generated wavs in the toolbox
+- [ ] Use the top left space to draw a legend (rather than doing it inside the plot), and give the possibility to remove speakers from there
+- [x] Display vocoder generation
+
+### Code style
+- [ ] Object-oriented inference rather than the current static style
+- [ ] Setup a config file to allow for default argparse values (mainly datasets_root).
+- [ ] Change the structure of the hparams file for each model. I think a namespace is the better solution.
+- [ ] Properly document all inference functions
 
