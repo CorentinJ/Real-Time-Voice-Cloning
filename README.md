@@ -6,7 +6,7 @@ It is a three-stage deep learning framework that allows to create a numerical re
 
 Video demonstration:
 
-[![Toolbox demo](https://i.imgur.com/Ixy13b7.png)](https://youtu.be/7pjOHW3SCcg)
+[![Toolbox demo](https://i.imgur.com/Ixy13b7.png)](https://www.youtube.com/watch?v=-O_hYhToKoA)
 
 
 
