@@ -30,10 +30,11 @@ A GPU is *highly* recommended (CPU-only is currently not implemented), but you d
 ### Pretrained models
 Downloadable [here](https://drive.google.com/file/d/1n1sPXvT34yXFLT47QZA6FIRGrwMeSsZc/view?usp=sharing) (375mb). Merge the contents of the archive with the contents of the repository.
 
-Encoder: trained 1.56M steps (2 months with a single GPU) with a batch size of 64  
+Encoder: trained 1.56M steps (2 months\* with a single GPU) with a batch size of 64  
 Synthesizer: trained 256k steps (1 week with 4 GPUs) with a batch size of 144  
 Vocoder: trained 428k steps (4 days with a single GPU) with a batch size of 100  
 
+\* with recent optimizations I made, it should now be closer to 20 days.
 
 ## Datasets, toolbox, preprocessing and training
 ### Datasets
