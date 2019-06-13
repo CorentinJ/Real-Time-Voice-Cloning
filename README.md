@@ -56,7 +56,7 @@ Here's the great thing about this repo: you're expected to run all python script
 
 `python toolbox.py <datasets_root>`
 
-to try the toolbox yourself. `datasets_root` is the directory that contains your LibriSpeech, VoxCeleb or other datasets. It is not mandatory to have datasets in your `datasets_root`. **If you only want to try the toolbox, I recommend downloading `LibriSpeech/train-clean-100` (see above) alone.**
+to try the toolbox yourself. `datasets_root` is the directory that contains your LibriSpeech, VoxCeleb or other datasets. It is not mandatory to have datasets in your `datasets_root`. **If you only want to try the toolbox, I recommend downloading `LibriSpeech/train-clean-100` alone (see above).**
 
 ### Preprocessing and training
 Pass `-h` to get argument infos for any script. If you want to train models yourself, run the remaining scripts:
@@ -65,7 +65,7 @@ Pass `-h` to get argument infos for any script. If you want to train models your
 
 `python encoder_train.py my_run <datasets_root>`
 
-The encoder uses visdom. You can disable it, but it's nice to have. Here what the environment looks like:
+The encoder uses visdom. You can disable it, but it's nice to have. Here's what the environment looks like:
 
 ![Visdom](https://i.imgur.com/rB1xk0b.png)
 
