@@ -1,8 +1,6 @@
-torch>=0.4.1
 tensorflow-gpu>=1.10.0,<=1.14.0
 umap-learn
 visdom
-PyQt4
 webrtcvad
 librosa>=0.5.1
 matplotlib>=2.0.2
