@@ -4,7 +4,7 @@ Multispeaker Text-To-Speech Synthesis](https://arxiv.org/pdf/1806.04558.pdf) wit
 
 It is a three-stage deep learning framework that allows to create a numerical representation of a voice from a few seconds of audio, and to use it to condition a text-to-speech model trained to generalize to new voices.
 
-Video demonstration:
+**Video demonstration:**
 
 [![Toolbox demo](https://i.imgur.com/Ixy13b7.png)](https://www.youtube.com/watch?v=-O_hYhToKoA)
 
@@ -40,7 +40,7 @@ Vocoder: trained 428k steps (4 days with a single GPU) with a batch size of 100
 ### Datasets
 Ideally, you want to keep all your datasets under a same directory. All prepreprocessing scripts will, by default, output the clean data to a new directory  `SV2TTS` created in your datasets root directory. Inside this directory will be created a directory for each model: the encoder, synthesizer and vocoder.
 
-You will need the following datasets:
+**For training:** you will need the following datasets:
 
 For the encoder:
 - **[LibriSpeech](http://www.openslr.org/12/):** train-other-500 (extract as `LibriSpeech/train-other-500`)
@@ -49,6 +49,8 @@ For the encoder:
 
 For the synthesizer and the vocoder: 
 - **[LibriSpeech](http://www.openslr.org/12/):** train-clean-100, train-clean-360 (extract as `LibriSpeech/train-clean-100` and `LibriSpeech/train-clean-360`)
+
+ **For trying the toolbox alone**: I recommend downloading only `LibriSpeech/train-clean-100` as above.
  
 Feel free to adapt the code to your needs. Other interesting datasets that you could use include **[VCTK](https://homepages.inf.ed.ac.uk/jyamagis/page3/page58/page58.html)** (used in the SV2TTS paper) or **[M-AILABS](https://www.caito.de/2019/01/the-m-ailabs-speech-dataset/)**.
 
@@ -57,7 +59,7 @@ Here's the great thing about this repo: you're expected to run all python script
 
 `python demo_toolbox.py <datasets_root>`
 
-to try the toolbox yourself. `datasets_root` is the directory that contains your LibriSpeech, VoxCeleb or other datasets. You can also have your own dataset in that directory, see the help message for `demo_toolbox.py`. It is not mandatory to have datasets in your `datasets_root`. **If you only want to try the toolbox, I recommend downloading `LibriSpeech/train-clean-100` alone (see above).**
+to try the toolbox yourself. `datasets_root` is the directory that contains your LibriSpeech, VoxCeleb or other datasets. You can also have your own dataset in that directory, see the help message for `demo_toolbox.py`. It is not mandatory to have datasets in your `datasets_root`.
 
 ### Preprocessing and training
 Pass `-h` to get argument infos for any script. If you want to train models yourself, run the remaining scripts:
