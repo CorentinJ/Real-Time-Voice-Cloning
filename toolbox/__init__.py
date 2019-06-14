@@ -10,6 +10,7 @@ import numpy as np
 
 # Use this directory structure for your datasets, or modify it to fit your needs
 recognized_datasets = [
+    "UserAudio",   # Use this to add your own audios
     "LibriSpeech/dev-clean",
     "LibriSpeech/dev-other",
     "LibriSpeech/test-clean",
@@ -25,12 +26,11 @@ recognized_datasets = [
     "VCTK-Corpus/wav48",
 ]
 
-
 class Toolbox:
     def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir):
         self.datasets_root = datasets_root
         self.utterances = set()
-        self.current_generated = (None, None, None, None) # speaker name, spec, breaks, wav
+        self.current_generated = (None, None, None, None) # speaker_name, spec, breaks, wav
         
         # Initialize the events and the interface
         self.ui = UI()
@@ -152,7 +152,6 @@ class Toolbox:
         # Synthesize the waveform
         if not vocoder.is_loaded():
             self.init_vocoder()
-        self.ui.log("")
         def vocoder_progress(i, seq_len, b_size, gen_rate):
             real_time_factor = (gen_rate / synthesizer.hparams.sample_rate) * 1000
             line = "Waveform generation: %d/%d (batch size: %d, rate: %.1fkHz - %.2fx real time)" \
@@ -160,8 +159,10 @@ class Toolbox:
             self.ui.log(line, "overwrite")
             self.ui.set_loading(i, seq_len)
         if self.ui.current_vocoder_fpath is not None:
+            self.ui.log("")
             wav = vocoder.infer_waveform(spec, progress_callback=vocoder_progress)
         else:
+            self.ui.log("Waveform generation with Griffin-Lim... ")
             wav = synthesizer.griffin_lim(spec)
         self.ui.set_loading(0)
         self.ui.log(" Done!", "append")

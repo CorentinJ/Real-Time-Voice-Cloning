@@ -55,9 +55,9 @@ Feel free to adapt the code to your needs. Other interesting datasets that you c
 ### Toolbox
 Here's the great thing about this repo: you're expected to run all python scripts in their alphabetical order. Begin with
 
-`python toolbox.py <datasets_root>`
+`python demo_toolbox.py <datasets_root>`
 
-to try the toolbox yourself. `datasets_root` is the directory that contains your LibriSpeech, VoxCeleb or other datasets. It is not mandatory to have datasets in your `datasets_root`. **If you only want to try the toolbox, I recommend downloading `LibriSpeech/train-clean-100` alone (see above).**
+to try the toolbox yourself. `datasets_root` is the directory that contains your LibriSpeech, VoxCeleb or other datasets. You can also have your own dataset in that directory, see the help message for `demo_toolbox.py`. It is not mandatory to have datasets in your `datasets_root`. **If you only want to try the toolbox, I recommend downloading `LibriSpeech/train-clean-100` alone (see above).**
 
 ### Preprocessing and training
 Pass `-h` to get argument infos for any script. If you want to train models yourself, run the remaining scripts:
@@ -115,3 +115,5 @@ The vocoder also outputs ground truth/generated audios to its model directory.
 - [ ] Change the structure of the hparams file for each model. I think a namespace is the better solution.
 - [ ] Properly document all inference functions
 
+## Contribution
+Feel free to open issues or PRs for any problem you may encounter, typos that you see or aspects that are confusing.
