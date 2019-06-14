@@ -102,6 +102,7 @@ The vocoder also outputs ground truth/generated audios to its model directory.
 ### Implementation
 - [ ] Let the user decide if they want to use speaker embeddings or utterance embeddings for training the synthesizer.
 - [ ] Multi-GPU training support for the encoder
+- [ ] Figure out which device is best to compute the loss on the encoder
 - [ ] Move on to a pytorch implementation of the synthesizer?
 - [ ] Post-generation cleaning routines for the vocoder?
 
