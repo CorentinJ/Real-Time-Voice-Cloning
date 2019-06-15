@@ -49,6 +49,7 @@ For the encoder:
 
 For the synthesizer and the vocoder: 
 - **[LibriSpeech](http://www.openslr.org/12/):** train-clean-100, train-clean-360 (extract as `LibriSpeech/train-clean-100` and `LibriSpeech/train-clean-360`)
+- **[LibriSpeech alignments](https://github.com/CorentinJ/librispeech-alignments#download-links):** take the first link and merge the directory structure with the LibriSpeech datasets you have downloaded (do not take the alignments from the datasets you haven't downloaded else the scripts will think you have them)
 
  **For trying the toolbox alone**: I recommend downloading only `LibriSpeech/train-clean-100` as above.
  
