@@ -182,6 +182,14 @@ class UI(QDialog):
     def current_utterance_name(self):
         return self.utterance_box.currentText()
     
+    def browse_file(self):
+        fpath = QFileDialog().getOpenFileNameAndFilter(
+            parent=self,
+            caption="Select an audio file",
+            filter="*.mp3;*.flac;*.wav;*.m4a"
+        )
+        return Path(fpath[0]) if fpath[0] != "" else None
+    
     @staticmethod
     def repopulate_box(box, items, random=False):
         """
@@ -376,6 +384,8 @@ class UI(QDialog):
         self.utterance_box = QComboBox()
         browser_layout.addWidget(QLabel("<b>Utterance</b>"), i, 2)
         browser_layout.addWidget(self.utterance_box, i + 1, 2)
+        self.browser_browse_button = QPushButton("Browse")
+        browser_layout.addWidget(self.browser_browse_button, i, 3)
         self.browser_load_button = QPushButton("Load")
         browser_layout.addWidget(self.browser_load_button, i + 1, 3)
         i += 2

@@ -1,14 +1,13 @@
-from typing import Union
-
-import numpy as np
-import torch
 from encoder.params_data import *
 from encoder.model import SpeakerEncoder
 from encoder.audio import preprocess_wav
-import matplotlib.pyplot as plt
 from matplotlib import cm
 from encoder import audio
 from pathlib import Path
+from typing import Union
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
 
 _model = None # type: SpeakerEncoder
 _device = None # type: torch.device
@@ -28,10 +27,9 @@ def load_model(weights_fpath: Path, device=None):
     #   was saved on. Worth investigating.
     global _model, _device
     if device is None:
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        _device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     elif isinstance(device, str):
-        device = torch.device(device)
-    _device = device
+        _device = torch.device(device)
     _model = SpeakerEncoder(_device, torch.device("cpu"))
     checkpoint = torch.load(weights_fpath)
     _model.load_state_dict(checkpoint["model_state"])

@@ -10,7 +10,6 @@ import numpy as np
 
 # Use this directory structure for your datasets, or modify it to fit your needs
 recognized_datasets = [
-    "UserAudio",   # Use this to add your own audios
     "LibriSpeech/dev-clean",
     "LibriSpeech/dev-other",
     "LibriSpeech/test-clean",
@@ -40,7 +39,7 @@ class Toolbox:
         
     def setup_events(self):
         # Dataset, speaker and utterance selection
-        self.ui.browser_load_button.clicked.connect(self.load_from_browser)
+        self.ui.browser_load_button.clicked.connect(lambda: self.load_from_browser())
         random_func = lambda level: lambda: self.ui.populate_browser(self.datasets_root,
                                                                      recognized_datasets,
                                                                      level)
@@ -56,6 +55,8 @@ class Toolbox:
         self.ui.vocoder_box.currentIndexChanged.connect(self.init_vocoder)
         
         # Utterance selection
+        func = lambda: self.load_from_browser(self.ui.browse_file())
+        self.ui.browser_browse_button.clicked.connect(func)
         func = lambda: self.ui.draw_utterance(self.ui.selected_utterance, "current")
         self.ui.utterance_history.currentIndexChanged.connect(func)
         func = lambda: self.ui.play(self.ui.selected_utterance.wav, synthesizer.sample_rate)
@@ -76,17 +77,21 @@ class Toolbox:
         self.ui.populate_browser(self.datasets_root, recognized_datasets, 0, True)
         self.ui.populate_models(encoder_models_dir, synthesizer_models_dir, vocoder_models_dir)
         
-    def load_from_browser(self):
-        fpath = Path(self.datasets_root,
-                     self.ui.current_dataset_name,
-                     self.ui.current_speaker_name,
-                     self.ui.current_utterance_name)
-        name = str(fpath.relative_to(self.datasets_root))
-        speaker_name = self.ui.current_dataset_name + '_' + self.ui.current_speaker_name
-        
-        # Select the next utterance
-        if self.ui.auto_next_checkbox.isChecked():
-            self.ui.browser_select_next()
+    def load_from_browser(self, fpath=None):
+        if fpath is None:
+            fpath = Path(self.datasets_root,
+                         self.ui.current_dataset_name,
+                         self.ui.current_speaker_name,
+                         self.ui.current_utterance_name)
+            name = str(fpath.relative_to(self.datasets_root))
+            speaker_name = self.ui.current_dataset_name + '_' + self.ui.current_speaker_name
+            
+            # Select the next utterance
+            if self.ui.auto_next_checkbox.isChecked():
+                self.ui.browser_select_next()
+        else:
+            name = fpath.name
+            speaker_name = fpath.parent.name
         
         # Get the wav from the disk. We take the wav with the vocoder/synthesizer format for
         # playback, so as to have a fair comparison with the generated audio
@@ -96,10 +101,10 @@ class Toolbox:
         self.add_real_utterance(wav, name, speaker_name)
         
     def record(self):
-        wav = self.ui.record_one(16000, 5)
+        wav = self.ui.record_one(encoder.sampling_rate, 5)
         if wav is None:
             return 
-        self.ui.play(wav, 16000)
+        self.ui.play(wav, encoder.sampling_rate)
 
         speaker_name = "user01"
         name = speaker_name + "_rec_%05d" % np.random.randint(100000)
