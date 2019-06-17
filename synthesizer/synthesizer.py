@@ -5,7 +5,6 @@ from synthesizer.models import create_model
 from synthesizer.utils import plot
 import tensorflow as tf
 import numpy as np
-import pyaudio
 import wave
 import os
 
@@ -181,27 +180,7 @@ class Synthesizer:
             assert len(mels) == len(linears) == len(texts)
         
         if basenames is None:
-            #Generate wav and read it
-            wav = audio.inv_mel_spectrogram(mels.T, hparams)
-            audio.save_wav(wav, "temp.wav", sr=hparams.sample_rate) #Find a better way
-            
-            chunk = 512
-            f = wave.open("temp.wav", "rb")
-            p = pyaudio.PyAudio()
-            stream = p.open(format=p.get_format_from_width(f.getsampwidth()),
-                            channels=f.getnchannels(),
-                            rate=f.getframerate(),
-                            output=True)
-            data = f.readframes(chunk)
-            while data:
-                stream.write(data)
-                data=f.readframes(chunk)
-            
-            stream.stop_stream()
-            stream.close()
-            
-            p.terminate()
-            return
+            raise NotImplemented()
         
         saved_mels_paths = []
         for i, mel in enumerate(mels):

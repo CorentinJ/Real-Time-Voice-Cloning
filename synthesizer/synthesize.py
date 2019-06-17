@@ -2,39 +2,10 @@ from synthesizer.synthesizer import Synthesizer
 from synthesizer.hparams import hparams_debug_string
 from synthesizer.infolog import log
 import tensorflow as tf
-from time import sleep
 from tqdm import tqdm
 import time
 import os
 
-
-def generate_fast(model, text):
-    model.synthesize(text, None, None, None, None)
-
-def run_live(args, checkpoint_path, hparams):
-    #Log to Terminal without keeping any records in files
-    log(hparams_debug_string())
-    synth = Synthesizer()
-    synth.load(checkpoint_path, hparams)
-    
-    #Generate fast greeting message
-    greetings = "Hello, Welcome to the Live testing tool. Please type a message and I will try " \
-                "to read it!"
-    log(greetings)
-    generate_fast(synth, greetings)
-    
-    #Interaction loop
-    while True:
-        try:
-            text = input()
-            generate_fast(synth, text)
-        
-        except KeyboardInterrupt:
-            leave = "Thank you for testing our features. see you soon."
-            log(leave)
-            generate_fast(synth, leave)
-            sleep(2)
-            break
 
 def run_eval(args, checkpoint_path, output_dir, hparams, sentences):
     eval_dir = os.path.join(output_dir, "eval")
