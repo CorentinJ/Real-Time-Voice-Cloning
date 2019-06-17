@@ -10,3 +10,4 @@ tqdm
 sounddevice
 Unidecode
 inflect
+PyQt5
