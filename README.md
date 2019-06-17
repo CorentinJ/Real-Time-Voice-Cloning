@@ -53,7 +53,7 @@ For the synthesizer and the vocoder:
 
  **For trying the toolbox alone**: I recommend downloading only `LibriSpeech/train-clean-100` as above.
  
-Feel free to adapt the code to your needs. Other interesting datasets that you could use include **[VCTK](https://homepages.inf.ed.ac.uk/jyamagis/page3/page58/page58.html)** (used in the SV2TTS paper) or **[M-AILABS](https://www.caito.de/2019/01/the-m-ailabs-speech-dataset/)**.
+Feel free to adapt the code to your needs. Other interesting datasets that you could use include **[LibriTTS](http://www.openslr.org/60/)** (paper [here](https://arxiv.org/abs/1904.02882)) which I already tried to implement but couldn't finish in time, **[VCTK](https://homepages.inf.ed.ac.uk/jyamagis/page3/page58/page58.html)** (used in the SV2TTS paper) or **[M-AILABS](https://www.caito.de/2019/01/the-m-ailabs-speech-dataset/)**.
 
 ### Toolbox
 Here's the great thing about this repo: you're expected to run all python scripts in their alphabetical order. Begin with
