@@ -1,7 +1,7 @@
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import *
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import *
 from encoder.inference import plot_embedding_as_heatmap
 from toolbox.utterance import Utterance
 from pathlib import Path
@@ -43,8 +43,8 @@ default_text = \
     "Each line will be treated separately.\nThen, they are joined together to make the final " \
     "spectrogram. Use the vocoder to generate audio.\nThe vocoder generates almost in constant " \
     "time, so it will be more time efficient for longer inputs like this one.\nOn the left you " \
-    "have the embedding projections. Load or record more utterances to see them.\n If you have " \
-    "at least 2 or 3 utterances from a same speaker, a cluster should form.\n Synthesized " \
+    "have the embedding projections. Load or record more utterances to see them.\nIf you have " \
+    "at least 2 or 3 utterances from a same speaker, a cluster should form.\nSynthesized " \
     "utterances are of the same color as the speaker whose voice was used, but they're " \
     "represented with a cross."
 
@@ -456,7 +456,7 @@ class UI(QDialog):
         
         
         ## Generation
-        self.text_prompt = QTextEdit(default_text.replace("\n", "<br>"))
+        self.text_prompt = QPlainTextEdit(default_text)
         gen_layout.addWidget(self.text_prompt, stretch=1)
         
         self.generate_button = QPushButton("Synthesize and vocode")
