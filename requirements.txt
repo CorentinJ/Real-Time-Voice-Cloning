@@ -8,3 +8,5 @@ numpy>=1.14.0
 scipy>=1.0.0
 tqdm
 sounddevice
+Unidecode
+inflect
