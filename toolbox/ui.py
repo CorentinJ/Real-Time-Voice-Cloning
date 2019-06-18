@@ -183,7 +183,7 @@ class UI(QDialog):
         return self.utterance_box.currentText()
     
     def browse_file(self):
-        fpath = QFileDialog().getOpenFileNameAndFilter(
+        fpath = QFileDialog().getOpenFileName(
             parent=self,
             caption="Select an audio file",
             filter="*.mp3;*.flac;*.wav;*.m4a"
