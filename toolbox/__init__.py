@@ -6,6 +6,8 @@ from pathlib import Path
 from time import perf_counter as timer
 from toolbox.utterance import Utterance
 import numpy as np
+import traceback
+import sys
 
 
 # Use this directory structure for your datasets, or modify it to fit your needs
@@ -27,6 +29,7 @@ recognized_datasets = [
 
 class Toolbox:
     def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir):
+        sys.excepthook = self.excepthook
         self.datasets_root = datasets_root
         self.utterances = set()
         self.current_generated = (None, None, None, None) # speaker_name, spec, breaks, wav
@@ -36,6 +39,10 @@ class Toolbox:
         self.reset_ui(enc_models_dir, syn_models_dir, voc_models_dir)
         self.setup_events()
         self.ui.start()
+        
+    def excepthook(self, exc_type, exc_value, exc_tb):
+        traceback.print_exception(exc_type, exc_value, exc_tb)
+        self.ui.log("Exception: %s" % exc_value)
         
     def setup_events(self):
         # Dataset, speaker and utterance selection

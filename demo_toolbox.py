@@ -3,16 +3,8 @@ from toolbox import Toolbox
 from utils.argutils import print_args
 import argparse
 
-import sys
-import traceback
-
-def excepthook(exc_type, exc_value, exc_tb):
-    traceback.print_exception(exc_type, exc_value, exc_tb)
-    sys.exit(1)
 
 if __name__ == '__main__':
-    sys.excepthook = excepthook
-
     parser = argparse.ArgumentParser(
         description="Runs the toolbox",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
