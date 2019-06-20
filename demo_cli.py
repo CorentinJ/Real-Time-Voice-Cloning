@@ -17,7 +17,6 @@ if __name__ == '__main__':
           "show how you can interface this project easily with your own. See the source code for "
           "an explanation of what is happening.\n")
     parser = argparse.ArgumentParser(
-        description="Runs the toolbox",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument("-e", "--enc_model_fpath", type=Path, 
@@ -42,7 +41,7 @@ if __name__ == '__main__':
         print("Your PyTorch installation is not configured to use CUDA. If you have a GPU ready "
               "for deep learning, ensure that the drivers are properly installed, and that your "
               "CUDA version matches your PyTorch installation. CPU-only inference is currently "
-              "not supported.", sys.stderr)
+              "not supported.", file=sys.stderr)
         quit(-1)
     device_id = torch.cuda.current_device()
     gpu_properties = torch.cuda.get_device_properties(device_id)
