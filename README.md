@@ -95,7 +95,7 @@ Use the synthesizer to generate training data for the vocoder:
 
 And finally, train the vocoder:
 
-`python vocoder_preprocess.py <datasets_root>`
+`python vocoder_train.py <datasets_root>`
 
 The vocoder also outputs ground truth/generated audios to its model directory.
  
