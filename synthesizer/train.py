@@ -330,46 +330,13 @@ def train(log_dir, args, hparams):
                     saver.save(sess, checkpoint_fpath, global_step=global_step)
                     
                     log("\nSaving alignment, Mel-Spectrograms and griffin-lim inverted waveform..")
-                    if hparams.predict_linear:
-                        input_seq, mel_prediction, linear_prediction, alignment, target, target_length, linear_target = sess.run(
-                            [
-                                model.tower_inputs[0][0],
-                                model.tower_mel_outputs[0][0],
-                                model.tower_linear_outputs[0][0],
-                                model.tower_alignments[0][0],
-                                model.tower_mel_targets[0][0],
-                                model.tower_targets_lengths[0][0],
-                                model.tower_linear_targets[0][0],
-                            ])
-                        
-                        # save predicted linear spectrogram to disk (debug)
-                        linear_filename = "linear-prediction-step-{}.npy".format(step)
-                        np.save(os.path.join(linear_dir, linear_filename), linear_prediction.T,
-                                allow_pickle=False)
-                        
-                        # save griffin lim inverted wav for debug (linear -> wav)
-                        wav = audio.inv_linear_spectrogram(linear_prediction.T, hparams)
-                        audio.save_wav(wav, os.path.join(wav_dir, "step-{}-wave-from-linear.wav"
-                                                                  "".format(step)),
-                                       sr=hparams.sample_rate)
-                        
-                        # Save real and predicted linear-spectrogram plot to disk (control purposes)
-                        plot.plot_spectrogram(linear_prediction, os.path.join(plot_dir,
-                                                                              "step-{}-linear-spectrogram.png".format(
-                                                                                  step)),
-                                              title="{}, {}, step={}, loss={:.5f}".format(
-                                                  "Tacotron", time_string(), step, loss),
-                                              target_spectrogram=linear_target,
-                                              max_len=target_length, auto_aspect=True)
-                    
-                    else:
-                        input_seq, mel_prediction, alignment, target, target_length = sess.run([
-                            model.tower_inputs[0][0],
-                            model.tower_mel_outputs[0][0],
-                            model.tower_alignments[0][0],
-                            model.tower_mel_targets[0][0],
-                            model.tower_targets_lengths[0][0],
-                        ])
+                    input_seq, mel_prediction, alignment, target, target_length = sess.run([
+                        model.tower_inputs[0][0],
+                        model.tower_mel_outputs[0][0],
+                        model.tower_alignments[0][0],
+                        model.tower_mel_targets[0][0],
+                        model.tower_targets_lengths[0][0],
+                    ])
                     
                     # save predicted mel spectrogram to disk (debug)
                     mel_filename = "mel-prediction-step-{}.npy".format(step)

@@ -82,29 +82,3 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
     print("Synthesized mel spectrograms at {}".format(synth_dir))
     return meta_out_fpath
 
-
-def tacotron_synthesize(args, hparams, checkpoint, sentences=None):
-    output_dir = args.output_dir
-    
-    try:
-        checkpoint_path = tf.train.get_checkpoint_state(checkpoint).model_checkpoint_path
-        log("loaded model at {}".format(checkpoint_path))
-    except:
-        raise RuntimeError("Failed to load checkpoint at {}".format(checkpoint))
-    
-    if hparams.tacotron_synthesis_batch_size < hparams.tacotron_num_gpus:
-        raise ValueError("Defined synthesis batch size {} is smaller than minimum required {} "
-                         "(num_gpus)! Please verify your synthesis batch size choice.".format(
-            hparams.tacotron_synthesis_batch_size, hparams.tacotron_num_gpus))
-    
-    if hparams.tacotron_synthesis_batch_size % hparams.tacotron_num_gpus != 0:
-        raise ValueError("Defined synthesis batch size {} is not a multiple of {} (num_gpus)! "
-                         "Please verify your synthesis batch size choice!".format(
-            hparams.tacotron_synthesis_batch_size, hparams.tacotron_num_gpus))
-    
-    if args.mode == "eval":
-        return run_eval(args, checkpoint_path, output_dir, hparams, sentences)
-    elif args.mode == "synthesis":
-        return run_synthesis(args, checkpoint_path, output_dir, hparams)
-    else:
-        run_live(args, checkpoint_path, hparams)
