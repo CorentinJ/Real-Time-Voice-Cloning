@@ -210,14 +210,20 @@ class UI(QDialog):
                          random=True):
         # Select a random dataset
         if level <= 0:
-            datasets = [datasets_root.joinpath(d) for d in recognized_datasets]
-            datasets = [d.relative_to(datasets_root) for d in datasets if d.exists()]
-            self.browser_load_button.setDisabled(len(datasets) == 0)
-            if len(datasets) == 0:
-                print("Warning: you do not have any of the recognized datasets in %s.\n"
-                      "The recognized datasets are:\n\t%s\nFeel free to add your own. You can "
-                      "still use the toolbox by recording samples yourself." % 
-                      (datasets_root, "\n\t".join(recognized_datasets)), file=sys.stderr)
+            if datasets_root is not None:
+                datasets = [datasets_root.joinpath(d) for d in recognized_datasets]
+                datasets = [d.relative_to(datasets_root) for d in datasets if d.exists()]
+                self.browser_load_button.setDisabled(len(datasets) == 0)
+            if datasets_root is None or len(datasets) == 0:
+                # Yes I am proud of this two-liner
+                msg = "Warning: you d" + "id not pass a root directory for datasets as argument" \
+                    if datasets_root is None else "o not have any of the recognized datasets in %s" 
+                self.log(msg)
+                msg += ".\nThe recognized datasets are:\n\t%s\nFeel free to add your own. You " \
+                       "can still use the toolbox by recording samples yourself." % \
+                       ("\n\t".join(recognized_datasets))
+                print(msg, file=sys.stderr)
+                
                 self.random_utterance_button.setDisabled(True)
                 self.random_speaker_button.setDisabled(True)
                 self.random_dataset_button.setDisabled(True)
