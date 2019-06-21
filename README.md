@@ -18,6 +18,9 @@ SV2TTS is a three-stage deep learning framework that allows to create a numerica
 |[1712.05884](https://arxiv.org/pdf/1712.05884.pdf) | Tacotron 2 (synthesizer) | Natural TTS Synthesis by Conditioning Wavenet on Mel Spectrogram Predictions | [Rayhane-mamah/Tacotron-2](https://github.com/Rayhane-mamah/Tacotron-2)
 |[1710.10467](https://arxiv.org/pdf/1710.10467.pdf) | GE2E (encoder)| Generalized End-To-End Loss for Speaker Verification | This repo |
 
+
+
+## Quick start
 ### Requirements
 You will need the following whether you plan to use the toolbox only or to retrain the models.
 
@@ -27,9 +30,6 @@ Run `pip install -r requirements.txt` to install the necessary packages. Additio
 
 A GPU is *highly* recommended (CPU-only is currently not implemented), but you don't necessarily need a high tier GPU if you only want to use the toolbox.
 
-
-
-## Quick start
 ### Pretrained models
 Download the latest [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models).
 
