@@ -52,6 +52,11 @@ or
 
 depending on whether you downloaded any datasets.
 
+## Wiki
+- **How it all works** (coming soon!)
+- [**Training models yourself**](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Training)
+- **Training with other data/languages** (coming soon!)
+- [**TODO and planned features**](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/TODO-&-planned-features) 
 
 ## Contribution
-See the [TODO and planned features](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/TODO-&-planned-features) page. Feel free to open issues or PRs for any problem you may encounter, typos that you see or aspects that are confusing.
+Feel free to open issues or PRs for any problem you may encounter, typos that you see or aspects that are confusing.
