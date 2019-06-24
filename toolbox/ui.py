@@ -215,9 +215,9 @@ class UI(QDialog):
                 datasets = [d.relative_to(datasets_root) for d in datasets if d.exists()]
                 self.browser_load_button.setDisabled(len(datasets) == 0)
             if datasets_root is None or len(datasets) == 0:
-                # Yes I am proud of this two-liner
-                msg = "Warning: you d" + "id not pass a root directory for datasets as argument" \
-                    if datasets_root is None else "o not have any of the recognized datasets in %s" 
+                msg = "Warning: you d" + ("id not pass a root directory for datasets as argument" \
+                    if datasets_root is None else "o not have any of the recognized datasets" \
+                                                  " in %s" % datasets_root) 
                 self.log(msg)
                 msg += ".\nThe recognized datasets are:\n\t%s\nFeel free to add your own. You " \
                        "can still use the toolbox by recording samples yourself." % \
