@@ -22,6 +22,9 @@ if __name__ == '__main__':
                         help="Directory containing saved synthesizer models")
     parser.add_argument("-v", "--voc_models_dir", type=Path, default="vocoder/saved_models", 
                         help="Directory containing saved vocoder models")
+    parser.add_argument("--low_mem", action="store_true", help=\
+        "If True, the memory used by the synthesizer will be freed after each use. Adds large "
+        "overhead but allows to save some GPU memory for lower-end GPUs.")
     args = parser.parse_args()
 
     # Launch the toolbox

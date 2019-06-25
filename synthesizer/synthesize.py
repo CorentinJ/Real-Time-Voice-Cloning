@@ -1,4 +1,4 @@
-from synthesizer.synthesizer import Synthesizer
+from synthesizer.tacotron2 import Tacotron2
 from synthesizer.hparams import hparams_debug_string
 from synthesizer.infolog import log
 import tensorflow as tf
@@ -18,8 +18,7 @@ def run_eval(args, checkpoint_path, output_dir, hparams, sentences):
     os.makedirs(os.path.join(log_dir, "plots"), exist_ok=True)
     
     log(hparams_debug_string())
-    synth = Synthesizer()
-    synth.load(checkpoint_path, hparams)
+    synth = Tacotron2(checkpoint_path, hparams)
     
     #Set inputs batch wise
     sentences = [sentences[i: i+hparams.tacotron_synthesis_batch_size] for i 
@@ -44,10 +43,9 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
     print(hparams_debug_string())
     
     # Load the model in memory
-    synth = Synthesizer()
     weights_dir = os.path.join(model_dir, "taco_pretrained")
     checkpoint_fpath = tf.train.get_checkpoint_state(weights_dir).model_checkpoint_path
-    synth.load(checkpoint_fpath, hparams, gta=True)
+    synth = Tacotron2(checkpoint_fpath, hparams, gta=True)
     
     # Load the metadata
     with open(metadata_filename, encoding="utf-8") as f:

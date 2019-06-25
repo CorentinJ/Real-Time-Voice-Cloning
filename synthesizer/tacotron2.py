@@ -1,16 +1,15 @@
 from synthesizer.utils.text import text_to_sequence
-from synthesizer import audio
 from synthesizer.infolog import log
 from synthesizer.models import create_model
 from synthesizer.utils import plot
+from synthesizer import audio
 import tensorflow as tf
 import numpy as np
-import wave
 import os
 
 
-class Synthesizer:
-    def load(self, checkpoint_path, hparams, gta=False, model_name="Tacotron"):
+class Tacotron2:
+    def __init__(self, checkpoint_path, hparams, gta=False, model_name="Tacotron"):
         log("Constructing model: %s" % model_name)
         #Force the batch size to be known in order to use attention masking in batch synthesis
         inputs = tf.placeholder(tf.int32, (None, None), name="inputs")
@@ -65,7 +64,7 @@ class Synthesizer:
     
     def my_synthesize(self, speaker_embeds, texts):
         """
-        Lighter synthesis function that directly returns the mel spectrogram.
+        Lighter synthesis function that directly returns the mel spectrograms.
         """
         
         # Prepare the input

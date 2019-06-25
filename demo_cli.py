@@ -1,6 +1,6 @@
 from encoder.params_model import model_embedding_size as speaker_embedding_size
 from utils.argutils import print_args
-from synthesizer import inference as synthesizer
+from synthesizer.inference import Synthesizer
 from encoder import inference as encoder
 from vocoder import inference as vocoder
 from pathlib import Path
@@ -28,6 +28,9 @@ if __name__ == '__main__':
     parser.add_argument("-v", "--voc_model_fpath", type=Path, 
                         default="vocoder/saved_models/pretrained/pretrained.pt",
                         help="Path to a saved vocoder")
+    parser.add_argument("--low_mem", action="store_true", help=\
+        "If True, the memory used by the synthesizer will be freed after each use. Adds large "
+        "overhead but allows to save some GPU memory for lower-end GPUs.")
     parser.add_argument("--no_sound", action="store_true", help=\
         "If True, audio won't be played.")
     args = parser.parse_args()
@@ -56,12 +59,10 @@ if __name__ == '__main__':
     
     
     ## Load the models one by one.
-    print("Loading the encoder, the synthesizer and the vocoder. This should take a few seconds. "
-          "The synthesizer will output a lot of stuff. Tensorflow is like that.")
+    print("Preparing the encoder, the synthesizer and the vocoder...")
     encoder.load_model(args.enc_model_fpath)
-    synthesizer.load_model(args.syn_model_dir.joinpath("taco_pretrained"))
+    synthesizer = Synthesizer(args.syn_model_dir.joinpath("taco_pretrained"), low_mem=args.low_mem)
     vocoder.load_model(args.voc_model_fpath)
-    print("\nAll models succesfully loaded!\n")
     
     
     ## Run a test
@@ -87,7 +88,7 @@ if __name__ == '__main__':
     # illustrate that
     embeds = [embed, np.zeros(speaker_embedding_size)]
     texts = ["test 1", "test 2"]
-    print("\tTesting the synthesizer...")
+    print("\tTesting the synthesizer... (loading the model will output a lot of text)")
     mels = synthesizer.synthesize_spectrograms(texts, embeds)
     
     # The vocoder synthesizes one waveform at a time, but it's more efficient for long ones. We 
