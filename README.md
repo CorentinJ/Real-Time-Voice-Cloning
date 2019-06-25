@@ -50,7 +50,7 @@ You can then try the toolbox:
 or  
 `python demo_toolbox.py`  
 
-depending on whether you downloaded any datasets.
+depending on whether you downloaded any datasets. If you are running an X-server or if you have the error "Aborted (core dumped)", see [this issue](https://github.com/CorentinJ/Real-Time-Voice-Cloning/issues/11#issuecomment-504733590).
 
 ## Wiki
 - **How it all works** (coming soon!)
