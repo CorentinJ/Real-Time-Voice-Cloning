@@ -101,6 +101,8 @@ class Toolbox:
             # Select the next utterance
             if self.ui.auto_next_checkbox.isChecked():
                 self.ui.browser_select_next()
+        elif fpath == "":
+            return 
         else:
             name = fpath.name
             speaker_name = fpath.parent.name
