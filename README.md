@@ -4,7 +4,7 @@ Multispeaker Text-To-Speech Synthesis](https://arxiv.org/pdf/1806.04558.pdf) (SV
 
 SV2TTS is a three-stage deep learning framework that allows to create a numerical representation of a voice from a few seconds of audio, and to use it to condition a text-to-speech model trained to generalize to new voices.
 
-**Video demonstration (click the picture):**
+**Video demonstration** (click the picture):
 
 [![Toolbox demo](https://i.imgur.com/Ixy13b7.png)](https://www.youtube.com/watch?v=-O_hYhToKoA)
 
@@ -52,13 +52,13 @@ You can then try the toolbox:
 or  
 `python demo_toolbox.py`  
 
-depending on whether you downloaded any datasets. If you are running an X-server or if you have the error "Aborted (core dumped)", see [this issue](https://github.com/CorentinJ/Real-Time-Voice-Cloning/issues/11#issuecomment-504733590).
+depending on whether you downloaded any datasets. If you are running an X-server or if you have the error `Aborted (core dumped)`, see [this issue](https://github.com/CorentinJ/Real-Time-Voice-Cloning/issues/11#issuecomment-504733590).
 
 ## Wiki
 - **How it all works** (coming soon!)
 - [**Training models yourself**](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Training)
-- **Training with other data/languages** (coming soon!)
+- **Training with other data/languages** (coming soon! - see [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/issues/30#issuecomment-507864097) for now)
 - [**TODO and planned features**](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/TODO-&-planned-features) 
 
 ## Contribution
-Feel free to open issues or PRs for any problem you may encounter, typos that you see or aspects that are confusing.
+Feel free to open issues or PRs for any problem you may encounter, typos that you see or aspects that are confusing. Contributions are welcome, open an issue or email me if you have something you want to work on.
