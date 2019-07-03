@@ -133,6 +133,91 @@ def denoise(wav, noise_profile: NoiseProfile, eta=0.15):
     return output
 
 
+## Alternative VAD algorithm to webrctvad. It has the advantage of not requiring to install that 
+## darn package and it also works for any sampling rate. Maybe I'll eventually use it instead of 
+## webrctvad
+# def vad(wav, sampling_rate, eta=0.15, window_size=0):
+#     """
+#     TODO: fix doc
+#     Creates a profile of the noise in a given waveform.
+# 
+#     :param wav: a waveform containing noise ONLY, as a numpy array of floats or ints. 
+#     :param sampling_rate: the sampling rate of the audio
+#     :param window_size: the size of the window the logmmse algorithm operates on. A default value 
+#     will be picked if left as 0.
+#     :param eta: voice threshold for noise update. While the voice activation detection value is 
+#     below this threshold, the noise profile will be continuously updated throughout the audio. 
+#     Set to 0 to disable updating the noise profile.
+#     """
+#     wav, dtype = to_float(wav)
+#     wav += np.finfo(np.float64).eps
+#     
+#     if window_size == 0:
+#         window_size = int(math.floor(0.02 * sampling_rate))
+#     
+#     if window_size % 2 == 1:
+#         window_size = window_size + 1
+#     
+#     perc = 50
+#     len1 = int(math.floor(window_size * perc / 100))
+#     len2 = int(window_size - len1)
+#     
+#     win = np.hanning(window_size)
+#     win = win * len2 / np.sum(win)
+#     n_fft = 2 * window_size
+#     
+#     wav_mean = np.zeros(n_fft)
+#     n_frames = len(wav) // window_size
+#     for j in range(0, window_size * n_frames, window_size):
+#         wav_mean += np.absolute(np.fft.fft(win * wav[j:j + window_size], n_fft, axis=0))
+#     noise_mu2 = (wav_mean / n_frames) ** 2
+#     
+#     wav, dtype = to_float(wav)
+#     wav += np.finfo(np.float64).eps
+#     
+#     nframes = int(math.floor(len(wav) / len2) - math.floor(window_size / len2))
+#     vad = np.zeros(nframes * len2, dtype=np.bool)
+# 
+#     aa = 0.98
+#     mu = 0.98
+#     ksi_min = 10 ** (-25 / 10)
+#     
+#     xk_prev = np.zeros(len1)
+#     noise_mu2 = noise_mu2
+#     for k in range(0, nframes * len2, len2):
+#         insign = win * wav[k:k + window_size]
+#         
+#         spec = np.fft.fft(insign, n_fft, axis=0)
+#         sig = np.absolute(spec)
+#         sig2 = sig ** 2
+#         
+#         gammak = np.minimum(sig2 / noise_mu2, 40)
+#         
+#         if xk_prev.all() == 0:
+#             ksi = aa + (1 - aa) * np.maximum(gammak - 1, 0)
+#         else:
+#             ksi = aa * xk_prev / noise_mu2 + (1 - aa) * np.maximum(gammak - 1, 0)
+#             ksi = np.maximum(ksi_min, ksi)
+#         
+#         log_sigma_k = gammak * ksi / (1 + ksi) - np.log(1 + ksi)
+#         vad_decision = np.sum(log_sigma_k) / window_size
+#         if vad_decision < eta:
+#             noise_mu2 = mu * noise_mu2 + (1 - mu) * sig2
+#         print(vad_decision)
+#         
+#         a = ksi / (1 + ksi)
+#         vk = a * gammak
+#         ei_vk = 0.5 * expn(1, np.maximum(vk, 1e-8))
+#         hw = a * np.exp(ei_vk)
+#         sig = sig * hw
+#         xk_prev = sig ** 2
+#         
+#         vad[k:k + len2] = vad_decision >= eta
+#         
+#     vad = np.pad(vad, (0, len(wav) - len(vad)), mode="constant")
+#     return vad
+
+
 def to_float(_input):
     if _input.dtype == np.float64:
         return _input, _input.dtype
