@@ -94,13 +94,12 @@ def _preprocess_speaker_dirs(speaker_dirs, dataset_name, datasets_root, out_dir,
                 continue
                 
             # Load and preprocess the waveform
-            wav = audio.load(in_fpath)
-            wav = audio.preprocess_wav(wav)
+            wav = audio.preprocess_wav(in_fpath)
             if len(wav) == 0:
                 continue
             
             # Create the mel spectrogram, discard those that are too short
-            frames = audio.wav_to_mel_filterbank(wav)
+            frames = audio.wav_to_mel_spectrogram(wav)
             if len(frames) < partials_n_frames:
                 continue
             

@@ -132,7 +132,7 @@ class Toolbox:
         # Compute the embedding
         if not encoder.is_loaded():
             self.init_encoder()
-        encoder_wav = encoder.load_preprocess_wav(wav)
+        encoder_wav = encoder.preprocess_wav(wav)
         embed, partial_embeds, _ = encoder.embed_utterance(encoder_wav, return_partials=True)
 
         # Add the utterance
@@ -208,7 +208,7 @@ class Toolbox:
         # TODO: this is problematic with different sampling rates, gotta fix it
         if not encoder.is_loaded():
             self.init_encoder()
-        encoder_wav = encoder.load_preprocess_wav(wav)
+        encoder_wav = encoder.preprocess_wav(wav)
         embed, partial_embeds, _ = encoder.embed_utterance(encoder_wav, return_partials=True)
         
         # Add the utterance

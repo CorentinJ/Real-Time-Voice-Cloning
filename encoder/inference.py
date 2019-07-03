@@ -1,10 +1,9 @@
 from encoder.params_data import *
 from encoder.model import SpeakerEncoder
-from encoder.audio import preprocess_wav
+from encoder.audio import preprocess_wav   # We want to expose this function from here
 from matplotlib import cm
 from encoder import audio
 from pathlib import Path
-from typing import Union
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -36,8 +35,10 @@ def load_model(weights_fpath: Path, device=None):
     _model.eval()
     print("Loaded encoder \"%s\" trained to step %d" % (weights_fpath.name, checkpoint["step"]))
     
+    
 def is_loaded():
     return _model is not None
+
 
 def embed_frames_batch(frames_batch):
     """
@@ -53,6 +54,7 @@ def embed_frames_batch(frames_batch):
     frames = torch.from_numpy(frames_batch).to(_device)
     embed = _model.forward(frames).detach().cpu().numpy()
     return embed
+
 
 def compute_partial_slices(n_samples, partial_utterance_n_frames=partials_n_frames,
                            min_pad_coverage=0.75, overlap=0.5):
@@ -105,12 +107,13 @@ def compute_partial_slices(n_samples, partial_utterance_n_frames=partials_n_fram
     
     return wav_slices, mel_slices
 
+
 def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
     """
     Computes an embedding for a single utterance.
     
     # TODO: handle multiple wavs to benefit from batching on GPU
-    :param wav: the utterance waveform as a numpy array of float32
+    :param wav: a preprocessed (see audio.py) utterance waveform as a numpy array of float32
     :param using_partials: if True, then the utterance is split in partial utterances of 
     <partial_utterance_n_frames> frames and the utterance embedding is computed from their 
     normalized average. If False, the utterance is instead computed from feeding the entire 
@@ -126,7 +129,7 @@ def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
     """
     # Process the entire utterance if not using partials
     if not using_partials:
-        frames = audio.wav_to_mel_filterbank(wav)
+        frames = audio.wav_to_mel_spectrogram(wav)
         embed = embed_frames_batch(frames[None, ...])[0]
         if return_partials:
             return embed, None, None
@@ -139,7 +142,7 @@ def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
         wav = np.pad(wav, (0, max_wave_length - len(wav)), "constant")
     
     # Split the utterance into partials
-    frames = audio.wav_to_mel_filterbank(wav)
+    frames = audio.wav_to_mel_spectrogram(wav)
     frames_batch = np.array([frames[s] for s in mel_slices])
     partial_embeds = embed_frames_batch(frames_batch)
     
@@ -151,20 +154,10 @@ def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
         return embed, partial_embeds, wave_slices
     return embed
 
+
 def embed_speaker(wavs, **kwargs):
     raise NotImplemented()
 
-def load_preprocess_wav(fpath_or_wav: Union[str, Path, np.ndarray]):
-    """
-    Loads an audio file in memory and applies the same preprocessing operations used in trained 
-    the Speaker Encoder. Using this function is not mandatory but recommended.
-    """
-    if isinstance(fpath_or_wav, str) or isinstance(fpath_or_wav, Path):
-        wav = audio.load(fpath_or_wav)
-    else:
-        wav = fpath_or_wav
-    wav = audio.preprocess_wav(wav)
-    return wav
 
 def plot_embedding_as_heatmap(embed, ax=None, title="", shape=None, color_range=(0, 0.30)):
     if ax is None:
