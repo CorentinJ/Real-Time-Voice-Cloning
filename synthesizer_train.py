@@ -15,7 +15,8 @@ def prepare_run(args):
     infolog.init(os.path.join(log_dir, "Terminal_train_log"), run_name, args.slack_url)
     return log_dir, modified_hp
 
-def main():
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("name", help="Name of the run and of the logging directory.")
     parser.add_argument("synthesizer_root", type=str, help=\
@@ -52,7 +53,3 @@ def main():
     log_dir, hparams = prepare_run(args)
     
     tacotron_train(args, log_dir, hparams)
-
-
-if __name__ == "__main__":
-    main()
