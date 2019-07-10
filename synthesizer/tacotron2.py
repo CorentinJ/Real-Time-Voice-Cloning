@@ -10,6 +10,7 @@ import os
 
 class Tacotron2:
     def __init__(self, checkpoint_path, hparams, gta=False, model_name="Tacotron"):
+        tf.reset_default_graph()
         log("Constructing model: %s" % model_name)
         #Force the batch size to be known in order to use attention masking in batch synthesis
         inputs = tf.placeholder(tf.int32, (None, None), name="inputs")

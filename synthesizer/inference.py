@@ -1,11 +1,9 @@
-from synthesizer.tacotron2 import Tacotron2
 from synthesizer.hparams import hparams
 from multiprocess.pool import Pool  # You're free to use either one
 #from multiprocessing import Pool   # 
 from synthesizer import audio
 from pathlib import Path
 from typing import Union, List
-import tensorflow as tf
 import numpy as np
 import numba.cuda
 import librosa
@@ -14,6 +12,22 @@ import librosa
 class Synthesizer:
     sample_rate = hparams.sample_rate
     hparams = hparams
+    
+    @staticmethod
+    def _get_checkpoint_file(checkpoints_dir: Path):
+        # Reimplementation of tf.train.get_checkpoint_state but without tensorflow
+        index_fpath = checkpoints_dir.joinpath("checkpoint")
+        if not index_fpath.exists():
+            raise Exception("Could not find any synthesizer weights under %s" % checkpoints_dir)
+        with index_fpath.open("r") as index_file:
+            for line in index_file:
+                if line.startswith("model_checkpoint_path"):
+                    break
+        checkpoint_fname = line[line.find(" ") + 1:].replace("\"", "").rstrip()
+        checkpoint_fpath = checkpoints_dir.joinpath(checkpoint_fname)
+        model_name = checkpoints_dir.parent.name.replace("logs-", "")
+        step = int(checkpoint_fname[checkpoint_fname.rfind('-') + 1:])
+        return checkpoint_fpath, model_name, step
     
     def __init__(self, checkpoints_dir: Path, verbose=True, low_mem=False):
         """
@@ -31,14 +45,9 @@ class Synthesizer:
         self._low_mem = low_mem
         
         # Prepare the model
-        self._model = None  # type: Tacotron2
-        checkpoint_state = tf.train.get_checkpoint_state(checkpoints_dir)
-        if checkpoint_state is None:
-            raise Exception("Could not find any synthesizer weights under %s" % checkpoints_dir)
-        self.checkpoint_fpath = checkpoint_state.model_checkpoint_path
+        self._model = None
+        self.checkpoint_fpath, model_name, step = self._get_checkpoint_file(checkpoints_dir)
         if verbose:
-            model_name = checkpoints_dir.parent.name.replace("logs-", "")
-            step = int(self.checkpoint_fpath[self.checkpoint_fpath.rfind('-') + 1:])
             print("Found synthesizer \"%s\" trained to step %d" % (model_name, step))
      
     def is_loaded(self):
@@ -54,8 +63,9 @@ class Synthesizer:
         """
         if self._low_mem:
             raise Exception("Cannot load the synthesizer permanently in low mem mode")
-        tf.reset_default_graph()
-        self._model = Tacotron2(self.checkpoint_fpath, hparams)
+        
+        from synthesizer.tacotron2 import Tacotron2
+        self._model = Tacotron2(str(self.checkpoint_fpath), hparams)
             
     def synthesize_spectrograms(self, texts: List[str],
                                 embeddings: Union[np.ndarray, List[np.ndarray]],
@@ -87,9 +97,10 @@ class Synthesizer:
 
     @staticmethod
     def _one_shot_synthesize_spectrograms(checkpoint_fpath, embeddings, texts):
+        from synthesizer.tacotron2 import Tacotron2
+    
         # Load the model and forward the inputs
-        tf.reset_default_graph()
-        model = Tacotron2(checkpoint_fpath, hparams)
+        model = Tacotron2(str(checkpoint_fpath), hparams)
         specs, alignments = model.my_synthesize(embeddings, texts)
         
         # Detach the outputs (not doing so will cause the process to hang)
