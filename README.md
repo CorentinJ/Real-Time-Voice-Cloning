@@ -30,7 +30,7 @@ You will need the following whether you plan to use the toolbox only or to retra
 
 **Python 3.7**. Python 3.6 might work too, but I wouldn't go lower because I make extensive use of pathlib.
 
-Run `pip install -r requirements.txt` to install the necessary packages. Additionally you will need [PyTorch](https://pytorch.org/get-started/locally/).
+Run `pip install -r requirements.txt` to install the necessary packages. Additionally you will need [PyTorch](https://pytorch.org/get-started/locally/) (>=1.0.1).
 
 A GPU is mandatory, but you don't necessarily need a high tier GPU if you only want to use the toolbox.
 
