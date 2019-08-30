@@ -95,15 +95,15 @@ def trim_long_silences(wav):
     audio_mask = binary_dilation(audio_mask, np.ones(vad_max_silence_length + 1))
     audio_mask = np.repeat(audio_mask, samples_per_window)
     
-    return wav[audio_mask == True]
+    return wav[audio_mask]
 
 
 def normalize_volume(wav, target_dBFS, increase_only=False, decrease_only=False):
     if increase_only and decrease_only:
         raise ValueError("Both increase only and decrease only are set")
-    rms = np.sqrt(np.mean((wav * int16_max) ** 2))
-    wave_dBFS = 20 * np.log10(rms / int16_max)
+    rms = np.mean(wav ** 2)
+    wave_dBFS = 10 * np.log10(rms)
     dBFS_change = target_dBFS - wave_dBFS
-    if dBFS_change < 0 and increase_only or dBFS_change > 0 and decrease_only:
+    if (dBFS_change < 0 and increase_only) or (dBFS_change > 0 and decrease_only):
         return wav
     return wav * (10 ** (dBFS_change / 20))
