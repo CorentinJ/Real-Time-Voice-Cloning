@@ -1,0 +1,1639 @@
+speaker: p304, enrollments: ['p304_232.wav', 'p304_226.wav', 'p304_018.wav']
+speaker: p303, enrollments: ['p303_058.wav', 'p303_070.wav', 'p303_064.wav']
+speaker: p335, enrollments: ['p335_066.wav', 'p335_072.wav', 'p335_099.wav']
+speaker: p361, enrollments: ['p361_104.wav', 'p361_110.wav', 'p361_138.wav']
+speaker: p333, enrollments: ['p333_037.wav', 'p333_023.wav', 'p333_235.wav']
+speaker: p334, enrollments: ['p334_275.wav', 'p334_261.wav', 'p334_249.wav']
+speaker: p302, enrollments: ['p302_263.wav', 'p302_277.wav', 'p302_288.wav']
+speaker: p305, enrollments: ['p305_009.wav', 'p305_021.wav', 'p305_035.wav']
+speaker: p351, enrollments: ['p351_143.wav', 'p351_157.wav', 'p351_180.wav']
+speaker: p360, enrollments: ['p360_317.wav', 'p360_303.wav', 'p360_115.wav']
+speaker: p277, enrollments: ['p277_268.wav', 'p277_254.wav', 'p277_240.wav']
+speaker: p283, enrollments: ['p283_269.wav', 'p283_255.wav', 'p283_241.wav']
+speaker: p248, enrollments: ['p248_137.wav', 'p248_123.wav', 'p248_335.wav']
+speaker: p284, enrollments: ['p284_017.wav', 'p284_003.wav', 'p284_229.wav']
+speaker: p270, enrollments: ['p270_016.wav', 'p270_002.wav', 'p270_228.wav']
+speaker: p246, enrollments: ['p246_014.wav', 'p246_028.wav', 'p246_202.wav']
+speaker: p279, enrollments: ['p279_388.wav', 'p279_363.wav', 'p279_405.wav']
+speaker: p241, enrollments: ['p241_242.wav', 'p241_256.wav', 'p241_281.wav']
+speaker: p225, enrollments: ['p225_159.wav', 'p225_165.wav', 'p225_171.wav']
+speaker: p240, enrollments: ['p240_051.wav', 'p240_045.wav', 'p240_079.wav']
+speaker: p247, enrollments: ['p247_213.wav', 'p247_207.wav', 'p247_011.wav']
+speaker: p278, enrollments: ['p278_158.wav', 'p278_170.wav', 'p278_164.wav']
+speaker: p271, enrollments: ['p271_239.wav', 'p271_205.wav', 'p271_211.wav']
+speaker: p285, enrollments: ['p285_238.wav', 'p285_204.wav', 'p285_210.wav']
+speaker: p282, enrollments: ['p282_046.wav', 'p282_052.wav', 'p282_085.wav']
+speaker: p276, enrollments: ['p276_047.wav', 'p276_053.wav', 'p276_084.wav']
+speaker: p249, enrollments: ['p249_324.wav', 'p249_330.wav', 'p249_318.wav']
+speaker: p254, enrollments: ['p254_307.wav', 'p254_313.wav', 'p254_105.wav']
+speaker: p298, enrollments: ['p298_227.wav', 'p298_233.wav', 'p298_019.wav']
+speaker: p253, enrollments: ['p253_186.wav', 'p253_192.wav', 'p253_145.wav']
+speaker: p265, enrollments: ['p265_190.wav', 'p265_184.wav', 'p265_153.wav']
+speaker: p262, enrollments: ['p262_339.wav', 'p262_311.wav', 'p262_305.wav']
+speaker: p236, enrollments: ['p236_298.wav', 'p236_273.wav', 'p236_267.wav']
+speaker: p231, enrollments: ['p231_019.wav', 'p231_031.wav', 'p231_025.wav']
+speaker: p238, enrollments: ['p238_378.wav', 'p238_344.wav', 'p238_422.wav']
+speaker: p263, enrollments: ['p263_102.wav', 'p263_116.wav', 'p263_328.wav']
+speaker: p297, enrollments: ['p297_103.wav', 'p297_117.wav', 'p297_329.wav']
+speaker: p264, enrollments: ['p264_383.wav', 'p264_397.wav', 'p264_368.wav']
+speaker: p299, enrollments: ['p299_008.wav', 'p299_034.wav', 'p299_020.wav']
+speaker: p252, enrollments: ['p252_395.wav', 'p252_381.wav', 'p252_356.wav']
+speaker: p255, enrollments: ['p255_114.wav', 'p255_100.wav', 'p255_128.wav']
+speaker: p239, enrollments: ['p239_157.wav', 'p239_143.wav', 'p239_194.wav']
+speaker: p230, enrollments: ['p230_222.wav', 'p230_236.wav', 'p230_008.wav']
+speaker: p237, enrollments: ['p237_048.wav', 'p237_060.wav', 'p237_074.wav']
+speaker: p345, enrollments: ['p345_229.wav', 'p345_215.wav', 'p345_201.wav']
+speaker: p374, enrollments: ['p374_082.wav', 'p374_096.wav', 'p374_041.wav']
+speaker: p318, enrollments: ['p318_002.wav', 'p318_016.wav', 'p318_228.wav']
+speaker: p316, enrollments: ['p316_109.wav', 'p316_135.wav', 'p316_121.wav']
+speaker: p329, enrollments: ['p329_256.wav', 'p329_242.wav', 'p329_295.wav']
+speaker: p311, enrollments: ['p311_388.wav', 'p311_377.wav', 'p311_411.wav']
+speaker: p343, enrollments: ['p343_287.wav', 'p343_293.wav', 'p343_278.wav']
+speaker: p310, enrollments: ['p310_158.wav', 'p310_164.wav', 'p310_170.wav']
+speaker: p317, enrollments: ['p317_326.wav', 'p317_332.wav', 'p317_118.wav']
+speaker: p326, enrollments: ['p326_199.wav', 'p326_172.wav', 'p326_166.wav']
+speaker: p362, enrollments: ['p362_004.wav', 'p362_010.wav', 'p362_038.wav']
+speaker: p300, enrollments: ['p300_158.wav', 'p300_170.wav', 'p300_164.wav']
+speaker: p307, enrollments: ['p307_332.wav', 'p307_326.wav', 'p307_118.wav']
+speaker: p336, enrollments: ['p336_199.wav', 'p336_166.wav', 'p336_172.wav']
+speaker: p364, enrollments: ['p364_096.wav', 'p364_082.wav', 'p364_055.wav']
+speaker: p363, enrollments: ['p363_217.wav', 'p363_203.wav', 'p363_015.wav']
+speaker: p308, enrollments: ['p308_016.wav', 'p308_002.wav', 'p308_228.wav']
+speaker: p330, enrollments: ['p330_137.wav', 'p330_123.wav', 'p330_335.wav']
+speaker: p339, enrollments: ['p339_242.wav', 'p339_256.wav', 'p339_281.wav']
+speaker: p306, enrollments: ['p306_109.wav', 'p306_121.wav', 'p306_135.wav']
+speaker: p301, enrollments: ['p301_388.wav', 'p301_405.wav', 'p301_363.wav']
+speaker: p287, enrollments: ['p287_117.wav', 'p287_103.wav', 'p287_329.wav']
+speaker: p273, enrollments: ['p273_116.wav', 'p273_102.wav', 'p273_328.wav']
+speaker: p274, enrollments: ['p274_397.wav', 'p274_383.wav', 'p274_368.wav']
+speaker: p280, enrollments: ['p280_396.wav', 'p280_382.wav', 'p280_369.wav']
+speaker: p245, enrollments: ['p245_100.wav', 'p245_114.wav', 'p245_128.wav']
+speaker: p229, enrollments: ['p229_143.wav', 'p229_157.wav', 'p229_180.wav']
+speaker: p227, enrollments: ['p227_048.wav', 'p227_074.wav', 'p227_060.wav']
+speaker: p244, enrollments: ['p244_313.wav', 'p244_307.wav', 'p244_111.wav']
+speaker: p243, enrollments: ['p243_192.wav', 'p243_186.wav', 'p243_151.wav']
+speaker: p288, enrollments: ['p288_233.wav', 'p288_227.wav', 'p288_019.wav']
+speaker: p281, enrollments: ['p281_185.wav', 'p281_191.wav', 'p281_146.wav']
+speaker: p275, enrollments: ['p275_184.wav', 'p275_190.wav', 'p275_147.wav']
+speaker: p272, enrollments: ['p272_339.wav', 'p272_305.wav', 'p272_311.wav']
+speaker: p286, enrollments: ['p286_338.wav', 'p286_304.wav', 'p286_462.wav']
+speaker: p226, enrollments: ['p226_298.wav', 'p226_267.wav', 'p226_273.wav']
+speaker: p228, enrollments: ['p228_350.wav', 'p228_344.wav', 'p228_152.wav']
+speaker: p232, enrollments: ['p232_119.wav', 'p232_131.wav', 'p232_125.wav']
+speaker: p250, enrollments: ['p250_045.wav', 'p250_051.wav', 'p250_079.wav']
+speaker: p268, enrollments: ['p268_158.wav', 'p268_164.wav', 'p268_170.wav']
+speaker: p257, enrollments: ['p257_207.wav', 'p257_213.wav', 'p257_005.wav']
+speaker: p295, enrollments: ['p295_238.wav', 'p295_210.wav', 'p295_204.wav']
+speaker: p261, enrollments: ['p261_239.wav', 'p261_211.wav', 'p261_205.wav']
+speaker: p259, enrollments: ['p259_330.wav', 'p259_456.wav', 'p259_442.wav']
+speaker: p266, enrollments: ['p266_053.wav', 'p266_047.wav', 'p266_090.wav']
+speaker: p292, enrollments: ['p292_052.wav', 'p292_046.wav', 'p292_091.wav']
+speaker: p234, enrollments: ['p234_148.wav', 'p234_160.wav', 'p234_174.wav']
+speaker: p233, enrollments: ['p233_322.wav', 'p233_336.wav', 'p233_108.wav']
+speaker: p258, enrollments: ['p258_123.wav', 'p258_137.wav', 'p258_321.wav']
+speaker: p293, enrollments: ['p293_269.wav', 'p293_241.wav', 'p293_255.wav']
+speaker: p267, enrollments: ['p267_268.wav', 'p267_240.wav', 'p267_254.wav']
+speaker: p260, enrollments: ['p260_002.wav', 'p260_016.wav', 'p260_228.wav']
+speaker: p294, enrollments: ['p294_003.wav', 'p294_017.wav', 'p294_229.wav']
+speaker: p269, enrollments: ['p269_388.wav', 'p269_377.wav', 'p269_363.wav']
+speaker: p256, enrollments: ['p256_014.wav', 'p256_028.wav', 'p256_216.wav']
+speaker: p251, enrollments: ['p251_256.wav', 'p251_242.wav', 'p251_295.wav']
+speaker: p323, enrollments: ['p323_023.wav', 'p323_037.wav', 'p323_221.wav']
+speaker: p312, enrollments: ['p312_277.wav', 'p312_263.wav', 'p312_288.wav']
+speaker: p315, enrollments: ['p315_009.wav', 'p315_380.wav', 'p315_343.wav']
+speaker: p341, enrollments: ['p341_157.wav', 'p341_143.wav', 'p341_194.wav']
+speaker: p314, enrollments: ['p314_226.wav', 'p314_232.wav', 'p314_018.wav']
+speaker: p313, enrollments: ['p313_058.wav', 'p313_064.wav', 'p313_070.wav']
+speaker: p376, enrollments: ['p376_150.wav', 'p376_144.wav', 'p376_178.wav']
+speaker: p347, enrollments: ['p347_106.wav', 'p347_112.wav', 'p347_338.wav']
+speaker: p340, enrollments: ['p340_378.wav', 'p340_422.wav', 'p340_344.wav']
+ori: speaker: p304, utterance: p304_064.wav, text: Mrs Anderson said this one was different., sim: 0.8965056538581848
+gen: speaker: p304, utterance: p304_064.wav, text: Mrs Anderson said this one was different., sim: 0.6157753467559814
+Saved audio to /tmp/gen-p304-p304_064.wav
+ori: speaker: p304, utterance: p304_345.wav, text: Things start to talk to each other., sim: 0.8555582165718079
+gen: speaker: p304, utterance: p304_345.wav, text: Things start to talk to each other., sim: 0.6416394710540771
+Saved audio to /tmp/gen-p304-p304_345.wav
+ori: speaker: p304, utterance: p304_310.wav, text: We understand the changes in the world., sim: 0.8573650121688843
+gen: speaker: p304, utterance: p304_310.wav, text: We understand the changes in the world., sim: 0.6744250655174255
+Saved audio to /tmp/gen-p304-p304_310.wav
+ori: speaker: p304, utterance: p304_050.wav, text: His father said, My son was lucky., sim: 0.9033713936805725
+gen: speaker: p304, utterance: p304_050.wav, text: His father said, My son was lucky., sim: 0.6439623236656189
+Saved audio to /tmp/gen-p304-p304_050.wav
+ori: speaker: p304, utterance: p304_127.wav, text: That could be at least five years away., sim: 0.8856863975524902
+gen: speaker: p304, utterance: p304_127.wav, text: That could be at least five years away., sim: 0.7889870405197144
+Saved audio to /tmp/gen-p304-p304_127.wav
+ori: speaker: p303, utterance: p303_233.wav, text: Mr King, who was present at yesterday's hearing, refused to comment., sim: 0.9198638200759888
+gen: speaker: p303, utterance: p303_233.wav, text: Mr King, who was present at yesterday's hearing, refused to comment., sim: 0.8772715926170349
+Saved audio to /tmp/gen-p303-p303_233.wav
+ori: speaker: p303, utterance: p303_096.wav, text: The League of Nations was also his idea., sim: 0.9206429123878479
+gen: speaker: p303, utterance: p303_096.wav, text: The League of Nations was also his idea., sim: 0.7646338939666748
+Saved audio to /tmp/gen-p303-p303_096.wav
+ori: speaker: p303, utterance: p303_128.wav, text: A lot of people were in tears., sim: 0.8353285789489746
+gen: speaker: p303, utterance: p303_128.wav, text: A lot of people were in tears., sim: 0.678043007850647
+Saved audio to /tmp/gen-p303-p303_128.wav
+ori: speaker: p303, utterance: p303_250.wav, text: But first it goes out on TV., sim: 0.8919610977172852
+gen: speaker: p303, utterance: p303_250.wav, text: But first it goes out on TV., sim: 0.6736236214637756
+Saved audio to /tmp/gen-p303-p303_250.wav
+ori: speaker: p303, utterance: p303_091.wav, text: There were unconfirmed reports that it was cannabis., sim: 0.9362276792526245
+gen: speaker: p303, utterance: p303_091.wav, text: There were unconfirmed reports that it was cannabis., sim: 0.8323229551315308
+Saved audio to /tmp/gen-p303-p303_091.wav
+ori: speaker: p335, utterance: p335_022.wav, text: The actual primary rainbow observed is said to be the effect of super-imposition of a number of bows., sim: 0.8856292366981506
+gen: speaker: p335, utterance: p335_022.wav, text: The actual primary rainbow observed is said to be the effect of super-imposition of a number of bows., sim: 0.8840357065200806
+Saved audio to /tmp/gen-p335-p335_022.wav
+ori: speaker: p335, utterance: p335_220.wav, text: They will have to make changes., sim: 0.8170151114463806
+gen: speaker: p335, utterance: p335_220.wav, text: They will have to make changes., sim: 0.7712242007255554
+Saved audio to /tmp/gen-p335-p335_220.wav
+ori: speaker: p335, utterance: p335_124.wav, text: The plane was in flames, sim: 0.8732538819313049
+gen: speaker: p335, utterance: p335_124.wav, text: The plane was in flames, sim: 0.7400757670402527
+Saved audio to /tmp/gen-p335-p335_124.wav
+ori: speaker: p335, utterance: p335_019.wav, text: Since then physicists have found that it is not reflection, but refraction by the raindrops which causes the rainbows., sim: 0.8705904483795166
+gen: speaker: p335, utterance: p335_019.wav, text: Since then physicists have found that it is not reflection, but refraction by the raindrops which causes the rainbows., sim: 0.8378409743309021
+Saved audio to /tmp/gen-p335-p335_019.wav
+ori: speaker: p335, utterance: p335_368.wav, text: Its people are inventive, talented and diligent., sim: 0.891729474067688
+gen: speaker: p335, utterance: p335_368.wav, text: Its people are inventive, talented and diligent., sim: 0.8567299842834473
+Saved audio to /tmp/gen-p335-p335_368.wav
+ori: speaker: p361, utterance: p361_102.wav, text: I welcome the decision., sim: 0.869945228099823
+gen: speaker: p361, utterance: p361_102.wav, text: I welcome the decision., sim: 0.6602450609207153
+Saved audio to /tmp/gen-p361-p361_102.wav
+ori: speaker: p361, utterance: p361_394.wav, text: It didn't matter who was in their way., sim: 0.7911167740821838
+gen: speaker: p361, utterance: p361_394.wav, text: It didn't matter who was in their way., sim: 0.7239900827407837
+Saved audio to /tmp/gen-p361-p361_394.wav
+ori: speaker: p361, utterance: p361_152.wav, text: This series is for real., sim: 0.8583524227142334
+gen: speaker: p361, utterance: p361_152.wav, text: This series is for real., sim: 0.6921318173408508
+Saved audio to /tmp/gen-p361-p361_152.wav
+ori: speaker: p361, utterance: p361_318.wav, text: It doesn't look good for her., sim: 0.8186356425285339
+gen: speaker: p361, utterance: p361_318.wav, text: It doesn't look good for her., sim: 0.6639603972434998
+Saved audio to /tmp/gen-p361-p361_318.wav
+ori: speaker: p361, utterance: p361_122.wav, text: It was on my mind a little bit., sim: 0.8489050269126892
+gen: speaker: p361, utterance: p361_122.wav, text: It was on my mind a little bit., sim: 0.7132695317268372
+Saved audio to /tmp/gen-p361-p361_122.wav
+ori: speaker: p333, utterance: p333_096.wav, text: He could face a jail sentence., sim: 0.873729407787323
+gen: speaker: p333, utterance: p333_096.wav, text: He could face a jail sentence., sim: 0.6421135067939758
+Saved audio to /tmp/gen-p333-p333_096.wav
+ori: speaker: p333, utterance: p333_322.wav, text: This is my music., sim: 0.8845221400260925
+gen: speaker: p333, utterance: p333_322.wav, text: This is my music., sim: 0.7141079306602478
+Saved audio to /tmp/gen-p333-p333_322.wav
+ori: speaker: p333, utterance: p333_163.wav, text: I was in jail for five years., sim: 0.9183785915374756
+gen: speaker: p333, utterance: p333_163.wav, text: I was in jail for five years., sim: 0.6218407154083252
+Saved audio to /tmp/gen-p333-p333_163.wav
+ori: speaker: p333, utterance: p333_217.wav, text: I've invented a village in East Lothian., sim: 0.9161726236343384
+gen: speaker: p333, utterance: p333_217.wav, text: I've invented a village in East Lothian., sim: 0.7284437417984009
+Saved audio to /tmp/gen-p333-p333_217.wav
+ori: speaker: p333, utterance: p333_120.wav, text: Within six minutes, they were two goals down., sim: 0.8970155119895935
+gen: speaker: p333, utterance: p333_120.wav, text: Within six minutes, they were two goals down., sim: 0.660751461982727
+Saved audio to /tmp/gen-p333-p333_120.wav
+ori: speaker: p334, utterance: p334_054.wav, text: But, by that time, of course, it is again., sim: 0.8912621140480042
+gen: speaker: p334, utterance: p334_054.wav, text: But, by that time, of course, it is again., sim: 0.5997573733329773
+Saved audio to /tmp/gen-p334-p334_054.wav
+ori: speaker: p334, utterance: p334_052.wav, text: It is a form of physical exercise., sim: 0.8397762775421143
+gen: speaker: p334, utterance: p334_052.wav, text: It is a form of physical exercise., sim: 0.8340156078338623
+Saved audio to /tmp/gen-p334-p334_052.wav
+ori: speaker: p334, utterance: p334_029.wav, text: It used to bother me sometimes, but it doesn't any more., sim: 0.8661544919013977
+gen: speaker: p334, utterance: p334_029.wav, text: It used to bother me sometimes, but it doesn't any more., sim: 0.7987772822380066
+Saved audio to /tmp/gen-p334-p334_029.wav
+ori: speaker: p334, utterance: p334_187.wav, text: I'm pleased to get through the opening match., sim: 0.8359612226486206
+gen: speaker: p334, utterance: p334_187.wav, text: I'm pleased to get through the opening match., sim: 0.6881776452064514
+Saved audio to /tmp/gen-p334-p334_187.wav
+ori: speaker: p334, utterance: p334_213.wav, text: The house was full of smoke., sim: 0.815925657749176
+gen: speaker: p334, utterance: p334_213.wav, text: The house was full of smoke., sim: 0.5951576232910156
+Saved audio to /tmp/gen-p334-p334_213.wav
+ori: speaker: p302, utterance: p302_060.wav, text: Ms McNeill was killed on impact., sim: 0.8229779601097107
+gen: speaker: p302, utterance: p302_060.wav, text: Ms McNeill was killed on impact., sim: 0.7384724020957947
+Saved audio to /tmp/gen-p302-p302_060.wav
+ori: speaker: p302, utterance: p302_210.wav, text: I was surprised by his response., sim: 0.858379065990448
+gen: speaker: p302, utterance: p302_210.wav, text: I was surprised by his response., sim: 0.7095744013786316
+Saved audio to /tmp/gen-p302-p302_210.wav
+ori: speaker: p302, utterance: p302_016.wav, text: The Norsemen considered the rainbow as a bridge over which the gods passed from earth to their home in the sky., sim: 0.9006168246269226
+gen: speaker: p302, utterance: p302_016.wav, text: The Norsemen considered the rainbow as a bridge over which the gods passed from earth to their home in the sky., sim: 0.8936377167701721
+Saved audio to /tmp/gen-p302-p302_016.wav
+ori: speaker: p302, utterance: p302_192.wav, text: I felt we had fallen back a little., sim: 0.842375636100769
+gen: speaker: p302, utterance: p302_192.wav, text: I felt we had fallen back a little., sim: 0.7555501461029053
+Saved audio to /tmp/gen-p302-p302_192.wav
+ori: speaker: p302, utterance: p302_267.wav, text: It's a matter of huge concern., sim: 0.8556684255599976
+gen: speaker: p302, utterance: p302_267.wav, text: It's a matter of huge concern., sim: 0.7298408150672913
+Saved audio to /tmp/gen-p302-p302_267.wav
+ori: speaker: p305, utterance: p305_163.wav, text: They want to shut the Scottish Office., sim: 0.8992074131965637
+gen: speaker: p305, utterance: p305_163.wav, text: They want to shut the Scottish Office., sim: 0.7126944661140442
+Saved audio to /tmp/gen-p305-p305_163.wav
+ori: speaker: p305, utterance: p305_410.wav, text: He has never even been to Ireland., sim: 0.8570764064788818
+gen: speaker: p305, utterance: p305_410.wav, text: He has never even been to Ireland., sim: 0.5497387647628784
+Saved audio to /tmp/gen-p305-p305_410.wav
+ori: speaker: p305, utterance: p305_117.wav, text: Pity he couldn't produce a winning British team., sim: 0.8520505428314209
+gen: speaker: p305, utterance: p305_117.wav, text: Pity he couldn't produce a winning British team., sim: 0.8063914179801941
+Saved audio to /tmp/gen-p305-p305_117.wav
+ori: speaker: p305, utterance: p305_177.wav, text: This is a dream come true for me., sim: 0.9070981740951538
+gen: speaker: p305, utterance: p305_177.wav, text: This is a dream come true for me., sim: 0.7202358245849609
+Saved audio to /tmp/gen-p305-p305_177.wav
+ori: speaker: p305, utterance: p305_073.wav, text: I've put my own money into this project., sim: 0.9315270781517029
+gen: speaker: p305, utterance: p305_073.wav, text: I've put my own money into this project., sim: 0.8670151233673096
+Saved audio to /tmp/gen-p305-p305_073.wav
+ori: speaker: p351, utterance: p351_407.wav, text: But the Foreign Secretary can cope., sim: 0.8348656892776489
+gen: speaker: p351, utterance: p351_407.wav, text: But the Foreign Secretary can cope., sim: 0.6172064542770386
+Saved audio to /tmp/gen-p351-p351_407.wav
+ori: speaker: p351, utterance: p351_334.wav, text: He will go a long way., sim: 0.7294497489929199
+gen: speaker: p351, utterance: p351_334.wav, text: He will go a long way., sim: 0.6313610672950745
+Saved audio to /tmp/gen-p351-p351_334.wav
+ori: speaker: p351, utterance: p351_123.wav, text: Last night he became one of the hunted., sim: 0.884382963180542
+gen: speaker: p351, utterance: p351_123.wav, text: Last night he became one of the hunted., sim: 0.6307252645492554
+Saved audio to /tmp/gen-p351-p351_123.wav
+ori: speaker: p351, utterance: p351_397.wav, text: They would have been forgiven for doing so., sim: 0.8833837509155273
+gen: speaker: p351, utterance: p351_397.wav, text: They would have been forgiven for doing so., sim: 0.7658671140670776
+Saved audio to /tmp/gen-p351-p351_397.wav
+ori: speaker: p351, utterance: p351_067.wav, text: We can't go home., sim: 0.7404218316078186
+gen: speaker: p351, utterance: p351_067.wav, text: We can't go home., sim: 0.48078054189682007
+Saved audio to /tmp/gen-p351-p351_067.wav
+ori: speaker: p360, utterance: p360_123.wav, text: Britain has never had it so good., sim: 0.8891236782073975
+gen: speaker: p360, utterance: p360_123.wav, text: Britain has never had it so good., sim: 0.7614631056785583
+Saved audio to /tmp/gen-p360-p360_123.wav
+ori: speaker: p360, utterance: p360_119.wav, text: I have spoken to head office., sim: 0.9028813242912292
+gen: speaker: p360, utterance: p360_119.wav, text: I have spoken to head office., sim: 0.7498350143432617
+Saved audio to /tmp/gen-p360-p360_119.wav
+ori: speaker: p360, utterance: p360_193.wav, text: There are some good people in there., sim: 0.8534495830535889
+gen: speaker: p360, utterance: p360_193.wav, text: There are some good people in there., sim: 0.7216259241104126
+Saved audio to /tmp/gen-p360-p360_193.wav
+ori: speaker: p360, utterance: p360_345.wav, text: How did it all come about?, sim: 0.7703329920768738
+gen: speaker: p360, utterance: p360_345.wav, text: How did it all come about?, sim: 0.5922562479972839
+Saved audio to /tmp/gen-p360-p360_345.wav
+ori: speaker: p360, utterance: p360_195.wav, text: I'm not going to blame the band., sim: 0.856522262096405
+gen: speaker: p360, utterance: p360_195.wav, text: I'm not going to blame the band., sim: 0.697393000125885
+Saved audio to /tmp/gen-p360-p360_195.wav
+ori: speaker: p277, utterance: p277_083.wav, text: It is a job creation scheme., sim: 0.8435688614845276
+gen: speaker: p277, utterance: p277_083.wav, text: It is a job creation scheme., sim: 0.6792013049125671
+Saved audio to /tmp/gen-p277-p277_083.wav
+ori: speaker: p277, utterance: p277_381.wav, text: Family liaison officers are now working to support the family., sim: 0.8933112621307373
+gen: speaker: p277, utterance: p277_381.wav, text: Family liaison officers are now working to support the family., sim: 0.8192583322525024
+Saved audio to /tmp/gen-p277-p277_381.wav
+ori: speaker: p277, utterance: p277_393.wav, text: The compromise is entirely on the arrival at that position., sim: 0.8764594793319702
+gen: speaker: p277, utterance: p277_393.wav, text: The compromise is entirely on the arrival at that position., sim: 0.8424543142318726
+Saved audio to /tmp/gen-p277-p277_393.wav
+ori: speaker: p277, utterance: p277_379.wav, text: Since then, he has played no active part in the company., sim: 0.8862410187721252
+gen: speaker: p277, utterance: p277_379.wav, text: Since then, he has played no active part in the company., sim: 0.8099126219749451
+Saved audio to /tmp/gen-p277-p277_379.wav
+ori: speaker: p277, utterance: p277_334.wav, text: This is a sector in overall deficit and urgent action is required., sim: 0.9052883982658386
+gen: speaker: p277, utterance: p277_334.wav, text: This is a sector in overall deficit and urgent action is required., sim: 0.8271827101707458
+Saved audio to /tmp/gen-p277-p277_334.wav
+ori: speaker: p283, utterance: p283_440.wav, text: Which may be the same thing., sim: 0.8402102589607239
+gen: speaker: p283, utterance: p283_440.wav, text: Which may be the same thing., sim: 0.6487835645675659
+Saved audio to /tmp/gen-p283-p283_440.wav
+ori: speaker: p283, utterance: p283_284.wav, text: You can never tell with the manager., sim: 0.8954815864562988
+gen: speaker: p283, utterance: p283_284.wav, text: You can never tell with the manager., sim: 0.6182070970535278
+Saved audio to /tmp/gen-p283-p283_284.wav
+ori: speaker: p283, utterance: p283_330.wav, text: He will address the nation this evening., sim: 0.9020741581916809
+gen: speaker: p283, utterance: p283_330.wav, text: He will address the nation this evening., sim: 0.613415002822876
+Saved audio to /tmp/gen-p283-p283_330.wav
+ori: speaker: p283, utterance: p283_133.wav, text: Lady Thatcher was the only woman with full membership., sim: 0.8805122375488281
+gen: speaker: p283, utterance: p283_133.wav, text: Lady Thatcher was the only woman with full membership., sim: 0.6129525899887085
+Saved audio to /tmp/gen-p283-p283_133.wav
+ori: speaker: p283, utterance: p283_372.wav, text: Ferguson is a good example., sim: 0.8503444194793701
+gen: speaker: p283, utterance: p283_372.wav, text: Ferguson is a good example., sim: 0.624716579914093
+Saved audio to /tmp/gen-p283-p283_372.wav
+ori: speaker: p248, utterance: p248_172.wav, text: They thought they had found a home., sim: 0.8306531310081482
+gen: speaker: p248, utterance: p248_172.wav, text: They thought they had found a home., sim: 0.7059182524681091
+Saved audio to /tmp/gen-p248-p248_172.wav
+ori: speaker: p248, utterance: p248_146.wav, text: This film will be totally awesome., sim: 0.8745754957199097
+gen: speaker: p248, utterance: p248_146.wav, text: This film will be totally awesome., sim: 0.6635253429412842
+Saved audio to /tmp/gen-p248-p248_146.wav
+ori: speaker: p248, utterance: p248_240.wav, text: My future is in the marathon., sim: 0.8429837226867676
+gen: speaker: p248, utterance: p248_240.wav, text: My future is in the marathon., sim: 0.7001410126686096
+Saved audio to /tmp/gen-p248-p248_240.wav
+ori: speaker: p248, utterance: p248_168.wav, text: By then, however, both men were already in the US., sim: 0.8970465660095215
+gen: speaker: p248, utterance: p248_168.wav, text: By then, however, both men were already in the US., sim: 0.806567370891571
+Saved audio to /tmp/gen-p248-p248_168.wav
+ori: speaker: p248, utterance: p248_038.wav, text: But it may take some time to confirm the findings., sim: 0.9179246425628662
+gen: speaker: p248, utterance: p248_038.wav, text: But it may take some time to confirm the findings., sim: 0.7577125430107117
+Saved audio to /tmp/gen-p248-p248_038.wav
+ori: speaker: p284, utterance: p284_408.wav, text: It is full-scale., sim: 0.8525260090827942
+gen: speaker: p284, utterance: p284_408.wav, text: It is full-scale., sim: 0.6619364619255066
+Saved audio to /tmp/gen-p284-p284_408.wav
+ori: speaker: p284, utterance: p284_104.wav, text: That's all right then., sim: 0.7283410429954529
+gen: speaker: p284, utterance: p284_104.wav, text: That's all right then., sim: 0.603095293045044
+Saved audio to /tmp/gen-p284-p284_104.wav
+ori: speaker: p284, utterance: p284_220.wav, text: The report is due out next month., sim: 0.8709971308708191
+gen: speaker: p284, utterance: p284_220.wav, text: The report is due out next month., sim: 0.5567888021469116
+Saved audio to /tmp/gen-p284-p284_220.wav
+ori: speaker: p284, utterance: p284_006.wav, text: When the sunlight strikes raindrops in the air, they act as a prism and form a rainbow. , sim: 0.8953104019165039
+gen: speaker: p284, utterance: p284_006.wav, text: When the sunlight strikes raindrops in the air, they act as a prism and form a rainbow. , sim: 0.889326274394989
+Saved audio to /tmp/gen-p284-p284_006.wav
+ori: speaker: p284, utterance: p284_027.wav, text: Is this accurate?, sim: 0.8139395117759705
+gen: speaker: p284, utterance: p284_027.wav, text: Is this accurate?, sim: 0.4859708547592163
+Saved audio to /tmp/gen-p284-p284_027.wav
+ori: speaker: p270, utterance: p270_072.wav, text: The guidelines are expected to be finalised before next spring., sim: 0.8989418148994446
+gen: speaker: p270, utterance: p270_072.wav, text: The guidelines are expected to be finalised before next spring., sim: 0.887603759765625
+Saved audio to /tmp/gen-p270-p270_072.wav
+ori: speaker: p270, utterance: p270_410.wav, text: We must improve our relations with government., sim: 0.888586699962616
+gen: speaker: p270, utterance: p270_410.wav, text: We must improve our relations with government., sim: 0.839497983455658
+Saved audio to /tmp/gen-p270-p270_410.wav
+ori: speaker: p270, utterance: p270_081.wav, text: They lived for their children., sim: 0.9067901968955994
+gen: speaker: p270, utterance: p270_081.wav, text: They lived for their children., sim: 0.7607074975967407
+Saved audio to /tmp/gen-p270-p270_081.wav
+ori: speaker: p270, utterance: p270_186.wav, text: They are determined to make a meaningful contribution., sim: 0.8786770701408386
+gen: speaker: p270, utterance: p270_186.wav, text: They are determined to make a meaningful contribution., sim: 0.8416705131530762
+Saved audio to /tmp/gen-p270-p270_186.wav
+ori: speaker: p270, utterance: p270_058.wav, text: The outcome of their game isn't the important thing., sim: 0.9221512675285339
+gen: speaker: p270, utterance: p270_058.wav, text: The outcome of their game isn't the important thing., sim: 0.8195461630821228
+Saved audio to /tmp/gen-p270-p270_058.wav
+ori: speaker: p246, utterance: p246_056.wav, text: This obsession wasn't just contained within the world of the losers., sim: 0.9000461101531982
+gen: speaker: p246, utterance: p246_056.wav, text: This obsession wasn't just contained within the world of the losers., sim: 0.8238577842712402
+Saved audio to /tmp/gen-p246-p246_056.wav
+ori: speaker: p246, utterance: p246_150.wav, text: I was stunned., sim: 0.813909649848938
+gen: speaker: p246, utterance: p246_150.wav, text: I was stunned., sim: 0.6593289375305176
+Saved audio to /tmp/gen-p246-p246_150.wav
+ori: speaker: p246, utterance: p246_161.wav, text: It is not like us., sim: 0.8558847308158875
+gen: speaker: p246, utterance: p246_161.wav, text: It is not like us., sim: 0.5572078227996826
+Saved audio to /tmp/gen-p246-p246_161.wav
+ori: speaker: p246, utterance: p246_157.wav, text: This year, this month, will be special for Torrance., sim: 0.8797000050544739
+gen: speaker: p246, utterance: p246_157.wav, text: This year, this month, will be special for Torrance., sim: 0.7845721244812012
+Saved audio to /tmp/gen-p246-p246_157.wav
+ori: speaker: p246, utterance: p246_239.wav, text: A thousand years ago the church was a powerful force in Europe., sim: 0.8985408544540405
+gen: speaker: p246, utterance: p246_239.wav, text: A thousand years ago the church was a powerful force in Europe., sim: 0.8025263547897339
+Saved audio to /tmp/gen-p246-p246_239.wav
+ori: speaker: p279, utterance: p279_160.wav, text: But we have not heard a thing from Diego., sim: 0.8554072380065918
+gen: speaker: p279, utterance: p279_160.wav, text: But we have not heard a thing from Diego., sim: 0.7329017519950867
+Saved audio to /tmp/gen-p279-p279_160.wav
+ori: speaker: p279, utterance: p279_366.wav, text: Whether his stance is shared by the incoming manager is another matter., sim: 0.892252504825592
+gen: speaker: p279, utterance: p279_366.wav, text: Whether his stance is shared by the incoming manager is another matter., sim: 0.8940081000328064
+Saved audio to /tmp/gen-p279-p279_366.wav
+ori: speaker: p279, utterance: p279_225.wav, text: I am immensely sad., sim: 0.8040010929107666
+gen: speaker: p279, utterance: p279_225.wav, text: I am immensely sad., sim: 0.6663509011268616
+Saved audio to /tmp/gen-p279-p279_225.wav
+ori: speaker: p279, utterance: p279_115.wav, text: We have to look at everything before we make any final decision., sim: 0.8252137899398804
+gen: speaker: p279, utterance: p279_115.wav, text: We have to look at everything before we make any final decision., sim: 0.8873883485794067
+Saved audio to /tmp/gen-p279-p279_115.wav
+ori: speaker: p279, utterance: p279_066.wav, text: That's the truth., sim: 0.7121025919914246
+gen: speaker: p279, utterance: p279_066.wav, text: That's the truth., sim: 0.5977149605751038
+Saved audio to /tmp/gen-p279-p279_066.wav
+ori: speaker: p241, utterance: p241_225.wav, text: Lottery cash is rightly dependent on grassroots approval., sim: 0.920462965965271
+gen: speaker: p241, utterance: p241_225.wav, text: Lottery cash is rightly dependent on grassroots approval., sim: 0.8334876298904419
+Saved audio to /tmp/gen-p241-p241_225.wav
+ori: speaker: p241, utterance: p241_122.wav, text: We recognise the important role of golf in attracting visitors., sim: 0.8975931406021118
+gen: speaker: p241, utterance: p241_122.wav, text: We recognise the important role of golf in attracting visitors., sim: 0.8340209126472473
+Saved audio to /tmp/gen-p241-p241_122.wav
+ori: speaker: p241, utterance: p241_127.wav, text: It's terrible that he has died the same way., sim: 0.8783451914787292
+gen: speaker: p241, utterance: p241_127.wav, text: It's terrible that he has died the same way., sim: 0.8274036645889282
+Saved audio to /tmp/gen-p241-p241_127.wav
+ori: speaker: p241, utterance: p241_071.wav, text: He highlighted a lack of staff., sim: 0.8677630424499512
+gen: speaker: p241, utterance: p241_071.wav, text: He highlighted a lack of staff., sim: 0.7110455632209778
+Saved audio to /tmp/gen-p241-p241_071.wav
+ori: speaker: p241, utterance: p241_089.wav, text: They have not done so this season so far., sim: 0.7826361656188965
+gen: speaker: p241, utterance: p241_089.wav, text: They have not done so this season so far., sim: 0.83277428150177
+Saved audio to /tmp/gen-p241-p241_089.wav
+ori: speaker: p225, utterance: p225_258.wav, text: We were not allowed to go to help them., sim: 0.866109311580658
+gen: speaker: p225, utterance: p225_258.wav, text: We were not allowed to go to help them., sim: 0.6023005247116089
+Saved audio to /tmp/gen-p225-p225_258.wav
+ori: speaker: p225, utterance: p225_285.wav, text: We have to break that cycle., sim: 0.8933488130569458
+gen: speaker: p225, utterance: p225_285.wav, text: We have to break that cycle., sim: 0.5616137385368347
+Saved audio to /tmp/gen-p225-p225_285.wav
+ori: speaker: p225, utterance: p225_166.wav, text: Like last month, it is simply too early to make a call., sim: 0.9421128034591675
+gen: speaker: p225, utterance: p225_166.wav, text: Like last month, it is simply too early to make a call., sim: 0.7214566469192505
+Saved audio to /tmp/gen-p225-p225_166.wav
+ori: speaker: p225, utterance: p225_326.wav, text: He will go a long way., sim: 0.6794549226760864
+gen: speaker: p225, utterance: p225_326.wav, text: He will go a long way., sim: 0.5672956705093384
+Saved audio to /tmp/gen-p225-p225_326.wav
+ori: speaker: p225, utterance: p225_141.wav, text: Drugs are used a lot at the fishing., sim: 0.8410786986351013
+gen: speaker: p225, utterance: p225_141.wav, text: Drugs are used a lot at the fishing., sim: 0.5793502330780029
+Saved audio to /tmp/gen-p225-p225_141.wav
+ori: speaker: p240, utterance: p240_271.wav, text: Brown is an interesting man, but he is not desperate., sim: 0.8557459712028503
+gen: speaker: p240, utterance: p240_271.wav, text: Brown is an interesting man, but he is not desperate., sim: 0.806380569934845
+Saved audio to /tmp/gen-p240-p240_271.wav
+ori: speaker: p240, utterance: p240_254.wav, text: I have a lot of relatives in this part of the country., sim: 0.811509370803833
+gen: speaker: p240, utterance: p240_254.wav, text: I have a lot of relatives in this part of the country., sim: 0.7489989399909973
+Saved audio to /tmp/gen-p240-p240_254.wav
+ori: speaker: p240, utterance: p240_095.wav, text: It seemed a moving and fitting tribute., sim: 0.9044860601425171
+gen: speaker: p240, utterance: p240_095.wav, text: It seemed a moving and fitting tribute., sim: 0.7109103798866272
+Saved audio to /tmp/gen-p240-p240_095.wav
+ori: speaker: p240, utterance: p240_285.wav, text: In fact, he was talking about the survival business., sim: 0.8729395270347595
+gen: speaker: p240, utterance: p240_285.wav, text: In fact, he was talking about the survival business., sim: 0.8070701956748962
+Saved audio to /tmp/gen-p240-p240_285.wav
+ori: speaker: p240, utterance: p240_208.wav, text: It's a mixture of everything., sim: 0.8747578859329224
+gen: speaker: p240, utterance: p240_208.wav, text: It's a mixture of everything., sim: 0.6208382248878479
+Saved audio to /tmp/gen-p240-p240_208.wav
+ori: speaker: p247, utterance: p247_013.wav, text: Some have accepted it as a miracle without physical explanation. ), sim: 0.8900670409202576
+gen: speaker: p247, utterance: p247_013.wav, text: Some have accepted it as a miracle without physical explanation. ), sim: 0.8466005325317383
+Saved audio to /tmp/gen-p247-p247_013.wav
+ori: speaker: p247, utterance: p247_289.wav, text: It is a crisis of human rights, a crisis of leadership.), sim: 0.8886746168136597
+gen: speaker: p247, utterance: p247_289.wav, text: It is a crisis of human rights, a crisis of leadership.), sim: 0.8463457226753235
+Saved audio to /tmp/gen-p247-p247_289.wav
+ori: speaker: p247, utterance: p247_449.wav, text: He deserves a second chance.), sim: 0.8909634947776794
+gen: speaker: p247, utterance: p247_449.wav, text: He deserves a second chance.), sim: 0.6751634478569031
+Saved audio to /tmp/gen-p247-p247_449.wav
+ori: speaker: p247, utterance: p247_353.wav, text: Urgent action is needed to tackle this crisis.), sim: 0.8873478174209595
+gen: speaker: p247, utterance: p247_353.wav, text: Urgent action is needed to tackle this crisis.), sim: 0.8145351409912109
+Saved audio to /tmp/gen-p247-p247_353.wav
+ori: speaker: p247, utterance: p247_077.wav, text: I was as strong as a horse.), sim: 0.8488487601280212
+gen: speaker: p247, utterance: p247_077.wav, text: I was as strong as a horse.), sim: 0.7313140630722046
+Saved audio to /tmp/gen-p247-p247_077.wav
+ori: speaker: p278, utterance: p278_021.wav, text: The difference in the rainbow depends considerably upon the size of the drops, and the width of the colored band increases as the size of the drops increases. , sim: 0.9196935892105103
+gen: speaker: p278, utterance: p278_021.wav, text: The difference in the rainbow depends considerably upon the size of the drops, and the width of the colored band increases as the size of the drops increases. , sim: 0.8797028660774231
+Saved audio to /tmp/gen-p278-p278_021.wav
+ori: speaker: p278, utterance: p278_306.wav, text: I intended to look for another club on loan., sim: 0.884588897228241
+gen: speaker: p278, utterance: p278_306.wav, text: I intended to look for another club on loan., sim: 0.7823328971862793
+Saved audio to /tmp/gen-p278-p278_306.wav
+ori: speaker: p278, utterance: p278_396.wav, text: The law would appear to be on our side., sim: 0.8636493682861328
+gen: speaker: p278, utterance: p278_396.wav, text: The law would appear to be on our side., sim: 0.7651709914207458
+Saved audio to /tmp/gen-p278-p278_396.wav
+ori: speaker: p278, utterance: p278_014.wav, text: To the Hebrews it was a token that there would be no more universal floods. , sim: 0.8899722695350647
+gen: speaker: p278, utterance: p278_014.wav, text: To the Hebrews it was a token that there would be no more universal floods. , sim: 0.8334326148033142
+Saved audio to /tmp/gen-p278-p278_014.wav
+ori: speaker: p278, utterance: p278_078.wav, text: It's so hard to shift., sim: 0.8385778665542603
+gen: speaker: p278, utterance: p278_078.wav, text: It's so hard to shift., sim: 0.6086971163749695
+Saved audio to /tmp/gen-p278-p278_078.wav
+ori: speaker: p271, utterance: p271_316.wav, text: My whole life has changed., sim: 0.8060439229011536
+gen: speaker: p271, utterance: p271_316.wav, text: My whole life has changed., sim: 0.7053214907646179
+Saved audio to /tmp/gen-p271-p271_316.wav
+ori: speaker: p271, utterance: p271_406.wav, text: In a way he was., sim: 0.8311073780059814
+gen: speaker: p271, utterance: p271_406.wav, text: In a way he was., sim: 0.714052140712738
+Saved audio to /tmp/gen-p271-p271_406.wav
+ori: speaker: p271, utterance: p271_248.wav, text: He also launched a new strategy for the agency., sim: 0.8834415078163147
+gen: speaker: p271, utterance: p271_248.wav, text: He also launched a new strategy for the agency., sim: 0.8312569260597229
+Saved audio to /tmp/gen-p271-p271_248.wav
+ori: speaker: p271, utterance: p271_441.wav, text: We were used., sim: 0.7799678444862366
+gen: speaker: p271, utterance: p271_441.wav, text: We were used., sim: 0.5879124999046326
+Saved audio to /tmp/gen-p271-p271_441.wav
+ori: speaker: p271, utterance: p271_186.wav, text: The conference is a chance for members to contribute to the debate., sim: 0.9001134634017944
+gen: speaker: p271, utterance: p271_186.wav, text: The conference is a chance for members to contribute to the debate., sim: 0.8653551936149597
+Saved audio to /tmp/gen-p271-p271_186.wav
+ori: speaker: p285, utterance: p285_180.wav, text: His name was unknown., sim: 0.8634136319160461
+gen: speaker: p285, utterance: p285_180.wav, text: His name was unknown., sim: 0.6791298389434814
+Saved audio to /tmp/gen-p285-p285_180.wav
+ori: speaker: p285, utterance: p285_051.wav, text: I love the Dome., sim: 0.7845015525817871
+gen: speaker: p285, utterance: p285_051.wav, text: I love the Dome., sim: 0.61489337682724
+Saved audio to /tmp/gen-p285-p285_051.wav
+ori: speaker: p285, utterance: p285_148.wav, text: I was on a roll., sim: 0.8720598816871643
+gen: speaker: p285, utterance: p285_148.wav, text: I was on a roll., sim: 0.6222852468490601
+Saved audio to /tmp/gen-p285-p285_148.wav
+ori: speaker: p285, utterance: p285_387.wav, text: The charity also has a project in Moscow in Russia., sim: 0.8527080416679382
+gen: speaker: p285, utterance: p285_387.wav, text: The charity also has a project in Moscow in Russia., sim: 0.85855633020401
+Saved audio to /tmp/gen-p285-p285_387.wav
+ori: speaker: p285, utterance: p285_112.wav, text: It is so sad., sim: 0.7757606506347656
+gen: speaker: p285, utterance: p285_112.wav, text: It is so sad., sim: 0.756443440914154
+Saved audio to /tmp/gen-p285-p285_112.wav
+ori: speaker: p282, utterance: p282_161.wav, text: Well, he should know., sim: 0.8445720672607422
+gen: speaker: p282, utterance: p282_161.wav, text: Well, he should know., sim: 0.6391565203666687
+Saved audio to /tmp/gen-p282-p282_161.wav
+ori: speaker: p282, utterance: p282_254.wav, text: One MP said he feared the job losses were only the beginning., sim: 0.860805869102478
+gen: speaker: p282, utterance: p282_254.wav, text: One MP said he feared the job losses were only the beginning., sim: 0.6887196898460388
+Saved audio to /tmp/gen-p282-p282_254.wav
+ori: speaker: p282, utterance: p282_259.wav, text: George W Bush, the US president, condemned the attacks., sim: 0.8720126152038574
+gen: speaker: p282, utterance: p282_259.wav, text: George W Bush, the US president, condemned the attacks., sim: 0.796766459941864
+Saved audio to /tmp/gen-p282-p282_259.wav
+ori: speaker: p282, utterance: p282_196.wav, text: I came home by ambulance., sim: 0.8071774244308472
+gen: speaker: p282, utterance: p282_196.wav, text: I came home by ambulance., sim: 0.614218533039093
+Saved audio to /tmp/gen-p282-p282_196.wav
+ori: speaker: p282, utterance: p282_255.wav, text: They must play for each other., sim: 0.8761053681373596
+gen: speaker: p282, utterance: p282_255.wav, text: They must play for each other., sim: 0.5683687925338745
+Saved audio to /tmp/gen-p282-p282_255.wav
+ori: speaker: p276, utterance: p276_358.wav, text: Is there a waiting list ?, sim: 0.8586093187332153
+gen: speaker: p276, utterance: p276_358.wav, text: Is there a waiting list ?, sim: 0.7838601469993591
+Saved audio to /tmp/gen-p276-p276_358.wav
+ori: speaker: p276, utterance: p276_320.wav, text: We represent a wide range of society., sim: 0.8703612685203552
+gen: speaker: p276, utterance: p276_320.wav, text: We represent a wide range of society., sim: 0.7589719295501709
+Saved audio to /tmp/gen-p276-p276_320.wav
+ori: speaker: p276, utterance: p276_202.wav, text: That was just one night., sim: 0.9156979918479919
+gen: speaker: p276, utterance: p276_202.wav, text: That was just one night., sim: 0.6042452454566956
+Saved audio to /tmp/gen-p276-p276_202.wav
+ori: speaker: p276, utterance: p276_213.wav, text: Some promoters made insulting offers., sim: 0.8701979517936707
+gen: speaker: p276, utterance: p276_213.wav, text: Some promoters made insulting offers., sim: 0.791883647441864
+Saved audio to /tmp/gen-p276-p276_213.wav
+ori: speaker: p276, utterance: p276_293.wav, text: That would open the gates of hell., sim: 0.8911893963813782
+gen: speaker: p276, utterance: p276_293.wav, text: That would open the gates of hell., sim: 0.6810621023178101
+Saved audio to /tmp/gen-p276-p276_293.wav
+ori: speaker: p249, utterance: p249_092.wav, text: Every time I play I do not understand their reaction., sim: 0.8235836029052734
+gen: speaker: p249, utterance: p249_092.wav, text: Every time I play I do not understand their reaction., sim: 0.7447170615196228
+Saved audio to /tmp/gen-p249-p249_092.wav
+ori: speaker: p249, utterance: p249_192.wav, text: Miller was every bit as happy., sim: 0.8800920248031616
+gen: speaker: p249, utterance: p249_192.wav, text: Miller was every bit as happy., sim: 0.7307352423667908
+Saved audio to /tmp/gen-p249-p249_192.wav
+ori: speaker: p249, utterance: p249_193.wav, text: We want to help them through it., sim: 0.852118968963623
+gen: speaker: p249, utterance: p249_193.wav, text: We want to help them through it., sim: 0.5963211059570312
+Saved audio to /tmp/gen-p249-p249_193.wav
+ori: speaker: p249, utterance: p249_049.wav, text: I would love to have him home., sim: 0.7693973779678345
+gen: speaker: p249, utterance: p249_049.wav, text: I would love to have him home., sim: 0.7059392333030701
+Saved audio to /tmp/gen-p249-p249_049.wav
+ori: speaker: p249, utterance: p249_026.wav, text: Police were called to the scene, according to the weekend reports., sim: 0.8645132184028625
+gen: speaker: p249, utterance: p249_026.wav, text: Police were called to the scene, according to the weekend reports., sim: 0.8463734984397888
+Saved audio to /tmp/gen-p249-p249_026.wav
+ori: speaker: p254, utterance: p254_216.wav, text: A career as a doctor is on hold., sim: 0.8658069968223572
+gen: speaker: p254, utterance: p254_216.wav, text: A career as a doctor is on hold., sim: 0.6523263454437256
+Saved audio to /tmp/gen-p254-p254_216.wav
+ori: speaker: p254, utterance: p254_320.wav, text: It was no secret that I wanted to sign him., sim: 0.8902835845947266
+gen: speaker: p254, utterance: p254_320.wav, text: It was no secret that I wanted to sign him., sim: 0.7739187479019165
+Saved audio to /tmp/gen-p254-p254_320.wav
+ori: speaker: p254, utterance: p254_068.wav, text: It is not a process which can be completed overnight., sim: 0.9089598059654236
+gen: speaker: p254, utterance: p254_068.wav, text: It is not a process which can be completed overnight., sim: 0.802398681640625
+Saved audio to /tmp/gen-p254-p254_068.wav
+ori: speaker: p254, utterance: p254_241.wav, text: They are all bright and different., sim: 0.9247526526451111
+gen: speaker: p254, utterance: p254_241.wav, text: They are all bright and different., sim: 0.6433994770050049
+Saved audio to /tmp/gen-p254-p254_241.wav
+ori: speaker: p254, utterance: p254_083.wav, text: Both sides have been hit by injury., sim: 0.8797748684883118
+gen: speaker: p254, utterance: p254_083.wav, text: Both sides have been hit by injury., sim: 0.795501172542572
+Saved audio to /tmp/gen-p254-p254_083.wav
+ori: speaker: p298, utterance: p298_099.wav, text: Their vision was not impeded., sim: 0.8301481604576111
+gen: speaker: p298, utterance: p298_099.wav, text: Their vision was not impeded., sim: 0.763627827167511
+Saved audio to /tmp/gen-p298-p298_099.wav
+ori: speaker: p298, utterance: p298_037.wav, text: Others may be trying to catch up., sim: 0.846366286277771
+gen: speaker: p298, utterance: p298_037.wav, text: Others may be trying to catch up., sim: 0.8009881973266602
+Saved audio to /tmp/gen-p298-p298_037.wav
+ori: speaker: p298, utterance: p298_055.wav, text: But it obviously doesn't, so the government needs to intervene., sim: 0.8608941435813904
+gen: speaker: p298, utterance: p298_055.wav, text: But it obviously doesn't, so the government needs to intervene., sim: 0.8798233866691589
+Saved audio to /tmp/gen-p298-p298_055.wav
+ori: speaker: p298, utterance: p298_147.wav, text: I always knew she was funny., sim: 0.845486581325531
+gen: speaker: p298, utterance: p298_147.wav, text: I always knew she was funny., sim: 0.7160913944244385
+Saved audio to /tmp/gen-p298-p298_147.wav
+ori: speaker: p298, utterance: p298_054.wav, text: You've got to have everything inside with you., sim: 0.856686532497406
+gen: speaker: p298, utterance: p298_054.wav, text: You've got to have everything inside with you., sim: 0.8158840537071228
+Saved audio to /tmp/gen-p298-p298_054.wav
+ori: speaker: p253, utterance: p253_222.wav, text: I'd never seen a play about me., sim: 0.836359977722168
+gen: speaker: p253, utterance: p253_222.wav, text: I'd never seen a play about me., sim: 0.6762278079986572
+Saved audio to /tmp/gen-p253-p253_222.wav
+ori: speaker: p253, utterance: p253_074.wav, text: It could take some time., sim: 0.8344663977622986
+gen: speaker: p253, utterance: p253_074.wav, text: It could take some time., sim: 0.5896852016448975
+Saved audio to /tmp/gen-p253-p253_074.wav
+ori: speaker: p253, utterance: p253_149.wav, text: It will include the Black Watch, the Royal Highland regiment., sim: 0.9047387838363647
+gen: speaker: p253, utterance: p253_149.wav, text: It will include the Black Watch, the Royal Highland regiment., sim: 0.8079731464385986
+Saved audio to /tmp/gen-p253-p253_149.wav
+ori: speaker: p253, utterance: p253_262.wav, text: He claimed his insurance company contested the damages, not the restaurant., sim: 0.8957669138908386
+gen: speaker: p253, utterance: p253_262.wav, text: He claimed his insurance company contested the damages, not the restaurant., sim: 0.8444238901138306
+Saved audio to /tmp/gen-p253-p253_262.wav
+ori: speaker: p253, utterance: p253_108.wav, text: Health Secretary Frank Dobson made the surprise announcement in the Commons yesterday., sim: 0.8916751742362976
+gen: speaker: p253, utterance: p253_108.wav, text: Health Secretary Frank Dobson made the surprise announcement in the Commons yesterday., sim: 0.8228696584701538
+Saved audio to /tmp/gen-p253-p253_108.wav
+ori: speaker: p265, utterance: p265_052.wav, text: It's that kind of place., sim: 0.9123083353042603
+gen: speaker: p265, utterance: p265_052.wav, text: It's that kind of place., sim: 0.6709291934967041
+Saved audio to /tmp/gen-p265-p265_052.wav
+ori: speaker: p265, utterance: p265_311.wav, text: The party is up for it., sim: 0.874350905418396
+gen: speaker: p265, utterance: p265_311.wav, text: The party is up for it., sim: 0.7011836171150208
+Saved audio to /tmp/gen-p265-p265_311.wav
+ori: speaker: p265, utterance: p265_223.wav, text: I can leave at the end of the day., sim: 0.8741520047187805
+gen: speaker: p265, utterance: p265_223.wav, text: I can leave at the end of the day., sim: 0.7006069421768188
+Saved audio to /tmp/gen-p265-p265_223.wav
+ori: speaker: p265, utterance: p265_002.wav, text: Ask her to bring these things with her from the store.  , sim: 0.8305732607841492
+gen: speaker: p265, utterance: p265_002.wav, text: Ask her to bring these things with her from the store.  , sim: 0.7722199559211731
+Saved audio to /tmp/gen-p265-p265_002.wav
+ori: speaker: p265, utterance: p265_273.wav, text: Russian officials have not determined the cause of the accident., sim: 0.9357807040214539
+gen: speaker: p265, utterance: p265_273.wav, text: Russian officials have not determined the cause of the accident., sim: 0.8077924251556396
+Saved audio to /tmp/gen-p265-p265_273.wav
+ori: speaker: p262, utterance: p262_001.wav, text: Please call Stella.  , sim: 0.6478298306465149
+gen: speaker: p262, utterance: p262_001.wav, text: Please call Stella.  , sim: 0.5899347066879272
+Saved audio to /tmp/gen-p262-p262_001.wav
+ori: speaker: p262, utterance: p262_180.wav, text: He will need that machine., sim: 0.7830488681793213
+gen: speaker: p262, utterance: p262_180.wav, text: He will need that machine., sim: 0.5585533976554871
+Saved audio to /tmp/gen-p262-p262_180.wav
+ori: speaker: p262, utterance: p262_021.wav, text: The difference in the rainbow depends considerably upon the size of the drops, and the width of the colored band increases as the size of the drops increases. , sim: 0.932288646697998
+gen: speaker: p262, utterance: p262_021.wav, text: The difference in the rainbow depends considerably upon the size of the drops, and the width of the colored band increases as the size of the drops increases. , sim: 0.8401322364807129
+Saved audio to /tmp/gen-p262-p262_021.wav
+ori: speaker: p262, utterance: p262_292.wav, text: Mr Campbell received a phone call., sim: 0.8995004296302795
+gen: speaker: p262, utterance: p262_292.wav, text: Mr Campbell received a phone call., sim: 0.7458466291427612
+Saved audio to /tmp/gen-p262-p262_292.wav
+ori: speaker: p262, utterance: p262_140.wav, text: It is huge., sim: 0.751128613948822
+gen: speaker: p262, utterance: p262_140.wav, text: It is huge., sim: 0.6056452989578247
+Saved audio to /tmp/gen-p262-p262_140.wav
+ori: speaker: p236, utterance: p236_452.wav, text: It is a cause for concern., sim: 0.7611611485481262
+gen: speaker: p236, utterance: p236_452.wav, text: It is a cause for concern., sim: 0.6574995517730713
+Saved audio to /tmp/gen-p236-p236_452.wav
+ori: speaker: p236, utterance: p236_289.wav, text: Frankly, we should all have such problems., sim: 0.8614293932914734
+gen: speaker: p236, utterance: p236_289.wav, text: Frankly, we should all have such problems., sim: 0.724825918674469
+Saved audio to /tmp/gen-p236-p236_289.wav
+ori: speaker: p236, utterance: p236_135.wav, text: I enjoy the creative process., sim: 0.7978899478912354
+gen: speaker: p236, utterance: p236_135.wav, text: I enjoy the creative process., sim: 0.7221892476081848
+Saved audio to /tmp/gen-p236-p236_135.wav
+ori: speaker: p236, utterance: p236_188.wav, text: We are the gateway to justice., sim: 0.821613073348999
+gen: speaker: p236, utterance: p236_188.wav, text: We are the gateway to justice., sim: 0.6413849592208862
+Saved audio to /tmp/gen-p236-p236_188.wav
+ori: speaker: p236, utterance: p236_056.wav, text: You must have a government and a good civil service., sim: 0.6713768243789673
+gen: speaker: p236, utterance: p236_056.wav, text: You must have a government and a good civil service., sim: 0.7265681624412537
+Saved audio to /tmp/gen-p236-p236_056.wav
+ori: speaker: p231, utterance: p231_228.wav, text: We played them off the pitch., sim: 0.7251665592193604
+gen: speaker: p231, utterance: p231_228.wav, text: We played them off the pitch., sim: 0.7450081706047058
+Saved audio to /tmp/gen-p231-p231_228.wav
+ori: speaker: p231, utterance: p231_389.wav, text: That time may never be broken., sim: 0.8307257294654846
+gen: speaker: p231, utterance: p231_389.wav, text: That time may never be broken., sim: 0.7450220584869385
+Saved audio to /tmp/gen-p231-p231_389.wav
+ori: speaker: p231, utterance: p231_157.wav, text: He was right into football from an early age., sim: 0.8732935786247253
+gen: speaker: p231, utterance: p231_157.wav, text: He was right into football from an early age., sim: 0.7144094705581665
+Saved audio to /tmp/gen-p231-p231_157.wav
+ori: speaker: p231, utterance: p231_464.wav, text: Driving has been the key., sim: 0.7432741522789001
+gen: speaker: p231, utterance: p231_464.wav, text: Driving has been the key., sim: 0.657741129398346
+Saved audio to /tmp/gen-p231-p231_464.wav
+ori: speaker: p231, utterance: p231_087.wav, text: It is an old family habit., sim: 0.8540876507759094
+gen: speaker: p231, utterance: p231_087.wav, text: It is an old family habit., sim: 0.7358580231666565
+Saved audio to /tmp/gen-p231-p231_087.wav
+ori: speaker: p238, utterance: p238_416.wav, text: However, civil rights campaigners welcomed the ruling., sim: 0.8769456148147583
+gen: speaker: p238, utterance: p238_416.wav, text: However, civil rights campaigners welcomed the ruling., sim: 0.6460670232772827
+Saved audio to /tmp/gen-p238-p238_416.wav
+ori: speaker: p238, utterance: p238_192.wav, text: The Yugoslav army will still be there., sim: 0.8766531348228455
+gen: speaker: p238, utterance: p238_192.wav, text: The Yugoslav army will still be there., sim: 0.6159222722053528
+Saved audio to /tmp/gen-p238-p238_192.wav
+ori: speaker: p238, utterance: p238_208.wav, text: The refund is fully justified., sim: 0.8544505834579468
+gen: speaker: p238, utterance: p238_208.wav, text: The refund is fully justified., sim: 0.7022464871406555
+Saved audio to /tmp/gen-p238-p238_208.wav
+ori: speaker: p238, utterance: p238_257.wav, text: It was a terrible combination of factors., sim: 0.8884961009025574
+gen: speaker: p238, utterance: p238_257.wav, text: It was a terrible combination of factors., sim: 0.7302608489990234
+Saved audio to /tmp/gen-p238-p238_257.wav
+ori: speaker: p238, utterance: p238_172.wav, text: We continue to hold the shares., sim: 0.8335895538330078
+gen: speaker: p238, utterance: p238_172.wav, text: We continue to hold the shares., sim: 0.7861788868904114
+Saved audio to /tmp/gen-p238-p238_172.wav
+ori: speaker: p263, utterance: p263_030.wav, text: We would like to find another region to develop in England., sim: 0.811530351638794
+gen: speaker: p263, utterance: p263_030.wav, text: We would like to find another region to develop in England., sim: 0.8352124094963074
+Saved audio to /tmp/gen-p263-p263_030.wav
+ori: speaker: p263, utterance: p263_386.wav, text: We are delighted at the response from potential employers., sim: 0.8922799229621887
+gen: speaker: p263, utterance: p263_386.wav, text: We are delighted at the response from potential employers., sim: 0.8686721920967102
+Saved audio to /tmp/gen-p263-p263_386.wav
+ori: speaker: p263, utterance: p263_244.wav, text: I always felt that I was in control of the match., sim: 0.8565409183502197
+gen: speaker: p263, utterance: p263_244.wav, text: I always felt that I was in control of the match., sim: 0.8055715560913086
+Saved audio to /tmp/gen-p263-p263_244.wav
+ori: speaker: p263, utterance: p263_100.wav, text: However, a decision should be made before the end of August., sim: 0.9028311967849731
+gen: speaker: p263, utterance: p263_100.wav, text: However, a decision should be made before the end of August., sim: 0.8572086691856384
+Saved audio to /tmp/gen-p263-p263_100.wav
+ori: speaker: p263, utterance: p263_035.wav, text: I could not do it., sim: 0.8880265951156616
+gen: speaker: p263, utterance: p263_035.wav, text: I could not do it., sim: 0.5771948099136353
+Saved audio to /tmp/gen-p263-p263_035.wav
+ori: speaker: p297, utterance: p297_335.wav, text: His primary residence is Scotland., sim: 0.8218346834182739
+gen: speaker: p297, utterance: p297_335.wav, text: His primary residence is Scotland., sim: 0.6718489527702332
+Saved audio to /tmp/gen-p297-p297_335.wav
+ori: speaker: p297, utterance: p297_297.wav, text: He planned to relocate to Scotland, probably Edinburgh., sim: 0.8690418601036072
+gen: speaker: p297, utterance: p297_297.wav, text: He planned to relocate to Scotland, probably Edinburgh., sim: 0.6759331226348877
+Saved audio to /tmp/gen-p297-p297_297.wav
+ori: speaker: p297, utterance: p297_176.wav, text: It was like the old days., sim: 0.8119406700134277
+gen: speaker: p297, utterance: p297_176.wav, text: It was like the old days., sim: 0.5494844317436218
+Saved audio to /tmp/gen-p297-p297_176.wav
+ori: speaker: p297, utterance: p297_382.wav, text: I don't want a burial service., sim: 0.8352850675582886
+gen: speaker: p297, utterance: p297_382.wav, text: I don't want a burial service., sim: 0.625200629234314
+Saved audio to /tmp/gen-p297-p297_382.wav
+ori: speaker: p297, utterance: p297_285.wav, text: Finally, they have a journey back to their youth., sim: 0.8048564791679382
+gen: speaker: p297, utterance: p297_285.wav, text: Finally, they have a journey back to their youth., sim: 0.736362636089325
+Saved audio to /tmp/gen-p297-p297_285.wav
+ori: speaker: p264, utterance: p264_215.wav, text: That could mean the difference between life and death in action.), sim: 0.8891326189041138
+gen: speaker: p264, utterance: p264_215.wav, text: That could mean the difference between life and death in action.), sim: 0.822018027305603
+Saved audio to /tmp/gen-p264-p264_215.wav
+ori: speaker: p264, utterance: p264_366.wav, text: Five local people were injured.), sim: 0.8869643807411194
+gen: speaker: p264, utterance: p264_366.wav, text: Five local people were injured.), sim: 0.700327455997467
+Saved audio to /tmp/gen-p264-p264_366.wav
+ori: speaker: p264, utterance: p264_141.wav, text: That comes at a cost.), sim: 0.8636648058891296
+gen: speaker: p264, utterance: p264_141.wav, text: That comes at a cost.), sim: 0.6677634119987488
+Saved audio to /tmp/gen-p264-p264_141.wav
+ori: speaker: p264, utterance: p264_386.wav, text: They want the style of the sound changed a bit.), sim: 0.875632107257843
+gen: speaker: p264, utterance: p264_386.wav, text: They want the style of the sound changed a bit.), sim: 0.8399169445037842
+Saved audio to /tmp/gen-p264-p264_386.wav
+ori: speaker: p264, utterance: p264_408.wav, text: That view was confirmed by Welsh coach Graham Henry.), sim: 0.9232707023620605
+gen: speaker: p264, utterance: p264_408.wav, text: That view was confirmed by Welsh coach Graham Henry.), sim: 0.6137750744819641
+Saved audio to /tmp/gen-p264-p264_408.wav
+ori: speaker: p299, utterance: p299_101.wav, text: It's amazing it happened in the daytime., sim: 0.8541210293769836
+gen: speaker: p299, utterance: p299_101.wav, text: It's amazing it happened in the daytime., sim: 0.7495682835578918
+Saved audio to /tmp/gen-p299-p299_101.wav
+ori: speaker: p299, utterance: p299_109.wav, text: He's delighted, too, with the new premises., sim: 0.8558334708213806
+gen: speaker: p299, utterance: p299_109.wav, text: He's delighted, too, with the new premises., sim: 0.7528115510940552
+Saved audio to /tmp/gen-p299-p299_109.wav
+ori: speaker: p299, utterance: p299_299.wav, text: Last month he made his debut in Japan., sim: 0.8385419249534607
+gen: speaker: p299, utterance: p299_299.wav, text: Last month he made his debut in Japan., sim: 0.735565721988678
+Saved audio to /tmp/gen-p299-p299_299.wav
+ori: speaker: p299, utterance: p299_112.wav, text: Hopefully, it will come from someone on our side., sim: 0.9082862138748169
+gen: speaker: p299, utterance: p299_112.wav, text: Hopefully, it will come from someone on our side., sim: 0.7375169992446899
+Saved audio to /tmp/gen-p299-p299_112.wav
+ori: speaker: p299, utterance: p299_220.wav, text: I would have dropped out otherwise., sim: 0.8858456015586853
+gen: speaker: p299, utterance: p299_220.wav, text: I would have dropped out otherwise., sim: 0.6645804643630981
+Saved audio to /tmp/gen-p299-p299_220.wav
+ori: speaker: p252, utterance: p252_334.wav, text: Does that put pressure on us ?, sim: 0.7633272409439087
+gen: speaker: p252, utterance: p252_334.wav, text: Does that put pressure on us ?, sim: 0.759914755821228
+Saved audio to /tmp/gen-p252-p252_334.wav
+ori: speaker: p252, utterance: p252_399.wav, text: It was too difficult., sim: 0.893323540687561
+gen: speaker: p252, utterance: p252_399.wav, text: It was too difficult., sim: 0.7420161962509155
+Saved audio to /tmp/gen-p252-p252_399.wav
+ori: speaker: p252, utterance: p252_154.wav, text: What are you not good at ?, sim: 0.8281594514846802
+gen: speaker: p252, utterance: p252_154.wav, text: What are you not good at ?, sim: 0.6496022343635559
+Saved audio to /tmp/gen-p252-p252_154.wav
+ori: speaker: p252, utterance: p252_387.wav, text: It's clearly a budget., sim: 0.8876445889472961
+gen: speaker: p252, utterance: p252_387.wav, text: It's clearly a budget., sim: 0.7507842779159546
+Saved audio to /tmp/gen-p252-p252_387.wav
+ori: speaker: p252, utterance: p252_290.wav, text: Donald felt it would be an appropriate thing to do., sim: 0.8375505208969116
+gen: speaker: p252, utterance: p252_290.wav, text: Donald felt it would be an appropriate thing to do., sim: 0.8474535942077637
+Saved audio to /tmp/gen-p252-p252_290.wav
+ori: speaker: p255, utterance: p255_123.wav, text: Child abuse is a dreadful thing., sim: 0.8443394899368286
+gen: speaker: p255, utterance: p255_123.wav, text: Child abuse is a dreadful thing., sim: 0.7715603709220886
+Saved audio to /tmp/gen-p255-p255_123.wav
+ori: speaker: p255, utterance: p255_241.wav, text: It is mainstream., sim: 0.8590377569198608
+gen: speaker: p255, utterance: p255_241.wav, text: It is mainstream., sim: 0.6599208116531372
+Saved audio to /tmp/gen-p255-p255_241.wav
+ori: speaker: p255, utterance: p255_187.wav, text: Tony had arrived., sim: 0.8372184634208679
+gen: speaker: p255, utterance: p255_187.wav, text: Tony had arrived., sim: 0.7086721062660217
+Saved audio to /tmp/gen-p255-p255_187.wav
+ori: speaker: p255, utterance: p255_017.wav, text: Others have tried to explain the phenomenon physically. , sim: 0.8745914697647095
+gen: speaker: p255, utterance: p255_017.wav, text: Others have tried to explain the phenomenon physically. , sim: 0.8784555196762085
+Saved audio to /tmp/gen-p255-p255_017.wav
+ori: speaker: p255, utterance: p255_001.wav, text: Please call Stella.  , sim: 0.795779824256897
+gen: speaker: p255, utterance: p255_001.wav, text: Please call Stella.  , sim: 0.7441591620445251
+Saved audio to /tmp/gen-p255-p255_001.wav
+ori: speaker: p239, utterance: p239_178.wav, text: Is it in the right place ?, sim: 0.7766202688217163
+gen: speaker: p239, utterance: p239_178.wav, text: Is it in the right place ?, sim: 0.5649994611740112
+Saved audio to /tmp/gen-p239-p239_178.wav
+ori: speaker: p239, utterance: p239_016.wav, text: The Norsemen considered the rainbow as a bridge over which the gods passed from earth to their home in the sky., sim: 0.9122239351272583
+gen: speaker: p239, utterance: p239_016.wav, text: The Norsemen considered the rainbow as a bridge over which the gods passed from earth to their home in the sky., sim: 0.8342410922050476
+Saved audio to /tmp/gen-p239-p239_016.wav
+ori: speaker: p239, utterance: p239_359.wav, text: William Hague delighted his party., sim: 0.8671591281890869
+gen: speaker: p239, utterance: p239_359.wav, text: William Hague delighted his party., sim: 0.6976451873779297
+Saved audio to /tmp/gen-p239-p239_359.wav
+ori: speaker: p239, utterance: p239_444.wav, text: Any error is severely punished., sim: 0.8220954537391663
+gen: speaker: p239, utterance: p239_444.wav, text: Any error is severely punished., sim: 0.6296817660331726
+Saved audio to /tmp/gen-p239-p239_444.wav
+ori: speaker: p239, utterance: p239_336.wav, text: Sentencing is due to take place tomorrow morning., sim: 0.8324048519134521
+gen: speaker: p239, utterance: p239_336.wav, text: Sentencing is due to take place tomorrow morning., sim: 0.8059659600257874
+Saved audio to /tmp/gen-p239-p239_336.wav
+ori: speaker: p230, utterance: p230_405.wav, text: It was a bank holiday, after all., sim: 0.8608357310295105
+gen: speaker: p230, utterance: p230_405.wav, text: It was a bank holiday, after all., sim: 0.6930829286575317
+Saved audio to /tmp/gen-p230-p230_405.wav
+ori: speaker: p230, utterance: p230_108.wav, text: He leaves a wife, a son and a daughter., sim: 0.8917513489723206
+gen: speaker: p230, utterance: p230_108.wav, text: He leaves a wife, a son and a daughter., sim: 0.6077120900154114
+Saved audio to /tmp/gen-p230-p230_108.wav
+ori: speaker: p230, utterance: p230_312.wav, text: The songs are just so good., sim: 0.8427683711051941
+gen: speaker: p230, utterance: p230_312.wav, text: The songs are just so good., sim: 0.6358855962753296
+Saved audio to /tmp/gen-p230-p230_312.wav
+ori: speaker: p230, utterance: p230_032.wav, text: The wedding was in Edinburgh., sim: 0.8954010605812073
+gen: speaker: p230, utterance: p230_032.wav, text: The wedding was in Edinburgh., sim: 0.6204127669334412
+Saved audio to /tmp/gen-p230-p230_032.wav
+ori: speaker: p230, utterance: p230_163.wav, text: Next year it plans to open an office in Tokyo., sim: 0.8890092968940735
+gen: speaker: p230, utterance: p230_163.wav, text: Next year it plans to open an office in Tokyo., sim: 0.7580975294113159
+Saved audio to /tmp/gen-p230-p230_163.wav
+ori: speaker: p237, utterance: p237_345.wav, text: They made clear that they are not interested in Government assistance., sim: 0.8823227882385254
+gen: speaker: p237, utterance: p237_345.wav, text: They made clear that they are not interested in Government assistance., sim: 0.830452024936676
+Saved audio to /tmp/gen-p237-p237_345.wav
+ori: speaker: p237, utterance: p237_325.wav, text: We are very strongly behind the bid., sim: 0.9013762474060059
+gen: speaker: p237, utterance: p237_325.wav, text: We are very strongly behind the bid., sim: 0.7339311242103577
+Saved audio to /tmp/gen-p237-p237_325.wav
+ori: speaker: p237, utterance: p237_335.wav, text: He can do no wrong., sim: 0.8575910925865173
+gen: speaker: p237, utterance: p237_335.wav, text: He can do no wrong., sim: 0.617347776889801
+Saved audio to /tmp/gen-p237-p237_335.wav
+ori: speaker: p237, utterance: p237_299.wav, text: She said she could not believe that they had run away., sim: 0.9174144268035889
+gen: speaker: p237, utterance: p237_299.wav, text: She said she could not believe that they had run away., sim: 0.845452070236206
+Saved audio to /tmp/gen-p237-p237_299.wav
+ori: speaker: p237, utterance: p237_196.wav, text: We are talking about a case of champagne and a vacuum cleaner., sim: 0.9380612969398499
+gen: speaker: p237, utterance: p237_196.wav, text: We are talking about a case of champagne and a vacuum cleaner., sim: 0.8450100421905518
+Saved audio to /tmp/gen-p237-p237_196.wav
+ori: speaker: p345, utterance: p345_370.wav, text: I don't believe a word of it., sim: 0.8526933193206787
+gen: speaker: p345, utterance: p345_370.wav, text: I don't believe a word of it., sim: 0.724132239818573
+Saved audio to /tmp/gen-p345-p345_370.wav
+ori: speaker: p345, utterance: p345_004.wav, text: We also need a small plastic snake and a big toy frog for the kids., sim: 0.8951894044876099
+gen: speaker: p345, utterance: p345_004.wav, text: We also need a small plastic snake and a big toy frog for the kids., sim: 0.789146363735199
+Saved audio to /tmp/gen-p345-p345_004.wav
+ori: speaker: p345, utterance: p345_140.wav, text: It doesn't exactly have the same appeal., sim: 0.8886841535568237
+gen: speaker: p345, utterance: p345_140.wav, text: It doesn't exactly have the same appeal., sim: 0.7743976712226868
+Saved audio to /tmp/gen-p345-p345_140.wav
+ori: speaker: p345, utterance: p345_156.wav, text: But the damage had been done., sim: 0.801307201385498
+gen: speaker: p345, utterance: p345_156.wav, text: But the damage had been done., sim: 0.7196377515792847
+Saved audio to /tmp/gen-p345-p345_156.wav
+ori: speaker: p345, utterance: p345_132.wav, text: The whole matter is done and dusted., sim: 0.7923638224601746
+gen: speaker: p345, utterance: p345_132.wav, text: The whole matter is done and dusted., sim: 0.675605058670044
+Saved audio to /tmp/gen-p345-p345_132.wav
+ori: speaker: p374, utterance: p374_349.wav, text: By hard work, is the answer., sim: 0.8431533575057983
+gen: speaker: p374, utterance: p374_349.wav, text: By hard work, is the answer., sim: 0.6026325225830078
+Saved audio to /tmp/gen-p374-p374_349.wav
+ori: speaker: p374, utterance: p374_173.wav, text: The rest is his own., sim: 0.783356785774231
+gen: speaker: p374, utterance: p374_173.wav, text: The rest is his own., sim: 0.5917027592658997
+Saved audio to /tmp/gen-p374-p374_173.wav
+ori: speaker: p374, utterance: p374_067.wav, text: They won the trophy in the Hoops., sim: 0.7872386574745178
+gen: speaker: p374, utterance: p374_067.wav, text: They won the trophy in the Hoops., sim: 0.6509012579917908
+Saved audio to /tmp/gen-p374-p374_067.wav
+ori: speaker: p374, utterance: p374_404.wav, text: Well, you can't have everything., sim: 0.8557161092758179
+gen: speaker: p374, utterance: p374_404.wav, text: Well, you can't have everything., sim: 0.7220667004585266
+Saved audio to /tmp/gen-p374-p374_404.wav
+ori: speaker: p374, utterance: p374_270.wav, text: All of us do., sim: 0.8163091540336609
+gen: speaker: p374, utterance: p374_270.wav, text: All of us do., sim: 0.6227738261222839
+Saved audio to /tmp/gen-p374-p374_270.wav
+ori: speaker: p318, utterance: p318_236.wav, text: Home is in the Scottish Borders., sim: 0.8781973123550415
+gen: speaker: p318, utterance: p318_236.wav, text: Home is in the Scottish Borders., sim: 0.8326196074485779
+Saved audio to /tmp/gen-p318-p318_236.wav
+ori: speaker: p318, utterance: p318_329.wav, text: This is the logic of punishment assaults., sim: 0.8961681127548218
+gen: speaker: p318, utterance: p318_329.wav, text: This is the logic of punishment assaults., sim: 0.8060123920440674
+Saved audio to /tmp/gen-p318-p318_329.wav
+ori: speaker: p318, utterance: p318_402.wav, text: This fight is not going to go away., sim: 0.9162128567695618
+gen: speaker: p318, utterance: p318_402.wav, text: This fight is not going to go away., sim: 0.8060848712921143
+Saved audio to /tmp/gen-p318-p318_402.wav
+ori: speaker: p318, utterance: p318_305.wav, text: SO now we know the secret., sim: 0.8324050903320312
+gen: speaker: p318, utterance: p318_305.wav, text: SO now we know the secret., sim: 0.6355122923851013
+Saved audio to /tmp/gen-p318-p318_305.wav
+ori: speaker: p318, utterance: p318_255.wav, text: Our people are paying high prices., sim: 0.8283620476722717
+gen: speaker: p318, utterance: p318_255.wav, text: Our people are paying high prices., sim: 0.6078134179115295
+Saved audio to /tmp/gen-p318-p318_255.wav
+ori: speaker: p316, utterance: p316_131.wav, text: Too much has already been said., sim: 0.8891820907592773
+gen: speaker: p316, utterance: p316_131.wav, text: Too much has already been said., sim: 0.705923318862915
+Saved audio to /tmp/gen-p316-p316_131.wav
+ori: speaker: p316, utterance: p316_409.wav, text: Taxation should be simplified., sim: 0.7709420323371887
+gen: speaker: p316, utterance: p316_409.wav, text: Taxation should be simplified., sim: 0.6225480437278748
+Saved audio to /tmp/gen-p316-p316_409.wav
+ori: speaker: p316, utterance: p316_143.wav, text: They exist in name alone., sim: 0.8458510041236877
+gen: speaker: p316, utterance: p316_143.wav, text: They exist in name alone., sim: 0.6327756643295288
+Saved audio to /tmp/gen-p316-p316_143.wav
+ori: speaker: p316, utterance: p316_324.wav, text: It has to reinvent itself., sim: 0.7930013537406921
+gen: speaker: p316, utterance: p316_324.wav, text: It has to reinvent itself., sim: 0.655214786529541
+Saved audio to /tmp/gen-p316-p316_324.wav
+ori: speaker: p316, utterance: p316_304.wav, text: I didn't feel good., sim: 0.8207144737243652
+gen: speaker: p316, utterance: p316_304.wav, text: I didn't feel good., sim: 0.5235965251922607
+Saved audio to /tmp/gen-p316-p316_304.wav
+ori: speaker: p329, utterance: p329_319.wav, text: The pressure was now back on Mr Arafat., sim: 0.8852844834327698
+gen: speaker: p329, utterance: p329_319.wav, text: The pressure was now back on Mr Arafat., sim: 0.5807653665542603
+Saved audio to /tmp/gen-p329-p329_319.wav
+ori: speaker: p329, utterance: p329_318.wav, text: The woman is basically off her head., sim: 0.8225061893463135
+gen: speaker: p329, utterance: p329_318.wav, text: The woman is basically off her head., sim: 0.6547331809997559
+Saved audio to /tmp/gen-p329-p329_318.wav
+ori: speaker: p329, utterance: p329_051.wav, text: I didn't have a clue., sim: 0.8248354196548462
+gen: speaker: p329, utterance: p329_051.wav, text: I didn't have a clue., sim: 0.7783673405647278
+Saved audio to /tmp/gen-p329-p329_051.wav
+ori: speaker: p329, utterance: p329_350.wav, text: I just had so much fun., sim: 0.8787152767181396
+gen: speaker: p329, utterance: p329_350.wav, text: I just had so much fun., sim: 0.7480987310409546
+Saved audio to /tmp/gen-p329-p329_350.wav
+ori: speaker: p329, utterance: p329_142.wav, text: And he had much need., sim: 0.7869551181793213
+gen: speaker: p329, utterance: p329_142.wav, text: And he had much need., sim: 0.66717529296875
+Saved audio to /tmp/gen-p329-p329_142.wav
+ori: speaker: p311, utterance: p311_039.wav, text: He tried to stop it, but it was already too late., sim: 0.8489426374435425
+gen: speaker: p311, utterance: p311_039.wav, text: He tried to stop it, but it was already too late., sim: 0.7726609706878662
+Saved audio to /tmp/gen-p311-p311_039.wav
+ori: speaker: p311, utterance: p311_229.wav, text: It should be scrapped., sim: 0.758882462978363
+gen: speaker: p311, utterance: p311_229.wav, text: It should be scrapped., sim: 0.5430090427398682
+Saved audio to /tmp/gen-p311-p311_229.wav
+ori: speaker: p311, utterance: p311_240.wav, text: It's not that clear-cut., sim: 0.8498390913009644
+gen: speaker: p311, utterance: p311_240.wav, text: It's not that clear-cut., sim: 0.5655391812324524
+Saved audio to /tmp/gen-p311-p311_240.wav
+ori: speaker: p311, utterance: p311_149.wav, text: It's been such a waste of money., sim: 0.9171875715255737
+gen: speaker: p311, utterance: p311_149.wav, text: It's been such a waste of money., sim: 0.6214008927345276
+Saved audio to /tmp/gen-p311-p311_149.wav
+ori: speaker: p311, utterance: p311_119.wav, text: He decides to do something about it., sim: 0.8839675188064575
+gen: speaker: p311, utterance: p311_119.wav, text: He decides to do something about it., sim: 0.8520846962928772
+Saved audio to /tmp/gen-p311-p311_119.wav
+ori: speaker: p343, utterance: p343_062.wav, text: But that's another story for another day., sim: 0.8869087100028992
+gen: speaker: p343, utterance: p343_062.wav, text: But that's another story for another day., sim: 0.6548300981521606
+Saved audio to /tmp/gen-p343-p343_062.wav
+ori: speaker: p343, utterance: p343_004.wav, text: We also need a small plastic snake and a big toy frog for the kids., sim: 0.8968895077705383
+gen: speaker: p343, utterance: p343_004.wav, text: We also need a small plastic snake and a big toy frog for the kids., sim: 0.8408898711204529
+Saved audio to /tmp/gen-p343-p343_004.wav
+ori: speaker: p343, utterance: p343_107.wav, text: I am not a paedophile., sim: 0.8125057816505432
+gen: speaker: p343, utterance: p343_107.wav, text: I am not a paedophile., sim: 0.6323175430297852
+Saved audio to /tmp/gen-p343-p343_107.wav
+ori: speaker: p343, utterance: p343_089.wav, text: We did discuss the Lockerbie issue., sim: 0.8898330330848694
+gen: speaker: p343, utterance: p343_089.wav, text: We did discuss the Lockerbie issue., sim: 0.5570076107978821
+Saved audio to /tmp/gen-p343-p343_089.wav
+ori: speaker: p343, utterance: p343_383.wav, text: And there is another problem., sim: 0.8566486835479736
+gen: speaker: p343, utterance: p343_383.wav, text: And there is another problem., sim: 0.6340569257736206
+Saved audio to /tmp/gen-p343-p343_383.wav
+ori: speaker: p310, utterance: p310_323.wav, text: The result today is an impasse., sim: 0.745997965335846
+gen: speaker: p310, utterance: p310_323.wav, text: The result today is an impasse., sim: 0.7231029868125916
+Saved audio to /tmp/gen-p310-p310_323.wav
+ori: speaker: p310, utterance: p310_238.wav, text: Last year was not a good year., sim: 0.8617269992828369
+gen: speaker: p310, utterance: p310_238.wav, text: Last year was not a good year., sim: 0.7154713273048401
+Saved audio to /tmp/gen-p310-p310_238.wav
+ori: speaker: p310, utterance: p310_130.wav, text: Now, though, he is back playing superbly for Blackburn., sim: 0.8756160140037537
+gen: speaker: p310, utterance: p310_130.wav, text: Now, though, he is back playing superbly for Blackburn., sim: 0.7468596696853638
+Saved audio to /tmp/gen-p310-p310_130.wav
+ori: speaker: p310, utterance: p310_229.wav, text: I get to work with very good people., sim: 0.8502199649810791
+gen: speaker: p310, utterance: p310_229.wav, text: I get to work with very good people., sim: 0.6976435780525208
+Saved audio to /tmp/gen-p310-p310_229.wav
+ori: speaker: p310, utterance: p310_170.wav, text: Last week, he was taken to the hospital., sim: 0.9545076489448547
+gen: speaker: p310, utterance: p310_170.wav, text: Last week, he was taken to the hospital., sim: 0.6958999633789062
+Saved audio to /tmp/gen-p310-p310_170.wav
+ori: speaker: p317, utterance: p317_332.wav, text: The effect was almost magical., sim: 0.9593580365180969
+gen: speaker: p317, utterance: p317_332.wav, text: The effect was almost magical., sim: 0.7102025747299194
+Saved audio to /tmp/gen-p317-p317_332.wav
+ori: speaker: p317, utterance: p317_034.wav, text: In this case, the farmer had actually given permission., sim: 0.876944363117218
+gen: speaker: p317, utterance: p317_034.wav, text: In this case, the farmer had actually given permission., sim: 0.7449416518211365
+Saved audio to /tmp/gen-p317-p317_034.wav
+ori: speaker: p317, utterance: p317_282.wav, text: For starters, many of the Scotland team didn't turn up., sim: 0.9201605916023254
+gen: speaker: p317, utterance: p317_282.wav, text: For starters, many of the Scotland team didn't turn up., sim: 0.7327178120613098
+Saved audio to /tmp/gen-p317-p317_282.wav
+ori: speaker: p317, utterance: p317_226.wav, text: Clubs can only do so much., sim: 0.8729589581489563
+gen: speaker: p317, utterance: p317_226.wav, text: Clubs can only do so much., sim: 0.6153051853179932
+Saved audio to /tmp/gen-p317-p317_226.wav
+ori: speaker: p317, utterance: p317_386.wav, text: Bob Dylan is getting old., sim: 0.8731406927108765
+gen: speaker: p317, utterance: p317_386.wav, text: Bob Dylan is getting old., sim: 0.6852123737335205
+Saved audio to /tmp/gen-p317-p317_386.wav
+ori: speaker: p326, utterance: p326_176.wav, text: In performance, that quality can prove to be a challenge., sim: 0.9251956343650818
+gen: speaker: p326, utterance: p326_176.wav, text: In performance, that quality can prove to be a challenge., sim: 0.7432609796524048
+Saved audio to /tmp/gen-p326-p326_176.wav
+ori: speaker: p326, utterance: p326_071.wav, text: The success story shows no signs of stopping., sim: 0.8863458037376404
+gen: speaker: p326, utterance: p326_071.wav, text: The success story shows no signs of stopping., sim: 0.7742260694503784
+Saved audio to /tmp/gen-p326-p326_071.wav
+ori: speaker: p326, utterance: p326_396.wav, text: A great deal has been achieved., sim: 0.9072068333625793
+gen: speaker: p326, utterance: p326_396.wav, text: A great deal has been achieved., sim: 0.6729902625083923
+Saved audio to /tmp/gen-p326-p326_396.wav
+ori: speaker: p326, utterance: p326_386.wav, text: Mrs Thatcher was in the right place, at the right time., sim: 0.9221886396408081
+gen: speaker: p326, utterance: p326_386.wav, text: Mrs Thatcher was in the right place, at the right time., sim: 0.8066126108169556
+Saved audio to /tmp/gen-p326-p326_386.wav
+ori: speaker: p326, utterance: p326_294.wav, text: So what is it with Nato?, sim: 0.8489593863487244
+gen: speaker: p326, utterance: p326_294.wav, text: So what is it with Nato?, sim: 0.5794128179550171
+Saved audio to /tmp/gen-p326-p326_294.wav
+ori: speaker: p362, utterance: p362_091.wav, text: It's not my fault., sim: 0.8408530950546265
+gen: speaker: p362, utterance: p362_091.wav, text: It's not my fault., sim: 0.5421890020370483
+Saved audio to /tmp/gen-p362-p362_091.wav
+ori: speaker: p362, utterance: p362_344.wav, text: He was their leader., sim: 0.8218105435371399
+gen: speaker: p362, utterance: p362_344.wav, text: He was their leader., sim: 0.5335469245910645
+Saved audio to /tmp/gen-p362-p362_344.wav
+ori: speaker: p362, utterance: p362_267.wav, text: Here he is, in effect, appointing himself a judge., sim: 0.9091159105300903
+gen: speaker: p362, utterance: p362_267.wav, text: Here he is, in effect, appointing himself a judge., sim: 0.6476168632507324
+Saved audio to /tmp/gen-p362-p362_267.wav
+ori: speaker: p362, utterance: p362_208.wav, text: It was crucial strike., sim: 0.8246074318885803
+gen: speaker: p362, utterance: p362_208.wav, text: It was crucial strike., sim: 0.5195066928863525
+Saved audio to /tmp/gen-p362-p362_208.wav
+ori: speaker: p362, utterance: p362_061.wav, text: And there has been a good start., sim: 0.9010587334632874
+gen: speaker: p362, utterance: p362_061.wav, text: And there has been a good start., sim: 0.5066092610359192
+Saved audio to /tmp/gen-p362-p362_061.wav
+ori: speaker: p300, utterance: p300_333.wav, text: There has been no cover-up - just the opposite in fact., sim: 0.8895643353462219
+gen: speaker: p300, utterance: p300_333.wav, text: There has been no cover-up - just the opposite in fact., sim: 0.8065175414085388
+Saved audio to /tmp/gen-p300-p300_333.wav
+ori: speaker: p300, utterance: p300_351.wav, text: This time, however, there is a new venue., sim: 0.8986703157424927
+gen: speaker: p300, utterance: p300_351.wav, text: This time, however, there is a new venue., sim: 0.7769762873649597
+Saved audio to /tmp/gen-p300-p300_351.wav
+ori: speaker: p300, utterance: p300_152.wav, text: We came across the first set of bodies., sim: 0.8777955770492554
+gen: speaker: p300, utterance: p300_152.wav, text: We came across the first set of bodies., sim: 0.6879600882530212
+Saved audio to /tmp/gen-p300-p300_152.wav
+ori: speaker: p300, utterance: p300_101.wav, text: Thereafter, he set his mind on becoming a doctor., sim: 0.9127717018127441
+gen: speaker: p300, utterance: p300_101.wav, text: Thereafter, he set his mind on becoming a doctor., sim: 0.7726116180419922
+Saved audio to /tmp/gen-p300-p300_101.wav
+ori: speaker: p300, utterance: p300_279.wav, text: But, in the end, he did - and blew him away., sim: 0.8971121311187744
+gen: speaker: p300, utterance: p300_279.wav, text: But, in the end, he did - and blew him away., sim: 0.7496527433395386
+Saved audio to /tmp/gen-p300-p300_279.wav
+ori: speaker: p307, utterance: p307_080.wav, text: Ferguson did not hesitate., sim: 0.8391423225402832
+gen: speaker: p307, utterance: p307_080.wav, text: Ferguson did not hesitate., sim: 0.6984493732452393
+Saved audio to /tmp/gen-p307-p307_080.wav
+ori: speaker: p307, utterance: p307_136.wav, text: I would ask the fans to be patient., sim: 0.8954914212226868
+gen: speaker: p307, utterance: p307_136.wav, text: I would ask the fans to be patient., sim: 0.8198031187057495
+Saved audio to /tmp/gen-p307-p307_136.wav
+ori: speaker: p307, utterance: p307_202.wav, text: There are some serious ethical issues involved., sim: 0.9039338827133179
+gen: speaker: p307, utterance: p307_202.wav, text: There are some serious ethical issues involved., sim: 0.7152367830276489
+Saved audio to /tmp/gen-p307-p307_202.wav
+ori: speaker: p307, utterance: p307_379.wav, text: It's being very carefully looked at., sim: 0.869036078453064
+gen: speaker: p307, utterance: p307_379.wav, text: It's being very carefully looked at., sim: 0.4966382384300232
+Saved audio to /tmp/gen-p307-p307_379.wav
+ori: speaker: p307, utterance: p307_333.wav, text: They've been at it for five hours., sim: 0.8758949041366577
+gen: speaker: p307, utterance: p307_333.wav, text: They've been at it for five hours., sim: 0.7031182646751404
+Saved audio to /tmp/gen-p307-p307_333.wav
+ori: speaker: p336, utterance: p336_253.wav, text: Our policy is very clear on this issue., sim: 0.8560338020324707
+gen: speaker: p336, utterance: p336_253.wav, text: Our policy is very clear on this issue., sim: 0.7756639122962952
+Saved audio to /tmp/gen-p336-p336_253.wav
+ori: speaker: p336, utterance: p336_350.wav, text: Bomber was not amused., sim: 0.8336889147758484
+gen: speaker: p336, utterance: p336_350.wav, text: Bomber was not amused., sim: 0.7073957324028015
+Saved audio to /tmp/gen-p336-p336_350.wav
+ori: speaker: p336, utterance: p336_194.wav, text: Where do you think she is going?, sim: 0.820633590221405
+gen: speaker: p336, utterance: p336_194.wav, text: Where do you think she is going?, sim: 0.7325057983398438
+Saved audio to /tmp/gen-p336-p336_194.wav
+ori: speaker: p336, utterance: p336_094.wav, text: It's hard to see it., sim: 0.8005592226982117
+gen: speaker: p336, utterance: p336_094.wav, text: It's hard to see it., sim: 0.6259028315544128
+Saved audio to /tmp/gen-p336-p336_094.wav
+ori: speaker: p336, utterance: p336_015.wav, text: The Greeks used to imagine that it was a sign from the gods to foretell war or heavy rain., sim: 0.9185450077056885
+gen: speaker: p336, utterance: p336_015.wav, text: The Greeks used to imagine that it was a sign from the gods to foretell war or heavy rain., sim: 0.816154956817627
+Saved audio to /tmp/gen-p336-p336_015.wav
+ori: speaker: p364, utterance: p364_266.wav, text: This could be the case., sim: 0.8157698512077332
+gen: speaker: p364, utterance: p364_266.wav, text: This could be the case., sim: 0.528056800365448
+Saved audio to /tmp/gen-p364-p364_266.wav
+ori: speaker: p364, utterance: p364_060.wav, text: Why has it taken so long?, sim: 0.8653073906898499
+gen: speaker: p364, utterance: p364_060.wav, text: Why has it taken so long?, sim: 0.6108755469322205
+Saved audio to /tmp/gen-p364-p364_060.wav
+ori: speaker: p364, utterance: p364_214.wav, text: We are seeking a meeting with the Minister., sim: 0.9359773993492126
+gen: speaker: p364, utterance: p364_214.wav, text: We are seeking a meeting with the Minister., sim: 0.6677131056785583
+Saved audio to /tmp/gen-p364-p364_214.wav
+ori: speaker: p364, utterance: p364_212.wav, text: I can handle the pace., sim: 0.8988974094390869
+gen: speaker: p364, utterance: p364_212.wav, text: I can handle the pace., sim: 0.63873291015625
+Saved audio to /tmp/gen-p364-p364_212.wav
+ori: speaker: p364, utterance: p364_037.wav, text: It isn't a free-for-all., sim: 0.8677543997764587
+gen: speaker: p364, utterance: p364_037.wav, text: It isn't a free-for-all., sim: 0.5661147832870483
+Saved audio to /tmp/gen-p364-p364_037.wav
+ori: speaker: p363, utterance: p363_166.wav, text: My father and mother are., sim: 0.8033022880554199
+gen: speaker: p363, utterance: p363_166.wav, text: My father and mother are., sim: 0.7282659411430359
+Saved audio to /tmp/gen-p363-p363_166.wav
+ori: speaker: p363, utterance: p363_415.wav, text: I am happy with my form., sim: 0.874005913734436
+gen: speaker: p363, utterance: p363_415.wav, text: I am happy with my form., sim: 0.7668320536613464
+Saved audio to /tmp/gen-p363-p363_415.wav
+ori: speaker: p363, utterance: p363_005.wav, text: She can scoop these things into three red bags, and we will go meet her Wednesday at the train station., sim: 0.9246216416358948
+gen: speaker: p363, utterance: p363_005.wav, text: She can scoop these things into three red bags, and we will go meet her Wednesday at the train station., sim: 0.8560677766799927
+Saved audio to /tmp/gen-p363-p363_005.wav
+ori: speaker: p363, utterance: p363_348.wav, text: The world is being invited to visit., sim: 0.8174320459365845
+gen: speaker: p363, utterance: p363_348.wav, text: The world is being invited to visit., sim: 0.7905076146125793
+Saved audio to /tmp/gen-p363-p363_348.wav
+ori: speaker: p363, utterance: p363_226.wav, text: That in itself is a joke., sim: 0.7293694615364075
+gen: speaker: p363, utterance: p363_226.wav, text: That in itself is a joke., sim: 0.7334597110748291
+Saved audio to /tmp/gen-p363-p363_226.wav
+ori: speaker: p308, utterance: p308_309.wav, text: If you don't enforce it, you bring it into disrepute., sim: 0.8920319080352783
+gen: speaker: p308, utterance: p308_309.wav, text: If you don't enforce it, you bring it into disrepute., sim: 0.7055762410163879
+Saved audio to /tmp/gen-p308-p308_309.wav
+ori: speaker: p308, utterance: p308_158.wav, text: A hospital spokeswoman described his condition as stable., sim: 0.9178590178489685
+gen: speaker: p308, utterance: p308_158.wav, text: A hospital spokeswoman described his condition as stable., sim: 0.7834088206291199
+Saved audio to /tmp/gen-p308-p308_158.wav
+ori: speaker: p308, utterance: p308_261.wav, text: He also received a medal of honour., sim: 0.8758705854415894
+gen: speaker: p308, utterance: p308_261.wav, text: He also received a medal of honour., sim: 0.6611250042915344
+Saved audio to /tmp/gen-p308-p308_261.wav
+ori: speaker: p308, utterance: p308_347.wav, text: The princess has had other health problems., sim: 0.8639741539955139
+gen: speaker: p308, utterance: p308_347.wav, text: The princess has had other health problems., sim: 0.7732523083686829
+Saved audio to /tmp/gen-p308-p308_347.wav
+ori: speaker: p308, utterance: p308_326.wav, text: Some old favourites remain in varying forms., sim: 0.8522274494171143
+gen: speaker: p308, utterance: p308_326.wav, text: Some old favourites remain in varying forms., sim: 0.8104916214942932
+Saved audio to /tmp/gen-p308-p308_326.wav
+ori: speaker: p330, utterance: p330_406.wav, text: We will deal with the refugees., sim: 0.8751210570335388
+gen: speaker: p330, utterance: p330_406.wav, text: We will deal with the refugees., sim: 0.7654792666435242
+Saved audio to /tmp/gen-p330-p330_406.wav
+ori: speaker: p330, utterance: p330_371.wav, text: That's the law of the land., sim: 0.8096307516098022
+gen: speaker: p330, utterance: p330_371.wav, text: That's the law of the land., sim: 0.603427529335022
+Saved audio to /tmp/gen-p330-p330_371.wav
+ori: speaker: p330, utterance: p330_028.wav, text: Surely history will not repeat itself., sim: 0.8370997905731201
+gen: speaker: p330, utterance: p330_028.wav, text: Surely history will not repeat itself., sim: 0.8201374411582947
+Saved audio to /tmp/gen-p330-p330_028.wav
+ori: speaker: p330, utterance: p330_324.wav, text: We've had our problems at the club., sim: 0.8212864398956299
+gen: speaker: p330, utterance: p330_324.wav, text: We've had our problems at the club., sim: 0.6991079449653625
+Saved audio to /tmp/gen-p330-p330_324.wav
+ori: speaker: p330, utterance: p330_335.wav, text: It could have been just a quick fix., sim: 0.9406189918518066
+gen: speaker: p330, utterance: p330_335.wav, text: It could have been just a quick fix., sim: 0.6639717817306519
+Saved audio to /tmp/gen-p330-p330_335.wav
+ori: speaker: p339, utterance: p339_206.wav, text: It is part of our heritage., sim: 0.7921738624572754
+gen: speaker: p339, utterance: p339_206.wav, text: It is part of our heritage., sim: 0.8072076439857483
+Saved audio to /tmp/gen-p339-p339_206.wav
+ori: speaker: p339, utterance: p339_013.wav, text: Some have accepted it as a miracle without physical explanation., sim: 0.8408835530281067
+gen: speaker: p339, utterance: p339_013.wav, text: Some have accepted it as a miracle without physical explanation., sim: 0.8564502000808716
+Saved audio to /tmp/gen-p339-p339_013.wav
+ori: speaker: p339, utterance: p339_180.wav, text: A film is different from a book., sim: 0.8048027157783508
+gen: speaker: p339, utterance: p339_180.wav, text: A film is different from a book., sim: 0.6028447151184082
+Saved audio to /tmp/gen-p339-p339_180.wav
+ori: speaker: p339, utterance: p339_047.wav, text: The jury is still out on this one., sim: 0.7772398591041565
+gen: speaker: p339, utterance: p339_047.wav, text: The jury is still out on this one., sim: 0.7901622653007507
+Saved audio to /tmp/gen-p339-p339_047.wav
+ori: speaker: p339, utterance: p339_105.wav, text: We have been so lucky., sim: 0.83492112159729
+gen: speaker: p339, utterance: p339_105.wav, text: We have been so lucky., sim: 0.6299518346786499
+Saved audio to /tmp/gen-p339-p339_105.wav
+ori: speaker: p306, utterance: p306_296.wav, text: After that he became more romantic., sim: 0.8993595242500305
+gen: speaker: p306, utterance: p306_296.wav, text: After that he became more romantic., sim: 0.7327014803886414
+Saved audio to /tmp/gen-p306-p306_296.wav
+ori: speaker: p306, utterance: p306_123.wav, text: This is not understood by people outside., sim: 0.9228768944740295
+gen: speaker: p306, utterance: p306_123.wav, text: This is not understood by people outside., sim: 0.837716817855835
+Saved audio to /tmp/gen-p306-p306_123.wav
+ori: speaker: p306, utterance: p306_312.wav, text: The Allies intend to maintain the average., sim: 0.912340521812439
+gen: speaker: p306, utterance: p306_312.wav, text: The Allies intend to maintain the average., sim: 0.8298845887184143
+Saved audio to /tmp/gen-p306-p306_312.wav
+ori: speaker: p306, utterance: p306_308.wav, text: He is a law unto himself., sim: 0.844692051410675
+gen: speaker: p306, utterance: p306_308.wav, text: He is a law unto himself., sim: 0.7939820289611816
+Saved audio to /tmp/gen-p306-p306_308.wav
+ori: speaker: p306, utterance: p306_012.wav, text: Throughout the centuries people have explained the rainbow in various ways., sim: 0.8886617422103882
+gen: speaker: p306, utterance: p306_012.wav, text: Throughout the centuries people have explained the rainbow in various ways., sim: 0.8405358195304871
+Saved audio to /tmp/gen-p306-p306_012.wav
+ori: speaker: p301, utterance: p301_262.wav, text: Scotland has been caught in the crossfire., sim: 0.8423135280609131
+gen: speaker: p301, utterance: p301_262.wav, text: Scotland has been caught in the crossfire., sim: 0.8138321042060852
+Saved audio to /tmp/gen-p301-p301_262.wav
+ori: speaker: p301, utterance: p301_208.wav, text: We have no choice but to shut down., sim: 0.8104419112205505
+gen: speaker: p301, utterance: p301_208.wav, text: We have no choice but to shut down., sim: 0.5920689702033997
+Saved audio to /tmp/gen-p301-p301_208.wav
+ori: speaker: p301, utterance: p301_003.wav, text: Six spoons of fresh snow peas, five thick slabs of blue cheese, and maybe a snack for her brother Bob., sim: 0.8958447575569153
+gen: speaker: p301, utterance: p301_003.wav, text: Six spoons of fresh snow peas, five thick slabs of blue cheese, and maybe a snack for her brother Bob., sim: 0.9043463468551636
+Saved audio to /tmp/gen-p301-p301_003.wav
+ori: speaker: p301, utterance: p301_350.wav, text: And Michael was just great., sim: 0.8648495078086853
+gen: speaker: p301, utterance: p301_350.wav, text: And Michael was just great., sim: 0.616229772567749
+Saved audio to /tmp/gen-p301-p301_350.wav
+ori: speaker: p301, utterance: p301_193.wav, text: He scored one goal and was on fire., sim: 0.8252844214439392
+gen: speaker: p301, utterance: p301_193.wav, text: He scored one goal and was on fire., sim: 0.7675124406814575
+Saved audio to /tmp/gen-p301-p301_193.wav
+ori: speaker: p287, utterance: p287_283.wav, text: It was an easy decision to come here., sim: 0.8519158363342285
+gen: speaker: p287, utterance: p287_283.wav, text: It was an easy decision to come here., sim: 0.70834881067276
+Saved audio to /tmp/gen-p287-p287_283.wav
+ori: speaker: p287, utterance: p287_005.wav, text: She can scoop these things into three red bags, and we will go meet her Wednesday at the train station. , sim: 0.9431049227714539
+gen: speaker: p287, utterance: p287_005.wav, text: She can scoop these things into three red bags, and we will go meet her Wednesday at the train station. , sim: 0.8856239914894104
+Saved audio to /tmp/gen-p287-p287_005.wav
+ori: speaker: p287, utterance: p287_092.wav, text: This decision is a farce., sim: 0.9275228381156921
+gen: speaker: p287, utterance: p287_092.wav, text: This decision is a farce., sim: 0.5864224433898926
+Saved audio to /tmp/gen-p287-p287_092.wav
+ori: speaker: p287, utterance: p287_058.wav, text: How are you, sir ?, sim: 0.8653285503387451
+gen: speaker: p287, utterance: p287_058.wav, text: How are you, sir ?, sim: 0.6199386119842529
+Saved audio to /tmp/gen-p287-p287_058.wav
+ori: speaker: p287, utterance: p287_275.wav, text: Do I think about them often ?, sim: 0.8022575378417969
+gen: speaker: p287, utterance: p287_275.wav, text: Do I think about them often ?, sim: 0.5671409964561462
+Saved audio to /tmp/gen-p287-p287_275.wav
+ori: speaker: p273, utterance: p273_047.wav, text: I expect a rapid response., sim: 0.8344026207923889
+gen: speaker: p273, utterance: p273_047.wav, text: I expect a rapid response., sim: 0.6620568633079529
+Saved audio to /tmp/gen-p273-p273_047.wav
+ori: speaker: p273, utterance: p273_355.wav, text: But the Foreign Secretary can cope., sim: 0.8806204795837402
+gen: speaker: p273, utterance: p273_355.wav, text: But the Foreign Secretary can cope., sim: 0.620951771736145
+Saved audio to /tmp/gen-p273-p273_355.wav
+ori: speaker: p273, utterance: p273_237.wav, text: Mr Crawford is no stranger to Scottish Enterprise., sim: 0.8931779265403748
+gen: speaker: p273, utterance: p273_237.wav, text: Mr Crawford is no stranger to Scottish Enterprise., sim: 0.7629380822181702
+Saved audio to /tmp/gen-p273-p273_237.wav
+ori: speaker: p273, utterance: p273_093.wav, text: Gordon Marshall was outstanding against us., sim: 0.8784976601600647
+gen: speaker: p273, utterance: p273_093.wav, text: Gordon Marshall was outstanding against us., sim: 0.7901119589805603
+Saved audio to /tmp/gen-p273-p273_093.wav
+ori: speaker: p273, utterance: p273_350.wav, text: The announcement was made after inquiries from a national newspaper., sim: 0.8958406448364258
+gen: speaker: p273, utterance: p273_350.wav, text: The announcement was made after inquiries from a national newspaper., sim: 0.7702332735061646
+Saved audio to /tmp/gen-p273-p273_350.wav
+ori: speaker: p274, utterance: p274_349.wav, text: That is a trend which will be encouraged.), sim: 0.9354876279830933
+gen: speaker: p274, utterance: p274_349.wav, text: That is a trend which will be encouraged.), sim: 0.6862092614173889
+Saved audio to /tmp/gen-p274-p274_349.wav
+ori: speaker: p274, utterance: p274_194.wav, text: Treasury spokesman Malcolm Bruce is also considered a potential contender.), sim: 0.9168083071708679
+gen: speaker: p274, utterance: p274_194.wav, text: Treasury spokesman Malcolm Bruce is also considered a potential contender.), sim: 0.8470670580863953
+Saved audio to /tmp/gen-p274-p274_194.wav
+ori: speaker: p274, utterance: p274_056.wav, text: Until recently, she worked as a recruitment consultant in London.), sim: 0.898853063583374
+gen: speaker: p274, utterance: p274_056.wav, text: Until recently, she worked as a recruitment consultant in London.), sim: 0.8087802529335022
+Saved audio to /tmp/gen-p274-p274_056.wav
+ori: speaker: p274, utterance: p274_247.wav, text: There were no reports of casualties.), sim: 0.8973908424377441
+gen: speaker: p274, utterance: p274_247.wav, text: There were no reports of casualties.), sim: 0.7340287566184998
+Saved audio to /tmp/gen-p274-p274_247.wav
+ori: speaker: p274, utterance: p274_348.wav, text: There was some merit in that.), sim: 0.8768707513809204
+gen: speaker: p274, utterance: p274_348.wav, text: There was some merit in that.), sim: 0.6027491092681885
+Saved audio to /tmp/gen-p274-p274_348.wav
+ori: speaker: p280, utterance: p280_017.wav, text: Others have tried to explain the phenomenon physically. , sim: 0.8642241358757019
+gen: speaker: p280, utterance: p280_017.wav, text: Others have tried to explain the phenomenon physically. , sim: 0.8402572870254517
+Saved audio to /tmp/gen-p280-p280_017.wav
+ori: speaker: p280, utterance: p280_230.wav, text: This is certainly not the time for attempts at trial by media., sim: 0.9382376670837402
+gen: speaker: p280, utterance: p280_230.wav, text: This is certainly not the time for attempts at trial by media., sim: 0.8452392220497131
+Saved audio to /tmp/gen-p280-p280_230.wav
+ori: speaker: p280, utterance: p280_109.wav, text: Scotland is never far away at Westminster., sim: 0.9095451831817627
+gen: speaker: p280, utterance: p280_109.wav, text: Scotland is never far away at Westminster., sim: 0.821660578250885
+Saved audio to /tmp/gen-p280-p280_109.wav
+ori: speaker: p280, utterance: p280_270.wav, text: Its primary business channel is the internet., sim: 0.8951152563095093
+gen: speaker: p280, utterance: p280_270.wav, text: Its primary business channel is the internet., sim: 0.8271144032478333
+Saved audio to /tmp/gen-p280-p280_270.wav
+ori: speaker: p280, utterance: p280_129.wav, text: It's so nice to see the reaction on their faces., sim: 0.9097263216972351
+gen: speaker: p280, utterance: p280_129.wav, text: It's so nice to see the reaction on their faces., sim: 0.9236258864402771
+Saved audio to /tmp/gen-p280-p280_129.wav
+ori: speaker: p245, utterance: p245_210.wav, text: Saturday is gone., sim: 0.8936402201652527
+gen: speaker: p245, utterance: p245_210.wav, text: Saturday is gone., sim: 0.5843533277511597
+Saved audio to /tmp/gen-p245-p245_210.wav
+ori: speaker: p245, utterance: p245_323.wav, text: I saw some good things., sim: 0.858759343624115
+gen: speaker: p245, utterance: p245_323.wav, text: I saw some good things., sim: 0.582500159740448
+Saved audio to /tmp/gen-p245-p245_323.wav
+ori: speaker: p245, utterance: p245_168.wav, text: It is tough, but possible., sim: 0.873823881149292
+gen: speaker: p245, utterance: p245_168.wav, text: It is tough, but possible., sim: 0.6502233743667603
+Saved audio to /tmp/gen-p245-p245_168.wav
+ori: speaker: p245, utterance: p245_358.wav, text: He's very explosive., sim: 0.9038378000259399
+gen: speaker: p245, utterance: p245_358.wav, text: He's very explosive., sim: 0.6046432852745056
+Saved audio to /tmp/gen-p245-p245_358.wav
+ori: speaker: p245, utterance: p245_094.wav, text: We want to get to the final, anyway., sim: 0.9121991395950317
+gen: speaker: p245, utterance: p245_094.wav, text: We want to get to the final, anyway., sim: 0.7653533220291138
+Saved audio to /tmp/gen-p245-p245_094.wav
+ori: speaker: p229, utterance: p229_365.wav, text: We are looking for perfection., sim: 0.907595157623291
+gen: speaker: p229, utterance: p229_365.wav, text: We are looking for perfection., sim: 0.6720722913742065
+Saved audio to /tmp/gen-p229-p229_365.wav
+ori: speaker: p229, utterance: p229_342.wav, text: Today she has been released., sim: 0.7869763374328613
+gen: speaker: p229, utterance: p229_342.wav, text: Today she has been released., sim: 0.6384924054145813
+Saved audio to /tmp/gen-p229-p229_342.wav
+ori: speaker: p229, utterance: p229_112.wav, text: He plans to call for an aid package from Mr Macdonald., sim: 0.8282566666603088
+gen: speaker: p229, utterance: p229_112.wav, text: He plans to call for an aid package from Mr Macdonald., sim: 0.8192839622497559
+Saved audio to /tmp/gen-p229-p229_112.wav
+ori: speaker: p229, utterance: p229_060.wav, text: And a film maker was born., sim: 0.8674383759498596
+gen: speaker: p229, utterance: p229_060.wav, text: And a film maker was born., sim: 0.5336483120918274
+Saved audio to /tmp/gen-p229-p229_060.wav
+ori: speaker: p229, utterance: p229_167.wav, text: Inside, the atmosphere was quiet., sim: 0.867447555065155
+gen: speaker: p229, utterance: p229_167.wav, text: Inside, the atmosphere was quiet., sim: 0.6713798642158508
+Saved audio to /tmp/gen-p229-p229_167.wav
+ori: speaker: p227, utterance: p227_298.wav, text: She has fallen in love with Scotland, however., sim: 0.8653971552848816
+gen: speaker: p227, utterance: p227_298.wav, text: She has fallen in love with Scotland, however., sim: 0.8219467997550964
+Saved audio to /tmp/gen-p227-p227_298.wav
+ori: speaker: p227, utterance: p227_077.wav, text: I first met him last summer., sim: 0.8702669143676758
+gen: speaker: p227, utterance: p227_077.wav, text: I first met him last summer., sim: 0.8062599301338196
+Saved audio to /tmp/gen-p227-p227_077.wav
+ori: speaker: p227, utterance: p227_375.wav, text: It is a stroke of genius., sim: 0.8306155204772949
+gen: speaker: p227, utterance: p227_375.wav, text: It is a stroke of genius., sim: 0.660076379776001
+Saved audio to /tmp/gen-p227-p227_375.wav
+ori: speaker: p227, utterance: p227_044.wav, text: If I was a woman., sim: 0.8594422340393066
+gen: speaker: p227, utterance: p227_044.wav, text: If I was a woman., sim: 0.6992239356040955
+Saved audio to /tmp/gen-p227-p227_044.wav
+ori: speaker: p227, utterance: p227_333.wav, text: It is so easy to be negative., sim: 0.7774580121040344
+gen: speaker: p227, utterance: p227_333.wav, text: It is so easy to be negative., sim: 0.6897830963134766
+Saved audio to /tmp/gen-p227-p227_333.wav
+ori: speaker: p244, utterance: p244_018.wav, text: Aristotle thought that the rainbow was caused by reflection of the sun's rays by the rain. , sim: 0.9436677098274231
+gen: speaker: p244, utterance: p244_018.wav, text: Aristotle thought that the rainbow was caused by reflection of the sun's rays by the rain. , sim: 0.8607009649276733
+Saved audio to /tmp/gen-p244-p244_018.wav
+ori: speaker: p244, utterance: p244_005.wav, text: She can scoop these things into three red bags, and we will go meet her Wednesday at the train station. , sim: 0.902899444103241
+gen: speaker: p244, utterance: p244_005.wav, text: She can scoop these things into three red bags, and we will go meet her Wednesday at the train station. , sim: 0.8424428701400757
+Saved audio to /tmp/gen-p244-p244_005.wav
+ori: speaker: p244, utterance: p244_028.wav, text: I am not interested in the money, it is the principle., sim: 0.8921366930007935
+gen: speaker: p244, utterance: p244_028.wav, text: I am not interested in the money, it is the principle., sim: 0.8488057851791382
+Saved audio to /tmp/gen-p244-p244_028.wav
+ori: speaker: p244, utterance: p244_291.wav, text: None of the agencies was able to help., sim: 0.8609705567359924
+gen: speaker: p244, utterance: p244_291.wav, text: None of the agencies was able to help., sim: 0.833096981048584
+Saved audio to /tmp/gen-p244-p244_291.wav
+ori: speaker: p244, utterance: p244_175.wav, text: All the pressure was on him., sim: 0.9104298949241638
+gen: speaker: p244, utterance: p244_175.wav, text: All the pressure was on him., sim: 0.7220433950424194
+Saved audio to /tmp/gen-p244-p244_175.wav
+ori: speaker: p243, utterance: p243_067.wav, text: He was failed by his health authority., sim: 0.8522109389305115
+gen: speaker: p243, utterance: p243_067.wav, text: He was failed by his health authority., sim: 0.7731208205223083
+Saved audio to /tmp/gen-p243-p243_067.wav
+ori: speaker: p243, utterance: p243_193.wav, text: It involved everything in terms of behaviour., sim: 0.9043169021606445
+gen: speaker: p243, utterance: p243_193.wav, text: It involved everything in terms of behaviour., sim: 0.8200347423553467
+Saved audio to /tmp/gen-p243-p243_193.wav
+ori: speaker: p243, utterance: p243_090.wav, text: Among them was Gary Robertson from Dundee., sim: 0.8621390461921692
+gen: speaker: p243, utterance: p243_090.wav, text: Among them was Gary Robertson from Dundee., sim: 0.8659368753433228
+Saved audio to /tmp/gen-p243-p243_090.wav
+ori: speaker: p243, utterance: p243_273.wav, text: I think I was about four years old., sim: 0.8465020656585693
+gen: speaker: p243, utterance: p243_273.wav, text: I think I was about four years old., sim: 0.8498762845993042
+Saved audio to /tmp/gen-p243-p243_273.wav
+ori: speaker: p243, utterance: p243_265.wav, text: His condition was described as serious last night., sim: 0.882861852645874
+gen: speaker: p243, utterance: p243_265.wav, text: His condition was described as serious last night., sim: 0.849823534488678
+Saved audio to /tmp/gen-p243-p243_265.wav
+ori: speaker: p288, utterance: p288_186.wav, text: It's very difficult to find a buyer., sim: 0.9043931365013123
+gen: speaker: p288, utterance: p288_186.wav, text: It's very difficult to find a buyer., sim: 0.7418867945671082
+Saved audio to /tmp/gen-p288-p288_186.wav
+ori: speaker: p288, utterance: p288_359.wav, text: But the real problem is the closure of the export market., sim: 0.890643298625946
+gen: speaker: p288, utterance: p288_359.wav, text: But the real problem is the closure of the export market., sim: 0.7588476538658142
+Saved audio to /tmp/gen-p288-p288_359.wav
+ori: speaker: p288, utterance: p288_159.wav, text: They will do their own thing., sim: 0.8760994672775269
+gen: speaker: p288, utterance: p288_159.wav, text: They will do their own thing., sim: 0.5611252188682556
+Saved audio to /tmp/gen-p288-p288_159.wav
+ori: speaker: p288, utterance: p288_231.wav, text: It is set in Paris., sim: 0.870642364025116
+gen: speaker: p288, utterance: p288_231.wav, text: It is set in Paris., sim: 0.542919933795929
+Saved audio to /tmp/gen-p288-p288_231.wav
+ori: speaker: p288, utterance: p288_206.wav, text: Feel the heat?, sim: 0.7583215236663818
+gen: speaker: p288, utterance: p288_206.wav, text: Feel the heat?, sim: 0.4472041726112366
+Saved audio to /tmp/gen-p288-p288_206.wav
+ori: speaker: p281, utterance: p281_320.wav, text: Scotland has shown the way., sim: 0.8435039520263672
+gen: speaker: p281, utterance: p281_320.wav, text: Scotland has shown the way., sim: 0.5085039138793945
+Saved audio to /tmp/gen-p281-p281_320.wav
+ori: speaker: p281, utterance: p281_143.wav, text: It will include the Black Watch, the Royal Highland regiment., sim: 0.9015077948570251
+gen: speaker: p281, utterance: p281_143.wav, text: It will include the Black Watch, the Royal Highland regiment., sim: 0.7729536890983582
+Saved audio to /tmp/gen-p281-p281_143.wav
+ori: speaker: p281, utterance: p281_408.wav, text: There is a solution, she believes., sim: 0.7960687279701233
+gen: speaker: p281, utterance: p281_408.wav, text: There is a solution, she believes., sim: 0.7261844277381897
+Saved audio to /tmp/gen-p281-p281_408.wav
+ori: speaker: p281, utterance: p281_374.wav, text: It would be quite nice., sim: 0.766275942325592
+gen: speaker: p281, utterance: p281_374.wav, text: It would be quite nice., sim: 0.663771390914917
+Saved audio to /tmp/gen-p281-p281_374.wav
+ori: speaker: p281, utterance: p281_055.wav, text: The Government should be ashamed., sim: 0.8452872037887573
+gen: speaker: p281, utterance: p281_055.wav, text: The Government should be ashamed., sim: 0.6274392604827881
+Saved audio to /tmp/gen-p281-p281_055.wav
+ori: speaker: p275, utterance: p275_250.wav, text: For the Scottish judges, the affair is very delicate and unique., sim: 0.9049911499023438
+gen: speaker: p275, utterance: p275_250.wav, text: For the Scottish judges, the affair is very delicate and unique., sim: 0.8735835552215576
+Saved audio to /tmp/gen-p275-p275_250.wav
+ori: speaker: p275, utterance: p275_197.wav, text: The modern approach will also be reflected in the terms of address., sim: 0.888451099395752
+gen: speaker: p275, utterance: p275_197.wav, text: The modern approach will also be reflected in the terms of address., sim: 0.8470220565795898
+Saved audio to /tmp/gen-p275-p275_197.wav
+ori: speaker: p275, utterance: p275_102.wav, text: She reflects a bit., sim: 0.8369572162628174
+gen: speaker: p275, utterance: p275_102.wav, text: She reflects a bit., sim: 0.6465274691581726
+Saved audio to /tmp/gen-p275-p275_102.wav
+ori: speaker: p275, utterance: p275_269.wav, text: The decision was announced at its annual conference in Dunfermline., sim: 0.8973057270050049
+gen: speaker: p275, utterance: p275_269.wav, text: The decision was announced at its annual conference in Dunfermline., sim: 0.8647640943527222
+Saved audio to /tmp/gen-p275-p275_269.wav
+ori: speaker: p275, utterance: p275_311.wav, text: I will not allow the destruction of the Scottish fishing industry., sim: 0.8594726324081421
+gen: speaker: p275, utterance: p275_311.wav, text: I will not allow the destruction of the Scottish fishing industry., sim: 0.8359119892120361
+Saved audio to /tmp/gen-p275-p275_311.wav
+ori: speaker: p272, utterance: p272_319.wav, text: Is that an issue?, sim: 0.8504126667976379
+gen: speaker: p272, utterance: p272_319.wav, text: Is that an issue?, sim: 0.6197609305381775
+Saved audio to /tmp/gen-p272-p272_319.wav
+ori: speaker: p272, utterance: p272_363.wav, text: It took about an hour for the gas to clear., sim: 0.8672274947166443
+gen: speaker: p272, utterance: p272_363.wav, text: It took about an hour for the gas to clear., sim: 0.6633321642875671
+Saved audio to /tmp/gen-p272-p272_363.wav
+ori: speaker: p272, utterance: p272_287.wav, text: There's a pause., sim: 0.7795907258987427
+gen: speaker: p272, utterance: p272_287.wav, text: There's a pause., sim: 0.549828290939331
+Saved audio to /tmp/gen-p272-p272_287.wav
+ori: speaker: p272, utterance: p272_203.wav, text: Twaddle is a case in point., sim: 0.8624539971351624
+gen: speaker: p272, utterance: p272_203.wav, text: Twaddle is a case in point., sim: 0.7292056679725647
+Saved audio to /tmp/gen-p272-p272_203.wav
+ori: speaker: p272, utterance: p272_045.wav, text: He's just in it for himself., sim: 0.7879667282104492
+gen: speaker: p272, utterance: p272_045.wav, text: He's just in it for himself., sim: 0.7473692297935486
+Saved audio to /tmp/gen-p272-p272_045.wav
+ori: speaker: p286, utterance: p286_043.wav, text: He will need that machine., sim: 0.8775244951248169
+gen: speaker: p286, utterance: p286_043.wav, text: He will need that machine., sim: 0.606334388256073
+Saved audio to /tmp/gen-p286-p286_043.wav
+ori: speaker: p286, utterance: p286_315.wav, text: I was there five months ago., sim: 0.9239105582237244
+gen: speaker: p286, utterance: p286_315.wav, text: I was there five months ago., sim: 0.7394242286682129
+Saved audio to /tmp/gen-p286-p286_315.wav
+ori: speaker: p286, utterance: p286_299.wav, text: That has been described in some quarters as nonsense and arrogance., sim: 0.9162974953651428
+gen: speaker: p286, utterance: p286_299.wav, text: That has been described in some quarters as nonsense and arrogance., sim: 0.8044931292533875
+Saved audio to /tmp/gen-p286-p286_299.wav
+ori: speaker: p286, utterance: p286_182.wav, text: This championship is different from the other majors., sim: 0.9273148775100708
+gen: speaker: p286, utterance: p286_182.wav, text: This championship is different from the other majors., sim: 0.7982800006866455
+Saved audio to /tmp/gen-p286-p286_182.wav
+ori: speaker: p286, utterance: p286_188.wav, text: We have a long way to go this week., sim: 0.8527632355690002
+gen: speaker: p286, utterance: p286_188.wav, text: We have a long way to go this week., sim: 0.7031445503234863
+Saved audio to /tmp/gen-p286-p286_188.wav
+ori: speaker: p226, utterance: p226_317.wav, text: It's about my time as a guitarist., sim: 0.8658584356307983
+gen: speaker: p226, utterance: p226_317.wav, text: It's about my time as a guitarist., sim: 0.768025815486908
+Saved audio to /tmp/gen-p226-p226_317.wav
+ori: speaker: p226, utterance: p226_017.wav, text: Others have tried to explain the phenomenon physically. , sim: 0.8595547676086426
+gen: speaker: p226, utterance: p226_017.wav, text: Others have tried to explain the phenomenon physically. , sim: 0.8627034425735474
+Saved audio to /tmp/gen-p226-p226_017.wav
+ori: speaker: p226, utterance: p226_251.wav, text: There's the mix., sim: 0.8310315012931824
+gen: speaker: p226, utterance: p226_251.wav, text: There's the mix., sim: 0.6761854290962219
+Saved audio to /tmp/gen-p226-p226_251.wav
+ori: speaker: p226, utterance: p226_370.wav, text: Saddam is not the only example of evil in our world., sim: 0.8965137600898743
+gen: speaker: p226, utterance: p226_370.wav, text: Saddam is not the only example of evil in our world., sim: 0.8375251293182373
+Saved audio to /tmp/gen-p226-p226_370.wav
+ori: speaker: p226, utterance: p226_325.wav, text: I am very happy to be here., sim: 0.7964616417884827
+gen: speaker: p226, utterance: p226_325.wav, text: I am very happy to be here., sim: 0.7017683386802673
+Saved audio to /tmp/gen-p226-p226_325.wav
+ori: speaker: p228, utterance: p228_353.wav, text: It should be an enjoyable and challenging period of their lives., sim: 0.9274667501449585
+gen: speaker: p228, utterance: p228_353.wav, text: It should be an enjoyable and challenging period of their lives., sim: 0.8089276552200317
+Saved audio to /tmp/gen-p228-p228_353.wav
+ori: speaker: p228, utterance: p228_135.wav, text: Buckingham Palace said the appointment was a matter for the prince., sim: 0.922187089920044
+gen: speaker: p228, utterance: p228_135.wav, text: Buckingham Palace said the appointment was a matter for the prince., sim: 0.833091139793396
+Saved audio to /tmp/gen-p228-p228_135.wav
+ori: speaker: p228, utterance: p228_164.wav, text: The weather affected the other two games in Fife., sim: 0.851590633392334
+gen: speaker: p228, utterance: p228_164.wav, text: The weather affected the other two games in Fife., sim: 0.7743548154830933
+Saved audio to /tmp/gen-p228-p228_164.wav
+ori: speaker: p228, utterance: p228_348.wav, text: Everyone was in tears., sim: 0.9027692675590515
+gen: speaker: p228, utterance: p228_348.wav, text: Everyone was in tears., sim: 0.5679455995559692
+Saved audio to /tmp/gen-p228-p228_348.wav
+ori: speaker: p228, utterance: p228_363.wav, text: I decided to tell a bit of the story about myself., sim: 0.8887656927108765
+gen: speaker: p228, utterance: p228_363.wav, text: I decided to tell a bit of the story about myself., sim: 0.7461094260215759
+Saved audio to /tmp/gen-p228-p228_363.wav
+ori: speaker: p232, utterance: p232_302.wav, text: Nothing is safe., sim: 0.8783950805664062
+gen: speaker: p232, utterance: p232_302.wav, text: Nothing is safe., sim: 0.6348678469657898
+Saved audio to /tmp/gen-p232-p232_302.wav
+ori: speaker: p232, utterance: p232_158.wav, text: They say that vital evidence was not heard in court., sim: 0.8614522814750671
+gen: speaker: p232, utterance: p232_158.wav, text: They say that vital evidence was not heard in court., sim: 0.7990341782569885
+Saved audio to /tmp/gen-p232-p232_158.wav
+ori: speaker: p232, utterance: p232_410.wav, text: I was in a position to challenge for this event and didn't., sim: 0.8716633915901184
+gen: speaker: p232, utterance: p232_410.wav, text: I was in a position to challenge for this event and didn't., sim: 0.8486855030059814
+Saved audio to /tmp/gen-p232-p232_410.wav
+ori: speaker: p232, utterance: p232_153.wav, text: I was in daily contact., sim: 0.8759085536003113
+gen: speaker: p232, utterance: p232_153.wav, text: I was in daily contact., sim: 0.6349198222160339
+Saved audio to /tmp/gen-p232-p232_153.wav
+ori: speaker: p232, utterance: p232_255.wav, text: It's a record label, not a form of music., sim: 0.7762485146522522
+gen: speaker: p232, utterance: p232_255.wav, text: It's a record label, not a form of music., sim: 0.8250436186790466
+Saved audio to /tmp/gen-p232-p232_255.wav
+ori: speaker: p250, utterance: p250_350.wav, text: That is a trend which will be encouraged., sim: 0.8604881167411804
+gen: speaker: p250, utterance: p250_350.wav, text: That is a trend which will be encouraged., sim: 0.7993407845497131
+Saved audio to /tmp/gen-p250-p250_350.wav
+ori: speaker: p250, utterance: p250_195.wav, text: They were seriously after him., sim: 0.8551262021064758
+gen: speaker: p250, utterance: p250_195.wav, text: They were seriously after him., sim: 0.6841344833374023
+Saved audio to /tmp/gen-p250-p250_195.wav
+ori: speaker: p250, utterance: p250_238.wav, text: I wouldn't even respond to that question., sim: 0.8230412006378174
+gen: speaker: p250, utterance: p250_238.wav, text: I wouldn't even respond to that question., sim: 0.8206477165222168
+Saved audio to /tmp/gen-p250-p250_238.wav
+ori: speaker: p250, utterance: p250_085.wav, text: They have now been banned from Celtic Park for life., sim: 0.9063528776168823
+gen: speaker: p250, utterance: p250_085.wav, text: They have now been banned from Celtic Park for life., sim: 0.8377209901809692
+Saved audio to /tmp/gen-p250-p250_085.wav
+ori: speaker: p250, utterance: p250_204.wav, text: We are going through difficult times., sim: 0.8251122832298279
+gen: speaker: p250, utterance: p250_204.wav, text: We are going through difficult times., sim: 0.649650514125824
+Saved audio to /tmp/gen-p250-p250_204.wav
+ori: speaker: p268, utterance: p268_353.wav, text: Instead, he missed the lot., sim: 0.8452821373939514
+gen: speaker: p268, utterance: p268_353.wav, text: Instead, he missed the lot., sim: 0.5587267875671387
+Saved audio to /tmp/gen-p268-p268_353.wav
+ori: speaker: p268, utterance: p268_389.wav, text: He also launched a new strategy for the agency., sim: 0.8519171476364136
+gen: speaker: p268, utterance: p268_389.wav, text: He also launched a new strategy for the agency., sim: 0.752465009689331
+Saved audio to /tmp/gen-p268-p268_389.wav
+ori: speaker: p268, utterance: p268_090.wav, text: I am glad I wasn't in it., sim: 0.8528232574462891
+gen: speaker: p268, utterance: p268_090.wav, text: I am glad I wasn't in it., sim: 0.6276656985282898
+Saved audio to /tmp/gen-p268-p268_090.wav
+ori: speaker: p268, utterance: p268_041.wav, text: Do I have a favourite ?, sim: 0.8061679005622864
+gen: speaker: p268, utterance: p268_041.wav, text: Do I have a favourite ?, sim: 0.6487799882888794
+Saved audio to /tmp/gen-p268-p268_041.wav
+ori: speaker: p268, utterance: p268_132.wav, text: Western countries condemned the conduct of the poll., sim: 0.9206027388572693
+gen: speaker: p268, utterance: p268_132.wav, text: Western countries condemned the conduct of the poll., sim: 0.747958779335022
+Saved audio to /tmp/gen-p268-p268_132.wav
+ori: speaker: p257, utterance: p257_242.wav, text: We decided we would go for a specialist inside centre., sim: 0.8471750020980835
+gen: speaker: p257, utterance: p257_242.wav, text: We decided we would go for a specialist inside centre., sim: 0.636908769607544
+Saved audio to /tmp/gen-p257-p257_242.wav
+ori: speaker: p257, utterance: p257_316.wav, text: The boat was fantastic., sim: 0.9173804521560669
+gen: speaker: p257, utterance: p257_316.wav, text: The boat was fantastic., sim: 0.5679023861885071
+Saved audio to /tmp/gen-p257-p257_316.wav
+ori: speaker: p257, utterance: p257_193.wav, text: There would appear to be no motive for the attack., sim: 0.8580716848373413
+gen: speaker: p257, utterance: p257_193.wav, text: There would appear to be no motive for the attack., sim: 0.6631599068641663
+Saved audio to /tmp/gen-p257-p257_193.wav
+ori: speaker: p257, utterance: p257_066.wav, text: I was just trying to win the golf tournament., sim: 0.9058806896209717
+gen: speaker: p257, utterance: p257_066.wav, text: I was just trying to win the golf tournament., sim: 0.8174842596054077
+Saved audio to /tmp/gen-p257-p257_066.wav
+ori: speaker: p257, utterance: p257_245.wav, text: I will not allow the destruction of the Scottish fishing industry., sim: 0.8138859868049622
+gen: speaker: p257, utterance: p257_245.wav, text: I will not allow the destruction of the Scottish fishing industry., sim: 0.8524560332298279
+Saved audio to /tmp/gen-p257-p257_245.wav
+ori: speaker: p295, utterance: p295_126.wav, text: You have a very persuasive president., sim: 0.8400863409042358
+gen: speaker: p295, utterance: p295_126.wav, text: You have a very persuasive president., sim: 0.7645712494850159
+Saved audio to /tmp/gen-p295-p295_126.wav
+ori: speaker: p295, utterance: p295_001.wav, text: Please call Stella., sim: 0.6412052512168884
+gen: speaker: p295, utterance: p295_001.wav, text: Please call Stella., sim: 0.5485260486602783
+Saved audio to /tmp/gen-p295-p295_001.wav
+ori: speaker: p295, utterance: p295_368.wav, text: Life, as many people know it, in other words., sim: 0.8878463506698608
+gen: speaker: p295, utterance: p295_368.wav, text: Life, as many people know it, in other words., sim: 0.7433860301971436
+Saved audio to /tmp/gen-p295-p295_368.wav
+ori: speaker: p295, utterance: p295_002.wav, text: Ask her to bring these things with her from the store., sim: 0.8080551028251648
+gen: speaker: p295, utterance: p295_002.wav, text: Ask her to bring these things with her from the store., sim: 0.7494102120399475
+Saved audio to /tmp/gen-p295-p295_002.wav
+ori: speaker: p295, utterance: p295_163.wav, text: Everyone is taking a breath and waiting., sim: 0.8700464963912964
+gen: speaker: p295, utterance: p295_163.wav, text: Everyone is taking a breath and waiting., sim: 0.6450409889221191
+Saved audio to /tmp/gen-p295-p295_163.wav
+ori: speaker: p261, utterance: p261_065.wav, text: It's not covered by the insurance., sim: 0.874416708946228
+gen: speaker: p261, utterance: p261_065.wav, text: It's not covered by the insurance., sim: 0.713371217250824
+Saved audio to /tmp/gen-p261-p261_065.wav
+ori: speaker: p261, utterance: p261_056.wav, text: We will pay their bills., sim: 0.8024970293045044
+gen: speaker: p261, utterance: p261_056.wav, text: We will pay their bills., sim: 0.5877785682678223
+Saved audio to /tmp/gen-p261-p261_056.wav
+ori: speaker: p261, utterance: p261_338.wav, text: Both sides have been hit by injury., sim: 0.8292654752731323
+gen: speaker: p261, utterance: p261_338.wav, text: Both sides have been hit by injury., sim: 0.5380761027336121
+Saved audio to /tmp/gen-p261-p261_338.wav
+ori: speaker: p261, utterance: p261_396.wav, text: However, it was well worth the wait., sim: 0.8545525074005127
+gen: speaker: p261, utterance: p261_396.wav, text: However, it was well worth the wait., sim: 0.5974836349487305
+Saved audio to /tmp/gen-p261-p261_396.wav
+ori: speaker: p261, utterance: p261_395.wav, text: You have to rely on each other., sim: 0.8295600414276123
+gen: speaker: p261, utterance: p261_395.wav, text: You have to rely on each other., sim: 0.6148706674575806
+Saved audio to /tmp/gen-p261-p261_395.wav
+ori: speaker: p259, utterance: p259_322.wav, text: We will deliver at director level.), sim: 0.8746169209480286
+gen: speaker: p259, utterance: p259_322.wav, text: We will deliver at director level.), sim: 0.5137884616851807
+Saved audio to /tmp/gen-p259-p259_322.wav
+ori: speaker: p259, utterance: p259_306.wav, text: It has the potential to be another North Sea.), sim: 0.8881407380104065
+gen: speaker: p259, utterance: p259_306.wav, text: It has the potential to be another North Sea.), sim: 0.7254056930541992
+Saved audio to /tmp/gen-p259-p259_306.wav
+ori: speaker: p259, utterance: p259_417.wav, text: It is a serious offence of reckless conduct.), sim: 0.9130069613456726
+gen: speaker: p259, utterance: p259_417.wav, text: It is a serious offence of reckless conduct.), sim: 0.8623707890510559
+Saved audio to /tmp/gen-p259-p259_417.wav
+ori: speaker: p259, utterance: p259_121.wav, text: That admission is not surprising.), sim: 0.9159863591194153
+gen: speaker: p259, utterance: p259_121.wav, text: That admission is not surprising.), sim: 0.692165732383728
+Saved audio to /tmp/gen-p259-p259_121.wav
+ori: speaker: p259, utterance: p259_257.wav, text: The amount of alcohol as a whole was very high.), sim: 0.8850674033164978
+gen: speaker: p259, utterance: p259_257.wav, text: The amount of alcohol as a whole was very high.), sim: 0.8507687449455261
+Saved audio to /tmp/gen-p259-p259_257.wav
+ori: speaker: p266, utterance: p266_057.wav, text: Until recently, she worked as a recruitment consultant in London., sim: 0.8429787158966064
+gen: speaker: p266, utterance: p266_057.wav, text: Until recently, she worked as a recruitment consultant in London., sim: 0.7699816823005676
+Saved audio to /tmp/gen-p266-p266_057.wav
+ori: speaker: p266, utterance: p266_204.wav, text: We have the experience, the courses, and an abundance of confidence., sim: 0.8300577998161316
+gen: speaker: p266, utterance: p266_204.wav, text: We have the experience, the courses, and an abundance of confidence., sim: 0.7850828766822815
+Saved audio to /tmp/gen-p266-p266_204.wav
+ori: speaker: p266, utterance: p266_423.wav, text: I've invented a village in East Lothian., sim: 0.7983471751213074
+gen: speaker: p266, utterance: p266_423.wav, text: I've invented a village in East Lothian., sim: 0.7254300713539124
+Saved audio to /tmp/gen-p266-p266_423.wav
+ori: speaker: p266, utterance: p266_219.wav, text: The loss of a company to the industry is a blow., sim: 0.8405621647834778
+gen: speaker: p266, utterance: p266_219.wav, text: The loss of a company to the industry is a blow., sim: 0.6893168687820435
+Saved audio to /tmp/gen-p266-p266_219.wav
+ori: speaker: p266, utterance: p266_206.wav, text: It's not before time., sim: 0.7690658569335938
+gen: speaker: p266, utterance: p266_206.wav, text: It's not before time., sim: 0.5850472450256348
+Saved audio to /tmp/gen-p266-p266_206.wav
+ori: speaker: p292, utterance: p292_325.wav, text: This is the last chance, and everyone knows it., sim: 0.8962109684944153
+gen: speaker: p292, utterance: p292_325.wav, text: This is the last chance, and everyone knows it., sim: 0.6920571327209473
+Saved audio to /tmp/gen-p292-p292_325.wav
+ori: speaker: p292, utterance: p292_242.wav, text: His musicals were very much of their time., sim: 0.9053813219070435
+gen: speaker: p292, utterance: p292_242.wav, text: His musicals were very much of their time., sim: 0.6336540579795837
+Saved audio to /tmp/gen-p292-p292_242.wav
+ori: speaker: p292, utterance: p292_213.wav, text: We were extremely arrogant., sim: 0.8640038967132568
+gen: speaker: p292, utterance: p292_213.wav, text: We were extremely arrogant., sim: 0.521772563457489
+Saved audio to /tmp/gen-p292-p292_213.wav
+ori: speaker: p292, utterance: p292_409.wav, text: It is good for Europe., sim: 0.7135088443756104
+gen: speaker: p292, utterance: p292_409.wav, text: It is good for Europe., sim: 0.5424532294273376
+Saved audio to /tmp/gen-p292-p292_409.wav
+ori: speaker: p292, utterance: p292_104.wav, text: It was, for me, like a week in heaven., sim: 0.911645770072937
+gen: speaker: p292, utterance: p292_104.wav, text: It was, for me, like a week in heaven., sim: 0.6284297704696655
+Saved audio to /tmp/gen-p292-p292_104.wav
+ori: speaker: p234, utterance: p234_243.wav, text: Was everything done to save people ?, sim: 0.8672463893890381
+gen: speaker: p234, utterance: p234_243.wav, text: Was everything done to save people ?, sim: 0.6761647462844849
+Saved audio to /tmp/gen-p234-p234_243.wav
+ori: speaker: p234, utterance: p234_223.wav, text: He must have a crack at it., sim: 0.8463222980499268
+gen: speaker: p234, utterance: p234_223.wav, text: He must have a crack at it., sim: 0.6508975625038147
+Saved audio to /tmp/gen-p234-p234_223.wav
+ori: speaker: p234, utterance: p234_045.wav, text: All businesses continue to trade., sim: 0.8591694831848145
+gen: speaker: p234, utterance: p234_045.wav, text: All businesses continue to trade., sim: 0.7368520498275757
+Saved audio to /tmp/gen-p234-p234_045.wav
+ori: speaker: p234, utterance: p234_101.wav, text: I had no intention of misleading anyone., sim: 0.8489173650741577
+gen: speaker: p234, utterance: p234_101.wav, text: I had no intention of misleading anyone., sim: 0.7876368165016174
+Saved audio to /tmp/gen-p234-p234_101.wav
+ori: speaker: p234, utterance: p234_123.wav, text: While they went on holiday, we got the contract., sim: 0.8625891208648682
+gen: speaker: p234, utterance: p234_123.wav, text: While they went on holiday, we got the contract., sim: 0.6606907248497009
+Saved audio to /tmp/gen-p234-p234_123.wav
+ori: speaker: p233, utterance: p233_061.wav, text: You have to be patient., sim: 0.8123831152915955
+gen: speaker: p233, utterance: p233_061.wav, text: You have to be patient., sim: 0.6069647073745728
+Saved audio to /tmp/gen-p233-p233_061.wav
+ori: speaker: p233, utterance: p233_248.wav, text: The project has already secured the support of Sir Sean Connery., sim: 0.9239634275436401
+gen: speaker: p233, utterance: p233_248.wav, text: The project has already secured the support of Sir Sean Connery., sim: 0.8575760126113892
+Saved audio to /tmp/gen-p233-p233_248.wav
+ori: speaker: p233, utterance: p233_300.wav, text: We have to sort it out ourselves., sim: 0.8100523948669434
+gen: speaker: p233, utterance: p233_300.wav, text: We have to sort it out ourselves., sim: 0.7429338693618774
+Saved audio to /tmp/gen-p233-p233_300.wav
+ori: speaker: p233, utterance: p233_379.wav, text: Yet the data is compelling., sim: 0.8306214213371277
+gen: speaker: p233, utterance: p233_379.wav, text: Yet the data is compelling., sim: 0.5736488103866577
+Saved audio to /tmp/gen-p233-p233_379.wav
+ori: speaker: p233, utterance: p233_313.wav, text: The election is total confusion and chaos., sim: 0.9101442098617554
+gen: speaker: p233, utterance: p233_313.wav, text: The election is total confusion and chaos., sim: 0.8391305804252625
+Saved audio to /tmp/gen-p233-p233_313.wav
+ori: speaker: p258, utterance: p258_056.wav, text: And if he hadn't become a musician?, sim: 0.8467084169387817
+gen: speaker: p258, utterance: p258_056.wav, text: And if he hadn't become a musician?, sim: 0.7824721336364746
+Saved audio to /tmp/gen-p258-p258_056.wav
+ori: speaker: p258, utterance: p258_207.wav, text: Feel the heat?, sim: 0.7070225477218628
+gen: speaker: p258, utterance: p258_207.wav, text: Feel the heat?, sim: 0.6442919373512268
+Saved audio to /tmp/gen-p258-p258_207.wav
+ori: speaker: p258, utterance: p258_259.wav, text: It will now relate to all public bodies in Scotland., sim: 0.9303192496299744
+gen: speaker: p258, utterance: p258_259.wav, text: It will now relate to all public bodies in Scotland., sim: 0.8257383704185486
+Saved audio to /tmp/gen-p258-p258_259.wav
+ori: speaker: p258, utterance: p258_093.wav, text: Journalists should make him., sim: 0.8887201547622681
+gen: speaker: p258, utterance: p258_093.wav, text: Journalists should make him., sim: 0.8026758432388306
+Saved audio to /tmp/gen-p258-p258_093.wav
+ori: speaker: p258, utterance: p258_167.wav, text: I always felt they played for me., sim: 0.8113540410995483
+gen: speaker: p258, utterance: p258_167.wav, text: I always felt they played for me., sim: 0.7939931750297546
+Saved audio to /tmp/gen-p258-p258_167.wav
+ori: speaker: p293, utterance: p293_220.wav, text: Who would be in that desert?, sim: 0.8260650634765625
+gen: speaker: p293, utterance: p293_220.wav, text: Who would be in that desert?, sim: 0.5885424613952637
+Saved audio to /tmp/gen-p293-p293_220.wav
+ori: speaker: p293, utterance: p293_197.wav, text: I'm a bit annoyed., sim: 0.8151834011077881
+gen: speaker: p293, utterance: p293_197.wav, text: I'm a bit annoyed., sim: 0.6175021529197693
+Saved audio to /tmp/gen-p293-p293_197.wav
+ori: speaker: p293, utterance: p293_051.wav, text: Stealing from the benefits system is no different., sim: 0.7783315777778625
+gen: speaker: p293, utterance: p293_051.wav, text: Stealing from the benefits system is no different., sim: 0.7183919548988342
+Saved audio to /tmp/gen-p293-p293_051.wav
+ori: speaker: p293, utterance: p293_295.wav, text: Construction is due to begin in February., sim: 0.8780157566070557
+gen: speaker: p293, utterance: p293_295.wav, text: Construction is due to begin in February., sim: 0.6808379888534546
+Saved audio to /tmp/gen-p293-p293_295.wav
+ori: speaker: p293, utterance: p293_306.wav, text: Again the verdict was not proven., sim: 0.8813869953155518
+gen: speaker: p293, utterance: p293_306.wav, text: Again the verdict was not proven., sim: 0.5731682777404785
+Saved audio to /tmp/gen-p293-p293_306.wav
+ori: speaker: p267, utterance: p267_140.wav, text: It was deployed in the Gulf War., sim: 0.8843117952346802
+gen: speaker: p267, utterance: p267_140.wav, text: It was deployed in the Gulf War., sim: 0.6447708606719971
+Saved audio to /tmp/gen-p267-p267_140.wav
+ori: speaker: p267, utterance: p267_153.wav, text: We are still getting over it., sim: 0.8828392028808594
+gen: speaker: p267, utterance: p267_153.wav, text: We are still getting over it., sim: 0.6578245759010315
+Saved audio to /tmp/gen-p267-p267_153.wav
+ori: speaker: p267, utterance: p267_060.wav, text: We need to increase the membership., sim: 0.8369192481040955
+gen: speaker: p267, utterance: p267_060.wav, text: We need to increase the membership., sim: 0.5742001533508301
+Saved audio to /tmp/gen-p267-p267_060.wav
+ori: speaker: p267, utterance: p267_347.wav, text: He was then replaced by Ross., sim: 0.9090952277183533
+gen: speaker: p267, utterance: p267_347.wav, text: He was then replaced by Ross., sim: 0.6856271028518677
+Saved audio to /tmp/gen-p267-p267_347.wav
+ori: speaker: p267, utterance: p267_395.wav, text: We shall not be moved., sim: 0.804547131061554
+gen: speaker: p267, utterance: p267_395.wav, text: We shall not be moved., sim: 0.535006582736969
+Saved audio to /tmp/gen-p267-p267_395.wav
+ori: speaker: p260, utterance: p260_149.wav, text: Crucially, though, United were still alive., sim: 0.8900088667869568
+gen: speaker: p260, utterance: p260_149.wav, text: Crucially, though, United were still alive., sim: 0.7894768714904785
+Saved audio to /tmp/gen-p260-p260_149.wav
+ori: speaker: p260, utterance: p260_215.wav, text: The loss of a company to the industry is a blow., sim: 0.915693461894989
+gen: speaker: p260, utterance: p260_215.wav, text: The loss of a company to the industry is a blow., sim: 0.8404853343963623
+Saved audio to /tmp/gen-p260-p260_215.wav
+ori: speaker: p260, utterance: p260_063.wav, text: They are real., sim: 0.758208155632019
+gen: speaker: p260, utterance: p260_063.wav, text: They are real., sim: 0.6093417406082153
+Saved audio to /tmp/gen-p260-p260_063.wav
+ori: speaker: p260, utterance: p260_233.wav, text: The car was just there., sim: 0.814597487449646
+gen: speaker: p260, utterance: p260_233.wav, text: The car was just there., sim: 0.6952226161956787
+Saved audio to /tmp/gen-p260-p260_233.wav
+ori: speaker: p260, utterance: p260_324.wav, text: I would love it., sim: 0.707629919052124
+gen: speaker: p260, utterance: p260_324.wav, text: I would love it., sim: 0.5845968723297119
+Saved audio to /tmp/gen-p260-p260_324.wav
+ori: speaker: p294, utterance: p294_380.wav, text: Visitors were also impressed., sim: 0.8992500305175781
+gen: speaker: p294, utterance: p294_380.wav, text: Visitors were also impressed., sim: 0.6584105491638184
+Saved audio to /tmp/gen-p294-p294_380.wav
+ori: speaker: p294, utterance: p294_133.wav, text: I can lead by example., sim: 0.8771624565124512
+gen: speaker: p294, utterance: p294_133.wav, text: I can lead by example., sim: 0.8276305198669434
+Saved audio to /tmp/gen-p294-p294_133.wav
+ori: speaker: p294, utterance: p294_155.wav, text: You feel the pride., sim: 0.8603140711784363
+gen: speaker: p294, utterance: p294_155.wav, text: You feel the pride., sim: 0.5390017628669739
+Saved audio to /tmp/gen-p294-p294_155.wav
+ori: speaker: p294, utterance: p294_006.wav, text: When the sunlight strikes raindrops in the air, they act as a prism and form a rainbow., sim: 0.9414693117141724
+gen: speaker: p294, utterance: p294_006.wav, text: When the sunlight strikes raindrops in the air, they act as a prism and form a rainbow., sim: 0.9125409126281738
+Saved audio to /tmp/gen-p294-p294_006.wav
+ori: speaker: p294, utterance: p294_267.wav, text: I would love to travel with it., sim: 0.8839397430419922
+gen: speaker: p294, utterance: p294_267.wav, text: I would love to travel with it., sim: 0.718880832195282
+Saved audio to /tmp/gen-p294-p294_267.wav
+ori: speaker: p269, utterance: p269_362.wav, text: I HAVE a dream., sim: 0.8119427561759949
+gen: speaker: p269, utterance: p269_362.wav, text: I HAVE a dream., sim: 0.568634033203125
+Saved audio to /tmp/gen-p269-p269_362.wav
+ori: speaker: p269, utterance: p269_184.wav, text: The conference is a chance for members to contribute to the debate., sim: 0.8741551637649536
+gen: speaker: p269, utterance: p269_184.wav, text: The conference is a chance for members to contribute to the debate., sim: 0.8463632464408875
+Saved audio to /tmp/gen-p269-p269_184.wav
+ori: speaker: p269, utterance: p269_137.wav, text: It's the big omission., sim: 0.7940380573272705
+gen: speaker: p269, utterance: p269_137.wav, text: It's the big omission., sim: 0.605042040348053
+Saved audio to /tmp/gen-p269-p269_137.wav
+ori: speaker: p269, utterance: p269_063.wav, text: It's that kind of place., sim: 0.8943712711334229
+gen: speaker: p269, utterance: p269_063.wav, text: It's that kind of place., sim: 0.6218746304512024
+Saved audio to /tmp/gen-p269-p269_063.wav
+ori: speaker: p269, utterance: p269_149.wav, text: We just had a go., sim: 0.8410379886627197
+gen: speaker: p269, utterance: p269_149.wav, text: We just had a go., sim: 0.5751562118530273
+Saved audio to /tmp/gen-p269-p269_149.wav
+ori: speaker: p256, utterance: p256_139.wav, text: Police could not say if the two incidents were connected., sim: 0.9393972158432007
+gen: speaker: p256, utterance: p256_139.wav, text: Police could not say if the two incidents were connected., sim: 0.8506543040275574
+Saved audio to /tmp/gen-p256-p256_139.wav
+ori: speaker: p256, utterance: p256_163.wav, text: We have to move forward., sim: 0.8544620871543884
+gen: speaker: p256, utterance: p256_163.wav, text: We have to move forward., sim: 0.5599103569984436
+Saved audio to /tmp/gen-p256-p256_163.wav
+ori: speaker: p256, utterance: p256_078.wav, text: IT shouldn't come as a surprise, but it does., sim: 0.9156312942504883
+gen: speaker: p256, utterance: p256_078.wav, text: IT shouldn't come as a surprise, but it does., sim: 0.7447458505630493
+Saved audio to /tmp/gen-p256-p256_078.wav
+ori: speaker: p256, utterance: p256_133.wav, text: Who will attend?, sim: 0.8203428387641907
+gen: speaker: p256, utterance: p256_133.wav, text: Who will attend?, sim: 0.6382376551628113
+Saved audio to /tmp/gen-p256-p256_133.wav
+ori: speaker: p256, utterance: p256_182.wav, text: They will run a mile., sim: 0.8288658857345581
+gen: speaker: p256, utterance: p256_182.wav, text: They will run a mile., sim: 0.5993744730949402
+Saved audio to /tmp/gen-p256-p256_182.wav
+ori: speaker: p251, utterance: p251_030.wav, text: So if we can take anything from tonight, it will be fantastic., sim: 0.7655068039894104
+gen: speaker: p251, utterance: p251_030.wav, text: So if we can take anything from tonight, it will be fantastic., sim: 0.7600933313369751
+Saved audio to /tmp/gen-p251-p251_030.wav
+ori: speaker: p251, utterance: p251_074.wav, text: I've not thought about it., sim: 0.8909256458282471
+gen: speaker: p251, utterance: p251_074.wav, text: I've not thought about it., sim: 0.611828625202179
+Saved audio to /tmp/gen-p251-p251_074.wav
+ori: speaker: p251, utterance: p251_043.wav, text: Dancing was her life., sim: 0.8403779864311218
+gen: speaker: p251, utterance: p251_043.wav, text: Dancing was her life., sim: 0.7907832860946655
+Saved audio to /tmp/gen-p251-p251_043.wav
+ori: speaker: p251, utterance: p251_227.wav, text: IT S the real thing, for sure., sim: 0.8311350345611572
+gen: speaker: p251, utterance: p251_227.wav, text: IT S the real thing, for sure., sim: 0.6145163774490356
+Saved audio to /tmp/gen-p251-p251_227.wav
+ori: speaker: p251, utterance: p251_007.wav, text: The rainbow is a division of white light into many beautiful colors. , sim: 0.8305720090866089
+gen: speaker: p251, utterance: p251_007.wav, text: The rainbow is a division of white light into many beautiful colors. , sim: 0.8182323575019836
+Saved audio to /tmp/gen-p251-p251_007.wav
+ori: speaker: p323, utterance: p323_169.wav, text: Connell was standing there, ordering her to get up., sim: 0.8878998160362244
+gen: speaker: p323, utterance: p323_169.wav, text: Connell was standing there, ordering her to get up., sim: 0.7871695756912231
+Saved audio to /tmp/gen-p323-p323_169.wav
+ori: speaker: p323, utterance: p323_218.wav, text: The process itself has taken over., sim: 0.9096672534942627
+gen: speaker: p323, utterance: p323_218.wav, text: The process itself has taken over., sim: 0.813669741153717
+Saved audio to /tmp/gen-p323-p323_218.wav
+ori: speaker: p323, utterance: p323_380.wav, text: He must be seen to be impartial., sim: 0.8230189085006714
+gen: speaker: p323, utterance: p323_380.wav, text: He must be seen to be impartial., sim: 0.721400797367096
+Saved audio to /tmp/gen-p323-p323_380.wav
+ori: speaker: p323, utterance: p323_365.wav, text: Shyness has rarely sold in boxing terms., sim: 0.8678992986679077
+gen: speaker: p323, utterance: p323_365.wav, text: Shyness has rarely sold in boxing terms., sim: 0.7857832908630371
+Saved audio to /tmp/gen-p323-p323_365.wav
+ori: speaker: p323, utterance: p323_216.wav, text: Lack of pace is his big problem., sim: 0.8446140885353088
+gen: speaker: p323, utterance: p323_216.wav, text: Lack of pace is his big problem., sim: 0.8343541026115417
+Saved audio to /tmp/gen-p323-p323_216.wav
+ori: speaker: p312, utterance: p312_133.wav, text: She was extremely rigid., sim: 0.8388198018074036
+gen: speaker: p312, utterance: p312_133.wav, text: She was extremely rigid., sim: 0.8225129246711731
+Saved audio to /tmp/gen-p312-p312_133.wav
+ori: speaker: p312, utterance: p312_409.wav, text: I put pressure on him., sim: 0.8298710584640503
+gen: speaker: p312, utterance: p312_409.wav, text: I put pressure on him., sim: 0.7127605080604553
+Saved audio to /tmp/gen-p312-p312_409.wav
+ori: speaker: p312, utterance: p312_397.wav, text: And we all understand that., sim: 0.8698863387107849
+gen: speaker: p312, utterance: p312_397.wav, text: And we all understand that., sim: 0.6381120681762695
+Saved audio to /tmp/gen-p312-p312_397.wav
+ori: speaker: p312, utterance: p312_076.wav, text: He was charged with perjury., sim: 0.8426754474639893
+gen: speaker: p312, utterance: p312_076.wav, text: He was charged with perjury., sim: 0.8142744898796082
+Saved audio to /tmp/gen-p312-p312_076.wav
+ori: speaker: p312, utterance: p312_012.wav, text: Throughout the centuries people have explained the rainbow in various ways., sim: 0.8741186857223511
+gen: speaker: p312, utterance: p312_012.wav, text: Throughout the centuries people have explained the rainbow in various ways., sim: 0.8108210563659668
+Saved audio to /tmp/gen-p312-p312_012.wav

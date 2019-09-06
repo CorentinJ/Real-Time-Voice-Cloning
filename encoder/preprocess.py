@@ -1,11 +1,16 @@
+import io
+
+import librosa
 from multiprocess.pool import ThreadPool
-from encoder.params_data import *
+
+import encoder.audio
 from encoder.config import librispeech_datasets, anglophone_nationalites
 from datetime import datetime
-from encoder import audio
 from pathlib import Path
 from tqdm import tqdm
 import numpy as np
+
+from encoder.params_data import partials_n_frames, sampling_rate
 
 
 class DatasetLog:
@@ -94,12 +99,19 @@ def _preprocess_speaker_dirs(speaker_dirs, dataset_name, datasets_root, out_dir,
                 continue
                 
             # Load and preprocess the waveform
-            wav = audio.preprocess_wav(in_fpath)
+            # Load the wav from disk if needed
+            if isinstance(in_fpath, str) or isinstance(in_fpath, Path) or isinstance(in_fpath, io.BytesIO):
+                wav, source_sr = librosa.load(in_fpath, sr=None)
+            else:
+                raise ValueError('unsupported format of wav_file')
+
+            # preprocess utterance waveform to a numpy array of float32
+            wav = encoder.audio.preprocess_wav(wav, source_sr)
             if len(wav) == 0:
                 continue
             
             # Create the mel spectrogram, discard those that are too short
-            frames = audio.wav_to_mel_spectrogram(wav)
+            frames = encoder.audio.wav_to_mel_spectrogram(wav)
             if len(frames) < partials_n_frames:
                 continue
             

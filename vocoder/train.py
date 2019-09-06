@@ -32,7 +32,7 @@ def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_tr
         hop_length=hp.hop_length,
         sample_rate=hp.sample_rate,
         mode=hp.voc_mode
-    ).cuda()
+    )#.cuda()
        
     # Initialize the optimizer
     optimizer = optim.Adam(model.parameters())
@@ -79,7 +79,7 @@ def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_tr
         running_loss = 0.
 
         for i, (x, y, m) in enumerate(data_loader, 1):
-            x, m, y = x.cuda(), m.cuda(), y.cuda()
+            x, m, y = x#.cuda(), m#.cuda(), y#.cuda()
             
             # Forward pass
             y_hat = model(x, m)

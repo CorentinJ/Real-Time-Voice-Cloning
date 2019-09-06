@@ -83,8 +83,8 @@ class WaveRNN(nn.Module) :
             c_outputs, f_outputs = [], []
 
             # Some initial inputs
-            out_coarse = torch.LongTensor([0]).cuda()
-            out_fine = torch.LongTensor([0]).cuda()
+            out_coarse = torch.LongTensor([0])#.cuda()
+            out_fine = torch.LongTensor([0])#.cuda()
 
             # We'll meed a hidden state
             hidden = self.init_hidden()
@@ -162,7 +162,7 @@ class WaveRNN(nn.Module) :
         return output, coarse, fine
 
     def init_hidden(self, batch_size=1) :
-        return torch.zeros(batch_size, self.hidden_size).cuda()
+        return torch.zeros(batch_size, self.hidden_size)#.cuda()
     
     def num_params(self) :
         parameters = filter(lambda p: p.requires_grad, self.parameters())

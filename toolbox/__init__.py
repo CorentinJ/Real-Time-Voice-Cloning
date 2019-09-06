@@ -8,6 +8,9 @@ from toolbox.utterance import Utterance
 import numpy as np
 import traceback
 import sys
+import uuid
+import pickle
+import soundfile
 
 
 # Use this directory structure for your datasets, or modify it to fit your needs
@@ -122,7 +125,8 @@ class Toolbox:
         self.add_real_utterance(wav, name, speaker_name)
         
     def record(self):
-        wav = self.ui.record_one(encoder.sampling_rate, 5)
+        # FIXME! Record 10 seconds.
+        wav = self.ui.record_one(encoder.sampling_rate, 10)
         if wav is None:
             return 
         self.ui.play(wav, encoder.sampling_rate)
@@ -197,6 +201,11 @@ class Toolbox:
         else:
             self.ui.log("Waveform generation with Griffin-Lim... ")
             wav = Synthesizer.griffin_lim(spec)
+        # Save wav
+        filename = f'/tmp/gen-{uuid.uuid4().hex[-12:]}.wav'
+        soundfile.write(filename, wav, Synthesizer.sample_rate, 'PCM_16')
+        self.ui.log(f"Saved audio to {filename}")
+
         self.ui.set_loading(0)
         self.ui.log(" Done!", "append")
         

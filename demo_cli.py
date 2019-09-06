@@ -34,8 +34,8 @@ if __name__ == '__main__':
     print_args(args, parser)
     if not args.no_sound:
         import sounddevice as sd
-        
     
+    """
     ## Print some environment information (for debugging purposes)
     print("Running a test of your configuration...\n")
     if not torch.cuda.is_available():
@@ -54,6 +54,7 @@ if __name__ == '__main__':
            gpu_properties.major,
            gpu_properties.minor,
            gpu_properties.total_memory / 1e9))
+    """
     
     
     ## Load the models one by one.

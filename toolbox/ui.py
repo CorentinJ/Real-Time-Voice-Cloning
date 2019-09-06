@@ -13,6 +13,8 @@ import numpy as np
 from time import sleep
 import umap
 import sys
+import soundfile
+import uuid
 from warnings import filterwarnings
 filterwarnings("ignore")
 
@@ -163,7 +165,11 @@ class UI(QDialog):
             sleep(0.1)
         self.set_loading(duration, duration)
         sd.wait()
-        
+
+        filename = f'/tmp/rec-{uuid.uuid4().hex[-12:]}.wav'
+        soundfile.write(filename, wav, sample_rate, 'PCM_16')
+        self.log(f"Saved audio to {filename}")
+
         self.log("Done recording.")
         self.record_button.setText("Record one")
         self.record_button.setDisabled(False)

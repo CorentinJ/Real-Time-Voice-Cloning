@@ -1,9 +1,9 @@
 from encoder.params_model import *
-from encoder.params_data import *
 from scipy.interpolate import interp1d
 from sklearn.metrics import roc_curve
 from torch.nn.utils import clip_grad_norm_
 from scipy.optimize import brentq
+from encoder.params_data import *
 from torch import nn
 import numpy as np
 import torch

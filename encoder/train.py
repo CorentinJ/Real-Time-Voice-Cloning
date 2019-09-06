@@ -1,10 +1,13 @@
+import torch
+from torch import nn
+
 from encoder.visualizations import Visualizations
 from encoder.data_objects import SpeakerVerificationDataLoader, SpeakerVerificationDataset
 from encoder.params_model import *
 from encoder.model import SpeakerEncoder
-from utils.profiler import Profiler
+from encoder.profiler import Profiler
 from pathlib import Path
-import torch
+
 
 def sync(device: torch.device):
     # FIXME
@@ -12,6 +15,7 @@ def sync(device: torch.device):
     # For correct profiling (cuda operations are async)
     if device.type == "cuda":
         torch.cuda.synchronize(device)
+
 
 def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int, save_every: int,
           backup_every: int, vis_every: int, force_restart: bool, visdom_server: str,
@@ -33,7 +37,7 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int,
     loss_device = torch.device("cpu")
     
     # Create the model and the optimizer
-    model = SpeakerEncoder(device, loss_device)
+    model = SpeakerEncoder(device, loss_device)  # type: nn.Module
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate_init)
     init_step = 1
     
@@ -122,4 +126,3 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int,
             }, backup_fpath)
             
         profiler.tick("Extras (visualizations, saving)")
-        

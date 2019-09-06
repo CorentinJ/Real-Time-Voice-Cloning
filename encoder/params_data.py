@@ -26,4 +26,4 @@ vad_max_silence_length = 6
 
 ## Audio volume normalization
 audio_norm_target_dBFS = -30
-
+int16_max = (2 ** 15) - 1
