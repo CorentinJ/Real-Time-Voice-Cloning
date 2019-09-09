@@ -1,3 +1,4 @@
+from multiprocess.context import SpawnContext
 from synthesizer.hparams import hparams
 from multiprocess.pool import Pool  # You're free to use either one
 #from multiprocessing import Pool   # 
@@ -5,7 +6,6 @@ from synthesizer import audio
 from pathlib import Path
 from typing import Union, List
 import numpy as np
-import numba.cuda
 import librosa
 
 
@@ -90,14 +90,17 @@ class Synthesizer:
             # Low memory inference mode: load the model upon every request. The model has to be 
             # loaded in a separate process to be able to release GPU memory (a simple workaround 
             # to tensorflow's intricacies)
-            specs, alignments = Pool(1).starmap(Synthesizer._one_shot_synthesize_spectrograms, 
-                                                [(self.checkpoint_fpath, embeddings, texts)])[0]
+            specs, alignments = Pool(1, context=SpawnContext()).starmap(
+                Synthesizer._one_shot_synthesize_spectrograms,
+                [(self.checkpoint_fpath, embeddings, texts)]
+            )[0]
     
         return (specs, alignments) if return_alignments else specs
 
     @staticmethod
     def _one_shot_synthesize_spectrograms(checkpoint_fpath, embeddings, texts):
         from synthesizer.tacotron2 import Tacotron2
+        import numba.cuda
     
         # Load the model and forward the inputs
         model = Tacotron2(str(checkpoint_fpath), hparams)
