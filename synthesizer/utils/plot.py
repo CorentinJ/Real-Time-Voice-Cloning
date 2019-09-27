@@ -2,6 +2,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+import wandb
 
 
 def split_title_line(title_text, max_words=5):
@@ -12,7 +13,7 @@ def split_title_line(title_text, max_words=5):
 	seq = title_text.split()
 	return "\n".join([" ".join(seq[i:i + max_words]) for i in range(0, len(seq), max_words)])
 
-def plot_alignment(alignment, path, title=None, split_title=False, max_len=None):
+def plot_alignment(alignment, path, title=None, split_title=False, max_len=None, caption="caption"):
 	if max_len is not None:
 		alignment = alignment[:, :max_len]
 
@@ -34,11 +35,12 @@ def plot_alignment(alignment, path, title=None, split_title=False, max_len=None)
 	plt.title(title)
 	plt.ylabel("Encoder timestep")
 	plt.tight_layout()
+	wandb.log({caption: [wandb.Image(plt, caption=caption)]}, commit=False)
 	plt.savefig(path, format="png")
 	plt.close()
 
 
-def plot_spectrogram(pred_spectrogram, path, title=None, split_title=False, target_spectrogram=None, max_len=None, auto_aspect=False):
+def plot_spectrogram(pred_spectrogram, path, title=None, split_title=False, target_spectrogram=None, max_len=None, auto_aspect=False, caption="caption"):
 	if max_len is not None:
 		target_spectrogram = target_spectrogram[:max_len]
 		pred_spectrogram = pred_spectrogram[:max_len]
@@ -72,5 +74,6 @@ def plot_spectrogram(pred_spectrogram, path, title=None, split_title=False, targ
 	fig.colorbar(mappable=im, shrink=0.65, orientation="horizontal", ax=ax2)
 
 	plt.tight_layout()
+	wandb.log({caption: [wandb.Image(plt, caption=caption)]}, commit=False)
 	plt.savefig(path, format="png")
 	plt.close()

@@ -12,6 +12,7 @@ import numpy as np
 import traceback
 import time
 import os
+import wandb
 
 log = infolog.log
 
@@ -206,6 +207,7 @@ def train(log_dir, args, hparams):
             
             # Training loop
             while not coord.should_stop() and step < args.tacotron_train_steps:
+                audios = []
                 start_time = time.time()
                 step, loss, opt = sess.run([global_step, model.loss, model.optimize])
                 time_window.append(time.time() - start_time)
@@ -258,6 +260,7 @@ def train(log_dir, args, hparams):
                         linear_loss = sum(linear_losses) / len(linear_losses)
                         
                         wav = audio.inv_linear_spectrogram(lin_p.T, hparams)
+                        audios.append(wandb.Audio(audio.as_np_wav(wav), caption="eval-wave-from-linear", sample_rate=hparams.sample_rate))
                         audio.save_wav(wav, os.path.join(eval_wav_dir,
                                                          "step-{}-eval-wave-from-linear.wav".format(
                                                              step)), sr=hparams.sample_rate)
@@ -288,6 +291,7 @@ def train(log_dir, args, hparams):
                     log("Saving eval log to {}..".format(eval_dir))
                     # Save some log to monitor model improvement on same unseen sequence
                     wav = audio.inv_mel_spectrogram(mel_p.T, hparams)
+                    audios.append(wandb.Audio(audio.as_np_wav(wav), caption="eval-wave-from-mel", sample_rate=hparams.sample_rate))
                     audio.save_wav(wav, os.path.join(eval_wav_dir,
                                                      "step-{}-eval-wave-from-mel.wav".format(step)),
                                    sr=hparams.sample_rate)
@@ -298,7 +302,7 @@ def train(log_dir, args, hparams):
                                                                                     time_string(),
                                                                                     step,
                                                                                     eval_loss),
-                                        max_len=t_len // hparams.outputs_per_step)
+                                        max_len=t_len // hparams.outputs_per_step, caption="eval-align")
                     plot.plot_spectrogram(mel_p, os.path.join(eval_plot_dir,
                                                               "step-{"
 															  "}-eval-mel-spectrogram.png".format(
@@ -308,7 +312,7 @@ def train(log_dir, args, hparams):
                                                                                       step,
                                                                                       eval_loss),
                                           target_spectrogram=mel_t,
-                                          max_len=t_len)
+                                          max_len=t_len, caption="eval-mel-spectrogram")
                     
                     if hparams.predict_linear:
                         plot.plot_spectrogram(lin_p, os.path.join(eval_plot_dir,
@@ -317,7 +321,7 @@ def train(log_dir, args, hparams):
                                               title="{}, {}, step={}, loss={:.5f}".format(
                                                   "Tacotron", time_string(), step, eval_loss),
                                               target_spectrogram=lin_t,
-                                              max_len=t_len, auto_aspect=True)
+                                              max_len=t_len, auto_aspect=True, caption="eval-linear-spectrogram")
                     
                     log("Eval loss for global step {}: {:.3f}".format(step, eval_loss))
                     log("Writing eval summary!")
@@ -345,6 +349,7 @@ def train(log_dir, args, hparams):
                     
                     # save griffin lim inverted wav for debug (mel -> wav)
                     wav = audio.inv_mel_spectrogram(mel_prediction.T, hparams)
+                    audios.append(wandb.Audio(audio.as_np_wav(wav), caption="wave-from-mel", sample_rate=hparams.sample_rate))
                     audio.save_wav(wav,
                                    os.path.join(wav_dir, "step-{}-wave-from-mel.wav".format(step)),
                                    sr=hparams.sample_rate)
@@ -355,7 +360,7 @@ def train(log_dir, args, hparams):
                                         title="{}, {}, step={}, loss={:.5f}".format("Tacotron",
                                                                                     time_string(),
                                                                                     step, loss),
-                                        max_len=target_length // hparams.outputs_per_step)
+                                        max_len=target_length // hparams.outputs_per_step, caption="wave-from-mel")
                     # save real and predicted mel-spectrogram plot to disk (control purposes)
                     plot.plot_spectrogram(mel_prediction, os.path.join(plot_dir,
                                                                        "step-{}-mel-spectrogram.png".format(
@@ -364,7 +369,7 @@ def train(log_dir, args, hparams):
                                                                                       time_string(),
                                                                                       step, loss),
                                           target_spectrogram=target,
-                                          max_len=target_length)
+                                          max_len=target_length, caption="mel-spectrogram")
                     log("Input at step {}: {}".format(step, sequence_to_text(input_seq)))
                 
                 if step % args.embedding_interval == 0 or step == args.tacotron_train_steps or step == 1:
@@ -377,7 +382,10 @@ def train(log_dir, args, hparams):
                                         [char_embedding_meta],
                                         checkpoint_state.model_checkpoint_path)
                     log("Tacotron Character embeddings have been updated on tensorboard!")
-            
+                if len(audios) > 0:
+                    wandb.log({"audios": audios}, commit=False)
+                wandb.log({"loss": loss, "loss_window.average": loss_window.average})
+                # wandb.tensorflow.log(stats)
             log("Tacotron training complete after {} global steps!".format(
                 args.tacotron_train_steps), slack=True)
             return save_dir

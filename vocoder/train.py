@@ -10,7 +10,7 @@ import torch.nn.functional as F
 import vocoder.hparams as hp
 import numpy as np
 import time
-
+import wandb
 
 def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_truth: bool,
           save_every: int, backup_every: int, force_restart: bool):
@@ -112,8 +112,10 @@ def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_tr
                 f"Loss: {avg_loss:.4f} | {speed:.1f} " \
                 f"steps/s | Step: {k}k | "
             stream(msg)
+            wandb.log({'loss': avg_loss})
 
 
         gen_testset(model, test_loader, hp.voc_gen_at_checkpoint, hp.voc_gen_batched,
                     hp.voc_target, hp.voc_overlap, model_dir)
         print("")
+    wandb.save(str(model_dir.resolve()))

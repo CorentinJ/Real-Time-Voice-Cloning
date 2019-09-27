@@ -5,6 +5,7 @@ from encoder.model import SpeakerEncoder
 from utils.profiler import Profiler
 from pathlib import Path
 import torch
+import wandb
 
 def sync(device: torch.device):
     # FIXME
@@ -91,7 +92,6 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int,
         # Update visualizations
         # learning_rate = optimizer.param_groups[0]["lr"]
         vis.update(loss.item(), eer, step)
-        
         # Draw projections and save them to the backup folder
         if umap_every != 0 and step % umap_every == 0:
             print("Drawing and saving projections (step %d)" % step)
@@ -121,5 +121,5 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int,
                 "optimizer_state": optimizer.state_dict(),
             }, backup_fpath)
             
+        wandb.log({'loss': loss.item(), 'Equal error rate': eer})
         profiler.tick("Extras (visualizations, saving)")
-        

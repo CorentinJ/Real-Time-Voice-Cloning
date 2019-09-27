@@ -4,6 +4,7 @@ from utils.argutils import print_args
 from synthesizer import infolog
 import argparse
 import os
+import wandb
 
 
 def prepare_run(args):
@@ -49,7 +50,11 @@ if __name__ == "__main__":
 							 "pairs")
     args = parser.parse_args()
     print_args(args, parser)
+    wandb.init()
+    wandb.config.update(args)
+    wandb.config.update({'training_step': 'synthesizer'})
     
     log_dir, hparams = prepare_run(args)
     
     tacotron_train(args, log_dir, hparams)
+    wandb.save(log_dir)

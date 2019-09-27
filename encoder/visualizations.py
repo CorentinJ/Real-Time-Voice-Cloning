@@ -6,6 +6,7 @@ import numpy as np
 # import webbrowser
 import visdom
 import umap
+import wandb
 
 colormap = np.array([
     [76, 255, 0],
@@ -166,13 +167,14 @@ class Visualizations:
         plt.scatter(projected[:, 0], projected[:, 1], c=colors)
         plt.gca().set_aspect("equal", "datalim")
         plt.title("UMAP projection (step %d)" % step)
+        wandb.log({'projection': [wandb.Image(plt, caption="projection")]}, commit=False)
         if not self.disabled:
             self.projection_win = self.vis.matplot(plt, win=self.projection_win)
         if out_fpath is not None:
             plt.savefig(out_fpath)
+#        wandb.log({'projection': plt}, commit=False)
         plt.clf()
         
     def save(self):
         if not self.disabled:
             self.vis.save([self.env_name])
-        

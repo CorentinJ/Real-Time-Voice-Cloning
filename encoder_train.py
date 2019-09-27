@@ -2,6 +2,7 @@ from utils.argutils import print_args
 from encoder.train import train
 from pathlib import Path
 import argparse
+import wandb
 
 
 if __name__ == "__main__":
@@ -43,5 +44,6 @@ if __name__ == "__main__":
     
     # Run the training
     print_args(args, parser)
+    wandb.init()
+    wandb.config.update(args)
     train(**vars(args))
-    
