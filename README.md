@@ -65,8 +65,6 @@ depending on whether you downloaded any datasets. If you are running an X-server
 - [**TODO and planned features**](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/TODO-&-planned-features) 
 
 ## Contribution
-Feel free to open issues or PRs for any problem you may encounter, typos that you see or aspects that are confusing. I try to reply to every issue.
-
-I'm working full-time as of June 2019. I won't be making progress of my own on this repo, but I will still gladly merge PRs and accept contributions to the wiki. Don't hesitate to send me an email if you wish to contribute.
+I'm working full-time as of June 2019. Replying to issues is very time-consuming, I can't always do it. I won't be making progress of my own on this repo, but I will still gladly merge PRs and accept contributions to the wiki. Don't hesitate to send me an email if you wish to contribute. 
 
 
