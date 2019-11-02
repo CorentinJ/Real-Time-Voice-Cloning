@@ -6,7 +6,7 @@ sudo apt-get install portaudio19-dev python-all-dev python3-all-dev && sudo pip 
 brew install portaudio;
 ```
 
-```speech2speech_ff.py``` supports speech and text both from files.
+```speech2speech_ff.py``` supports both speech and text  from files.
 ```speech2speech_fv.py``` supports speech from files, and text from recording.
 ```speech2speech_vv.py``` is a test version of both voice and text from recording. To run it, we need to replace the ```audio.py``` in the ```encoder``` folder.  It's better to copy whole ```Real-Time-Voice-Cloning``` repository and do it. Because I don't have a GPU and Google Colab doesn't support input audio device, so I can't test recording code.
 
