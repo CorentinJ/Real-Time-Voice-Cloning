@@ -9,6 +9,7 @@ import librosa
 import argparse
 import torch
 import sys
+import speech_recognition
 
 
 if __name__ == '__main__':
@@ -117,7 +118,7 @@ if __name__ == '__main__':
     while True:
         try:
             # Get the reference audio filepath
-            message = "Reference voice: enter an audio filepath of a voice to be cloned (mp3, " \
+            message = "Reference voice: enter an audio filepath of first voice to be swapped  (mp3, " \
                       "wav, m4a, flac, ...):\n"
             in_fpath = Path(input(message).replace("\"", "").replace("\'", ""))
             
@@ -140,10 +141,16 @@ if __name__ == '__main__':
             embed = encoder.embed_utterance(preprocessed_wav)
             print("Created the embedding")
             
-            
+            ##we would probably make a call to the speech to text API here
+            recognizer = speech_recognition.Recognizer()
+            test_source_path = "C:/Users/Carlo/Desktop/Voice-Swapping-Dataset/LibriSpeech/train-clean-100/19/198/19-198-0006.flac"
+            print(test_source_path)
+            with speech_recognition.AudioFile(test_source_path) as source:
+                audio = recognizer.record(source)
+                
             ## Generating the spectrogram
-            text = input("Write a sentence (+-20 words) to be synthesized:\n")
-            
+            #text = input("Write a sentence (+-20 words) to be synthesized:\n")
+            text = recognizer.recognize_google(audio)
             # The synthesizer works in batch, so you need to put your data in a list or numpy array
             texts = [text]
             embeds = [embed]
