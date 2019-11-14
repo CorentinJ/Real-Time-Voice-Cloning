@@ -30,13 +30,15 @@ SV2TTS is a three-stage deep learning framework that allows to create a numerica
 
 ## Quick start
 ### Requirements
-You will need the following whether you plan to use the toolbox only or to retrain the models.
+The following requirements are needed, regardless of whether you plan to retrain the models or only use the toolbox:
 
-**Python 3.7**. Python 3.6 might work too, but I wouldn't go lower because I make extensive use of pathlib.
+**Python 3.7**. Python 3.6 might work, but previous versions are not recommended due to extensive use of pathlib.
 
-Run `pip install -r requirements.txt` to install the necessary packages. Additionally you will need [PyTorch](https://pytorch.org/get-started/locally/) (>=1.0.1).
+**Install Necessary Packages**. Run `pip install -r requirements.txt` to install the necessary packages. 
 
-A GPU is mandatory, but you don't necessarily need a high tier GPU if you only want to use the toolbox.
+**PyTorch**. Must be version 1.0.1 or higher. You can install it from their website [PyTorch](https://pytorch.org/get-started/locally/).
+
+**A GPU (Graphics Processing Unit)**. A high tier GPU is not necessary if you only want to use the toolbox.
 
 ### Pretrained models
 Download the latest [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models).
