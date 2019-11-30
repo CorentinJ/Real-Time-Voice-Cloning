@@ -22,8 +22,15 @@ def clone_voice(in_fpath_1, in_fpath_2, encoder, synthesizer, vocoder, num_gener
             preprocessed_wav = encoder.preprocess_wav(Path(in_fpath_1))
             # - If the wav is already loaded:
             original_wav, sampling_rate = librosa.load(Path(in_fpath_1))
+                
             preprocessed_wav = encoder.preprocess_wav(original_wav, sampling_rate)
             print("Loaded file succesfully")
+            
+            # Play the audio (non-blocking)
+            if num_generated == 0 and not args.no_sound:
+                sd.stop()
+                sd.play(preprocessed_wav, synthesizer.sample_rate)
+                
             
             # Then we derive the embedding. There are many functions and parameters that the 
             # speaker encoder interfaces. These are mostly for in-depth research. You will typically
@@ -31,12 +38,18 @@ def clone_voice(in_fpath_1, in_fpath_2, encoder, synthesizer, vocoder, num_gener
             embed = encoder.embed_utterance(preprocessed_wav)
             print("Created the embedding")
             
-            ##we would probably make a call to the speech to text API here
+            ##Generating text from other speaker's speech
             recognizer = speech_recognition.Recognizer()
             
             with speech_recognition.AudioFile(in_fpath_2) as source:
                 audio = recognizer.record(source)
-                
+            
+            if num_generated == 0 and not args.no_sound:
+                second_audio = encoder.preprocess_wav(Path(in_fpath_2))
+                sd.stop()
+                sd.play(second_audio, synthesizer.sample_rate)
+            
+            
             ## Generating the spectrogram
             #text = input("Write a sentence (+-20 words) to be synthesized:\n")
             text = recognizer.recognize_google(audio)
@@ -166,7 +179,8 @@ if __name__ == '__main__':
     # 0.5 seconds which will all be generated together. The parameters here are absurdly short, and 
     # that has a detrimental effect on the quality of the audio. The default parameters are 
     # recommended in general.
-    vocoder.infer_waveform(mel, target=200, overlap=50, progress_callback=no_action)
+    vocoder.infer_waveform(mel, #target=200, overlap=50, 
+                           progress_callback=no_action)
     
     print("All test passed! You can now synthesize speech.\n\n")
     

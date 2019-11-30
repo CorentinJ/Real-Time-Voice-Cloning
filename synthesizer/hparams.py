@@ -95,7 +95,7 @@ hparams = HParams(
     # Whether to clip silence in Audio (at beginning and end of audio only, not the middle)
     # train samples of lengths between 3sec and 14sec are more than enough to make a model capable
     # of good parallelization.
-    clip_mels_length=True,
+    clip_mels_length=False,
     # For cases of OOM (Not really recommended, only use if facing unsolvable OOM errors, 
 	# also consider clipping your samples to smaller chunks)
     max_mel_frames=900,
