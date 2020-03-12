@@ -167,9 +167,9 @@ if __name__ == '__main__':
             generated_wav = np.pad(generated_wav, (0, synthesizer.sample_rate), mode="constant")
             
             # Play the audio (non-blocking)
-            if not args.no_sound:
-                sd.stop()
-                sd.play(generated_wav, synthesizer.sample_rate)
+            # if not args.no_sound:
+            #     sd.stop()
+            #     sd.play(generated_wav, synthesizer.sample_rate)
                 
             # Save it on the disk
             fpath = "demo_output_%02d.wav" % num_generated
