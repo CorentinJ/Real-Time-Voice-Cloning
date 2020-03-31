@@ -19,7 +19,7 @@ SV2TTS is a three-stage deep learning framework that allows to create a numerica
 |[1710.10467](https://arxiv.org/pdf/1710.10467.pdf) | GE2E (encoder)| Generalized End-To-End Loss for Speaker Verification | This repo |
 
 ## News
-**13/11/19**: I'm sorry that I can't maintain this repo as much as I wish I could. I'm working full time on improving voice cloning techniques and I don't have the time to share my improvements here. Plus this repo relies on a lot of old tensorflow code and it's hard to work with. If you're a researcher, then this repo might be of use to you. **If you just want to clone your voice**, do check our demo on [Resemble.AI](https://www.resemble.ai/) - it can run for free but it will be a bit slower, and it will give much better results than this repo.
+**13/11/19**: I'm sorry that I can't maintain this repo as much as I wish I could. I'm working full time on improving voice cloning techniques and I don't have the time to share my improvements here. Plus this repo relies on a lot of old tensorflow code and it's hard to work with. If you're a researcher, then this repo might be of use to you. **If you just want to clone your voice**, do check our demo on [Resemble.AI](https://www.resemble.ai/) - it will give much better results than this repo and will not require a complex setup.
 
 **20/08/19:** I'm working on [resemblyzer](https://github.com/resemble-ai/Resemblyzer), an independent package for the voice encoder. You can use your trained encoder models from this repo with it.
 
@@ -59,12 +59,6 @@ or
 `python demo_toolbox.py`  
 
 depending on whether you downloaded any datasets. If you are running an X-server or if you have the error `Aborted (core dumped)`, see [this issue](https://github.com/CorentinJ/Real-Time-Voice-Cloning/issues/11#issuecomment-504733590).
-
-## Wiki
-- **How it all works** (WIP - [stub](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/How-it-all-works), you might be better off reading my thesis until it's done)
-- [**Training models yourself**](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Training)
-- **Training with other data/languages** (WIP - see [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/issues/30#issuecomment-507864097) for now)
-- [**TODO and planned features**](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/TODO-&-planned-features) 
 
 ## Contributions & Issues
 I'm working full-time as of June 2019. I don't have time to maintain this repo nor reply to issues. Sorry.
