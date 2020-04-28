@@ -36,8 +36,6 @@ You will need the following whether you plan to use the toolbox only or to retra
 
 Run `pip install -r requirements.txt` to install the necessary packages. Additionally you will need [PyTorch](https://pytorch.org/get-started/locally/) (>=1.0.1).
 
-A GPU is mandatory, but you don't necessarily need a high tier GPU if you only want to use the toolbox.
-
 ### Pretrained models
 Download the latest [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models).
 
@@ -47,6 +45,8 @@ Before you download any dataset, you can begin by testing your configuration wit
 `python demo_cli.py`
 
 If all tests pass, you're good to go.
+
+To use the cpu, use the option `--cpu`.
 
 ### Datasets
 For playing with the toolbox alone, I only recommend downloading [`LibriSpeech/train-clean-100`](http://www.openslr.org/resources/12/train-clean-100.tar.gz). Extract the contents as `<datasets_root>/LibriSpeech/train-clean-100` where `<datasets_root>` is a directory of your choosing. Other datasets are supported in the toolbox, see [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Training#datasets). If you chose to use your own dataset you'll need your own audio files, or you will have to record it with the toolbox.
