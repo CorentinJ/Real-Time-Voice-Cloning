@@ -109,7 +109,7 @@ class ZoneoutLSTMCell(tf.compat.v1.nn.rnn_cell.RNNCell):
         if zm < 0. or zs > 1.:
             raise ValueError("One/both provided Zoneout factors are not in [0, 1]")
         
-        self._cell = tf.nn.rnn_cell.LSTMCell(num_units, state_is_tuple=state_is_tuple, name=name)
+        self._cell = tf.compat.v1.nn.rnn_cell.LSTMCell(num_units, state_is_tuple=state_is_tuple, name=name)
         self._zoneout_cell = zoneout_factor_cell
         self._zoneout_outputs = zoneout_factor_output
         self.is_training = is_training
@@ -227,7 +227,7 @@ class EncoderRNN:
     
     def __call__(self, inputs, input_lengths):
         with tf.compat.v1.variable_scope(self.scope):
-            outputs, (fw_state, bw_state) = tf.nn.bidirectional_dynamic_rnn(
+            outputs, (fw_state, bw_state) = tf.compat.v1.nn.bidirectional_dynamic_rnn(
                 self._fw_cell,
                 self._bw_cell,
                 inputs,
@@ -265,7 +265,7 @@ class Prenet:
         
         with tf.compat.v1.variable_scope(self.scope):
             for i, size in enumerate(self.layers_sizes):
-                dense = tf.layers.dense(x, units=size, activation=self.activation,
+                dense = tf.compat.v1.layers.dense(x, units=size, activation=self.activation,
                                         name="dense_{}".format(i + 1))
                 # The paper discussed introducing diversity in generation at inference time
                 # by using a dropout of 0.5 only in prenet layers (in both training and inference).
@@ -302,7 +302,7 @@ class DecoderRNN:
                                            name="decoder_LSTM_{}".format(i + 1)) for i in
                            range(layers)]
         
-        self._cell = tf.contrib.rnn.MultiRNNCell(self.rnn_layers, state_is_tuple=True)
+        self._cell = tf.compat.v1.nn.rnn_cell.MultiRNNCell(self.rnn_layers, state_is_tuple=True)
     
     def __call__(self, inputs, states):
         with tf.compat.v1.variable_scope(self.scope):
@@ -413,13 +413,13 @@ class Postnet:
 
 def conv1d(inputs, kernel_size, channels, activation, is_training, drop_rate, scope):
     with tf.compat.v1.variable_scope(scope):
-        conv1d_output = tf.layers.conv1d(
+        conv1d_output = tf.compat.v1.layers.conv1d(
             inputs,
             filters=channels,
             kernel_size=kernel_size,
             activation=None,
             padding="same")
-        batched = tf.layers.batch_normalization(conv1d_output, training=is_training)
+        batched = tf.compat.v1.layers.batch_normalization(conv1d_output, training=is_training)
         activated = activation(batched)
         return tf.layers.dropout(activated, rate=drop_rate, training=is_training,
                                  name="dropout_{}".format(scope))

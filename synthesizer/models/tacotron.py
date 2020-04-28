@@ -83,10 +83,10 @@ class Tacotron():
             
             ##############
             
-            p_inputs = tf.py_func(split_func, [inputs, split_infos[:, 0]], lout_int)
-            p_mel_targets = tf.py_func(split_func, [mel_targets, split_infos[:, 1]],
+            p_inputs = tf.compat.v1.py_func(split_func, [inputs, split_infos[:, 0]], lout_int)
+            p_mel_targets = tf.compat.v1.py_func(split_func, [mel_targets, split_infos[:, 1]],
                                        lout_float) if mel_targets is not None else mel_targets
-            p_stop_token_targets = tf.py_func(split_func, [stop_token_targets, split_infos[:, 2]],
+            p_stop_token_targets = tf.compat.v1.py_func(split_func, [stop_token_targets, split_infos[:, 2]],
                                               lout_float) if stop_token_targets is not None else \
 				stop_token_targets
             
