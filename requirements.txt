@@ -1,7 +1,7 @@
-tensorflow-gpu>=1.10.0,<=1.14.0
+tensorflow-gpu
 umap-learn
 visdom
-webrtcvad
+webrtcvad-wheels
 librosa>=0.5.1
 matplotlib>=2.0.2
 numpy>=1.14.0
@@ -13,3 +13,6 @@ inflect
 PyQt5
 multiprocess
 numba
+
+## Possible linux fix
+#sudo apt install python3 python3-dev build-essential libssl-dev libffi-dev libxml2-dev libxslt1-dev zlib1g-dev python-pip
