@@ -121,8 +121,7 @@ if __name__ == '__main__':
     while True:
         try:
             # Get the reference audio filepath
-            message = "Reference voice: enter an audio filepath of a voice to be cloned (mp3, " \
-                      "wav, m4a, flac, ...):\n"
+            message = "Reference voice: enter an audio filepath of a voice to be cloned (.wav only):\n"
             in_fpath = Path(input(message).replace("\"", "").replace("\'", ""))
             
             
