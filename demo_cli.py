@@ -41,7 +41,7 @@ if __name__ == '__main__':
     ## Print some environment information (for debugging purposes)
     print("Running a test of your configuration...\n")
     if args.cpu:
-        encoder.load_model(args.enc_model_fpath)
+        print("Using CPU for inference.")
     elif torch.cuda.is_available():
         device_id = torch.cuda.current_device()
         gpu_properties = torch.cuda.get_device_properties(device_id)
@@ -120,8 +120,9 @@ if __name__ == '__main__':
     num_generated = 0
     while True:
         try:
-            # Get the reference audio filepath
-            message = "Reference voice: enter an audio filepath of a voice to be cloned (.wav only):\n"
+             # Get the reference audio filepath
+            message = "Reference voice: enter an audio filepath of a voice to be cloned (mp3, " \
+                      "wav, m4a, flac, ...):\n"
             in_fpath = Path(input(message).replace("\"", "").replace("\'", ""))
             
             
