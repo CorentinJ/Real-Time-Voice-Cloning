@@ -1,4 +1,5 @@
-tensorflow-gpu
+# python3.7 or less
+tensorflow==1.15
 umap-learn
 visdom
 webrtcvad-wheels
@@ -13,6 +14,9 @@ inflect
 PyQt5
 multiprocess
 numba
+unidecode
 
-## Possible linux fix
+## Possible linux fix for webrtcvad failure
 #sudo apt install python3 python3-dev build-essential libssl-dev libffi-dev libxml2-dev libxslt1-dev zlib1g-dev python-pip
+## Possible linux fix for 'OSError: PortAudio library not found'
+# sudo apt-get install libportaudio2
