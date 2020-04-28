@@ -123,8 +123,7 @@ if __name__ == '__main__':
              # Get the reference audio filepath
             message = "Reference voice: enter an audio filepath of a voice to be cloned (mp3, " \
                       "wav, m4a, flac, ...):\n"
-            #in_fpath = input(str(message).replace("\"", '').replace("\'", ''))
-            in_fpath = '/mnt/c/Users/jakep/Music/Eliza Cassan/Deus Ex Human Revolution - All Eliza Cassan News Broadcasts.wav'
+            in_fpath = input(str(message).replace("\"", '').replace("\'", ''))
             
             
             ## Computing the embedding
@@ -147,8 +146,7 @@ if __name__ == '__main__':
             
             
             ## Generating the spectrogram
-            #text = input("Write a sentence (+-20 words) to be synthesized:\n")
-            text = 'Hello. This is Eliza Cassan, coming to you live from Picus TV. The future is now.'
+            text = input("Write a sentence (+-20 words) to be synthesized:\n")
             
             # The synthesizer works in batch, so you need to put your data in a list or numpy array
             texts = [text]
