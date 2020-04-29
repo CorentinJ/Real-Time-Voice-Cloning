@@ -1,0 +1,1 @@
+sudo apt -y install python3 python3-dev build-essential libssl-dev libffi-dev libxml2-dev libxslt1-dev zlib1g-dev python-pip libportaudio2
