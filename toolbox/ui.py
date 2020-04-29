@@ -188,7 +188,7 @@ class UI(QDialog):
             caption="Select an audio file",
             filter="Audio Files (*.mp3 *.flac *.wav *.m4a)"
         )
-        return Path(fpath[0]) if fpath[0] != "" else ""
+        return str(fpath[0]) if fpath[0] != "" else ""
     
     @staticmethod
     def repopulate_box(box, items, random=False):
