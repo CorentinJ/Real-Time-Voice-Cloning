@@ -19,4 +19,3 @@ sounddevice
 #tqdm
 #PyQt5
 #numba==0.48.0
-'C:\Users\jakep\Music\Eliza Cassan\Eliza Cassan Clipped.wav'
