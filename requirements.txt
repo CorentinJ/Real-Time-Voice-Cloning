@@ -1,21 +1,22 @@
-# python3.7 confirmed
-tensorflow==1.15
-umap-learn
-visdom
-webrtcvad-wheels
-librosa>=0.5.1
-matplotlib>=2.0.2
-numpy>=1.14.0
-scipy>=1.0.0
-tqdm
-sounddevice
-Unidecode
-inflect
-PyQt5
-multiprocess
-numba==0.48.0
+# python3.7.x (6,7) confirmed
 unidecode
+inflect
+tensorflow==1.15
+numpy>=1.14.0
+matplotlib>=2.0.2
+librosa>=0.5.1
 PySoundFile
+multiprocess
+webrtcvad
+sounddevice
 
-# Fix for "This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem."
-# sudo apt-get install libxkbcommon-x11-dev
+
+
+#umap-learn
+#visdom
+#webrtcvad-wheels
+#scipy>=1.0.0
+#tqdm
+#PyQt5
+#numba==0.48.0
+'C:\Users\jakep\Music\Eliza Cassan\Eliza Cassan Clipped.wav'

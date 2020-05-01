@@ -36,6 +36,8 @@ You will need the following whether you plan to use the toolbox only or to retra
 
 Run `pip install -r requirements.txt` to install the necessary packages. Additionally you will need [PyTorch](https://pytorch.org/get-started/locally/) (>=1.0.1).
 
+To use preconfigured setup batch instructions, please use .sh and .bat for linux and windows respectively.
+
 ### Pretrained models
 Download the latest [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models).
 
