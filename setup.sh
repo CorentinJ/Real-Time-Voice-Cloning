@@ -1,5 +1,5 @@
 conda_installed=$(conda list | grep 'conda: command not found')
-if [ $conda_installed != 'conda: command not found' ]; then
+if [ $conda_installed != '' ]; then
     wget -nc https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -o ~/Downloads
     chmod +x ~/Downloads/Miniconda3-latest-Linux-x86_64.sh
     ./Miniconda3-latest-Linux-x86_64.sh
