@@ -8,6 +8,7 @@ from toolbox.utterance import Utterance
 import numpy as np
 import traceback
 import sys
+import os
 
 
 # Use this directory structure for your datasets, or modify it to fit your needs
@@ -102,7 +103,11 @@ class Toolbox:
                          self.ui.current_dataset_name,
                          self.ui.current_speaker_name,
                          self.ui.current_utterance_name)
-            name = str(fpath.relative_to(self.datasets_root))
+
+            if(str(self.datasets_root)[0] == '/'):
+                name = str(fpath.relative_to(self.datasets_root))
+            else:
+                name = os.getcwd() + '/' + str(self.datasets_root)
             speaker_name = self.ui.current_dataset_name + '_' + self.ui.current_speaker_name
             
             # Select the next utterance
@@ -116,7 +121,7 @@ class Toolbox:
         
         # Get the wav from the disk. We take the wav with the vocoder/synthesizer format for
         # playback, so as to have a fair comparison with the generated audio
-        wav = Synthesizer.load_preprocess_wav(fpath)
+        wav = Synthesizer.load_preprocess_wav(os.getcwd() + '/' + str(fpath))
         self.ui.log("Loaded %s" % name)
 
         self.add_real_utterance(wav, name, speaker_name)

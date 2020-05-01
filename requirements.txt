@@ -9,13 +9,12 @@ PySoundFile
 multiprocess
 webrtcvad
 sounddevice
+PyQt5
+umap-learn
 
-
-
-#umap-learn
+## tested demo_cli.py and demo_toolbox.py
+## Unused requirements
 #visdom
-#webrtcvad-wheels
 #scipy>=1.0.0
 #tqdm
-#PyQt5
 #numba==0.48.0
