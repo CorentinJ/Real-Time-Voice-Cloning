@@ -19,20 +19,22 @@ SV2TTS is a three-stage deep learning framework that allows the creation of a nu
 
 ## Get Started
 ### Requirements
-Please use the setup.sh or setup.bat if your on linux and windows respictevly to install the dependancies, and requirements. Currently only python 3.7.x is supported.
+Please use the setup.sh or setup.bat if you're on linux and windows respictevly to install the dependancies, and requirements. Currently only python 3.7.x is supported.
 
 #### Install Manually:
 You will need [PyTorch](https://pytorch.org/get-started/locally/) (>=1.0.1) installed first, then run `pip install -r requirements.txt` to install the necessary packages.
 
 ### After install Steps
-Next you will need pretrained models if you don't plan to train your own. Those can be downloaded at [models](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models). These models were trained with a cuda device, so they'll produce finiky result for a cpu. New models will need to be produced first. (As of 5/1/20) Download the models, and uncompress them in this root folder. They should result in /encoder/saved_models, /synthesizer/saved_models, and /vocoder/saved_models.
+Next you will need [pretrained models](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models) if you don't plan to train your own.
+These models were trained on a cuda device, so they'll produce finicky results for a cpu. New CPU models will need to be produced first. (As of 5/1/20)
+Download the models, and uncompress them in this root folder. If done correctly, it should result as /encoder/saved_models, /synthesizer/saved_models, and /vocoder/saved_models.
 
 ### Test installation
 When you believe you have all the neccesary soup, test the program by running `python demo_cli.py`.
 If all tests pass, you're good to go. To use the cpu, use the option `--cpu`.
 
 ### Generate Audio from dataset
-There are a few preconfigured options for datasets. One in perticular, [`LibriSpeech/train-clean-100`](http://www.openslr.org/resources/12/train-clean-100.tar.gz) is made to work from demo_toolbox.py. When you download this dataset, you can locate the directory anywhere, but creating a folder in this directory named datasets is recommended.
+There are a few preconfigured options for datasets. One in perticular, [`LibriSpeech/train-clean-100`](http://www.openslr.org/resources/12/train-clean-100.tar.gz) is made to work from demo_toolbox.py. When you download this dataset, you can locate the directory anywhere, but creating a folder in this directory named `datasets` is recommended.
 
 To run the toolbox, use `python demo_toolbox.py -d datasets` if you followed the recommendation for directory location. Otherwise, include the full path to the dataset.
 
