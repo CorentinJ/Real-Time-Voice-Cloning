@@ -58,6 +58,7 @@ if __name__ == '__main__':
         print("Your PyTorch installation is not configured. If you have a GPU ready "
               "for deep learning, ensure that the drivers are properly installed, and that your "
               "CUDA version matches your PyTorch installation.", file=sys.stderr)
+        print("\nIf you're trying to use a cpu, please use the option --cpu.", file=sys.stderr)
         quit(-1)
     
     
