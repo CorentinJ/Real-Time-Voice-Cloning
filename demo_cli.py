@@ -5,6 +5,7 @@ from encoder import inference as encoder
 from vocoder import inference as vocoder
 from pathlib import Path
 import numpy as np
+import soundfile as sf
 import librosa
 import argparse
 import torch
@@ -178,8 +179,7 @@ if __name__ == '__main__':
             # Save it on the disk
             fpath = "demo_output_%02d.wav" % num_generated
             print(generated_wav.dtype)
-            librosa.output.write_wav(fpath, generated_wav.astype(np.float32), 
-                                     synthesizer.sample_rate)
+            sf.write(fpath, generated_wav.astype(np.float32), synthesizer.sample_rate)
             num_generated += 1
             print("\nSaved output as %s\n\n" % fpath)
             
