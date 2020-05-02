@@ -27,7 +27,7 @@ You will need [PyTorch](https://pytorch.org/get-started/locally/) (>=1.0.1) inst
 ### After install Steps
 Next you will need [pretrained models](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models) if you don't plan to train your own.
 These models were trained on a cuda device, so they'll produce finicky results for a cpu. New CPU models will need to be produced first. (As of 5/1/20)
-Download the models, and uncompress them in this root folder. If done correctly, it should result as /encoder/saved_models, /synthesizer/saved_models, and /vocoder/saved_models.
+Download the models, and uncompress them in this root folder. If done correctly, it should result as `/encoder/saved_models`, `/synthesizer/saved_models`, and `/vocoder/saved_models`.
 
 ### Test installation
 When you believe you have all the neccesary soup, test the program by running `python demo_cli.py`.
