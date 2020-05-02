@@ -12,6 +12,10 @@ sounddevice
 PyQt5
 umap-learn
 
+## AMD CPU support in tensorflow 2.0
+# tensorflow-rocm
+# rocm-dkms
+
 ## tested demo_cli.py and demo_toolbox.py
 ## Unused requirements
 #visdom
