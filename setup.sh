@@ -7,7 +7,7 @@ if [ '$conda_installed' != '' ]; then
 fi
 
 conda install pytorch
-sudo apt -y install libportaudio2 gcc
+sudo apt -y install libportaudio2 gcc libsndfile1
 python3.7 -m pip install -r requirements.txt
 
 ## Future AMD setup (needs tensorflow api v2)
