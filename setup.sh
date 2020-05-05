@@ -8,7 +8,7 @@ fi
 
 conda install pytorch
 python3.7 -m pip install -r requirements.txt
-sudo apt -y install libportaudio2
+sudo apt -y install libportaudio2 gcc
 
 ## Future AMD setup (needs tensorflow api v2)
 amd='FALSE'
