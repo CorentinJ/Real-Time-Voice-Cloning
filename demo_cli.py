@@ -178,11 +178,11 @@ if __name__ == '__main__':
                 sd.play(generated_wav, synthesizer.sample_rate)
                 
             # Save it on the disk
-            fpath = "demo_output_%02d.wav" % num_generated
+            filename = "demo_output_%02d.wav" % num_generated
             print(generated_wav.dtype)
-            sf.write(fpath, generated_wav.astype(np.float32), synthesizer.sample_rate)
+            sf.write(filename, generated_wav.astype(np.float32), synthesizer.sample_rate)
             num_generated += 1
-            print("\nSaved output as %s\n\n" % fpath)
+            print("\nSaved output as %s\n\n" % filename)
             
             
         except Exception as e:

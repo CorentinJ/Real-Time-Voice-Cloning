@@ -148,10 +148,8 @@ class ZoneoutLSTMCell(tf.compat.v1.nn.rnn_cell.RNNCell):
         if self.is_training:
             # nn.dropout takes keep_prob (probability to keep activations) not drop_prob (
 			# probability to mask activations)!
-            c = (1 - self._zoneout_cell) * tf.nn.dropout(new_c - prev_c,
-                                                         (1 - self._zoneout_cell)) + prev_c
-            h = (1 - self._zoneout_outputs) * tf.nn.dropout(new_h - prev_h,
-                                                            (1 - self._zoneout_outputs)) + prev_h
+            c = (1 - self._zoneout_cell) * tf.nn.dropout(new_c - prev_c, (1 - self._zoneout_cell)) + prev_c
+            h = (1 - self._zoneout_outputs) * tf.nn.dropout(new_h - prev_h, (1 - self._zoneout_outputs)) + prev_h
         
         else:
             c = (1 - self._zoneout_cell) * new_c + self._zoneout_cell * prev_c

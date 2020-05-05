@@ -9,7 +9,7 @@ if __name__ == "__main__":
         description="Creates embeddings for the synthesizer from the LibriSpeech utterances.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument("synthesizer_root", type=Path, help=\
+    parser.add_argument('-d', "--synthesizer_root", type=Path, default='./datasets/SV2TTS/synthesizer/', help=\
         "Path to the synthesizer training data that contains the audios and the train.txt file. "
         "If you let everything as default, it should be <datasets_root>/SV2TTS/synthesizer/.")
     parser.add_argument("-e", "--encoder_model_fpath", type=Path, 

@@ -12,7 +12,7 @@ if __name__ == "__main__":
                     "vocoder for training.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument("datasets_root", type=Path, help=\
+    parser.add_argument('-d', "--datasets_root", type=Path, default='./datasets/', help=\
         "Path to the directory containing your LibriSpeech/TTS datasets.")
     parser.add_argument("-o", "--out_dir", type=Path, default=argparse.SUPPRESS, help=\
         "Path to the output directory that will contain the mel spectrograms, the audios and the "

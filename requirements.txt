@@ -1,7 +1,12 @@
 # python3.7.x (6,7) confirmed
+# each portion of tensorflow is neeed
+# core package is for RNN, cpu and gpu are for specific system speed-ups
+tensorflow==1.15
+tensorflow-cpu==1.15
+tensorflow-gpu==1.15
+# dependancies
 unidecode
 inflect
-tensorflow==1.15
 numpy>=1.14.0
 matplotlib>=2.0.2
 librosa>=0.5.1
@@ -11,6 +16,7 @@ webrtcvad
 sounddevice
 PyQt5
 umap-learn
+visdom
 
 ## AMD CPU support in tensorflow 2.0
 # tensorflow-rocm
@@ -18,7 +24,6 @@ umap-learn
 
 ## tested demo_cli.py and demo_toolbox.py
 ## Unused requirements
-#visdom
 #scipy>=1.0.0
 #tqdm
 #numba==0.48.0

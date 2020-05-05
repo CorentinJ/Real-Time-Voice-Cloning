@@ -381,10 +381,10 @@ class Tacotron():
                         linear_loss = 0.
                     else:
                         # Compute loss of predictions before postnet
-                        before = tf.losses.mean_squared_error(self.tower_mel_targets[i],
+                        before = tf.compat.v1.losses.mean_squared_error(self.tower_mel_targets[i],
                                                               self.tower_decoder_output[i])
                         # Compute loss after postnet
-                        after = tf.losses.mean_squared_error(self.tower_mel_targets[i],
+                        after = tf.compat.v1.losses.mean_squared_error(self.tower_mel_targets[i],
                                                              self.tower_mel_outputs[i])
                         # Compute <stop_token> loss (for learning dynamic generation stop)
                         stop_token_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
@@ -475,7 +475,7 @@ class Tacotron():
                     self.learning_rate = tf.convert_to_tensor(
                         hp.tacotron_initial_learning_rate)
 
-                optimizer = tf.train.AdamOptimizer(self.learning_rate, hp.tacotron_adam_beta1,
+                optimizer = tf.compat.v1.train.AdamOptimizer(self.learning_rate, hp.tacotron_adam_beta1,
                                                    hp.tacotron_adam_beta2, hp.tacotron_adam_epsilon)
 
         # 2. Compute Gradient
@@ -518,7 +518,7 @@ class Tacotron():
 
             # Add dependency on UPDATE_OPS; otherwise batchnorm won"t work correctly. See:
             # https://github.com/tensorflow/tensorflow/issues/1122
-            with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
+            with tf.control_dependencies(tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)):
                 self.optimize = optimizer.apply_gradients(zip(clipped_gradients, vars),
                                                           global_step=global_step)
 
@@ -538,7 +538,7 @@ class Tacotron():
         hp = self._hparams
 
         # Compute natural exponential decay
-        lr = tf.train.exponential_decay(init_lr,
+        lr = tf.compat.v1.train.exponential_decay(init_lr,
                                         global_step - hp.tacotron_start_decay,
                                         # lr = 1e-3 at step 50k
                                         self.decay_steps,
