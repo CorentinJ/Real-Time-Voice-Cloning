@@ -8,3 +8,5 @@ conda -y install pytorch
 start cmd /k %userprofile%/miniconda3/Scripts/activate base
 cd /D "%~dp0"
 pip install -r requirements.txt
+
+plaidml-setup

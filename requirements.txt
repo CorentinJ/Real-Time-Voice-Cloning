@@ -20,6 +20,10 @@ umap-learn
 visdom
 
 ## AMD CPU support in tensorflow 2.0
+#### win ####
+# keras
+# plaidml-keras plaidbench
+#### linux ####
 # tensorflow-rocm
 # rocm-dkms
 
