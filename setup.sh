@@ -2,13 +2,13 @@ conda_installed=$(conda list | grep 'conda: command not found')
 if [ '$conda_installed' != '' ]; then
     wget -nc https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
     chmod +x Miniconda3-latest-Linux-x86_64.sh
-    Miniconda3-latest-Linux-x86_64.sh
-    mv Miniconda3-latest-Linux-x86_64.sh ~/Downloads
+    ./Miniconda3-latest-Linux-x86_64.sh
+    rm Miniconda3-latest-Linux-x86_64.sh ~/Downloads
 fi
 
 conda install pytorch
+sudo apt -y install libportaudio2 gcc
 python3.7 -m pip install -r requirements.txt
-sudo apt -y install libportaudio2
 
 ## Future AMD setup (needs tensorflow api v2)
 amd='FALSE'
