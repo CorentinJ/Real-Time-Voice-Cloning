@@ -19,7 +19,7 @@ SV2TTS is a three-stage deep learning framework that allows the creation of a nu
 
 ## Get Started
 ### Requirements
-Please use the setup.sh or setup.bat if you're on linux and windows respictevly to install the dependancies, and requirements. Currently only python 3.7.x is supported.
+Please use the setup.sh or setup.bat if you're on linux and windows respectively to install the dependancies, and requirements. Currently only python 3.7.x is supported.
 
 #### Install Manually:
 You will need [PyTorch](https://pytorch.org/get-started/locally/) (>=1.0.1) installed first, then run `pip install -r requirements.txt` to install the necessary packages.
