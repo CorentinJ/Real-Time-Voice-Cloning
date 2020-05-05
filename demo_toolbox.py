@@ -29,4 +29,3 @@ if __name__ == '__main__':
     # Launch the toolbox
     print_args(args, parser)
     Toolbox(**vars(args))
-    

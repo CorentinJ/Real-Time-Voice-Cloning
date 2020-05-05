@@ -53,9 +53,9 @@ def add_train_stats(model, hparams):
         if hparams.tacotron_teacher_forcing_mode == "scheduled":
             tf.compat.v1.summary.scalar("teacher_forcing_ratio", model.ratio)  # Control teacher forcing 
         # ratio decay when mode = "scheduled"
-        gradient_norms = [tf.norm(grad) for grad in model.gradients]
+        gradient_norms = [tf.norm(tensor=grad) for grad in model.gradients]
         tf.compat.v1.summary.histogram("gradient_norm", gradient_norms)
-        tf.compat.v1.summary.scalar("max_gradient_norm", tf.reduce_max(gradient_norms))  # visualize 
+        tf.compat.v1.summary.scalar("max_gradient_norm", tf.reduce_max(input_tensor=gradient_norms))  # visualize 
         # gradients (in case of explosion)
         return tf.compat.v1.summary.merge_all()
 
@@ -63,18 +63,18 @@ def add_train_stats(model, hparams):
 def add_eval_stats(summary_writer, step, linear_loss, before_loss, after_loss, stop_token_loss,
                    loss):
     values = [
-        tf.Summary.Value(tag="Tacotron_eval_model/eval_stats/eval_before_loss",
+        tf.compat.v1.Summary.Value(tag="Tacotron_eval_model/eval_stats/eval_before_loss",
                          simple_value=before_loss),
-        tf.Summary.Value(tag="Tacotron_eval_model/eval_stats/eval_after_loss",
+        tf.compat.v1.Summary.Value(tag="Tacotron_eval_model/eval_stats/eval_after_loss",
                          simple_value=after_loss),
-        tf.Summary.Value(tag="Tacotron_eval_model/eval_stats/stop_token_loss",
+        tf.compat.v1.Summary.Value(tag="Tacotron_eval_model/eval_stats/stop_token_loss",
                          simple_value=stop_token_loss),
-        tf.Summary.Value(tag="Tacotron_eval_model/eval_stats/eval_loss", simple_value=loss),
+        tf.compat.v1.Summary.Value(tag="Tacotron_eval_model/eval_stats/eval_loss", simple_value=loss),
     ]
     if linear_loss is not None:
-        values.append(tf.Summary.Value(tag="Tacotron_eval_model/eval_stats/eval_linear_loss",
+        values.append(tf.compat.v1.Summary.Value(tag="Tacotron_eval_model/eval_stats/eval_linear_loss",
                                        simple_value=linear_loss))
-    test_summary = tf.Summary(value=values)
+    test_summary = tf.compat.v1.Summary(value=values)
     summary_writer.add_summary(test_summary, step)
 
 

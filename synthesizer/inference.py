@@ -134,4 +134,3 @@ class Synthesizer:
         with the same parameters present in hparams.py.
         """
         return audio.inv_mel_spectrogram(mel, hparams)
-    
