@@ -34,9 +34,9 @@ When you believe you have all the neccesary soup, test the program by running `p
 If all tests pass, you're good to go. To use the cpu, use the option `--cpu`.
 
 ### Generate Audio from dataset
-There are a few preconfigured options for datasets. One in perticular, [`LibriSpeech/train-clean-100`](http://www.openslr.org/resources/12/train-clean-100.tar.gz) is made to work from demo_toolbox.py. When you download this dataset, you can locate the directory anywhere, but creating a folder in this directory named `datasets` is recommended.
+There are a few preconfigured options for datasets. One in perticular, [`LibriSpeech/train-clean-100`](http://www.openslr.org/resources/12/train-clean-100.tar.gz) is made to work from demo_toolbox.py. When you download this dataset, you can locate the directory anywhere, but creating a folder in this directory named `datasets` is recommended. (All scripts will use this directory as default)
 
-To run the toolbox, use `python demo_toolbox.py -d datasets` if you followed the recommendation for directory location. Otherwise, include the full path to the dataset.
+To run the toolbox, use `python demo_toolbox.py` if you followed the recommendation for the datasets directory location. Otherwise, include the full path to the dataset and use the option `-d`.
 
 To set the speaker, you'll need an input audio file. use browse in the toolbox to your personal audio file, or record to set your own voice.
 
