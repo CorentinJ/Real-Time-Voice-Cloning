@@ -325,7 +325,7 @@ def train(log_dir, args, hparams):
                                    stop_token_loss, eval_loss)
                 
                 if step % args.checkpoint_interval == 0 or step == args.tacotron_train_steps or \
-                        step == 300:
+                        step % 50 == 0:
                     # Save model and current global step
                     saver.save(sess, checkpoint_fpath, global_step=global_step)
                     
