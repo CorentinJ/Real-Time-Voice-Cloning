@@ -21,6 +21,11 @@ SV2TTS is a three-stage deep learning framework that allows the creation of a nu
 ### Requirements
 Please use the setup.sh or setup.bat if you're on linux and windows respectively to install the dependancies, and requirements. Currently only python 3.7.x is supported.
 
+* Windows Install Requirements
+* * During python installation, make sure python is added to path during installation.
+* * During conda installation, make sure you install it 'just for me'.
+* * During ms build tools installation, you only need to install the c++ package, which requires around 4.7GB. Upon installation of build tools, you'll need to restart the computer to complete the install process. Rerun the setup.bat to finish the setup process.
+
 #### Install Manually:
 You will need [PyTorch](https://pytorch.org/get-started/locally/) (>=1.0.1) installed first, then run `pip install -r requirements.txt` to install the necessary packages.
 
