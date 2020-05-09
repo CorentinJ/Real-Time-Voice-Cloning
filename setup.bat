@@ -13,6 +13,12 @@ if not exist %userprofile%/Downloads/vs_BuildTools.exe (
     %userprofile%/Downloads/vs_BuildTools.exe
 )
 
+if not exist vocoder/saved_models (
+    python -m pip install gdown
+    gdown https://drive.google.com/uc?id=1n1sPXvT34yXFLT47QZA6FIRGrwMeSsZc
+    python -c "import zipfile; zipfile.ZipFile('pretrained.zip').extractall()"
+)
+
 start cmd /k "%userprofile%/miniconda3/Scripts/activate base & conda install -y pytorch & exit"
 cd /D "%~dp0"
 pip install -r requirements.txt

@@ -6,6 +6,12 @@ if [ '$conda_installed' != '' ]; then
     rm Miniconda3-latest-Linux-x86_64.sh
 fi
 
+if [ ! -d "vocoder/saved_models" ]; then
+    python -m pip install gdown
+    gdown https://drive.google.com/uc?id=1n1sPXvT34yXFLT47QZA6FIRGrwMeSsZc
+    python -c "import zipfile; zipfile.ZipFile('pretrained.zip').extractall()"
+fi
+
 conda install pytorch
 sudo apt -y install libportaudio2 gcc libsndfile1
 python3.7 -m pip install -r requirements.txt

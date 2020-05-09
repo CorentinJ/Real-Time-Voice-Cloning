@@ -37,4 +37,3 @@ def print_args(args: argparse.Namespace, parser=None):
         param, value = items[i]
         print("    {0}:{1}{2}".format(param, ' ' * (pad - len(param)), value))
     print("")
-    
