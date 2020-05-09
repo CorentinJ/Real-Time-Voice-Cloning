@@ -17,6 +17,7 @@ if not exist vocoder/saved_models (
     python -m pip install gdown
     gdown https://drive.google.com/uc?id=1n1sPXvT34yXFLT47QZA6FIRGrwMeSsZc
     python -c "import zipfile; zipfile.ZipFile('pretrained.zip').extractall()"
+    del pretrained.zip
 )
 
 start cmd /k "%userprofile%/miniconda3/Scripts/activate base & conda install -y pytorch & exit"
