@@ -24,3 +24,5 @@ LibriSpeech/*
 *.txt
 *.TXT
 *.flac
+*.mp3
+*.zip
