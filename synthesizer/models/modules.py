@@ -150,7 +150,6 @@ class ZoneoutLSTMCell(tf.compat.v1.nn.rnn_cell.RNNCell):
 			# probability to mask activations)!
             c = (1 - self._zoneout_cell) * tf.nn.dropout(new_c - prev_c, (1 - self._zoneout_cell)) + prev_c
             h = (1 - self._zoneout_outputs) * tf.nn.dropout(new_h - prev_h, (1 - self._zoneout_outputs)) + prev_h
-        
         else:
             c = (1 - self._zoneout_cell) * new_c + self._zoneout_cell * prev_c
             h = (1 - self._zoneout_outputs) * new_h + self._zoneout_outputs * prev_h
@@ -177,7 +176,7 @@ class EncoderConvolutions:
         """
         super(EncoderConvolutions, self).__init__()
         self.is_training = is_training
-        
+
         self.kernel_size = hparams.enc_conv_kernel_size
         self.channels = hparams.enc_conv_channels
         self.activation = activation
@@ -241,7 +240,8 @@ class EncoderRNN:
 
 
 class Prenet:
-    """Two fully connected layers used as an information bottleneck for the attention.
+    """
+        Two fully connected layers used as an information bottleneck for the attention.
     """
     
     def __init__(self, is_training, layers_sizes=[256, 256], drop_rate=0.5, activation=tf.nn.relu,

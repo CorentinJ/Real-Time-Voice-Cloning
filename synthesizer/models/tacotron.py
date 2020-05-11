@@ -65,9 +65,7 @@ class Tacotron():
             raise RuntimeError(
                 "Model can not be in training and evaluation modes at the same time!")
 
-        split_device = "/cpu:0" if self._hparams.tacotron_num_gpus > 1 or \
-            self._hparams.split_on_cpu else "/gpu:{}".format(
-                self._hparams.tacotron_gpu_start_idx)
+        split_device = "/cpu:0" if self._hparams.tacotron_num_gpus > 1 or self._hparams.split_on_cpu else "/gpu:{}".format(self._hparams.tacotron_gpu_start_idx)
         with tf.device(split_device):
             hp = self._hparams
             lout_int = [tf.int32] * hp.tacotron_num_gpus
@@ -80,12 +78,10 @@ class Tacotron():
                 targets_lengths is not None else targets_lengths
 
             ### SV2TTS ###
-
             tower_embed_targets = tf.split(embed_targets, num_or_size_splits=hp.tacotron_num_gpus,
                                            axis=0)
 
             ##############
-
             p_inputs = tf.numpy_function(
                 split_func, [inputs, split_infos[:, 0]], lout_int)
             p_mel_targets = tf.numpy_function(split_func, [mel_targets, split_infos[:, 1]],
@@ -124,7 +120,7 @@ class Tacotron():
         gpus = ["/gpu:{}".format(i) for i in
                 range(hp.tacotron_gpu_start_idx, hp.tacotron_gpu_start_idx + hp.tacotron_num_gpus)]
         for i in range(hp.tacotron_num_gpus):
-            with tf.device(tf.compat.v1.train.replica_device_setter(ps_tasks=1, ps_device="/cpu:0",
+            with tf.device(tf.compat.v1.train.replica_device_setter(ps_tasks=1, ps_device=split_device,
                                                                     worker_device=gpus[i])):
                 with tf.compat.v1.variable_scope("inference") as scope:
                     assert hp.tacotron_teacher_forcing_mode in (
