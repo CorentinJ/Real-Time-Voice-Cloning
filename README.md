@@ -1,6 +1,6 @@
 # Real-Time Voice Cloning
 This repository is an implementation of [Transfer Learning from Speaker Verification to
-Multispeaker Text-To-Speech Synthesis](https://arxiv.org/pdf/1806.04558.pdf) (SV2TTS) with a vocoder that works in real-time. Feel free to check [my thesis](https://matheo.uliege.be/handle/2268.2/6801) if you're curious or if you're looking for info I haven't documented yet (don't hesitate to make an issue for that too). Mostly I would recommend giving a quick look to the figures beyond the introduction.
+Multispeaker Text-To-Speech Synthesis](https://arxiv.org/pdf/1806.04558.pdf) (SV2TTS) with a vocoder that works in real-time. Feel free to check [my thesis](https://matheo.uliege.be/handle/2268.2/6801) if you're curious or if you're looking for info I haven't documented. Mostly I would recommend giving a quick look to the figures beyond the introduction.
 
 SV2TTS is a three-stage deep learning framework that allows to create a numerical representation of a voice from a few seconds of audio, and to use it to condition a text-to-speech model trained to generalize to new voices.
 
@@ -19,7 +19,9 @@ SV2TTS is a three-stage deep learning framework that allows to create a numerica
 |[1710.10467](https://arxiv.org/pdf/1710.10467.pdf) | GE2E (encoder)| Generalized End-To-End Loss for Speaker Verification | This repo |
 
 ## News
-**13/11/19**: I'm sorry that I can't maintain this repo as much as I wish I could. I'm working full time on improving voice cloning techniques and I don't have the time to share my improvements here. Plus this repo relies on a lot of old tensorflow code and it's hard to work with. If you're a researcher, then this repo might be of use to you. **If you just want to clone your voice**, do check our demo on [Resemble.AI](https://www.resemble.ai/) - it will give much better results than this repo and will not require a complex setup.
+**13/11/19**: I'm now working full time and I will not maintain this repo anymore. To anyone who reads this:
+- **If you just want to clone your voice**, do check our demo on [Resemble.AI](https://www.resemble.ai/) - it will give much better results than this repo and will not require a complex setup. The free plan already allows you to do a lot. We have a [plugin for Unity](https://github.com/resemble-ai/resemble-unity-text-to-speech) as well for game developers.
+- If, for some reason, you want to spend hours setting up a python environment to run crappy old tensorflow code that will give you very average results, be my guest. One year after my thesis, there are many other better open-source implementations of neural TTS out there, and new ones keep coming every day. 
 
 **20/08/19:** I'm working on [resemblyzer](https://github.com/resemble-ai/Resemblyzer), an independent package for the voice encoder. You can use your trained encoder models from this repo with it.
 
@@ -32,7 +34,7 @@ SV2TTS is a three-stage deep learning framework that allows to create a numerica
 ### Requirements
 You will need the following whether you plan to use the toolbox only or to retrain the models.
 
-**Python 3.7**. Python 3.6 might work too, but I wouldn't go lower because I make extensive use of pathlib.
+**Python 3.6+**.
 
 Run `pip install -r requirements.txt` to install the necessary packages. Additionally you will need [PyTorch](https://pytorch.org/get-started/locally/) (>=1.0.1).
 
@@ -59,6 +61,3 @@ or
 `python demo_toolbox.py`  
 
 depending on whether you downloaded any datasets. If you are running an X-server or if you have the error `Aborted (core dumped)`, see [this issue](https://github.com/CorentinJ/Real-Time-Voice-Cloning/issues/11#issuecomment-504733590).
-
-## Contributions & Issues
-I'm working full-time as of June 2019. I don't have time to maintain this repo nor reply to issues. Sorry.
