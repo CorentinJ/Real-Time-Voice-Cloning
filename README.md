@@ -30,7 +30,9 @@ SV2TTS is a three-stage deep learning framework that allows to create a numerica
 **25/06/19:** Experimental support for low-memory GPUs (~2gb) added for the synthesizer. Pass `--low_mem` to `demo_cli.py` or `demo_toolbox.py` to enable it. It adds a big overhead, so it's not recommended if you have enough VRAM.
 
 
-## Quick start
+## Setup
+Note: setup up this project is a lot of work. Somebody took the time to make [a better guide](https://poorlydocumented.com/2019/11/installing-corentinjs-real-time-voice-cloning-project-on-windows-10-from-scratch/) on how to install everything. I recommend using it. 
+
 ### Requirements
 You will need the following whether you plan to use the toolbox only or to retrain the models.
 
