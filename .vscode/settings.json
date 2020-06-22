@@ -1,7 +1,0 @@
-{
-    "terminal.integrated.shell.windows": "C:\\Windows\\System32\\cmd.exe",
-    "terminal.integrated.shellArgs.windows": [
-        "/k",
-        "%userprofile%/miniconda3/Scripts/activate base"
-    ]
-}
