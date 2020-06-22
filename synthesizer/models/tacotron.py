@@ -120,7 +120,7 @@ class Tacotron():
         gpus = ["/gpu:{}".format(i) for i in
                 range(hp.tacotron_gpu_start_idx, hp.tacotron_gpu_start_idx + hp.tacotron_num_gpus)]
         for i in range(hp.tacotron_num_gpus):
-            with tf.device(tf.compat.v1.train.replica_device_setter(ps_tasks=1, ps_device=split_device,
+            with tf.device(tf.compat.v1.train.replica_device_setter(ps_tasks=1, ps_device="/cpu:0",
                                                                     worker_device=gpus[i])):
                 with tf.compat.v1.variable_scope("inference") as scope:
                     assert hp.tacotron_teacher_forcing_mode in ("constant", "scheduled")
