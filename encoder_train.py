@@ -14,7 +14,7 @@ if __name__ == "__main__":
         "Name for this model instance. If a model state from the same run ID was previously "
         "saved, the training will restart from there. Pass -f to overwrite saved states and "
         "restart from scratch.")
-    parser.add_argument("clean_data_root", type=Path, help= \
+    parser.add_argument("-d", "--clean_data_root", type=Path, default='./datasets/SV2TTS/encoder/', help= \
         "Path to the output directory of encoder_preprocess.py. If you left the default "
         "output directory when preprocessing, it should be <datasets_root>/SV2TTS/encoder/.")
     parser.add_argument("-m", "--models_dir", type=Path, default="encoder/saved_models/", help=\
@@ -44,4 +44,3 @@ if __name__ == "__main__":
     # Run the training
     print_args(args, parser)
     train(**vars(args))
-    

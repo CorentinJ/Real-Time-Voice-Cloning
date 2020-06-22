@@ -7,11 +7,12 @@ from pathlib import Path
 import torch
 
 def sync(device: torch.device):
-    # FIXME
-    return 
     # For correct profiling (cuda operations are async)
     if device.type == "cuda":
         torch.cuda.synchronize(device)
+    else:
+        torch.cpu.synchronize(device)
+    
 
 def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int, save_every: int,
           backup_every: int, vis_every: int, force_restart: bool, visdom_server: str,
@@ -30,7 +31,7 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int,
     # hyperparameters) faster on the CPU.
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # FIXME: currently, the gradient is None if loss_device is cuda
-    loss_device = torch.device("cpu")
+    loss_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     # Create the model and the optimizer
     model = SpeakerEncoder(device, loss_device)
@@ -122,4 +123,3 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int,
             }, backup_fpath)
             
         profiler.tick("Extras (visualizations, saving)")
-        

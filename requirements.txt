@@ -1,15 +1,34 @@
-tensorflow-gpu>=1.10.0,<=1.14.0
+# python3.7.x (6,7) confirmed
+# each portion of tensorflow is neeed
+# core package is for RNN, cpu and gpu are for specific system speed-ups
+tensorflow==1.15
+tensorflow-cpu==1.15
+tensorflow-gpu==1.15
+
+# dependancies
+unidecode
+inflect
+numpy>=1.14.0
+matplotlib>=2.0.2
+librosa>=0.5.1
+PySoundFile
+multiprocess
+webrtcvad
+sounddevice
+PyQt5
 umap-learn
 visdom
-webrtcvad
-librosa>=0.5.1
-matplotlib>=2.0.2
-numpy>=1.14.0
-scipy>=1.0.0
-tqdm
-sounddevice
-Unidecode
-inflect
-PyQt5
-multiprocess
-numba
+
+## AMD CPU support in tensorflow 2.0
+#### win ####
+# keras
+# plaidml-keras plaidbench
+#### linux ####
+# tensorflow-rocm
+# rocm-dkms
+
+## tested demo_cli.py and demo_toolbox.py
+## Unused requirements
+#scipy>=1.0.0
+#tqdm
+#numba==0.48.0

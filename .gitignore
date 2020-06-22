@@ -14,7 +14,15 @@
 *.bcf
 *.toc
 *.wav
-*.sh
+datasets/*
 encoder/saved_models/*
 synthesizer/saved_models/*
 vocoder/saved_models/*
+*.bak
+*.gz
+LibriSpeech/*
+*.txt
+*.TXT
+*.flac
+*.mp3
+*.zip

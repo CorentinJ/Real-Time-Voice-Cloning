@@ -42,4 +42,3 @@ class Profiler:
             print("  %s  mean: %4.0fms   std: %4.0fms" % 
                   (name_msg.ljust(pad), np.mean(deltas) * 1000, np.std(deltas) * 1000))
         print("", flush=True)    
-        

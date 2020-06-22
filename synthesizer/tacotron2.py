@@ -12,13 +12,13 @@ class Tacotron2:
     def __init__(self, checkpoint_path, hparams, gta=False, model_name="Tacotron"):
         log("Constructing model: %s" % model_name)
         #Force the batch size to be known in order to use attention masking in batch synthesis
-        inputs = tf.placeholder(tf.int32, (None, None), name="inputs")
-        input_lengths = tf.placeholder(tf.int32, (None,), name="input_lengths")
-        speaker_embeddings = tf.placeholder(tf.float32, (None, hparams.speaker_embedding_size),
+        inputs = tf.compat.v1.placeholder(tf.int32, (None, None), name="inputs")
+        input_lengths = tf.compat.v1.placeholder(tf.int32, (None,), name="input_lengths")
+        speaker_embeddings = tf.compat.v1.placeholder(tf.float32, (None, hparams.speaker_embedding_size),
                                             name="speaker_embeddings")
-        targets = tf.placeholder(tf.float32, (None, None, hparams.num_mels), name="mel_targets")
-        split_infos = tf.placeholder(tf.int32, shape=(hparams.tacotron_num_gpus, None), name="split_infos")
-        with tf.variable_scope("Tacotron_model") as scope:
+        targets = tf.compat.v1.placeholder(tf.float32, (None, None, hparams.num_mels), name="mel_targets")
+        split_infos = tf.compat.v1.placeholder(tf.int32, shape=(hparams.tacotron_num_gpus, None), name="split_infos")
+        with tf.compat.v1.variable_scope("Tacotron_model") as scope:
             self.model = create_model(model_name, hparams)
             if gta:
                 self.model.initialize(inputs, input_lengths, speaker_embeddings, targets, gta=gta,
@@ -52,14 +52,14 @@ class Tacotron2:
         
         log("Loading checkpoint: %s" % checkpoint_path)
         #Memory allocation on the GPUs as needed
-        config = tf.ConfigProto()
+        config = tf.compat.v1.ConfigProto()
         config.gpu_options.allow_growth = True
         config.allow_soft_placement = True
         
-        self.session = tf.Session(config=config)
-        self.session.run(tf.global_variables_initializer())
+        self.session = tf.compat.v1.Session(config=config)
+        self.session.run(tf.compat.v1.global_variables_initializer())
         
-        saver = tf.train.Saver()
+        saver = tf.compat.v1.train.Saver()
         saver.restore(self.session, checkpoint_path)
     
     def my_synthesize(self, speaker_embeds, texts):
