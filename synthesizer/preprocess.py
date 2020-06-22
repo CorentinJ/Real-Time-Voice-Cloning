@@ -8,16 +8,14 @@ from utils import logmmse
 from tqdm import tqdm
 import numpy as np
 import librosa
-import os
 
 
 def preprocess_librispeech(datasets_root: Path, out_dir: Path, n_processes: int, 
                            skip_existing: bool, hparams):
     # Gather the input directories
-    if(str(datasets_root)[0] != '/' or str(datasets_root)[1] != ':'):
-        datasets_root = Path(os.getcwd() + '/' + str(datasets_root))
     dataset_root = datasets_root.joinpath("LibriSpeech")
-    input_dirs = [dataset_root.joinpath("train-clean-100"), dataset_root.joinpath("train-clean-360")]
+    input_dirs = [dataset_root.joinpath("train-clean-100"), 
+                  dataset_root.joinpath("train-clean-360")]
     print("\n    ".join(map(str, ["Using data from:"] + input_dirs)))
     assert all(input_dir.exists() for input_dir in input_dirs)
     
@@ -84,7 +82,7 @@ def preprocess_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hparams)
 
 def split_on_silences(wav_fpath, words, end_times, hparams):
     # Load the audio waveform
-    wav, _ = librosa.load(str(wav_fpath), hparams.sample_rate)
+    wav, _ = librosa.load(wav_fpath, hparams.sample_rate)
     if hparams.rescale:
         wav = wav / np.abs(wav).max() * hparams.rescaling_max
     
@@ -224,3 +222,4 @@ def create_embeddings(synthesizer_root: Path, encoder_model_fpath: Path, n_proce
     func = partial(embed_utterance, encoder_model_fpath=encoder_model_fpath)
     job = Pool(n_processes).imap(func, fpaths)
     list(tqdm(job, "Embedding", len(fpaths), unit="utterances"))
+    
