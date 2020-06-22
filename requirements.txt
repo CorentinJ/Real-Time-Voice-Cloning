@@ -1,7 +1,7 @@
 # each portion of tensorflow is needed
 # core package is for RNN, cpu and gpu are for specific system speed-ups
 tensorflow==1.15
-tensorflow-cpu==1.15
+tensorflow-cpu==2.1.0
 tensorflow-gpu==1.15
 umap-learn
 visdom
