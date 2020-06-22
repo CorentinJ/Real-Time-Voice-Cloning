@@ -31,8 +31,7 @@ if __name__ == '__main__':
         "overhead but allows to save some GPU memory for lower-end GPUs.")
     parser.add_argument("--no_sound", action="store_true", help=\
         "If True, audio won't be played.")
-    parser.add_argument(
-        '--cpu', help='Use CPU.', action='store_true')
+    parser.add_argument("--cpu", help="Use CPU.", action="store_true")
     args = parser.parse_args()
     print_args(args, parser)
     if not args.no_sound:
