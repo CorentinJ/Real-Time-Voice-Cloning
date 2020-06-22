@@ -135,7 +135,7 @@ if __name__ == '__main__':
             # - Directly load from the filepath:
             preprocessed_wav = encoder.preprocess_wav(in_fpath)
             # - If the wav is already loaded:
-            original_wav, sampling_rate = librosa.load(in_fpath)
+            original_wav, sampling_rate = librosa.load(str(in_fpath))
             preprocessed_wav = encoder.preprocess_wav(original_wav, sampling_rate)
             print("Loaded file succesfully")
             
