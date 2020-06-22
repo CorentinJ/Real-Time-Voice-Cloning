@@ -31,7 +31,7 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int,
     # hyperparameters) faster on the CPU.
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # FIXME: currently, the gradient is None if loss_device is cuda
-    loss_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    loss_device = torch.device("cpu")
     
     # Create the model and the optimizer
     model = SpeakerEncoder(device, loss_device)
