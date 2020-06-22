@@ -83,11 +83,11 @@ class Tacotron():
             
             ##############
             
-            p_inputs = tf.py_func(split_func, [inputs, split_infos[:, 0]], lout_int)
-            p_mel_targets = tf.py_func(split_func, [mel_targets, split_infos[:, 1]],
-                                       lout_float) if mel_targets is not None else mel_targets
-            p_stop_token_targets = tf.py_func(split_func, [stop_token_targets, split_infos[:, 2]],
-                                              lout_float) if stop_token_targets is not None else \
+            p_inputs = tf.numpy_function(split_func, [inputs, split_infos[:, 0]], lout_int)
+            p_mel_targets = tf.numpy_function(split_func, [mel_targets, split_infos[:, 1]],
+                                              lout_float) if mel_targets is not None else mel_targets
+            p_stop_token_targets = tf.numpy_function(split_func, [stop_token_targets, split_infos[:, 2]],
+                                                     lout_float) if stop_token_targets is not None else \
 				stop_token_targets
             
             tower_inputs = []
@@ -120,9 +120,9 @@ class Tacotron():
         gpus = ["/gpu:{}".format(i) for i in
                 range(hp.tacotron_gpu_start_idx, hp.tacotron_gpu_start_idx + hp.tacotron_num_gpus)]
         for i in range(hp.tacotron_num_gpus):
-            with tf.device(tf.train.replica_device_setter(ps_tasks=1, ps_device="/cpu:0",
-                                                          worker_device=gpus[i])):
-                with tf.variable_scope("inference") as scope:
+            with tf.device(tf.compat.v1.train.replica_device_setter(ps_tasks=1, ps_device="/cpu:0",
+                                                                    worker_device=gpus[i])):
+                with tf.compat.v1.variable_scope("inference") as scope:
                     assert hp.tacotron_teacher_forcing_mode in ("constant", "scheduled")
                     if hp.tacotron_teacher_forcing_mode == "scheduled" and is_training:
                         assert global_step is not None
@@ -132,7 +132,7 @@ class Tacotron():
                     post_condition = hp.predict_linear and not gta
                     
                     # Embeddings ==> [batch_size, sequence_length, embedding_dim]
-                    self.embedding_table = tf.get_variable(
+                    self.embedding_table = tf.compat.v1.get_variable(
                         "inputs_embedding", [len(symbols), hp.embedding_dim], dtype=tf.float32)
                     embedded_inputs = tf.nn.embedding_lookup(self.embedding_table, tower_inputs[i])
                     
@@ -283,7 +283,7 @@ class Tacotron():
         self.tower_targets_lengths = tower_targets_lengths
         self.tower_stop_token_targets = tower_stop_token_targets
         
-        self.all_vars = tf.trainable_variables()
+        self.all_vars = tf.compat.v1.trainable_variables()
         
         log("Initialized Tacotron model. Dimensions (? = dynamic shape): ")
         log("  Train mode:               {}".format(is_training))
@@ -331,9 +331,9 @@ class Tacotron():
                 range(hp.tacotron_gpu_start_idx, hp.tacotron_gpu_start_idx + hp.tacotron_num_gpus)]
         
         for i in range(hp.tacotron_num_gpus):
-            with tf.device(tf.train.replica_device_setter(ps_tasks=1, ps_device="/cpu:0",
-                                                          worker_device=gpus[i])):
-                with tf.variable_scope("loss") as scope:
+            with tf.device(tf.compat.v1.train.replica_device_setter(ps_tasks=1, ps_device="/cpu:0",
+                                                                    worker_device=gpus[i])):
+                with tf.compat.v1.variable_scope("loss") as scope:
                     if hp.mask_decoder:
                         # Compute loss of predictions before postnet
                         before = MaskedMSE(self.tower_mel_targets[i], self.tower_decoder_output[i],
@@ -356,11 +356,11 @@ class Tacotron():
                         linear_loss = 0.
                     else:
                         # Compute loss of predictions before postnet
-                        before = tf.losses.mean_squared_error(self.tower_mel_targets[i],
-                                                              self.tower_decoder_output[i])
+                        before = tf.compat.v1.losses.mean_squared_error(self.tower_mel_targets[i],
+                                                                        self.tower_decoder_output[i])
                         # Compute loss after postnet
-                        after = tf.losses.mean_squared_error(self.tower_mel_targets[i],
-                                                             self.tower_mel_outputs[i])
+                        after = tf.compat.v1.losses.mean_squared_error(self.tower_mel_targets[i],
+                                                                       self.tower_mel_outputs[i])
                         # Compute <stop_token> loss (for learning dynamic generation stop)
                         stop_token_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
                             labels=self.tower_stop_token_targets[i],
@@ -439,7 +439,7 @@ class Tacotron():
         grad_device = "/cpu:0" if hp.tacotron_num_gpus > 1 else gpus[0]
         
         with tf.device(grad_device):
-            with tf.variable_scope("optimizer") as scope:
+            with tf.compat.v1.variable_scope("optimizer") as scope:
                 if hp.tacotron_decay_learning_rate:
                     self.decay_steps = hp.tacotron_decay_steps
                     self.decay_rate = hp.tacotron_decay_rate
@@ -448,16 +448,16 @@ class Tacotron():
                 else:
                     self.learning_rate = tf.convert_to_tensor(hp.tacotron_initial_learning_rate)
                 
-                optimizer = tf.train.AdamOptimizer(self.learning_rate, hp.tacotron_adam_beta1,
-                                                   hp.tacotron_adam_beta2, hp.tacotron_adam_epsilon)
+                optimizer = tf.compat.v1.train.AdamOptimizer(self.learning_rate, hp.tacotron_adam_beta1,
+                                                             hp.tacotron_adam_beta2, hp.tacotron_adam_epsilon)
         
         # 2. Compute Gradient
         for i in range(hp.tacotron_num_gpus):
             #  Device placement
-            with tf.device(tf.train.replica_device_setter(ps_tasks=1, ps_device="/cpu:0",
-                                                          worker_device=gpus[i])):
+            with tf.device(tf.compat.v1.train.replica_device_setter(ps_tasks=1, ps_device="/cpu:0",
+                                                                    worker_device=gpus[i])):
                 # agg_loss += self.tower_loss[i]
-                with tf.variable_scope("optimizer") as scope:
+                with tf.compat.v1.variable_scope("optimizer") as scope:
                     gradients = optimizer.compute_gradients(self.tower_loss[i])
                     tower_gradients.append(gradients)
         
@@ -490,7 +490,7 @@ class Tacotron():
             
             # Add dependency on UPDATE_OPS; otherwise batchnorm won"t work correctly. See:
             # https://github.com/tensorflow/tensorflow/issues/1122
-            with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
+            with tf.control_dependencies(tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)):
                 self.optimize = optimizer.apply_gradients(zip(clipped_gradients, vars),
                                                           global_step=global_step)
     
@@ -510,12 +510,12 @@ class Tacotron():
         hp = self._hparams
         
         # Compute natural exponential decay
-        lr = tf.train.exponential_decay(init_lr,
-                                        global_step - hp.tacotron_start_decay,
-                                        # lr = 1e-3 at step 50k
-                                        self.decay_steps,
-                                        self.decay_rate,  # lr = 1e-5 around step 310k
-                                        name="lr_exponential_decay")
+        lr = tf.compat.v1.train.exponential_decay(init_lr,
+                                                  global_step - hp.tacotron_start_decay,
+                                                  # lr = 1e-3 at step 50k
+                                                  self.decay_steps,
+                                                  self.decay_rate,  # lr = 1e-5 around step 310k
+                                                  name="lr_exponential_decay")
         
         # clip learning rate by max and min values (initial and final values)
         return tf.minimum(tf.maximum(lr, hp.tacotron_final_learning_rate), init_lr)

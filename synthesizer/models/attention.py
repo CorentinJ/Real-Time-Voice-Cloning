@@ -60,10 +60,10 @@ def _location_sensitive_score(W_query, W_fil, W_keys):
 	dtype = W_query.dtype
 	num_units = W_keys.shape[-1].value or array_ops.shape(W_keys)[-1]
 
-	v_a = tf.get_variable(
+	v_a = tf.compat.v1.get_variable(
 		"attention_variable_projection", shape=[num_units], dtype=dtype,
 		initializer=tf.contrib.layers.xavier_initializer())
-	b_a = tf.get_variable(
+	b_a = tf.compat.v1.get_variable(
 		"attention_bias", shape=[num_units], dtype=dtype,
 		initializer=tf.zeros_initializer())
 
@@ -155,10 +155,10 @@ class LocationSensitiveAttention(BahdanauAttention):
 				probability_fn=normalization_function,
 				name=name)
 
-		self.location_convolution = tf.layers.Conv1D(filters=hparams.attention_filters,
+		self.location_convolution = tf.compat.v1.layers.Conv1D(filters=hparams.attention_filters,
 			kernel_size=hparams.attention_kernel, padding="same", use_bias=True,
 			bias_initializer=tf.zeros_initializer(), name="location_features_convolution")
-		self.location_layer = tf.layers.Dense(units=num_units, use_bias=False,
+		self.location_layer = tf.compat.v1.layers.Dense(units=num_units, use_bias=False,
 			dtype=tf.float32, name="location_features_layer")
 		self._cumulate = cumulate_weights
 

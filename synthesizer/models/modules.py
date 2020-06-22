@@ -1,4 +1,5 @@
 import tensorflow as tf
+import torch
 
 
 class HighwayNet:
@@ -6,12 +7,12 @@ class HighwayNet:
         self.units = units
         self.scope = "HighwayNet" if name is None else name
         
-        self.H_layer = tf.layers.Dense(units=self.units, activation=tf.nn.relu, name="H")
-        self.T_layer = tf.layers.Dense(units=self.units, activation=tf.nn.sigmoid, name="T",
+        self.H_layer = tf.compat.v1.layers.Dense(units=self.units, activation=tf.nn.relu, name="H")
+        self.T_layer = tf.compat.v1.layers.Dense(units=self.units, activation=tf.nn.sigmoid, name="T",
                                        bias_initializer=tf.constant_initializer(-1.))
     
     def __call__(self, inputs):
-        with tf.variable_scope(self.scope):
+        with tf.compat.v1.variable_scope(self.scope):
             H = self.H_layer(inputs)
             T = self.T_layer(inputs)
             return H * T + inputs * (1. - T)
@@ -38,8 +39,8 @@ class CBHG:
         self._bw_cell = tf.nn.rnn_cell.GRUCell(rnn_units, name="{}_backward_RNN".format(self.scope))
     
     def __call__(self, inputs, input_lengths):
-        with tf.variable_scope(self.scope):
-            with tf.variable_scope("conv_bank"):
+        with tf.compat.v1.variable_scope(self.scope):
+            with tf.compat.v1.variable_scope("conv_bank"):
                 # Convolution bank: concatenate on the last axis to stack channels from all 
                 # convolutions
                 # The convolution bank uses multiple different kernel sizes to have many insights 
@@ -71,7 +72,7 @@ class CBHG:
             # Additional projection in case of dimension mismatch (for HighwayNet "residual" 
 			# connection)
             if highway_input.shape[2] != self.highway_units:
-                highway_input = tf.layers.dense(highway_input, self.highway_units)
+                highway_input = tf.compat.v1.layers.Dense(highway_input, self.highway_units)
             
             # 4-layer HighwayNet
             for highwaynet in self.highwaynet_layers:
@@ -88,7 +89,7 @@ class CBHG:
             return tf.concat(outputs, axis=2)  # Concat forward and backward outputs
 
 
-class ZoneoutLSTMCell(tf.nn.rnn_cell.RNNCell):
+class ZoneoutLSTMCell(tf.compat.v1.nn.rnn_cell.RNNCell):
     """Wrapper for tf LSTM to create Zoneout LSTM Cell
 
     inspired by:
@@ -108,8 +109,11 @@ class ZoneoutLSTMCell(tf.nn.rnn_cell.RNNCell):
         
         if zm < 0. or zs > 1.:
             raise ValueError("One/both provided Zoneout factors are not in [0, 1]")
-        
-        self._cell = tf.nn.rnn_cell.LSTMCell(num_units, state_is_tuple=state_is_tuple, name=name)
+
+        if torch.cuda.is_available():
+            self._cell = tf.contrib.cudnn_rnn.CudnnLSTM(num_units, name=name)
+        else:
+            self._cell = tf.contrib.rnn.LSTMBlockCell(num_units, name=name)
         self._zoneout_cell = zoneout_factor_cell
         self._zoneout_outputs = zoneout_factor_output
         self.is_training = is_training
@@ -144,16 +148,13 @@ class ZoneoutLSTMCell(tf.nn.rnn_cell.RNNCell):
         if self.is_training:
             # nn.dropout takes keep_prob (probability to keep activations) not drop_prob (
 			# probability to mask activations)!
-            c = (1 - self._zoneout_cell) * tf.nn.dropout(new_c - prev_c,
-                                                         (1 - self._zoneout_cell)) + prev_c
-            h = (1 - self._zoneout_outputs) * tf.nn.dropout(new_h - prev_h,
-                                                            (1 - self._zoneout_outputs)) + prev_h
-        
+            c = (1 - self._zoneout_cell) * tf.nn.dropout(new_c - prev_c, (1 - self._zoneout_cell)) + prev_c
+            h = (1 - self._zoneout_outputs) * tf.nn.dropout(new_h - prev_h, (1 - self._zoneout_outputs)) + prev_h
         else:
             c = (1 - self._zoneout_cell) * new_c + self._zoneout_cell * prev_c
             h = (1 - self._zoneout_outputs) * new_h + self._zoneout_outputs * prev_h
         
-        new_state = tf.nn.rnn_cell.LSTMStateTuple(c, h) if self.state_is_tuple else tf.concat(1, [c,
+        new_state = tf.compat.v1.nn.rnn_cell.LSTMStateTuple(c, h) if self.state_is_tuple else tf.concat(1, [c,
                                                                                                   h])
         
         return output, new_state
@@ -175,7 +176,7 @@ class EncoderConvolutions:
         """
         super(EncoderConvolutions, self).__init__()
         self.is_training = is_training
-        
+
         self.kernel_size = hparams.enc_conv_kernel_size
         self.channels = hparams.enc_conv_channels
         self.activation = activation
@@ -184,7 +185,7 @@ class EncoderConvolutions:
         self.enc_conv_num_layers = hparams.enc_conv_num_layers
     
     def __call__(self, inputs):
-        with tf.variable_scope(self.scope):
+        with tf.compat.v1.variable_scope(self.scope):
             x = inputs
             for i in range(self.enc_conv_num_layers):
                 x = conv1d(x, self.kernel_size, self.channels, self.activation,
@@ -226,8 +227,8 @@ class EncoderRNN:
                                         name="encoder_bw_LSTM")
     
     def __call__(self, inputs, input_lengths):
-        with tf.variable_scope(self.scope):
-            outputs, (fw_state, bw_state) = tf.nn.bidirectional_dynamic_rnn(
+        with tf.compat.v1.variable_scope(self.scope):
+            outputs, (fw_state, bw_state) = tf.compat.v1.nn.bidirectional_dynamic_rnn(
                 self._fw_cell,
                 self._bw_cell,
                 inputs,
@@ -239,7 +240,8 @@ class EncoderRNN:
 
 
 class Prenet:
-    """Two fully connected layers used as an information bottleneck for the attention.
+    """
+        Two fully connected layers used as an information bottleneck for the attention.
     """
     
     def __init__(self, is_training, layers_sizes=[256, 256], drop_rate=0.5, activation=tf.nn.relu,
@@ -263,13 +265,13 @@ class Prenet:
     def __call__(self, inputs):
         x = inputs
         
-        with tf.variable_scope(self.scope):
+        with tf.compat.v1.variable_scope(self.scope):
             for i, size in enumerate(self.layers_sizes):
-                dense = tf.layers.dense(x, units=size, activation=self.activation,
+                dense = tf.compat.v1.layers.dense(x, units=size, activation=self.activation,
                                         name="dense_{}".format(i + 1))
                 # The paper discussed introducing diversity in generation at inference time
                 # by using a dropout of 0.5 only in prenet layers (in both training and inference).
-                x = tf.layers.dropout(dense, rate=self.drop_rate, training=True,
+                x = tf.compat.v1.layers.dropout(dense, rate=self.drop_rate, training=True,
                                       name="dropout_{}".format(i + 1) + self.scope)
         return x
 
@@ -302,10 +304,10 @@ class DecoderRNN:
                                            name="decoder_LSTM_{}".format(i + 1)) for i in
                            range(layers)]
         
-        self._cell = tf.contrib.rnn.MultiRNNCell(self.rnn_layers, state_is_tuple=True)
+        self._cell = tf.compat.v1.nn.rnn_cell.MultiRNNCell(self.rnn_layers, state_is_tuple=True)
     
     def __call__(self, inputs, states):
-        with tf.variable_scope(self.scope):
+        with tf.compat.v1.variable_scope(self.scope):
             return self._cell(inputs, states)
 
 
@@ -327,14 +329,14 @@ class FrameProjection:
         self.activation = activation
         
         self.scope = "Linear_projection" if scope is None else scope
-        self.dense = tf.layers.Dense(units=shape, activation=activation,
+        self.dense = tf.compat.v1.layers.Dense(units=shape, activation=activation,
                                      name="projection_{}".format(self.scope))
     
     def __call__(self, inputs):
-        with tf.variable_scope(self.scope):
+        with tf.compat.v1.variable_scope(self.scope):
             # If activation==None, this returns a simple Linear projection
             # else the projection will be passed through an activation function
-            # output = tf.layers.dense(inputs, units=self.shape, activation=self.activation,
+            # output = tf.compat.v1.layers.Dense(inputs, units=self.shape, activation=self.activation,
             # 	name="projection_{}".format(self.scope))
             output = self.dense(inputs)
             
@@ -362,7 +364,7 @@ class StopProjection:
         self.scope = "stop_token_projection" if scope is None else scope
     
     def __call__(self, inputs):
-        with tf.variable_scope(self.scope):
+        with tf.compat.v1.variable_scope(self.scope):
             output = tf.layers.dense(inputs, units=self.shape,
                                      activation=None, name="projection_{}".format(self.scope))
             
@@ -399,7 +401,7 @@ class Postnet:
         self.drop_rate = hparams.tacotron_dropout_rate
     
     def __call__(self, inputs):
-        with tf.variable_scope(self.scope):
+        with tf.compat.v1.variable_scope(self.scope):
             x = inputs
             for i in range(self.postnet_num_layers - 1):
                 x = conv1d(x, self.kernel_size, self.channels, self.activation,
@@ -412,16 +414,16 @@ class Postnet:
 
 
 def conv1d(inputs, kernel_size, channels, activation, is_training, drop_rate, scope):
-    with tf.variable_scope(scope):
-        conv1d_output = tf.layers.conv1d(
+    with tf.compat.v1.variable_scope(scope):
+        conv1d_output = tf.compat.v1.layers.conv1d(
             inputs,
             filters=channels,
             kernel_size=kernel_size,
             activation=None,
             padding="same")
-        batched = tf.layers.batch_normalization(conv1d_output, training=is_training)
+        batched = tf.compat.v1.layers.batch_normalization(conv1d_output, training=is_training)
         activated = activation(batched)
-        return tf.layers.dropout(activated, rate=drop_rate, training=is_training,
+        return tf.compat.v1.layers.dropout(activated, rate=drop_rate, training=is_training,
                                  name="dropout_{}".format(scope))
 
 
