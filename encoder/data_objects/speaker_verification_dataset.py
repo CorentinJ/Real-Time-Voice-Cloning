@@ -53,3 +53,4 @@ class SpeakerVerificationDataLoader(DataLoader):
 
     def collate(self, speakers):
         return SpeakerBatch(speakers, self.utterances_per_speaker, partials_n_frames) 
+    

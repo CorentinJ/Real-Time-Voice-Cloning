@@ -175,3 +175,4 @@ class Visualizations:
     def save(self):
         if not self.disabled:
             self.vis.save([self.env_name])
+        
