@@ -8,8 +8,6 @@ from toolbox.utterance import Utterance
 import numpy as np
 import traceback
 import sys
-import os
-import soundfile as sf
 
 
 # Use this directory structure for your datasets, or modify it to fit your needs
@@ -104,11 +102,7 @@ class Toolbox:
                          self.ui.current_dataset_name,
                          self.ui.current_speaker_name,
                          self.ui.current_utterance_name)
-
-            if(str(self.datasets_root)[0] == '/' or str(self.datasets_root)[1] == ':'):
-                name = str(fpath.relative_to(self.datasets_root))
-            else:
-                name = os.getcwd() + '/' + str(fpath)
+            name = str(fpath.relative_to(self.datasets_root))
             speaker_name = self.ui.current_dataset_name + '_' + self.ui.current_speaker_name
             
             # Select the next utterance
@@ -117,14 +111,14 @@ class Toolbox:
         elif fpath == "":
             return 
         else:
-            name = str(fpath).replace('\\', '/')
-            speaker_name = 'Custom'
+            name = fpath.name
+            speaker_name = fpath.parent.name
         
         # Get the wav from the disk. We take the wav with the vocoder/synthesizer format for
         # playback, so as to have a fair comparison with the generated audio
-        wav = Synthesizer.load_preprocess_wav(name)
+        wav = Synthesizer.load_preprocess_wav(fpath)
         self.ui.log("Loaded %s" % name)
-        self.filename = os.path.basename(name)
+
         self.add_real_utterance(wav, name, speaker_name)
         
     def record(self):
@@ -216,9 +210,6 @@ class Toolbox:
         # Play it
         wav = wav / np.abs(wav).max() * 0.97
         self.ui.play(wav, Synthesizer.sample_rate)
-
-        # Save it
-        sf.write('./Custom_%s.wav' % self.filename, wav, Synthesizer.sample_rate)
 
         # Compute the embedding
         # TODO: this is problematic with different sampling rates, gotta fix it
