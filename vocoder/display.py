@@ -13,7 +13,12 @@ def progbar(i, n, size=16):
 
 
 def stream(message) :
-    sys.stdout.write("\r{%s}" % message)
+    try:
+        sys.stdout.write("\r{%s}" % message)
+    except:
+        #Remove non-ASCII characters from message
+        message = ''.join(i for i in message if ord(i)<128)
+        sys.stdout.write("\r{%s}" % message)
 
 
 def simple_table(item_tuples) :
