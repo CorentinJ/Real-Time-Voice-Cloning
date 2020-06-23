@@ -16,4 +16,4 @@ Unidecode
 inflect
 PyQt5
 multiprocess
-numba
+numba==0.48
