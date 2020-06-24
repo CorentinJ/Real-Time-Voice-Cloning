@@ -16,7 +16,7 @@ def float_2_label(x, bits) :
 
 
 def load_wav(path) :
-    return librosa.load(path, sr=hp.sample_rate)[0]
+    return librosa.load(str(path), sr=hp.sample_rate)[0]
 
 
 def save_wav(x, path) :

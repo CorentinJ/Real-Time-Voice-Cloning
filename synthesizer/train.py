@@ -33,48 +33,48 @@ def add_embedding_stats(summary_writer, embedding_names, paths_to_meta, checkpoi
 
 
 def add_train_stats(model, hparams):
-    with tf.variable_scope("stats") as scope:
+    with tf.compat.v1.variable_scope("stats") as scope:
         for i in range(hparams.tacotron_num_gpus):
-            tf.summary.histogram("mel_outputs %d" % i, model.tower_mel_outputs[i])
-            tf.summary.histogram("mel_targets %d" % i, model.tower_mel_targets[i])
-        tf.summary.scalar("before_loss", model.before_loss)
-        tf.summary.scalar("after_loss", model.after_loss)
+            tf.compat.v1.summary.histogram("mel_outputs %d" % i, model.tower_mel_outputs[i])
+            tf.compat.v1.summary.histogram("mel_targets %d" % i, model.tower_mel_targets[i])
+        tf.compat.v1.summary.scalar("before_loss", model.before_loss)
+        tf.compat.v1.summary.scalar("after_loss", model.after_loss)
         
         if hparams.predict_linear:
-            tf.summary.scalar("linear_loss", model.linear_loss)
+            tf.compat.v1.summary.scalar("linear_loss", model.linear_loss)
             for i in range(hparams.tacotron_num_gpus):
-                tf.summary.histogram("mel_outputs %d" % i, model.tower_linear_outputs[i])
-                tf.summary.histogram("mel_targets %d" % i, model.tower_linear_targets[i])
+                tf.compat.v1.summary.histogram("mel_outputs %d" % i, model.tower_linear_outputs[i])
+                tf.compat.v1.summary.histogram("mel_targets %d" % i, model.tower_linear_targets[i])
         
-        tf.summary.scalar("regularization_loss", model.regularization_loss)
-        tf.summary.scalar("stop_token_loss", model.stop_token_loss)
-        tf.summary.scalar("loss", model.loss)
-        tf.summary.scalar("learning_rate", model.learning_rate)  # Control learning rate decay speed
+        tf.compat.v1.summary.scalar("regularization_loss", model.regularization_loss)
+        tf.compat.v1.summary.scalar("stop_token_loss", model.stop_token_loss)
+        tf.compat.v1.summary.scalar("loss", model.loss)
+        tf.compat.v1.summary.scalar("learning_rate", model.learning_rate)  # Control learning rate decay speed
         if hparams.tacotron_teacher_forcing_mode == "scheduled":
-            tf.summary.scalar("teacher_forcing_ratio", model.ratio)  # Control teacher forcing 
+            tf.compat.v1.summary.scalar("teacher_forcing_ratio", model.ratio)  # Control teacher forcing
         # ratio decay when mode = "scheduled"
-        gradient_norms = [tf.norm(grad) for grad in model.gradients]
-        tf.summary.histogram("gradient_norm", gradient_norms)
-        tf.summary.scalar("max_gradient_norm", tf.reduce_max(gradient_norms))  # visualize 
+        gradient_norms = [tf.norm(tensor=grad) for grad in model.gradients]
+        tf.compat.v1.summary.histogram("gradient_norm", gradient_norms)
+        tf.compat.v1.summary.scalar("max_gradient_norm", tf.reduce_max(input_tensor=gradient_norms))  # visualize
         # gradients (in case of explosion)
-        return tf.summary.merge_all()
+        return tf.compat.v1.summary.merge_all()
 
 
 def add_eval_stats(summary_writer, step, linear_loss, before_loss, after_loss, stop_token_loss,
                    loss):
     values = [
-        tf.Summary.Value(tag="Tacotron_eval_model/eval_stats/eval_before_loss",
-                         simple_value=before_loss),
-        tf.Summary.Value(tag="Tacotron_eval_model/eval_stats/eval_after_loss",
-                         simple_value=after_loss),
-        tf.Summary.Value(tag="Tacotron_eval_model/eval_stats/stop_token_loss",
-                         simple_value=stop_token_loss),
-        tf.Summary.Value(tag="Tacotron_eval_model/eval_stats/eval_loss", simple_value=loss),
+        tf.compat.v1.Summary.Value(tag="Tacotron_eval_model/eval_stats/eval_before_loss",
+                                   simple_value=before_loss),
+        tf.compat.v1.Summary.Value(tag="Tacotron_eval_model/eval_stats/eval_after_loss",
+                                   simple_value=after_loss),
+        tf.compat.v1.Summary.Value(tag="Tacotron_eval_model/eval_stats/stop_token_loss",
+                                   simple_value=stop_token_loss),
+        tf.compat.v1.Summary.Value(tag="Tacotron_eval_model/eval_stats/eval_loss", simple_value=loss),
     ]
     if linear_loss is not None:
-        values.append(tf.Summary.Value(tag="Tacotron_eval_model/eval_stats/eval_linear_loss",
-                                       simple_value=linear_loss))
-    test_summary = tf.Summary(value=values)
+        values.append(tf.compat.v1.Summary.Value(tag="Tacotron_eval_model/eval_stats/eval_linear_loss",
+                                                 simple_value=linear_loss))
+    test_summary = tf.compat.v1.Summary(value=values)
     summary_writer.add_summary(test_summary, step)
 
 
@@ -83,7 +83,7 @@ def time_string():
 
 
 def model_train_mode(args, feeder, hparams, global_step):
-    with tf.variable_scope("Tacotron_model", reuse=tf.AUTO_REUSE) as scope:
+    with tf.compat.v1.variable_scope("Tacotron_model", reuse=tf.compat.v1.AUTO_REUSE) as scope:
         model = create_model("Tacotron", hparams)
         model.initialize(feeder.inputs, feeder.input_lengths, feeder.speaker_embeddings, 
                          feeder.mel_targets, feeder.token_targets,
@@ -96,7 +96,7 @@ def model_train_mode(args, feeder, hparams, global_step):
 
 
 def model_test_mode(args, feeder, hparams, global_step):
-    with tf.variable_scope("Tacotron_model", reuse=tf.AUTO_REUSE) as scope:
+    with tf.compat.v1.variable_scope("Tacotron_model", reuse=tf.compat.v1.AUTO_REUSE) as scope:
         model = create_model("Tacotron", hparams)
         model.initialize(feeder.eval_inputs, feeder.eval_input_lengths, 
                          feeder.eval_speaker_embeddings, feeder.eval_mel_targets,
@@ -136,11 +136,11 @@ def train(log_dir, args, hparams):
     log(hparams_debug_string())
     
     # Start by setting a seed for repeatability
-    tf.set_random_seed(hparams.tacotron_random_seed)
+    tf.compat.v1.set_random_seed(hparams.tacotron_random_seed)
     
     # Set up data feeder
     coord = tf.train.Coordinator()
-    with tf.variable_scope("datafeeder") as scope:
+    with tf.compat.v1.variable_scope("datafeeder") as scope:
         feeder = Feeder(coord, metadat_fpath, hparams)
     
     # Set up model:
@@ -164,21 +164,21 @@ def train(log_dir, args, hparams):
     step = 0
     time_window = ValueWindow(100)
     loss_window = ValueWindow(100)
-    saver = tf.train.Saver(max_to_keep=5)
+    saver = tf.compat.v1.train.Saver(max_to_keep=5)
     
     log("Tacotron training set to a maximum of {} steps".format(args.tacotron_train_steps))
     
     # Memory allocation on the GPU as needed
-    config = tf.ConfigProto()
+    config = tf.compat.v1.ConfigProto()
     config.gpu_options.allow_growth = True
     config.allow_soft_placement = True
     
     # Train
-    with tf.Session(config=config) as sess:
+    with tf.compat.v1.Session(config=config) as sess:
         try:
-            summary_writer = tf.summary.FileWriter(tensorboard_dir, sess.graph)
+            summary_writer = tf.compat.v1.summary.FileWriter(tensorboard_dir, sess.graph)
             
-            sess.run(tf.global_variables_initializer())
+            sess.run(tf.compat.v1.global_variables_initializer())
             
             # saved model restoring
             if args.restore:

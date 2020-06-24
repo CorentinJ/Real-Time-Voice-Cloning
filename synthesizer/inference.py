@@ -104,6 +104,7 @@ class Synthesizer:
     
         # Load the model and forward the inputs
         model = Tacotron2(str(checkpoint_fpath), hparams)
+
         specs, alignments = model.my_synthesize(embeddings, texts)
         
         # Detach the outputs (not doing so will cause the process to hang)
@@ -122,7 +123,7 @@ class Synthesizer:
         Loads and preprocesses an audio file under the same conditions the audio files were used to
         train the synthesizer. 
         """
-        wav = librosa.load(fpath, hparams.sample_rate)[0]
+        wav = librosa.load(str(fpath), hparams.sample_rate)[0]
         if hparams.rescale:
             wav = wav / np.abs(wav).max() * hparams.rescaling_max
         return wav
@@ -148,4 +149,3 @@ class Synthesizer:
         with the same parameters present in hparams.py.
         """
         return audio.inv_mel_spectrogram(mel, hparams)
-    
