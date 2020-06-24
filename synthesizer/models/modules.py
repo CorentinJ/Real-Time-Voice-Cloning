@@ -110,10 +110,7 @@ class ZoneoutLSTMCell(tf.compat.v1.nn.rnn_cell.RNNCell):
         if zm < 0. or zs > 1.:
             raise ValueError("One/both provided Zoneout factors are not in [0, 1]")
 
-        if torch.cuda.is_available():
-            self._cell = tf.contrib.cudnn_rnn.CudnnLSTM(num_units, name=name)
-        else:
-            self._cell = tf.contrib.rnn.LSTMBlockCell(num_units, name=name)
+        self._cell = tf.compat.v1.nn.rnn_cell.LSTMCell(num_units, state_is_tuple=state_is_tuple, name=name)
         self._zoneout_cell = zoneout_factor_cell
         self._zoneout_outputs = zoneout_factor_output
         self.is_training = is_training
