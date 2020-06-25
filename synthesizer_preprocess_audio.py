@@ -24,8 +24,10 @@ if __name__ == "__main__":
         "interrupted.")
     parser.add_argument("--hparams", type=str, default="", help=\
         "Hyperparameter overrides as a comma-separated list of name-value pairs")
+    parser.add_argument("--disable_webrtcvad_check", action="store_true", help=\
+        "Preprocess audio without the webrtcvad package installed (not recommended).")
     args = parser.parse_args()
-    
+
     # Process the arguments
     if not hasattr(args, "out_dir"):
         args.out_dir = args.datasets_root.joinpath("SV2TTS", "synthesizer")
@@ -33,6 +35,16 @@ if __name__ == "__main__":
     # Create directories
     assert args.datasets_root.exists()
     args.out_dir.mkdir(exist_ok=True, parents=True)
+
+    # Verify webrtcvad is available
+    if not args.disable_webrtcvad_check:
+        try:
+            import webrtcvad
+        except:
+            raise ModuleNotFoundError("Package 'webrtcvad' not found. This package enables "
+                "noise removal and is recommended. Please install and try again. If installation fails, "
+                "skip this check with --disable_webrtcvad_check")
+    del args.disable_webrtcvad_check
 
     # Preprocess the dataset
     print_args(args, parser)
