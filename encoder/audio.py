@@ -5,7 +5,6 @@ from typing import Optional, Union
 import numpy as np
 import librosa
 import struct
-import warnings
 
 try:
     import webrtcvad
