@@ -36,19 +36,19 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--skip_existing", action="store_true", help=\
         "Whether to skip existing output files with the same name. Useful if this script was "
         "interrupted.")
-    parser.add_argument("--disable_webrtcvad_check", action="store_true", help=\
-        "Preprocess audio without the webrtcvad package installed (not recommended).")
+    parser.add_argument("--no_trim", action="store_true", help=\
+        "Preprocess audio without trimming silences (not recommended).")
     args = parser.parse_args()
 
     # Verify webrtcvad is available
-    if not args.disable_webrtcvad_check:
+    if not args.no_trim:
         try:
             import webrtcvad
         except:
             raise ModuleNotFoundError("Package 'webrtcvad' not found. This package enables "
                 "noise removal and is recommended. Please install and try again. If installation fails, "
-                "skip this check with --disable_webrtcvad_check")
-    del args.disable_webrtcvad_check
+                "use --no_trim to disable this error message.")
+    del args.no_trim
 
     # Process the arguments
     args.datasets = args.datasets.split(",")

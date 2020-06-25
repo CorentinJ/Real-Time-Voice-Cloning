@@ -24,8 +24,8 @@ if __name__ == "__main__":
         "interrupted.")
     parser.add_argument("--hparams", type=str, default="", help=\
         "Hyperparameter overrides as a comma-separated list of name-value pairs")
-    parser.add_argument("--disable_webrtcvad_check", action="store_true", help=\
-        "Preprocess audio without the webrtcvad package installed (not recommended).")
+    parser.add_argument("--no_trim", action="store_true", help=\
+        "Preprocess audio without trimming silences (not recommended).")
     args = parser.parse_args()
 
     # Process the arguments
@@ -37,14 +37,14 @@ if __name__ == "__main__":
     args.out_dir.mkdir(exist_ok=True, parents=True)
 
     # Verify webrtcvad is available
-    if not args.disable_webrtcvad_check:
+    if not args.no_trim:
         try:
             import webrtcvad
         except:
             raise ModuleNotFoundError("Package 'webrtcvad' not found. This package enables "
                 "noise removal and is recommended. Please install and try again. If installation fails, "
-                "skip this check with --disable_webrtcvad_check")
-    del args.disable_webrtcvad_check
+                "use --no_trim to disable this error message.")
+    del args.no_trim
 
     # Preprocess the dataset
     print_args(args, parser)
