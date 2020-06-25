@@ -2,6 +2,7 @@ from scipy.ndimage.morphology import binary_dilation
 from encoder.params_data import *
 from pathlib import Path
 from typing import Optional, Union
+from warnings import warn
 import numpy as np
 import librosa
 import struct
@@ -9,7 +10,7 @@ import struct
 try:
     import webrtcvad
 except:
-    print("WARNING: Unable to import 'webrtcvad'. Please install for better noise removal.")
+    warn("Unable to import 'webrtcvad'. This package enables noise removal and is recommended.")
     webrtcvad=None
 
 int16_max = (2 ** 15) - 1
