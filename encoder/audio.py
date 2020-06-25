@@ -5,10 +5,12 @@ from typing import Optional, Union
 import numpy as np
 import librosa
 import struct
+import warnings
 
 try:
     import webrtcvad
 except:
+    print("WARNING: Unable to import 'webrtcvad'. Please install for better noise removal.")
     webrtcvad=None
 
 int16_max = (2 ** 15) - 1
