@@ -2,10 +2,16 @@ from scipy.ndimage.morphology import binary_dilation
 from encoder.params_data import *
 from pathlib import Path
 from typing import Optional, Union
+from warnings import warn
 import numpy as np
-import webrtcvad
 import librosa
 import struct
+
+try:
+    import webrtcvad
+except:
+    warn("Unable to import 'webrtcvad'. This package enables noise removal and is recommended.")
+    webrtcvad=None
 
 int16_max = (2 ** 15) - 1
 
@@ -35,7 +41,8 @@ def preprocess_wav(fpath_or_wav: Union[str, Path, np.ndarray],
         
     # Apply the preprocessing: normalize volume and shorten long silences 
     wav = normalize_volume(wav, audio_norm_target_dBFS, increase_only=True)
-    wav = trim_long_silences(wav)
+    if webrtcvad:
+        wav = trim_long_silences(wav)
     
     return wav
 
