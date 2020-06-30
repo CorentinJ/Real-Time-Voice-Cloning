@@ -136,7 +136,28 @@ class UI(QDialog):
         self.umap_ax.set_xticks([])
         self.umap_ax.set_yticks([])
         self.umap_ax.figure.canvas.draw()
-        
+
+    def setup_audio_devices(self,samplerate):
+        supported_devices=[]
+        for device in sd.query_devices():
+            try:
+                sd.check_output_settings(device=device['name'], samplerate=samplerate)
+                supported_devices.append(device['name'])
+            except Exception as e:
+                print("Unsuported device: ",samplerate,"Device: ", device['name'], "\n", e)
+        if len(supported_devices)==0:
+            error_dialog = QtWidgets.QErrorMessage()
+            error_dialog.showMessage("No supported output audio devices were found! Audio output may not work.")
+            self.audio_out_devices_cb.setDisabled(True)
+        else:
+            sd.default.device = supported_devices[0]
+            self.audio_out_devices_cb.clear()
+            self.audio_out_devices_cb.addItems(supported_devices)
+            self.audio_out_devices_cb.currentTextChanged.connect(self.set_audio_device)
+
+    def set_audio_device(self, dv):
+        sd.default.device=dv
+    
     def play(self, wav, sample_rate):
         sd.stop()
         sd.play(wav, sample_rate)
@@ -426,7 +447,13 @@ class UI(QDialog):
         browser_layout.addWidget(self.play_button, i, 2)
         self.stop_button = QPushButton("Stop")
         browser_layout.addWidget(self.stop_button, i, 3)
-        i += 2
+        i += 1
+
+        #Audio devices
+        browser_layout.addWidget(QLabel("<b>Audio Device</b>"), i, 0)
+        self.audio_out_devices_cb=QComboBox()
+        browser_layout.addWidget(self.audio_out_devices_cb, i+1, 0)
+        i += 3
 
         # Model selection
         self.encoder_box = QComboBox()

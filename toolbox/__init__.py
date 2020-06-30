@@ -82,7 +82,8 @@ class Toolbox:
         self.ui.play_button.clicked.connect(func)
         self.ui.stop_button.clicked.connect(self.ui.stop)
         self.ui.record_button.clicked.connect(self.record)
-        
+        self.ui.setup_audio_devices(Synthesizer.sample_rate)
+
         # Generation
         func = lambda: self.synthesize() or self.vocode()
         self.ui.generate_button.clicked.connect(func)
