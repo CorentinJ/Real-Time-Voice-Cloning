@@ -10,8 +10,6 @@ def sync(device: torch.device):
     # For correct profiling (cuda operations are async)
     if device.type == "cuda":
         torch.cuda.synchronize(device)
-    else:
-        torch.cpu.synchronize(device)
     
 
 def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int, save_every: int,
