@@ -13,7 +13,7 @@ import numpy as np
 from time import sleep
 import umap
 import sys
-from warnings import filterwarnings
+from warnings import filterwarnings, warn
 filterwarnings("ignore")
 
 
@@ -137,14 +137,14 @@ class UI(QDialog):
         self.umap_ax.set_yticks([])
         self.umap_ax.figure.canvas.draw()
 
-    def setup_audio_devices(self,samplerate):
+    def setup_audio_devices(self,sample_rate):
         supported_devices=[]
         for device in sd.query_devices():
             try:
-                sd.check_output_settings(device=device['name'], samplerate=samplerate)
+                sd.check_output_settings(device=device['name'], samplerate=sample_rate)
                 supported_devices.append(device['name'])
             except Exception as e:
-                print("Unsuported device: ",samplerate,"Device: ", device['name'], "\n", e)
+                warn("Unsupported device "+ device['name']+" for the sample rate: "+str(sample_rate)+": "+str(e))
         if len(supported_devices)==0:
             error_dialog = QtWidgets.QErrorMessage()
             error_dialog.showMessage("No supported output audio devices were found! Audio output may not work.")
