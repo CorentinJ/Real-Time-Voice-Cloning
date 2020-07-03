@@ -54,7 +54,7 @@ class Synthesizer:
         """
         if self._low_mem:
             raise Exception("Cannot load the synthesizer permanently in low mem mode")
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
         self._model = Tacotron2(self.checkpoint_fpath, hparams)
             
     def synthesize_spectrograms(self, texts: List[str],
@@ -88,7 +88,7 @@ class Synthesizer:
     @staticmethod
     def _one_shot_synthesize_spectrograms(checkpoint_fpath, embeddings, texts):
         # Load the model and forward the inputs
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
         model = Tacotron2(checkpoint_fpath, hparams)
         specs, alignments = model.my_synthesize(embeddings, texts)
         
@@ -108,7 +108,7 @@ class Synthesizer:
         Loads and preprocesses an audio file under the same conditions the audio files were used to
         train the synthesizer. 
         """
-        wav = librosa.load(fpath, hparams.sample_rate)[0]
+        wav = librosa.load(str(fpath), hparams.sample_rate)[0]
         if hparams.rescale:
             wav = wav / np.abs(wav).max() * hparams.rescaling_max
         return wav
@@ -134,4 +134,3 @@ class Synthesizer:
         with the same parameters present in hparams.py.
         """
         return audio.inv_mel_spectrogram(mel, hparams)
-    

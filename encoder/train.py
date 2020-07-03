@@ -7,11 +7,10 @@ from pathlib import Path
 import torch
 
 def sync(device: torch.device):
-    # FIXME
-    return 
     # For correct profiling (cuda operations are async)
     if device.type == "cuda":
         torch.cuda.synchronize(device)
+    
 
 def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int, save_every: int,
           backup_every: int, vis_every: int, force_restart: bool, visdom_server: str,
@@ -122,4 +121,3 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int,
             }, backup_fpath)
             
         profiler.tick("Extras (visualizations, saving)")
-        
