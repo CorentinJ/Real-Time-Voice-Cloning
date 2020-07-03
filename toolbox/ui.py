@@ -167,8 +167,7 @@ class UI(QDialog):
             self.audio_in_devices_cb.currentTextChanged.connect(self.set_audio_device)
 
         if len(output_devices)==0:
-            error_dialog = QtWidgets.QErrorMessage()
-            error_dialog.showMessage("No supported output audio devices were found! Audio output may not work.")
+            self.log("No supported output audio devices were found! Audio output may not work.")
             self.audio_out_devices_cb.addItems(['None'])
             self.audio_out_devices_cb.setDisabled(True)
         else:
@@ -176,15 +175,18 @@ class UI(QDialog):
             self.audio_out_devices_cb.addItems(output_devices)
             self.audio_out_devices_cb.currentTextChanged.connect(self.set_audio_device)
 
-    def set_audio_device(self, dv):
+        self.set_audio_device()
+
+    def set_audio_device(self):
         input_device = self.audio_in_devices_cb.currentText()
-        if input_device is 'None':
+        if input_device == 'None':
             input_device = None
         
         output_device = self.audio_out_devices_cb.currentText()
-        if output_device is 'None':
+        if output_device == 'None':
             output_device = None
 
+        # If None, sounddevice queries portaudio
         sd.default.device = (input_device, output_device)
     
     def play(self, wav, sample_rate):
