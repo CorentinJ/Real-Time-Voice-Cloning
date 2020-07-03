@@ -217,7 +217,7 @@ class UI(QDialog):
         sd.wait()
         
         self.log("Done recording.")
-        self.record_button.setText("Record one")
+        self.record_button.setText("Record")
         self.record_button.setDisabled(False)
         
         return wav.squeeze()
