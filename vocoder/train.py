@@ -10,6 +10,7 @@ import torch.nn.functional as F
 import vocoder.hparams as hp
 import numpy as np
 import time
+import torch
 
 
 def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_truth: bool,
@@ -32,8 +33,14 @@ def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_tr
         hop_length=hp.hop_length,
         sample_rate=hp.sample_rate,
         mode=hp.voc_mode
-    ).cuda()
-       
+    )
+
+    if torch.cuda.is_available():
+        model = model.cuda()
+        device = torch.device('cuda')
+    else:
+        device = torch.device('cpu')   
+
     # Initialize the optimizer
     optimizer = optim.Adam(model.parameters())
     for p in optimizer.param_groups: 
