@@ -138,37 +138,37 @@ class UI(QDialog):
         self.umap_ax.figure.canvas.draw()
 
     def setup_audio_devices(self,sample_rate):
-        input_devices=[]
-        output_devices=[]
+        input_devices = []
+        output_devices = []
         for device in sd.query_devices():
             # Check if valid input
             try:
-                sd.check_input_settings(device=device['name'], samplerate=sample_rate)
-                input_devices.append(device['name'])
+                sd.check_input_settings(device=device["name"], samplerate=sample_rate)
+                input_devices.append(device["name"])
             except:
                 pass
 
             # Check if valid output
             try:
-                sd.check_output_settings(device=device['name'], samplerate=sample_rate)
-                output_devices.append(device['name'])
+                sd.check_output_settings(device=device["name"], samplerate=sample_rate)
+                output_devices.append(device["name"])
             except Exception as e:
                 # Log a warning only if the device is not an input
-                if not device['name'] in input_devices:
-                    warn("Unsupported output device "+ device['name']+" for the sample rate: "+str(sample_rate)+": "+str(e))
+                if not device["name"] in input_devices:
+                    warn("Unsupported output device %s for the sample rate: %d \nError: %s" % (device["name"], sample_rate, str(e)))
 
-        if len(input_devices)==0:
+        if len(input_devices) == 0:
             self.log("No audio input device detected. Recording may not work.")
-            self.audio_in_devices_cb.addItems(['None'])
+            self.audio_in_devices_cb.addItems(["None"])
             self.audio_in_devices_cb.setDisabled(True)
         else:
             self.audio_in_devices_cb.clear()
             self.audio_in_devices_cb.addItems(input_devices)
             self.audio_in_devices_cb.currentTextChanged.connect(self.set_audio_device)
 
-        if len(output_devices)==0:
+        if len(output_devices) == 0:
             self.log("No supported output audio devices were found! Audio output may not work.")
-            self.audio_out_devices_cb.addItems(['None'])
+            self.audio_out_devices_cb.addItems(["None"])
             self.audio_out_devices_cb.setDisabled(True)
         else:
             self.audio_out_devices_cb.clear()
@@ -179,11 +179,11 @@ class UI(QDialog):
 
     def set_audio_device(self):
         input_device = self.audio_in_devices_cb.currentText()
-        if input_device == 'None':
+        if input_device == "None":
             input_device = None
         
         output_device = self.audio_out_devices_cb.currentText()
-        if output_device == 'None':
+        if output_device == "None":
             output_device = None
 
         # If None, sounddevice queries portaudio
