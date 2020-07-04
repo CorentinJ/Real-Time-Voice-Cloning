@@ -1,4 +1,5 @@
 # This is a list of recommended packages that also enables GPU support.
 # You will also need the packages listed in requirements.txt
-tensorflow-gpu==1.15
-webrtcvad
+
+tensorflow-gpu==1.15   # Enables GPU support
+webrtcvad              # Better noise reduction when processing audio files
