@@ -118,8 +118,12 @@ class WaveRNN(nn.Module):
     def forward(self, x, mels):
         self.step += 1
         bsize = x.size(0)
-        h1 = torch.zeros(1, bsize, self.rnn_dims).cuda()
-        h2 = torch.zeros(1, bsize, self.rnn_dims).cuda()
+        if torch.cuda.is_available():
+            h1 = torch.zeros(1, bsize, self.rnn_dims).cuda()
+            h2 = torch.zeros(1, bsize, self.rnn_dims).cuda()
+        else:
+            h1 = torch.zeros(1, bsize, self.rnn_dims).cpu()
+            h2 = torch.zeros(1, bsize, self.rnn_dims).cpu()
         mels, aux = self.upsample(mels)
 
         aux_idx = [self.aux_dims * i for i in range(5)]
@@ -209,8 +213,11 @@ class WaveRNN(nn.Module):
                 if self.mode == 'MOL':
                     sample = sample_from_discretized_mix_logistic(logits.unsqueeze(0).transpose(1, 2))
                     output.append(sample.view(-1))
-                    # x = torch.FloatTensor([[sample]]).cuda()
-                    x = sample.transpose(0, 1).cuda()
+                    if torch.cuda.is_available():
+                        # x = torch.FloatTensor([[sample]]).cuda()
+                        x = sample.transpose(0, 1).cuda()
+                    else:
+                        x = sample.transpose(0, 1)
 
                 elif self.mode == 'RAW' :
                     posterior = F.softmax(logits, dim=1)
