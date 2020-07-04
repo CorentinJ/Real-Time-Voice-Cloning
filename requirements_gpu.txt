@@ -1,0 +1,5 @@
+# This is a list of recommended packages that also enables GPU support.
+# You will also need the packages listed in requirements.txt
+tensorflow-cpu==1.15
+tensorflow-gpu==1.15
+webrtcvad
