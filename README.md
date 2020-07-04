@@ -40,7 +40,7 @@ You will need the following whether you plan to use the toolbox only or to retra
 
 Run `pip install -r requirements.txt` to install the necessary packages. Additionally you will need [PyTorch](https://pytorch.org/get-started/locally/) (>=1.0.1).
 
-A GPU is mandatory, but you don't necessarily need a high tier GPU if you only want to use the toolbox.
+If you have a GPU, run `pip install -r requirements_gpu.txt` to enable GPU support. A GPU is recommended, but it is not required to use the toolbox.
 
 ### Pretrained models
 Download the latest [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models).
