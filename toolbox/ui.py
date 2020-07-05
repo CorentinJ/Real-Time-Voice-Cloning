@@ -13,7 +13,7 @@ import numpy as np
 from time import sleep
 import umap
 import sys
-from warnings import filterwarnings
+from warnings import filterwarnings, warn
 filterwarnings("ignore")
 
 
@@ -136,7 +136,59 @@ class UI(QDialog):
         self.umap_ax.set_xticks([])
         self.umap_ax.set_yticks([])
         self.umap_ax.figure.canvas.draw()
+
+    def setup_audio_devices(self,sample_rate):
+        input_devices = []
+        output_devices = []
+        for device in sd.query_devices():
+            # Check if valid input
+            try:
+                sd.check_input_settings(device=device["name"], samplerate=sample_rate)
+                input_devices.append(device["name"])
+            except:
+                pass
+
+            # Check if valid output
+            try:
+                sd.check_output_settings(device=device["name"], samplerate=sample_rate)
+                output_devices.append(device["name"])
+            except Exception as e:
+                # Log a warning only if the device is not an input
+                if not device["name"] in input_devices:
+                    warn("Unsupported output device %s for the sample rate: %d \nError: %s" % (device["name"], sample_rate, str(e)))
+
+        if len(input_devices) == 0:
+            self.log("No audio input device detected. Recording may not work.")
+            self.audio_in_devices_cb.addItems(["None"])
+            self.audio_in_devices_cb.setDisabled(True)
+        else:
+            self.audio_in_devices_cb.clear()
+            self.audio_in_devices_cb.addItems(input_devices)
+            self.audio_in_devices_cb.currentTextChanged.connect(self.set_audio_device)
+
+        if len(output_devices) == 0:
+            self.log("No supported output audio devices were found! Audio output may not work.")
+            self.audio_out_devices_cb.addItems(["None"])
+            self.audio_out_devices_cb.setDisabled(True)
+        else:
+            self.audio_out_devices_cb.clear()
+            self.audio_out_devices_cb.addItems(output_devices)
+            self.audio_out_devices_cb.currentTextChanged.connect(self.set_audio_device)
+
+        self.set_audio_device()
+
+    def set_audio_device(self):
+        input_device = self.audio_in_devices_cb.currentText()
+        if input_device == "None":
+            input_device = None
         
+        output_device = self.audio_out_devices_cb.currentText()
+        if output_device == "None":
+            output_device = None
+
+        # If None, sounddevice queries portaudio
+        sd.default.device = (input_device, output_device)
+    
     def play(self, wav, sample_rate):
         sd.stop()
         sd.play(wav, sample_rate)
@@ -165,7 +217,7 @@ class UI(QDialog):
         sd.wait()
         
         self.log("Done recording.")
-        self.record_button.setText("Record one")
+        self.record_button.setText("Record")
         self.record_button.setDisabled(False)
         
         return wav.squeeze()
@@ -426,7 +478,17 @@ class UI(QDialog):
         browser_layout.addWidget(self.play_button, i, 2)
         self.stop_button = QPushButton("Stop")
         browser_layout.addWidget(self.stop_button, i, 3)
-        i += 2
+        i += 1
+
+        #Audio devices
+        browser_layout.addWidget(QLabel("<b>Audio Input</b>"), i, 0)
+        self.audio_in_devices_cb=QComboBox()
+        browser_layout.addWidget(self.audio_in_devices_cb, i+1, 0)
+
+        browser_layout.addWidget(QLabel("<b>Audio Output</b>"), i, 1)
+        self.audio_out_devices_cb=QComboBox()
+        browser_layout.addWidget(self.audio_out_devices_cb, i+1, 1)
+        i += 3
 
         # Model selection
         self.encoder_box = QComboBox()
