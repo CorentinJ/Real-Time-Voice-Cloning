@@ -7,6 +7,7 @@ from toolbox.utterance import Utterance
 from pathlib import Path
 from typing import List, Set
 import sounddevice as sd
+import soundfile as sf
 import matplotlib.pyplot as plt
 import numpy as np
 # from sklearn.manifold import TSNE         # You can try with TSNE if you like, I prefer UMAP 
@@ -137,7 +138,21 @@ class UI(QDialog):
         self.umap_ax.set_yticks([])
         self.umap_ax.figure.canvas.draw()
 
-    def setup_audio_devices(self,sample_rate):
+    def save_audio_file(self, wav, sample_rate):        
+        dialog = QFileDialog()
+        dialog.setDefaultSuffix(".wav")
+        fpath, _ = QFileDialog().getSaveFileName(
+            parent=self,
+            caption="Select a path to save the audio file",
+            filter="Audio Files (*.flac *.wav)"
+        )
+        if fpath:
+            #Default format is wav
+            if Path(fpath).suffix == "":
+                fpath += ".wav"
+            sf.write(fpath, wav, sample_rate)
+
+    def setup_audio_devices(self, sample_rate):
         input_devices = []
         output_devices = []
         for device in sd.query_devices():
@@ -389,6 +404,8 @@ class UI(QDialog):
         self.generate_button.setDisabled(True)
         self.synthesize_button.setDisabled(True)
         self.vocode_button.setDisabled(True)
+        self.replay_wav_button.setDisabled(True)
+        self.save_wav_button.setDisabled(True)
         [self.log("") for _ in range(self.max_log_lines)]
 
     def __init__(self):
@@ -537,6 +554,15 @@ class UI(QDialog):
         layout.addWidget(self.vocode_button)
         gen_layout.addLayout(layout)
 
+
+        #Replay & Save Audio
+        self.replay_wav_button = QPushButton("Replay")
+        self.replay_wav_button.setToolTip("Replay last generated vocoder")
+        layout.addWidget(self.replay_wav_button)
+        self.save_wav_button = QPushButton("Save")
+        self.save_wav_button.setToolTip("Save last generated vocoder audio in filesystem as a wav file")
+        layout.addWidget(self.save_wav_button)
+        
         self.loading_bar = QProgressBar()
         gen_layout.addWidget(self.loading_bar)
         

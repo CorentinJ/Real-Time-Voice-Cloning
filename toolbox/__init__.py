@@ -43,6 +43,7 @@ class Toolbox:
         self.current_generated = (None, None, None, None) # speaker_name, spec, breaks, wav
         
         self.synthesizer = None # type: Synthesizer
+        self.current_wav = None
         
         # Initialize the events and the interface
         self.ui = UI()
@@ -82,7 +83,15 @@ class Toolbox:
         self.ui.play_button.clicked.connect(func)
         self.ui.stop_button.clicked.connect(self.ui.stop)
         self.ui.record_button.clicked.connect(self.record)
+
+        #Audio
         self.ui.setup_audio_devices(Synthesizer.sample_rate)
+
+        #Wav playback & save
+        func = lambda: self.replay_last_wav()
+        self.ui.replay_wav_button.clicked.connect(func)
+        func = lambda: self.save_last_wav()
+        self.ui.save_wav_button.clicked.connect(func)
 
         # Generation
         func = lambda: self.synthesize() or self.vocode()
@@ -92,6 +101,14 @@ class Toolbox:
         
         # UMAP legend
         self.ui.clear_button.clicked.connect(self.clear_utterances)
+
+    def save_last_wav(self):
+        if not self.current_wav is None:
+            self.ui.save_audio_file(self.current_wav, Synthesizer.sample_rate)
+
+    def replay_last_wav(self):
+        if not self.current_wav is None:
+            self.ui.play(self.current_wav, Synthesizer.sample_rate)
 
     def reset_ui(self, encoder_models_dir, synthesizer_models_dir, vocoder_models_dir):
         self.ui.populate_browser(self.datasets_root, recognized_datasets, 0, True)
@@ -211,6 +228,11 @@ class Toolbox:
         # Play it
         wav = wav / np.abs(wav).max() * 0.97
         self.ui.play(wav, Synthesizer.sample_rate)
+
+        #Enable replay and save buttons:
+        self.ui.replay_wav_button.setDisabled(False)
+        self.ui.save_wav_button.setDisabled(False)
+        self.current_wav=wav
 
         # Compute the embedding
         # TODO: this is problematic with different sampling rates, gotta fix it
