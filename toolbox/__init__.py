@@ -44,6 +44,7 @@ class Toolbox:
         
         self.synthesizer = None # type: Synthesizer
         self.current_wav = None
+        self.waves_list = []
         
         # Initialize the events and the interface
         self.ui = UI()
@@ -92,6 +93,7 @@ class Toolbox:
         self.ui.replay_wav_button.clicked.connect(func)
         func = lambda: self.save_last_wav()
         self.ui.save_wav_button.clicked.connect(func)
+        self.ui.waveforms_cb.currentIndexChanged.connect(self.set_current_wav)
 
         # Generation
         func = lambda: self.synthesize() or self.vocode()
@@ -101,6 +103,9 @@ class Toolbox:
         
         # UMAP legend
         self.ui.clear_button.clicked.connect(self.clear_utterances)
+
+    def set_current_wav(self, index):
+        self.current_wav = self.waves_list[index]
 
     def save_last_wav(self):
         if not self.current_wav is None:
@@ -233,6 +238,8 @@ class Toolbox:
         self.ui.replay_wav_button.setDisabled(False)
         self.ui.save_wav_button.setDisabled(False)
         self.current_wav=wav
+        self.waves_list.append(wav)
+        self.ui.waveforms_cb.addItem("%d: %s" % (len(self.waves_list), self.ui.waveforms_cb.currentText()))
 
         # Compute the embedding
         # TODO: this is problematic with different sampling rates, gotta fix it

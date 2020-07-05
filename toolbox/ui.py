@@ -505,6 +505,11 @@ class UI(QDialog):
         browser_layout.addWidget(QLabel("<b>Audio Output</b>"), i, 1)
         self.audio_out_devices_cb=QComboBox()
         browser_layout.addWidget(self.audio_out_devices_cb, i+1, 1)
+
+        browser_layout.addWidget(QLabel("<b>Generated Waveforms</b>"), i, 3)
+        self.waveforms_cb=QComboBox()
+#        self.waveforms_cb.setEditable(True)
+        browser_layout.addWidget(self.waveforms_cb, i+1, 3)
         i += 3
 
         # Model selection
