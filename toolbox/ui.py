@@ -1,6 +1,6 @@
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QStringListModel
 from PyQt5.QtWidgets import *
 from encoder.inference import plot_embedding_as_heatmap
 from toolbox.utterance import Utterance
@@ -505,11 +505,6 @@ class UI(QDialog):
         browser_layout.addWidget(QLabel("<b>Audio Output</b>"), i, 1)
         self.audio_out_devices_cb=QComboBox()
         browser_layout.addWidget(self.audio_out_devices_cb, i+1, 1)
-
-        browser_layout.addWidget(QLabel("<b>Generated Waveforms</b>"), i, 3)
-        self.waveforms_cb=QComboBox()
-#        self.waveforms_cb.setEditable(True)
-        browser_layout.addWidget(self.waveforms_cb, i+1, 3)
         i += 3
 
         # Model selection
@@ -561,13 +556,20 @@ class UI(QDialog):
 
 
         #Replay & Save Audio
+        layout2 = QHBoxLayout()
         self.replay_wav_button = QPushButton("Replay")
         self.replay_wav_button.setToolTip("Replay last generated vocoder")
-        layout.addWidget(self.replay_wav_button)
-        self.save_wav_button = QPushButton("Save")
+        layout2.addWidget(self.replay_wav_button)
+        self.save_wav_button = QPushButton("Export")
         self.save_wav_button.setToolTip("Save last generated vocoder audio in filesystem as a wav file")
-        layout.addWidget(self.save_wav_button)
-        
+        layout2.addWidget(self.save_wav_button)
+        self.waves_list_model=QStringListModel()
+        self.waves_cb=QComboBox()
+        self.waves_cb.setModel(self.waves_list_model)
+        self.waves_cb.setToolTip("Select one of the last generated waves in this section for replaying or exporting")
+        layout2.addWidget(self.waves_cb)
+        gen_layout.addLayout(layout2)
+
         self.loading_bar = QProgressBar()
         gen_layout.addWidget(self.loading_bar)
         

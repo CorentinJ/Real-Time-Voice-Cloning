@@ -34,6 +34,9 @@ recognized_datasets = [
     "VCTK-Corpus/wav48",
 ]
 
+#Maximum of generated wavs to keep on memory
+MAX_WAVES=15
+
 class Toolbox:
     def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir, low_mem):
         sys.excepthook = self.excepthook
@@ -93,7 +96,7 @@ class Toolbox:
         self.ui.replay_wav_button.clicked.connect(func)
         func = lambda: self.save_last_wav()
         self.ui.save_wav_button.clicked.connect(func)
-        self.ui.waveforms_cb.currentIndexChanged.connect(self.set_current_wav)
+        self.ui.waves_cb.currentIndexChanged.connect(self.set_current_wav)
 
         # Generation
         func = lambda: self.synthesize() or self.vocode()
@@ -237,9 +240,16 @@ class Toolbox:
         #Enable replay and save buttons:
         self.ui.replay_wav_button.setDisabled(False)
         self.ui.save_wav_button.setDisabled(False)
-        self.current_wav=wav
+
+        #Update waves combobox
+        self.current_wav = wav
+        if len(self.waves_list) == MAX_WAVES:
+          self.waves_list.pop(0)          
         self.waves_list.append(wav)
-        self.ui.waveforms_cb.addItem("%d: %s" % (len(self.waves_list), self.ui.waveforms_cb.currentText()))
+        n_waves=len(self.waves_list)
+        #TODO better naming for the combobox items?
+        self.ui.waves_list_model.setStringList(["%d" % (i+1) for i in range(n_waves)])
+        self.ui.waves_cb.setCurrentIndex(n_waves-1)
 
         # Compute the embedding
         # TODO: this is problematic with different sampling rates, gotta fix it
