@@ -405,7 +405,7 @@ class UI(QDialog):
         self.synthesize_button.setDisabled(True)
         self.vocode_button.setDisabled(True)
         self.replay_wav_button.setDisabled(True)
-        self.save_wav_button.setDisabled(True)
+        self.export_wav_button.setDisabled(True)
         [self.log("") for _ in range(self.max_log_lines)]
 
     def __init__(self):
@@ -560,12 +560,12 @@ class UI(QDialog):
         self.replay_wav_button = QPushButton("Replay")
         self.replay_wav_button.setToolTip("Replay last generated vocoder")
         layout2.addWidget(self.replay_wav_button)
-        self.save_wav_button = QPushButton("Export")
-        self.save_wav_button.setToolTip("Save last generated vocoder audio in filesystem as a wav file")
-        layout2.addWidget(self.save_wav_button)
-        self.waves_list_model = QStringListModel()
+        self.export_wav_button = QPushButton("Export")
+        self.export_wav_button.setToolTip("Save last generated vocoder audio in filesystem as a wav file")
+        layout2.addWidget(self.export_wav_button)
+        self.waves_cb_model = QStringListModel()
         self.waves_cb = QComboBox()
-        self.waves_cb.setModel(self.waves_list_model)
+        self.waves_cb.setModel(self.waves_cb_model)
         self.waves_cb.setToolTip("Select one of the last generated waves in this section for replaying or exporting")
         layout2.addWidget(self.waves_cb)
         gen_layout.addLayout(layout2)

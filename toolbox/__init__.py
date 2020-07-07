@@ -48,6 +48,7 @@ class Toolbox:
         self.synthesizer = None # type: Synthesizer
         self.current_wav = None
         self.waves_list = []
+        self.waves_count=0
         
         # Initialize the events and the interface
         self.ui = UI()
@@ -94,8 +95,8 @@ class Toolbox:
         #Wav playback & save
         func = lambda: self.replay_last_wav()
         self.ui.replay_wav_button.clicked.connect(func)
-        func = lambda: self.save_last_wav()
-        self.ui.save_wav_button.clicked.connect(func)
+        func = lambda: self.export_current_wave()
+        self.ui.export_wav_button.clicked.connect(func)
         self.ui.waves_cb.currentIndexChanged.connect(self.set_current_wav)
 
         # Generation
@@ -108,15 +109,13 @@ class Toolbox:
         self.ui.clear_button.clicked.connect(self.clear_utterances)
 
     def set_current_wav(self, index):
-        self.current_wav = self.waves_list[index]
+        self.current_wav = self.waves_list[self.waves_count - 1 - index]
 
-    def save_last_wav(self):
-        if not self.current_wav is None:
-            self.ui.save_audio_file(self.current_wav, Synthesizer.sample_rate)
+    def export_current_wave(self):
+        self.ui.save_audio_file(self.current_wav, Synthesizer.sample_rate)
 
     def replay_last_wav(self):
-        if not self.current_wav is None:
-            self.ui.play(self.current_wav, Synthesizer.sample_rate)
+        self.ui.play(self.current_wav, Synthesizer.sample_rate)
 
     def reset_ui(self, encoder_models_dir, synthesizer_models_dir, vocoder_models_dir):
         self.ui.populate_browser(self.datasets_root, recognized_datasets, 0, True)
@@ -239,17 +238,19 @@ class Toolbox:
 
         #Enable replay and save buttons:
         self.ui.replay_wav_button.setDisabled(False)
-        self.ui.save_wav_button.setDisabled(False)
+        self.ui.export_wav_button.setDisabled(False)
 
         #Update waves combobox
-        self.current_wav = wav
-        if len(self.waves_list) == MAX_WAVES:
+        self.waves_count += 1
+        if self.waves_count >= MAX_WAVES:
           self.waves_list.pop(0)          
         self.waves_list.append(wav)
-        n_waves=len(self.waves_list)
         #TODO better naming for the combobox items?
-        self.ui.waves_list_model.setStringList(["%d" % (i+1) for i in range(n_waves)])
-        self.ui.waves_cb.setCurrentIndex(n_waves-1)
+        cb_items = ["%d" % (self.waves_count - i) for i in range(0, min(self.waves_count, MAX_WAVES))]
+        self.ui.waves_cb.disconnect()
+        self.ui.waves_cb_model.setStringList(cb_items)
+        self.ui.waves_cb.setCurrentIndex(0)
+        self.ui.waves_cb.currentIndexChanged.connect(self.set_current_wav)
 
         # Compute the embedding
         # TODO: this is problematic with different sampling rates, gotta fix it
