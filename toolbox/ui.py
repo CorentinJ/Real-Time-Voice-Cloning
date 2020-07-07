@@ -141,7 +141,7 @@ class UI(QDialog):
     def save_audio_file(self, wav, sample_rate):        
         dialog = QFileDialog()
         dialog.setDefaultSuffix(".wav")
-        fpath, _ = QFileDialog().getSaveFileName(
+        fpath, _ = dialog.getSaveFileName(
             parent=self,
             caption="Select a path to save the audio file",
             filter="Audio Files (*.flac *.wav)"
