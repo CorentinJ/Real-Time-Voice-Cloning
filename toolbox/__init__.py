@@ -110,7 +110,7 @@ class Toolbox:
         self.ui.clear_button.clicked.connect(self.clear_utterances)
 
     def set_current_wav(self, index):
-        self.current_wav = self.waves_list[self.waves_count - 1 - index]
+        self.current_wav = self.waves_list[len(self.waves_list) - 1 - index]
 
     def export_current_wave(self):
         self.ui.save_audio_file(self.current_wav, Synthesizer.sample_rate)
