@@ -246,8 +246,8 @@ class Toolbox:
         if self.waves_count > MAX_WAVES:
           self.waves_list.pop()
           self.waves_namelist.pop()
-        self.waves_list.insert(0,wav)
-        self.waves_namelist.insert(0,wav_name)
+        self.waves_list.insert(0, wav)
+        self.waves_namelist.insert(0, wav_name)
 
         self.ui.waves_cb.disconnect()
         self.ui.waves_cb_model.setStringList(self.waves_namelist)
