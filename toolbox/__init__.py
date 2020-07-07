@@ -110,7 +110,7 @@ class Toolbox:
         self.ui.clear_button.clicked.connect(self.clear_utterances)
 
     def set_current_wav(self, index):
-        self.current_wav = self.waves_list[len(self.waves_list) - 1 - index]
+        self.current_wav = self.waves_list[index]
 
     def export_current_wave(self):
         self.ui.save_audio_file(self.current_wav, Synthesizer.sample_rate)
@@ -237,21 +237,29 @@ class Toolbox:
         wav = wav / np.abs(wav).max() * 0.97
         self.ui.play(wav, Synthesizer.sample_rate)
 
-        #Enable replay and save buttons:
-        self.ui.replay_wav_button.setDisabled(False)
-        self.ui.export_wav_button.setDisabled(False)
+        # Name it (history displayed in combobox)
+        # TODO better naming for the combobox items?
+        wav_name = str(self.waves_count + 1)
 
         #Update waves combobox
         self.waves_count += 1
-        if self.waves_count >= MAX_WAVES:
-          self.waves_list.pop(0)          
-        self.waves_list.append(wav)
-        #TODO better naming for the combobox items?
-        self.waves_namelist = ["%d" % (self.waves_count - i) for i in range(0, min(self.waves_count, MAX_WAVES))]
+        if self.waves_count > MAX_WAVES:
+          self.waves_list.pop()
+          self.waves_namelist.pop()
+        self.waves_list.insert(0, wav)
+        self.waves_namelist.insert(0, wav_name)
+
         self.ui.waves_cb.disconnect()
         self.ui.waves_cb_model.setStringList(self.waves_namelist)
         self.ui.waves_cb.setCurrentIndex(0)
         self.ui.waves_cb.currentIndexChanged.connect(self.set_current_wav)
+
+        # Update current wav
+        self.set_current_wav(0)
+        
+        #Enable replay and save buttons:
+        self.ui.replay_wav_button.setDisabled(False)
+        self.ui.export_wav_button.setDisabled(False)
 
         # Compute the embedding
         # TODO: this is problematic with different sampling rates, gotta fix it
