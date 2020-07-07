@@ -31,20 +31,17 @@ if __name__ == '__main__':
         "overhead but allows to save some GPU memory for lower-end GPUs.")
     parser.add_argument("--no_sound", action="store_true", help=\
         "If True, audio won't be played.")
-    parser.add_argument("--cpu", help="Use CPU.", action="store_true")
     args = parser.parse_args()
     print_args(args, parser)
     if not args.no_sound:
         import sounddevice as sd
         
     
-    ## Print some environment information (for debugging purposes)
     print("Running a test of your configuration...\n")
-    if args.cpu:
-        print("Using CPU for inference.")
-    elif torch.cuda.is_available():
+    if torch.cuda.is_available():
         device_id = torch.cuda.current_device()
         gpu_properties = torch.cuda.get_device_properties(device_id)
+        ## Print some environment information (for debugging purposes)
         print("Found %d GPUs available. Using GPU %d (%s) of compute capability %d.%d with "
             "%.1fGb total memory.\n" % 
             (torch.cuda.device_count(),
@@ -54,11 +51,7 @@ if __name__ == '__main__':
             gpu_properties.minor,
             gpu_properties.total_memory / 1e9))
     else:
-        print("Your PyTorch installation is not configured. If you have a GPU ready "
-              "for deep learning, ensure that the drivers are properly installed, and that your "
-              "CUDA version matches your PyTorch installation.", file=sys.stderr)
-        print("\nIf you're trying to use a cpu, please use the option --cpu.", file=sys.stderr)
-        quit(-1)
+        print("Using CPU for inference.\n")
     
     
     ## Load the models one by one.
