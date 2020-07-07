@@ -48,7 +48,7 @@ class Toolbox:
         self.synthesizer = None # type: Synthesizer
         self.current_wav = None
         self.waves_list = []
-        self.waves_count=0
+        self.waves_count = 0
         
         # Initialize the events and the interface
         self.ui = UI()
