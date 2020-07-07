@@ -49,6 +49,7 @@ class Toolbox:
         self.current_wav = None
         self.waves_list = []
         self.waves_count = 0
+        self.waves_namelist = []
         
         # Initialize the events and the interface
         self.ui = UI()
@@ -246,9 +247,9 @@ class Toolbox:
           self.waves_list.pop(0)          
         self.waves_list.append(wav)
         #TODO better naming for the combobox items?
-        cb_items = ["%d" % (self.waves_count - i) for i in range(0, min(self.waves_count, MAX_WAVES))]
+        self.waves_namelist = ["%d" % (self.waves_count - i) for i in range(0, min(self.waves_count, MAX_WAVES))]
         self.ui.waves_cb.disconnect()
-        self.ui.waves_cb_model.setStringList(cb_items)
+        self.ui.waves_cb_model.setStringList(self.waves_namelist)
         self.ui.waves_cb.setCurrentIndex(0)
         self.ui.waves_cb.currentIndexChanged.connect(self.set_current_wav)
 
