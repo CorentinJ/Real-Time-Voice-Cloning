@@ -34,6 +34,9 @@ recognized_datasets = [
     "VCTK-Corpus/wav48",
 ]
 
+#Maximum of generated wavs to keep on memory
+MAX_WAVES = 15
+
 class Toolbox:
     def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir, low_mem):
         sys.excepthook = self.excepthook
@@ -43,6 +46,10 @@ class Toolbox:
         self.current_generated = (None, None, None, None) # speaker_name, spec, breaks, wav
         
         self.synthesizer = None # type: Synthesizer
+        self.current_wav = None
+        self.waves_list = []
+        self.waves_count = 0
+        self.waves_namelist = []
         
         # Initialize the events and the interface
         self.ui = UI()
@@ -82,7 +89,16 @@ class Toolbox:
         self.ui.play_button.clicked.connect(func)
         self.ui.stop_button.clicked.connect(self.ui.stop)
         self.ui.record_button.clicked.connect(self.record)
+
+        #Audio
         self.ui.setup_audio_devices(Synthesizer.sample_rate)
+
+        #Wav playback & save
+        func = lambda: self.replay_last_wav()
+        self.ui.replay_wav_button.clicked.connect(func)
+        func = lambda: self.export_current_wave()
+        self.ui.export_wav_button.clicked.connect(func)
+        self.ui.waves_cb.currentIndexChanged.connect(self.set_current_wav)
 
         # Generation
         func = lambda: self.synthesize() or self.vocode()
@@ -92,6 +108,15 @@ class Toolbox:
         
         # UMAP legend
         self.ui.clear_button.clicked.connect(self.clear_utterances)
+
+    def set_current_wav(self, index):
+        self.current_wav = self.waves_list[index]
+
+    def export_current_wave(self):
+        self.ui.save_audio_file(self.current_wav, Synthesizer.sample_rate)
+
+    def replay_last_wav(self):
+        self.ui.play(self.current_wav, Synthesizer.sample_rate)
 
     def reset_ui(self, encoder_models_dir, synthesizer_models_dir, vocoder_models_dir):
         self.ui.populate_browser(self.datasets_root, recognized_datasets, 0, True)
@@ -211,6 +236,30 @@ class Toolbox:
         # Play it
         wav = wav / np.abs(wav).max() * 0.97
         self.ui.play(wav, Synthesizer.sample_rate)
+
+        # Name it (history displayed in combobox)
+        # TODO better naming for the combobox items?
+        wav_name = str(self.waves_count + 1)
+
+        #Update waves combobox
+        self.waves_count += 1
+        if self.waves_count > MAX_WAVES:
+          self.waves_list.pop()
+          self.waves_namelist.pop()
+        self.waves_list.insert(0, wav)
+        self.waves_namelist.insert(0, wav_name)
+
+        self.ui.waves_cb.disconnect()
+        self.ui.waves_cb_model.setStringList(self.waves_namelist)
+        self.ui.waves_cb.setCurrentIndex(0)
+        self.ui.waves_cb.currentIndexChanged.connect(self.set_current_wav)
+
+        # Update current wav
+        self.set_current_wav(0)
+        
+        #Enable replay and save buttons:
+        self.ui.replay_wav_button.setDisabled(False)
+        self.ui.export_wav_button.setDisabled(False)
 
         # Compute the embedding
         # TODO: this is problematic with different sampling rates, gotta fix it

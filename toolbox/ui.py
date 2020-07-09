@@ -1,12 +1,13 @@
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QStringListModel
 from PyQt5.QtWidgets import *
 from encoder.inference import plot_embedding_as_heatmap
 from toolbox.utterance import Utterance
 from pathlib import Path
 from typing import List, Set
 import sounddevice as sd
+import soundfile as sf
 import matplotlib.pyplot as plt
 import numpy as np
 # from sklearn.manifold import TSNE         # You can try with TSNE if you like, I prefer UMAP 
@@ -137,7 +138,21 @@ class UI(QDialog):
         self.umap_ax.set_yticks([])
         self.umap_ax.figure.canvas.draw()
 
-    def setup_audio_devices(self,sample_rate):
+    def save_audio_file(self, wav, sample_rate):        
+        dialog = QFileDialog()
+        dialog.setDefaultSuffix(".wav")
+        fpath, _ = dialog.getSaveFileName(
+            parent=self,
+            caption="Select a path to save the audio file",
+            filter="Audio Files (*.flac *.wav)"
+        )
+        if fpath:
+            #Default format is wav
+            if Path(fpath).suffix == "":
+                fpath += ".wav"
+            sf.write(fpath, wav, sample_rate)
+
+    def setup_audio_devices(self, sample_rate):
         input_devices = []
         output_devices = []
         for device in sd.query_devices():
@@ -389,6 +404,8 @@ class UI(QDialog):
         self.generate_button.setDisabled(True)
         self.synthesize_button.setDisabled(True)
         self.vocode_button.setDisabled(True)
+        self.replay_wav_button.setDisabled(True)
+        self.export_wav_button.setDisabled(True)
         [self.log("") for _ in range(self.max_log_lines)]
 
     def __init__(self):
@@ -536,6 +553,22 @@ class UI(QDialog):
         self.vocode_button = QPushButton("Vocode only")
         layout.addWidget(self.vocode_button)
         gen_layout.addLayout(layout)
+
+
+        #Replay & Save Audio
+        layout2 = QHBoxLayout()
+        self.replay_wav_button = QPushButton("Replay")
+        self.replay_wav_button.setToolTip("Replay last generated vocoder")
+        layout2.addWidget(self.replay_wav_button)
+        self.export_wav_button = QPushButton("Export")
+        self.export_wav_button.setToolTip("Save last generated vocoder audio in filesystem as a wav file")
+        layout2.addWidget(self.export_wav_button)
+        self.waves_cb_model = QStringListModel()
+        self.waves_cb = QComboBox()
+        self.waves_cb.setModel(self.waves_cb_model)
+        self.waves_cb.setToolTip("Select one of the last generated waves in this section for replaying or exporting")
+        layout2.addWidget(self.waves_cb)
+        gen_layout.addLayout(layout2)
 
         self.loading_bar = QProgressBar()
         gen_layout.addWidget(self.loading_bar)
