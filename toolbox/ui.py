@@ -297,6 +297,7 @@ class UI(QDialog):
                 self.utterance_box.setDisabled(True)
                 self.speaker_box.setDisabled(True)
                 self.dataset_box.setDisabled(True)
+                self.browser_load_button.setDisabled(True)
                 return 
             self.repopulate_box(self.dataset_box, datasets, random)
     
