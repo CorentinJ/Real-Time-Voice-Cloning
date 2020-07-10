@@ -38,7 +38,7 @@ SV2TTS is a three-stage deep learning framework that allows to create a numerica
 
 * Install [PyTorch](https://pytorch.org/get-started/locally/) (>=1.0.1).
 * Install [ffmpeg](https://ffmpeg.org/download.html#get-packages).
-* Run `pip install -r requirements.txt` to install the necessary packages.
+* Run `pip install -r requirements.txt` to install the remaining necessary packages.
 
 ### 2. Download Pretrained Models
 Download the latest [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models).
