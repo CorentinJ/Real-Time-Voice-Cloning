@@ -53,6 +53,12 @@ if __name__ == '__main__':
     else:
         print("Using CPU for inference.\n")
     
+    ## Print helpful error message if models are not present
+    if not args.enc_model_fpath.is_file():
+        if not args.syn_model_dir.is_dir():
+            if not args.voc_model_fpath.is_file():
+                print("Error: Model files not found. If needed, download them here: https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models")
+                quit(-1)
     
     ## Load the models one by one.
     print("Preparing the encoder, the synthesizer and the vocoder...")

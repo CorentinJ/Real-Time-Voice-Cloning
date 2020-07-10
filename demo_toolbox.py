@@ -26,8 +26,14 @@ if __name__ == '__main__':
         "If True, the memory used by the synthesizer will be freed after each use. Adds large "
         "overhead but allows to save some GPU memory for lower-end GPUs.")
     args = parser.parse_args()
+    print_args(args, parser)
+
+    ## Print helpful error message if models are not present
+    if not args.enc_models_dir.is_dir():
+        if not args.syn_models_dir.is_dir():
+            if not args.voc_models_dir.is_dir():
+                print("Error: Model files not found. If needed, download them here: https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models")
+                quit(-1)
 
     # Launch the toolbox
-    print_args(args, parser)
-    Toolbox(**vars(args))
-    
+    Toolbox(**vars(args))    
