@@ -1,5 +1,6 @@
 from encoder.params_model import model_embedding_size as speaker_embedding_size
 from utils.argutils import print_args
+from utils.modelutils import check_model_paths
 from synthesizer.inference import Synthesizer
 from encoder import inference as encoder
 from vocoder import inference as vocoder
@@ -53,6 +54,9 @@ if __name__ == '__main__':
     else:
         print("Using CPU for inference.\n")
     
+    ## Remind the user to download pretrained models if needed
+    check_model_paths(encoder_path=args.enc_model_fpath, synthesizer_path=args.syn_model_dir,
+                      vocoder_path=args.voc_model_fpath)
     
     ## Load the models one by one.
     print("Preparing the encoder, the synthesizer and the vocoder...")

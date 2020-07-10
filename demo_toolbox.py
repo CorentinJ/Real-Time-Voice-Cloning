@@ -1,6 +1,7 @@
 from pathlib import Path
 from toolbox import Toolbox
 from utils.argutils import print_args
+from utils.modelutils import check_model_paths
 import argparse
 
 
@@ -26,8 +27,11 @@ if __name__ == '__main__':
         "If True, the memory used by the synthesizer will be freed after each use. Adds large "
         "overhead but allows to save some GPU memory for lower-end GPUs.")
     args = parser.parse_args()
+    print_args(args, parser)
+
+    ## Remind the user to download pretrained models if needed
+    check_model_paths(encoder_path=args.enc_models_dir, synthesizer_path=args.syn_models_dir,
+                      vocoder_path=args.voc_models_dir)
 
     # Launch the toolbox
-    print_args(args, parser)
-    Toolbox(**vars(args))
-    
+    Toolbox(**vars(args))    
