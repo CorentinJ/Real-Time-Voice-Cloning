@@ -1,6 +1,7 @@
 from pathlib import Path
 from toolbox import Toolbox
 from utils.argutils import print_args
+from utils.modelutils import check_model_paths
 import argparse
 
 
@@ -28,12 +29,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
     print_args(args, parser)
 
-    ## Print helpful error message if models are not present
-    if not args.enc_models_dir.is_dir():
-        if not args.syn_models_dir.is_dir():
-            if not args.voc_models_dir.is_dir():
-                print("Error: Model files not found. If needed, download them here: https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models")
-                quit(-1)
+    ## Remind the user to download pretrained models if needed
+    check_model_paths(encoder_path=args.enc_models_dir, synthesizer_path=args.syn_models_dir,
+                      vocoder_path=args.voc_models_dir)
 
     # Launch the toolbox
     Toolbox(**vars(args))    
