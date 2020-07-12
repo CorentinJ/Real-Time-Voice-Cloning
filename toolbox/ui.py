@@ -174,12 +174,9 @@ class UI(QDialog):
 
         if len(input_devices) == 0:
             self.log("No audio input device detected. Recording may not work.")
-            self.audio_in_devices_cb.addItems(["None"])
-            self.audio_in_devices_cb.setDisabled(True)
+            self.audio_in_device = None
         else:
-            self.audio_in_devices_cb.clear()
-            self.audio_in_devices_cb.addItems(input_devices)
-            self.audio_in_devices_cb.currentTextChanged.connect(self.set_audio_device)
+            self.audio_in_device = input_devices[0]
 
         if len(output_devices) == 0:
             self.log("No supported output audio devices were found! Audio output may not work.")
@@ -193,16 +190,13 @@ class UI(QDialog):
         self.set_audio_device()
 
     def set_audio_device(self):
-        input_device = self.audio_in_devices_cb.currentText()
-        if input_device == "None":
-            input_device = None
         
         output_device = self.audio_out_devices_cb.currentText()
         if output_device == "None":
             output_device = None
 
         # If None, sounddevice queries portaudio
-        sd.default.device = (input_device, output_device)
+        sd.default.device = (self.audio_in_device, output_device)
     
     def play(self, wav, sample_rate):
         sd.stop()
@@ -298,6 +292,7 @@ class UI(QDialog):
                 self.speaker_box.setDisabled(True)
                 self.dataset_box.setDisabled(True)
                 self.browser_load_button.setDisabled(True)
+                self.auto_next_checkbox.setDisabled(True)
                 return 
             self.repopulate_box(self.dataset_box, datasets, random)
     
@@ -423,24 +418,24 @@ class UI(QDialog):
         
         # Browser
         browser_layout = QGridLayout()
-        root_layout.addLayout(browser_layout, 0, 1)
-        
-        # Visualizations
-        vis_layout = QVBoxLayout()
-        root_layout.addLayout(vis_layout, 1, 1, 2, 3)
+        root_layout.addLayout(browser_layout, 0, 0, 1, 2)
         
         # Generation
         gen_layout = QVBoxLayout()
-        root_layout.addLayout(gen_layout, 0, 2)
+        root_layout.addLayout(gen_layout, 0, 2, 1, 2)
         
         # Projections
         self.projections_layout = QVBoxLayout()
-        root_layout.addLayout(self.projections_layout, 1, 0)
+        root_layout.addLayout(self.projections_layout, 1, 0, 1, 1)
+        
+        # Visualizations
+        vis_layout = QVBoxLayout()
+        root_layout.addLayout(vis_layout, 1, 1, 1, 3)
 
 
         ## Projections
         # UMap
-        fig, self.umap_ax = plt.subplots(figsize=(4, 4), facecolor="#F0F0F0")
+        fig, self.umap_ax = plt.subplots(figsize=(3, 3), facecolor="#F0F0F0")
         fig.subplots_adjust(left=0.02, bottom=0.02, right=0.98, top=0.98)
         self.projections_layout.addWidget(FigureCanvas(fig))
         self.umap_hot = False
@@ -460,8 +455,6 @@ class UI(QDialog):
         self.utterance_box = QComboBox()
         browser_layout.addWidget(QLabel("<b>Utterance</b>"), i, 2)
         browser_layout.addWidget(self.utterance_box, i + 1, 2)
-        self.browser_browse_button = QPushButton("Browse")
-        browser_layout.addWidget(self.browser_browse_button, i, 3)
         self.browser_load_button = QPushButton("Load")
         browser_layout.addWidget(self.browser_load_button, i + 1, 3)
         i += 2
@@ -480,16 +473,13 @@ class UI(QDialog):
         
         # Utterance box
         browser_layout.addWidget(QLabel("<b>Use embedding from:</b>"), i, 0)
-        i += 1
-        
-        # Random & next utterance buttons
         self.utterance_history = QComboBox()
-        browser_layout.addWidget(self.utterance_history, i, 0, 1, 3)
+        browser_layout.addWidget(self.utterance_history, i, 1, 1, 3)
         i += 1
         
         # Random & next utterance buttons
-        self.take_generated_button = QPushButton("Take generated")
-        browser_layout.addWidget(self.take_generated_button, i, 0)
+        self.browser_browse_button = QPushButton("Browse")
+        browser_layout.addWidget(self.browser_browse_button, i, 0)
         self.record_button = QPushButton("Record")
         browser_layout.addWidget(self.record_button, i, 1)
         self.play_button = QPushButton("Play")
@@ -498,17 +488,8 @@ class UI(QDialog):
         browser_layout.addWidget(self.stop_button, i, 3)
         i += 1
 
-        #Audio devices
-        browser_layout.addWidget(QLabel("<b>Audio Input</b>"), i, 0)
-        self.audio_in_devices_cb=QComboBox()
-        browser_layout.addWidget(self.audio_in_devices_cb, i+1, 0)
 
-        browser_layout.addWidget(QLabel("<b>Audio Output</b>"), i, 1)
-        self.audio_out_devices_cb=QComboBox()
-        browser_layout.addWidget(self.audio_out_devices_cb, i+1, 1)
-        i += 3
-
-        # Model selection
+        # Model and audio output selection
         self.encoder_box = QComboBox()
         browser_layout.addWidget(QLabel("<b>Encoder</b>"), i, 0)
         browser_layout.addWidget(self.encoder_box, i + 1, 0)
@@ -518,7 +499,26 @@ class UI(QDialog):
         self.vocoder_box = QComboBox()
         browser_layout.addWidget(QLabel("<b>Vocoder</b>"), i, 2)
         browser_layout.addWidget(self.vocoder_box, i + 1, 2)
+        
+        self.audio_out_devices_cb=QComboBox()
+        browser_layout.addWidget(QLabel("<b>Audio Output</b>"), i, 3)
+        browser_layout.addWidget(self.audio_out_devices_cb, i + 1, 3)
         i += 2
+
+        #Replay & Save Audio
+        browser_layout.addWidget(QLabel("<b>Toolbox Output:</b>"), i, 0)
+        self.waves_cb = QComboBox()
+        self.waves_cb_model = QStringListModel()
+        self.waves_cb.setModel(self.waves_cb_model)
+        self.waves_cb.setToolTip("Select one of the last generated waves in this section for replaying or exporting")
+        browser_layout.addWidget(self.waves_cb, i, 1)
+        self.replay_wav_button = QPushButton("Replay")
+        self.replay_wav_button.setToolTip("Replay last generated vocoder")
+        browser_layout.addWidget(self.replay_wav_button, i, 2)
+        self.export_wav_button = QPushButton("Export")
+        self.export_wav_button.setToolTip("Save last generated vocoder audio in filesystem as a wav file")
+        browser_layout.addWidget(self.export_wav_button, i, 3)
+        i += 1
 
 
         ## Embed & spectrograms
@@ -554,22 +554,6 @@ class UI(QDialog):
         self.vocode_button = QPushButton("Vocode only")
         layout.addWidget(self.vocode_button)
         gen_layout.addLayout(layout)
-
-
-        #Replay & Save Audio
-        layout2 = QHBoxLayout()
-        self.replay_wav_button = QPushButton("Replay")
-        self.replay_wav_button.setToolTip("Replay last generated vocoder")
-        layout2.addWidget(self.replay_wav_button)
-        self.export_wav_button = QPushButton("Export")
-        self.export_wav_button.setToolTip("Save last generated vocoder audio in filesystem as a wav file")
-        layout2.addWidget(self.export_wav_button)
-        self.waves_cb_model = QStringListModel()
-        self.waves_cb = QComboBox()
-        self.waves_cb.setModel(self.waves_cb_model)
-        self.waves_cb.setToolTip("Select one of the last generated waves in this section for replaying or exporting")
-        layout2.addWidget(self.waves_cb)
-        gen_layout.addLayout(layout2)
 
         self.loading_bar = QProgressBar()
         gen_layout.addWidget(self.loading_bar)
