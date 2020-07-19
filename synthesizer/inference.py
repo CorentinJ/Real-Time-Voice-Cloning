@@ -91,8 +91,6 @@ class Synthesizer:
             #    self.load()
             self.load() #load every time for repeatability
             specs, alignments = self._model.my_synthesize(embeddings, texts)
-            #specs, alignments = Pool(1).starmap(Synthesizer._one_shot_synthesize_spectrograms, 
-            #                                    [(self.checkpoint_fpath, embeddings, texts)])[0]
         else:
             # Low memory inference mode: load the model upon every request. The model has to be 
             # loaded in a separate process to be able to release GPU memory (a simple workaround 

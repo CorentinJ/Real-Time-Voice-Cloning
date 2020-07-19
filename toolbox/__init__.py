@@ -211,10 +211,10 @@ class Toolbox:
         # Synthesize the waveform
         #if not vocoder.is_loaded():
         #    self.init_vocoder()
-        
+
         #initialize the vocoder every time for repeatability
         torch.manual_seed(0)
-        
+
         self.init_vocoder()
         def vocoder_progress(i, seq_len, b_size, gen_rate):
             real_time_factor = (gen_rate / Synthesizer.sample_rate) * 1000
