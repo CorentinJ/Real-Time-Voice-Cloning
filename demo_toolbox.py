@@ -23,12 +23,7 @@ seed_value += 1
 
 # 4. Set `tensorflow` pseudo-random generator at a fixed value
 import tensorflow as tf
-tf.set_random_seed(seed_value)
-
-# 5. Configure a new global `tensorflow` session
-session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
-sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
-tf.keras.backend.set_session(sess)
+tf.compat.v1.set_random_seed(seed_value)
 
 from pathlib import Path
 from toolbox import Toolbox
