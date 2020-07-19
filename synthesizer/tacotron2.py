@@ -12,7 +12,7 @@ import random
 class Tacotron2:
     def __init__(self, checkpoint_path, hparams, gta=False, model_name="Tacotron"):
         log("Constructing model and seeding: %s" % model_name)
-        os.environ['PYTHONHASHSEED'] = str(hparams.tacotron_random_seed)
+        os.environ["PYTHONHASHSEED"] = str(hparams.tacotron_random_seed)
         random.seed(hparams.tacotron_random_seed)
         np.random.seed(hparams.tacotron_random_seed)
         tf.compat.v1.set_random_seed(hparams.tacotron_random_seed)

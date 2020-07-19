@@ -74,7 +74,6 @@ class Synthesizer:
         :return: a list of N melspectrograms as numpy arrays of shape (80, Mi), where Mi is the 
         sequence length of spectrogram i, and possibly the alignments.
         """
-
         if not self._low_mem:
             # Usual inference mode: load the model on the first request and keep it loaded.
             # If repeatable output is requested, reload it every time.
