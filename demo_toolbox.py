@@ -1,3 +1,35 @@
+import torch
+torch.manual_seed(0)
+
+print('Running in 1-thread CPU mode for fully reproducible results training a CNN and generating numpy randomness.  This mode may be slow...')
+# Seed value
+# Apparently you may use different seed values at each stage
+seed_value= 1
+
+# 1. Set `PYTHONHASHSEED` environment variable at a fixed value
+import os
+os.environ['PYTHONHASHSEED']=str(seed_value)
+seed_value += 1
+
+# 2. Set `python` built-in pseudo-random generator at a fixed value
+import random
+random.seed(seed_value)
+seed_value += 1
+
+# 3. Set `numpy` pseudo-random generator at a fixed value
+import numpy as np
+np.random.seed(seed_value)
+seed_value += 1
+
+# 4. Set `tensorflow` pseudo-random generator at a fixed value
+import tensorflow as tf
+tf.set_random_seed(seed_value)
+
+# 5. Configure a new global `tensorflow` session
+session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
+tf.keras.backend.set_session(sess)
+
 from pathlib import Path
 from toolbox import Toolbox
 from utils.argutils import print_args

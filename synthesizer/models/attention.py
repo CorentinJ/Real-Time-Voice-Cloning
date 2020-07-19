@@ -159,7 +159,8 @@ class LocationSensitiveAttention(BahdanauAttention):
 			kernel_size=hparams.attention_kernel, padding="same", use_bias=True,
 			bias_initializer=tf.zeros_initializer(), name="location_features_convolution")
 		self.location_layer = tf.compat.v1.layers.Dense(units=num_units, use_bias=False,
-			dtype=tf.float32, name="location_features_layer")
+			dtype=tf.float32, name="location_features_layer",
+                        kernel_initializer = tf.glorot_uniform_initializer(seed=123, dtype=tf.float32))
 		self._cumulate = cumulate_weights
 
 	def __call__(self, query, state):

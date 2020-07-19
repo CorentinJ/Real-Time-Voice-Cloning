@@ -8,7 +8,7 @@ from toolbox.utterance import Utterance
 import numpy as np
 import traceback
 import sys
-
+import torch
 
 # Use this directory structure for your datasets, or modify it to fit your needs
 recognized_datasets = [
@@ -196,7 +196,7 @@ class Toolbox:
         texts = self.ui.text_prompt.toPlainText().split("\n")
         embed = self.ui.selected_utterance.embed
         embeds = np.stack([embed] * len(texts))
-        specs = self.synthesizer.synthesize_spectrograms(texts, embeds)
+        specs = self.synthesizer.synthesize_spectrograms(texts, embeds, seed=0)
         breaks = [spec.shape[1] for spec in specs]
         spec = np.concatenate(specs, axis=1)
         
@@ -209,8 +209,13 @@ class Toolbox:
         assert spec is not None
 
         # Synthesize the waveform
-        if not vocoder.is_loaded():
-            self.init_vocoder()
+        #if not vocoder.is_loaded():
+        #    self.init_vocoder()
+        
+        #initialize the vocoder every time for repeatability
+        torch.manual_seed(0)
+        
+        self.init_vocoder()
         def vocoder_progress(i, seq_len, b_size, gen_rate):
             real_time_factor = (gen_rate / Synthesizer.sample_rate) * 1000
             line = "Waveform generation: %d/%d (batch size: %d, rate: %.1fkHz - %.2fx real time)" \

@@ -9,6 +9,8 @@ import tensorflow as tf
 import numpy as np
 import numba.cuda
 import librosa
+import random
+import os
 
 
 class Synthesizer:
@@ -59,7 +61,8 @@ class Synthesizer:
             
     def synthesize_spectrograms(self, texts: List[str],
                                 embeddings: Union[np.ndarray, List[np.ndarray]],
-                                return_alignments=False):
+                                return_alignments=False,
+                                seed=None):
         """
         Synthesizes mel spectrograms from texts and speaker embeddings.
 
@@ -71,11 +74,25 @@ class Synthesizer:
         :return: a list of N melspectrograms as numpy arrays of shape (80, Mi), where Mi is the 
         sequence length of spectrogram i, and possibly the alignments.
         """
+
+        if seed:
+            # Seed the random number generator for deterministic output
+            os.environ['PYTHONHASHSEED'] = str(seed)
+            random.seed(seed)
+            np.random.seed(seed)
+            tf.compat.v1.set_random_seed(seed)
+            session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+            sess = tf.compat.v1.Session(graph=tf.get_default_graph(), config=session_conf)
+            tf.keras.backend.set_session(sess)
+
         if not self._low_mem:
             # Usual inference mode: load the model on the first request and keep it loaded.
-            if not self.is_loaded():
-                self.load()
+            #if not self.is_loaded():
+            #    self.load()
+            self.load() #load every time for repeatability
             specs, alignments = self._model.my_synthesize(embeddings, texts)
+            #specs, alignments = Pool(1).starmap(Synthesizer._one_shot_synthesize_spectrograms, 
+            #                                    [(self.checkpoint_fpath, embeddings, texts)])[0]
         else:
             # Low memory inference mode: load the model upon every request. The model has to be 
             # loaded in a separate process to be able to release GPU memory (a simple workaround 

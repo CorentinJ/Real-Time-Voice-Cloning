@@ -6,11 +6,17 @@ from synthesizer import audio
 import tensorflow as tf
 import numpy as np
 import os
+import random
 
 
 class Tacotron2:
     def __init__(self, checkpoint_path, hparams, gta=False, model_name="Tacotron"):
-        log("Constructing model: %s" % model_name)
+        log("Constructing model and seeding: %s" % model_name)
+        os.environ['PYTHONHASHSEED'] = str(hparams.tacotron_random_seed)
+        random.seed(hparams.tacotron_random_seed)
+        np.random.seed(hparams.tacotron_random_seed)
+        tf.compat.v1.set_random_seed(hparams.tacotron_random_seed)
+
         #Force the batch size to be known in order to use attention masking in batch synthesis
         inputs = tf.compat.v1.placeholder(tf.int32, (None, None), name="inputs")
         input_lengths = tf.compat.v1.placeholder(tf.int32, (None,), name="input_lengths")
