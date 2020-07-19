@@ -196,7 +196,7 @@ class Toolbox:
         texts = self.ui.text_prompt.toPlainText().split("\n")
         embed = self.ui.selected_utterance.embed
         embeds = np.stack([embed] * len(texts))
-        specs = self.synthesizer.synthesize_spectrograms(texts, embeds, seed=0)
+        specs = self.synthesizer.synthesize_spectrograms(texts, embeds)
         breaks = [spec.shape[1] for spec in specs]
         spec = np.concatenate(specs, axis=1)
         

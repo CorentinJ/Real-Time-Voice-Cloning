@@ -61,8 +61,7 @@ class Synthesizer:
             
     def synthesize_spectrograms(self, texts: List[str],
                                 embeddings: Union[np.ndarray, List[np.ndarray]],
-                                return_alignments=False,
-                                seed=None):
+                                return_alignments=False):
         """
         Synthesizes mel spectrograms from texts and speaker embeddings.
 
@@ -74,16 +73,6 @@ class Synthesizer:
         :return: a list of N melspectrograms as numpy arrays of shape (80, Mi), where Mi is the 
         sequence length of spectrogram i, and possibly the alignments.
         """
-
-        if seed:
-            # Seed the random number generator for deterministic output
-            os.environ['PYTHONHASHSEED'] = str(seed)
-            random.seed(seed)
-            np.random.seed(seed)
-            tf.compat.v1.set_random_seed(seed)
-            session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
-            sess = tf.compat.v1.Session(graph=tf.get_default_graph(), config=session_conf)
-            tf.keras.backend.set_session(sess)
 
         if not self._low_mem:
             # Usual inference mode: load the model on the first request and keep it loaded.
