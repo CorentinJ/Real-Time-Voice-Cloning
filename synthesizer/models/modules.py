@@ -7,9 +7,9 @@ class HighwayNet:
         self.units = units
         self.scope = "HighwayNet" if name is None else name
         
-        self.H_layer = tf.compat.v1.layers.Dense(units=self.units, activation=tf.nn.relu, name="H", kernel_initializer=tf.glorot_uniform_initializer(seed=123, dtype=tf.float32))
+        self.H_layer = tf.compat.v1.layers.Dense(units=self.units, activation=tf.nn.relu, name="H")
         self.T_layer = tf.compat.v1.layers.Dense(units=self.units, activation=tf.nn.sigmoid, name="T",
-                                       bias_initializer=tf.constant_initializer(-1.), kernel_initializer=tf.glorot_uniform_initializer(seed=123, dtype=tf.float32))
+                                       bias_initializer=tf.constant_initializer(-1.))
     
     def __call__(self, inputs):
         with tf.compat.v1.variable_scope(self.scope):
@@ -35,8 +35,8 @@ class CBHG:
         self.highwaynet_layers = [
             HighwayNet(highway_units, name="{}_highwaynet_{}".format(self.scope, i + 1)) for i in
             range(n_highwaynet_layers)]
-        self._fw_cell = tf.nn.rnn_cell.GRUCell(rnn_units, name="{}_forward_RNN".format(self.scope), kernel_initializer=tf.glorot_normal_initializer(seed=123, dtype=tf.float32))
-        self._bw_cell = tf.nn.rnn_cell.GRUCell(rnn_units, name="{}_backward_RNN".format(self.scope), kernel_initializer=tf.glorot_normal_initializer(seed=123, dtype=tf.float32))
+        self._fw_cell = tf.nn.rnn_cell.GRUCell(rnn_units, name="{}_forward_RNN".format(self.scope))
+        self._bw_cell = tf.nn.rnn_cell.GRUCell(rnn_units, name="{}_backward_RNN".format(self.scope))
     
     def __call__(self, inputs, input_lengths):
         with tf.compat.v1.variable_scope(self.scope):
@@ -265,8 +265,7 @@ class Prenet:
         with tf.compat.v1.variable_scope(self.scope):
             for i, size in enumerate(self.layers_sizes):
                 dense = tf.compat.v1.layers.dense(x, units=size, activation=self.activation,
-                                        name="dense_{}".format(i + 1),
-                                        kernel_initializer=tf.glorot_uniform_initializer(seed=123, dtype=tf.float32))
+                                        name="dense_{}".format(i + 1))
                 # The paper discussed introducing diversity in generation at inference time
                 # by using a dropout of 0.5 only in prenet layers (in both training and inference).
                 x = tf.compat.v1.layers.dropout(dense, rate=self.drop_rate, training=True,
@@ -328,7 +327,7 @@ class FrameProjection:
         
         self.scope = "Linear_projection" if scope is None else scope
         self.dense = tf.compat.v1.layers.Dense(units=shape, activation=activation,
-                                     name="projection_{}".format(self.scope), kernel_initializer=tf.glorot_uniform_initializer(seed=123, dtype=tf.float32))
+                                     name="projection_{}".format(self.scope))
     
     def __call__(self, inputs):
         with tf.compat.v1.variable_scope(self.scope):
@@ -364,7 +363,7 @@ class StopProjection:
     def __call__(self, inputs):
         with tf.compat.v1.variable_scope(self.scope):
             output = tf.layers.dense(inputs, units=self.shape,
-                                     activation=None, name="projection_{}".format(self.scope), kernel_initializer=tf.glorot_uniform_initializer(seed=123, dtype=tf.float32))
+                                     activation=None, name="projection_{}".format(self.scope))
             
             # During training, don"t use activation as it is integrated inside the 
 			# sigmoid_cross_entropy loss function
