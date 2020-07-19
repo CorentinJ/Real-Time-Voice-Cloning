@@ -17,7 +17,7 @@ class Synthesizer:
     sample_rate = hparams.sample_rate
     hparams = hparams
     
-    def __init__(self, checkpoints_dir: Path, verbose=True, low_mem=False):
+    def __init__(self, checkpoints_dir: Path, verbose=True, low_mem=False, repeatable=False):
         """
         Creates a synthesizer ready for inference. The actual model isn't loaded in memory until
         needed or until load() is called.
@@ -31,6 +31,7 @@ class Synthesizer:
         """
         self.verbose = verbose
         self._low_mem = low_mem
+        self._repeatable = repeatable
         
         # Prepare the model
         self._model = None  # type: Tacotron2
@@ -76,9 +77,9 @@ class Synthesizer:
 
         if not self._low_mem:
             # Usual inference mode: load the model on the first request and keep it loaded.
-            #if not self.is_loaded():
-            #    self.load()
-            self.load() #load every time for repeatability
+            # If repeatable output is requested, reload it every time.
+            if self._repeatable or not self.is_loaded():
+                self.load()
             specs, alignments = self._model.my_synthesize(embeddings, texts)
         else:
             # Low memory inference mode: load the model upon every request. The model has to be 

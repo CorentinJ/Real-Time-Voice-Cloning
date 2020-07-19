@@ -38,10 +38,11 @@ recognized_datasets = [
 MAX_WAVES = 15
 
 class Toolbox:
-    def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir, low_mem):
+    def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir, low_mem, repeatable):
         sys.excepthook = self.excepthook
         self.datasets_root = datasets_root
         self.low_mem = low_mem
+        self.repeatable = repeatable
         self.utterances = set()
         self.current_generated = (None, None, None, None) # speaker_name, spec, breaks, wav
         
@@ -189,7 +190,7 @@ class Toolbox:
         if self.synthesizer is None:
             model_dir = self.ui.current_synthesizer_model_dir
             checkpoints_dir = model_dir.joinpath("taco_pretrained")
-            self.synthesizer = Synthesizer(checkpoints_dir, low_mem=self.low_mem)
+            self.synthesizer = Synthesizer(checkpoints_dir, low_mem=self.low_mem, repeatable=self.repeatable)
         if not self.synthesizer.is_loaded():
             self.ui.log("Loading the synthesizer %s" % self.synthesizer.checkpoint_fpath)
         
@@ -209,13 +210,11 @@ class Toolbox:
         assert spec is not None
 
         # Synthesize the waveform
-        #if not vocoder.is_loaded():
-        #    self.init_vocoder()
+        if self.repeatable or not vocoder.is_loaded():
+            # Initialize the vocoder with a fixed seed for repeatability
+            torch.manual_seed(0)
+            self.init_vocoder()
 
-        #initialize the vocoder every time for repeatability
-        torch.manual_seed(0)
-
-        self.init_vocoder()
         def vocoder_progress(i, seq_len, b_size, gen_rate):
             real_time_factor = (gen_rate / Synthesizer.sample_rate) * 1000
             line = "Waveform generation: %d/%d (batch size: %d, rate: %.1fkHz - %.2fx real time)" \

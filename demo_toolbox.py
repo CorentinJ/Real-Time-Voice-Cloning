@@ -1,30 +1,3 @@
-import torch
-torch.manual_seed(0)
-
-print('Running in 1-thread CPU mode for fully reproducible results training a CNN and generating numpy randomness.  This mode may be slow...')
-# Seed value
-# Apparently you may use different seed values at each stage
-seed_value= 1
-
-# 1. Set `PYTHONHASHSEED` environment variable at a fixed value
-import os
-os.environ['PYTHONHASHSEED']=str(seed_value)
-seed_value += 1
-
-# 2. Set `python` built-in pseudo-random generator at a fixed value
-import random
-random.seed(seed_value)
-seed_value += 1
-
-# 3. Set `numpy` pseudo-random generator at a fixed value
-import numpy as np
-np.random.seed(seed_value)
-seed_value += 1
-
-# 4. Set `tensorflow` pseudo-random generator at a fixed value
-import tensorflow as tf
-tf.compat.v1.set_random_seed(seed_value)
-
 from pathlib import Path
 from toolbox import Toolbox
 from utils.argutils import print_args
@@ -53,8 +26,40 @@ if __name__ == '__main__':
     parser.add_argument("--low_mem", action="store_true", help=\
         "If True, the memory used by the synthesizer will be freed after each use. Adds large "
         "overhead but allows to save some GPU memory for lower-end GPUs.")
+    parser.add_argument("--repeatable", action="store_true", help=\
+        "If True, the synthesizer and vocoder will use hardcoded seeds for random number generation"
+        "and the models will be reloaded on each use for repeatability of voice cloning output.")
     args = parser.parse_args()
     print_args(args, parser)
+
+    ## Set seeds if repeatable output requested
+    if args.repeatable:
+        import torch
+        torch.manual_seed(0)
+
+        # Seed value
+        # Apparently you may use different seed values at each stage
+        seed_value= 1
+
+        # 1. Set `PYTHONHASHSEED` environment variable at a fixed value
+        import os
+        os.environ["PYTHONHASHSEED"]=str(seed_value)
+        seed_value += 1
+
+        # 2. Set `python` built-in pseudo-random generator at a fixed value
+        import random
+        random.seed(seed_value)
+        seed_value += 1
+
+        # 3. Set `numpy` pseudo-random generator at a fixed value
+        import numpy as np
+        np.random.seed(seed_value)
+        seed_value += 1
+
+        # 4. Set `tensorflow` pseudo-random generator at a fixed value
+        import tensorflow as tf
+        tf.compat.v1.set_random_seed(seed_value)
+
 
     ## Remind the user to download pretrained models if needed
     check_model_paths(encoder_path=args.enc_models_dir, synthesizer_path=args.syn_models_dir,
