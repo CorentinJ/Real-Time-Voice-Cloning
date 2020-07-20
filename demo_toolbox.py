@@ -30,20 +30,13 @@ if __name__ == '__main__':
     parser.add_argument("--low_mem", action="store_true", help=\
         "If True, the memory used by the synthesizer will be freed after each use. Adds large "
         "overhead but allows to save some GPU memory for lower-end GPUs.")
-    parser.add_argument("--reload_models", action="store_true", help=\
-        "If True, reload synthesizer and vocoder models on each use for repeatable output.")
     parser.add_argument("--seed", type=int, default=None, help=\
-        "Specifies a seed value for random number generation for deterministic behavior.")
+        "Optional random number seed value for repeatable output.")
     args = parser.parse_args()
-
-    ## If "--reload_models" is specified, assign a default seed value if oneis not specified
-    if args.reload_models and args.seed is None:
-        args.seed = 0 
-
     print_args(args, parser)
 
     ## Initialize random number generators
-    if args.seed:
+    if args.seed is not None:
         torch.manual_seed(args.seed)
         os.environ["PYTHONHASHSEED"] = str(args.seed)
         random.seed(args.seed)

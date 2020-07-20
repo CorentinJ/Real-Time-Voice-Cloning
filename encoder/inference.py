@@ -7,6 +7,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+from typing import Optional, Union
 
 _model = None # type: SpeakerEncoder
 _device = None # type: torch.device
@@ -175,3 +176,7 @@ def plot_embedding_as_heatmap(embed, ax=None, title="", shape=None, color_range=
     
     ax.set_xticks([]), ax.set_yticks([])
     ax.set_title(title)
+
+def preprocess_wav(fpath_or_wav: Union[str, Path, np.ndarray],
+                   source_sr: Optional[int] = None):
+    return audio.preprocess_wav(fpath_or_wav, source_sr)

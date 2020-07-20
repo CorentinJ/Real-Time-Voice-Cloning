@@ -15,7 +15,7 @@ class Synthesizer:
     sample_rate = hparams.sample_rate
     hparams = hparams
     
-    def __init__(self, checkpoints_dir: Path, verbose=True, low_mem=False, reload_models=False, seed=None):
+    def __init__(self, checkpoints_dir: Path, verbose=True, low_mem=False, seed=None):
         """
         Creates a synthesizer ready for inference. The actual model isn't loaded in memory until
         needed or until load() is called.
@@ -26,13 +26,12 @@ class Synthesizer:
         :param low_mem: if True, the model will be loaded in a separate process and its resources 
         will be released after each usage. Adds a large overhead, only recommended if your GPU 
         memory is low (<= 2gb)
-        :param reload_models: if True, the model is always reloaded before each usage.
-        This makes the synthesizer output consistent for a given embedding and input text.
         :param seed: optional integer for seeding random number generators when initializing model
+        This makes the synthesizer output consistent for a given embedding and input text.
+        However, it requires the model to be reloaded whenever a text is synthesized.
         """
         self.verbose = verbose
         self._low_mem = low_mem
-        self._reload_models = reload_models
         self._seed = seed
 
         # Prepare the model
@@ -45,15 +44,18 @@ class Synthesizer:
             model_name = checkpoints_dir.parent.name.replace("logs-", "")
             step = int(self.checkpoint_fpath[self.checkpoint_fpath.rfind('-') + 1:])
             print("Found synthesizer \"%s\" trained to step %d" % (model_name, step))
-     
+
     def set_seed(self, new_seed):
         """
         Updates the seed that initializes random number generators associated with Tacotron2.
+        Returns the new seed state as confirmation.
         """
-        if new_seed is not None:
+        try:
             self._seed = int(new_seed)
-        else:
+        except:
             self._seed = None
+
+        return self._seed
 
     def is_loaded(self):
         """
@@ -88,7 +90,7 @@ class Synthesizer:
         if not self._low_mem:
             # Usual inference mode: load the model on the first request and keep it loaded.
             # If repeatable output is requested, reload it every time.
-            if self._reload_models or not self.is_loaded():
+            if not self.is_loaded() or self._seed is not None:
                 self.load()
             specs, alignments = self._model.my_synthesize(embeddings, texts)
         else:
@@ -104,7 +106,7 @@ class Synthesizer:
     def _one_shot_synthesize_spectrograms(checkpoint_fpath, embeddings, texts):
         # Load the model and forward the inputs
         tf.compat.v1.reset_default_graph()
-        model = Tacotron2(checkpoint_fpath, hparams)
+        model = Tacotron2(checkpoint_fpath, hparams, seed=self._seed)
         specs, alignments = model.my_synthesize(embeddings, texts)
         
         # Detach the outputs (not doing so will cause the process to hang)
