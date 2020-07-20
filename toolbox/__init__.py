@@ -207,6 +207,8 @@ class Toolbox:
         if self.ui.random_seed_checkbox.isChecked():
             seed = self.synthesizer.set_seed(int(self.ui.seed_textbox.text()))
             self.ui.populate_gen_options(seed, self.trim_silences)
+        else:
+            seed = self.synthesizer.set_seed(None)
         
         texts = self.ui.text_prompt.toPlainText().split("\n")
         embed = self.ui.selected_utterance.embed
