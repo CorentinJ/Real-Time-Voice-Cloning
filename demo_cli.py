@@ -15,6 +15,7 @@ import os
 import random
 import tensorflow as tf
 
+
 if __name__ == '__main__':
     ## Info & args
     parser = argparse.ArgumentParser(
@@ -170,7 +171,7 @@ if __name__ == '__main__':
             ## Generating the waveform
             print("Synthesizing the waveform:")
 
-            # If seed is specified, reset torch seed and reload vocoder for repeatabilitty
+            # If seed is specified, reset torch seed and reload vocoder for repeatability
             if args.seed is not None:
                 torch.manual_seed(args.seed)
                 vocoder.load_model(args.voc_model_fpath)

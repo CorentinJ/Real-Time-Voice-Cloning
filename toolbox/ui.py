@@ -577,7 +577,7 @@ class UI(QDialog):
 
         layout_seed = QGridLayout()
         self.random_seed_checkbox = QCheckBox("Random seed:")
-        self.random_seed_checkbox.setToolTip("When checked, makes the synthesizer and vocoder deterministic")
+        self.random_seed_checkbox.setToolTip("When checked, makes the synthesizer and vocoder deterministic.")
         layout_seed.addWidget(self.random_seed_checkbox, 0, 0)
         self.seed_textbox = QLineEdit()
         self.seed_textbox.setMaximumWidth(80)
