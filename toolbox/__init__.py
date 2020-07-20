@@ -224,7 +224,7 @@ class Toolbox:
             seed = None
 
         if seed is not None:
-            torch.manual_seed(self.seed)
+            torch.manual_seed(seed)
 
         # Synthesize the waveform
         if not vocoder.is_loaded() or seed is not None:
