@@ -10,12 +10,15 @@ import random
 
 
 class Tacotron2:
-    def __init__(self, checkpoint_path, hparams, gta=False, model_name="Tacotron"):
-        log("Constructing model and seeding: %s" % model_name)
-        os.environ["PYTHONHASHSEED"] = str(hparams.tacotron_random_seed)
-        random.seed(hparams.tacotron_random_seed)
-        np.random.seed(hparams.tacotron_random_seed)
-        tf.compat.v1.set_random_seed(hparams.tacotron_random_seed)
+    def __init__(self, checkpoint_path, hparams, gta=False, model_name="Tacotron", seed=None):
+        log("Constructing model: %s" % model_name)
+
+        # Initialize random number generators if a seed is provided (improves repeatability)
+        if seed is not None:
+            os.environ["PYTHONHASHSEED"] = str(seed)
+            random.seed(seed)
+            np.random.seed(seed)
+            tf.compat.v1.set_random_seed(seed)
 
         #Force the batch size to be known in order to use attention masking in batch synthesis
         inputs = tf.compat.v1.placeholder(tf.int32, (None, None), name="inputs")

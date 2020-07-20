@@ -38,11 +38,12 @@ recognized_datasets = [
 MAX_WAVES = 15
 
 class Toolbox:
-    def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir, low_mem, repeatable):
+    def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir, low_mem, reload_models, seed):
         sys.excepthook = self.excepthook
         self.datasets_root = datasets_root
         self.low_mem = low_mem
-        self.repeatable = repeatable
+        self.reload_models = reload_models
+        self.seed = seed
         self.utterances = set()
         self.current_generated = (None, None, None, None) # speaker_name, spec, breaks, wav
         
@@ -190,7 +191,7 @@ class Toolbox:
         if self.synthesizer is None:
             model_dir = self.ui.current_synthesizer_model_dir
             checkpoints_dir = model_dir.joinpath("taco_pretrained")
-            self.synthesizer = Synthesizer(checkpoints_dir, low_mem=self.low_mem, repeatable=self.repeatable)
+            self.synthesizer = Synthesizer(checkpoints_dir, low_mem=self.low_mem, reload_models=self.reload_models, seed=self.seed)
         if not self.synthesizer.is_loaded():
             self.ui.log("Loading the synthesizer %s" % self.synthesizer.checkpoint_fpath)
         
@@ -209,10 +210,12 @@ class Toolbox:
         speaker_name, spec, breaks, _ = self.current_generated
         assert spec is not None
 
+        # If specified, initialize the vocoder model with a fixed seed for repeatability
+        if self.seed is not None:
+            torch.manual_seed(self.seed)
+
         # Synthesize the waveform
-        if self.repeatable or not vocoder.is_loaded():
-            # Initialize the vocoder with a fixed seed for repeatability
-            torch.manual_seed(0)
+        if self.reload_models or not vocoder.is_loaded():
             self.init_vocoder()
 
         def vocoder_progress(i, seq_len, b_size, gen_rate):
