@@ -42,7 +42,6 @@ class Toolbox:
         sys.excepthook = self.excepthook
         self.datasets_root = datasets_root
         self.low_mem = low_mem
-        self.trim_silences = True
         self.utterances = set()
         self.current_generated = (None, None, None, None) # speaker_name, spec, breaks, wav
         
@@ -51,7 +50,14 @@ class Toolbox:
         self.waves_list = []
         self.waves_count = 0
         self.waves_namelist = []
-        
+
+        # Check for webrtcvad (enables removal of silences in vocoder output)
+        try:
+            import webrtcvad
+            self.trim_silences = True
+        except:
+            self.trim_silences = False
+
         # Initialize the events and the interface
         self.ui = UI()
         self.reset_ui(enc_models_dir, syn_models_dir, voc_models_dir, seed)
@@ -251,6 +257,10 @@ class Toolbox:
         wavs = [wav[start:end] for start, end, in zip(b_starts, b_ends)]
         breaks = [np.zeros(int(0.15 * Synthesizer.sample_rate))] * len(breaks)
         wav = np.concatenate([i for w, b in zip(wavs, breaks) for i in (w, b)])
+
+        # Trim excessive silences
+        if self.ui.trim_silences_checkbox.isChecked():
+            wav = encoder.preprocess_wav(wav)
 
         # Play it
         wav = wav / np.abs(wav).max() * 0.97

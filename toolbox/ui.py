@@ -398,7 +398,10 @@ class UI(QDialog):
             self.random_seed_checkbox.setChecked(False)
             self.seed_textbox.setText(str(0))
             self.seed_textbox.setEnabled(False)
-        #self.webrtcvad
+
+        if not trim_silences:
+            self.trim_silences_checkbox.setChecked(False)
+            self.trim_silences_checkbox.setDisabled(True)
 
     def update_seed_textbox(self):
         if self.random_seed_checkbox.isChecked():
