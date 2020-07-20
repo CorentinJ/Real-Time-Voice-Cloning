@@ -11,9 +11,6 @@ import librosa
 import argparse
 import torch
 import sys
-import os
-import random
-import tensorflow as tf
 
 
 if __name__ == '__main__':
@@ -42,14 +39,6 @@ if __name__ == '__main__':
     if not args.no_sound:
         import sounddevice as sd
         
-    ## Initialize random number generators
-    if args.seed is not None:
-        torch.manual_seed(args.seed)
-        os.environ["PYTHONHASHSEED"] = str(args.seed)
-        random.seed(args.seed)
-        np.random.seed(args.seed)
-        tf.compat.v1.set_random_seed(args.seed)
-    
     print("Running a test of your configuration...\n")
     if torch.cuda.is_available():
         device_id = torch.cuda.current_device()

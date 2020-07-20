@@ -3,11 +3,6 @@ from toolbox import Toolbox
 from utils.argutils import print_args
 from utils.modelutils import check_model_paths
 import argparse
-import torch
-import os
-import random
-import numpy as np
-import tensorflow as tf
 
 
 if __name__ == '__main__':
@@ -35,14 +30,6 @@ if __name__ == '__main__':
         "Optional random number seed value for repeatable output.")
     args = parser.parse_args()
     print_args(args, parser)
-
-    ## Initialize random number generators
-    if args.seed is not None:
-        torch.manual_seed(args.seed)
-        os.environ["PYTHONHASHSEED"] = str(args.seed)
-        random.seed(args.seed)
-        np.random.seed(args.seed)
-        tf.compat.v1.set_random_seed(args.seed)
 
     ## Remind the user to download pretrained models if needed
     check_model_paths(encoder_path=args.enc_models_dir, synthesizer_path=args.syn_models_dir,
