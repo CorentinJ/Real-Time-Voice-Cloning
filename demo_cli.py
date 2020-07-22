@@ -32,12 +32,13 @@ if __name__ == '__main__':
         "overhead but allows to save some GPU memory for lower-end GPUs.")
     parser.add_argument("--no_sound", action="store_true", help=\
         "If True, audio won't be played.")
+    parser.add_argument("--seed", type=int, default=None, help=\
+        "Optional random number seed value to make toolbox deterministic.")
     args = parser.parse_args()
     print_args(args, parser)
     if not args.no_sound:
         import sounddevice as sd
         
-    
     print("Running a test of your configuration...\n")
     if torch.cuda.is_available():
         device_id = torch.cuda.current_device()
@@ -61,7 +62,7 @@ if __name__ == '__main__':
     ## Load the models one by one.
     print("Preparing the encoder, the synthesizer and the vocoder...")
     encoder.load_model(args.enc_model_fpath)
-    synthesizer = Synthesizer(args.syn_model_dir.joinpath("taco_pretrained"), low_mem=args.low_mem)
+    synthesizer = Synthesizer(args.syn_model_dir.joinpath("taco_pretrained"), low_mem=args.low_mem, seed=args.seed)
     vocoder.load_model(args.voc_model_fpath)
     
     
@@ -158,6 +159,12 @@ if __name__ == '__main__':
             
             ## Generating the waveform
             print("Synthesizing the waveform:")
+
+            # If seed is specified, reset torch seed and reload vocoder
+            if args.seed is not None:
+                torch.manual_seed(args.seed)
+                vocoder.load_model(args.voc_model_fpath)
+
             # Synthesizing the waveform is fairly straightforward. Remember that the longer the
             # spectrogram, the more time-efficient the vocoder.
             generated_wav = vocoder.infer_waveform(spec)
@@ -167,6 +174,9 @@ if __name__ == '__main__':
             # There's a bug with sounddevice that makes the audio cut one second earlier, so we
             # pad it.
             generated_wav = np.pad(generated_wav, (0, synthesizer.sample_rate), mode="constant")
+
+            # Trim excess silences to compensate for gaps in spectrograms (issue #53)
+            generated_wav = encoder.preprocess_wav(generated_wav)
             
             # Play the audio (non-blocking)
             if not args.no_sound:

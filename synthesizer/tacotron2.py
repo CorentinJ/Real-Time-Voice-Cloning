@@ -9,8 +9,13 @@ import os
 
 
 class Tacotron2:
-    def __init__(self, checkpoint_path, hparams, gta=False, model_name="Tacotron"):
+    def __init__(self, checkpoint_path, hparams, gta=False, model_name="Tacotron", seed=None):
         log("Constructing model: %s" % model_name)
+
+        # Initialize tensorflow random number seed for deterministic operation if provided
+        if seed is not None:
+            tf.compat.v1.set_random_seed(seed)
+
         #Force the batch size to be known in order to use attention masking in batch synthesis
         inputs = tf.compat.v1.placeholder(tf.int32, (None, None), name="inputs")
         input_lengths = tf.compat.v1.placeholder(tf.int32, (None,), name="input_lengths")

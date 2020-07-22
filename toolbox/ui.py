@@ -389,6 +389,26 @@ class UI(QDialog):
         self.loading_bar.setTextVisible(value != 0)
         self.app.processEvents()
 
+    def populate_gen_options(self, seed, trim_silences):
+        if seed is not None:
+            self.random_seed_checkbox.setChecked(True)
+            self.seed_textbox.setText(str(seed))
+            self.seed_textbox.setEnabled(True)
+        else:
+            self.random_seed_checkbox.setChecked(False)
+            self.seed_textbox.setText(str(0))
+            self.seed_textbox.setEnabled(False)
+
+        if not trim_silences:
+            self.trim_silences_checkbox.setChecked(False)
+            self.trim_silences_checkbox.setDisabled(True)
+
+    def update_seed_textbox(self):
+        if self.random_seed_checkbox.isChecked():
+            self.seed_textbox.setEnabled(True)
+        else:
+            self.seed_textbox.setEnabled(False)
+
     def reset_interface(self):
         self.draw_embed(None, None, "current")
         self.draw_embed(None, None, "generated")
@@ -554,6 +574,19 @@ class UI(QDialog):
         self.vocode_button = QPushButton("Vocode only")
         layout.addWidget(self.vocode_button)
         gen_layout.addLayout(layout)
+
+        layout_seed = QGridLayout()
+        self.random_seed_checkbox = QCheckBox("Random seed:")
+        self.random_seed_checkbox.setToolTip("When checked, makes the synthesizer and vocoder deterministic.")
+        layout_seed.addWidget(self.random_seed_checkbox, 0, 0)
+        self.seed_textbox = QLineEdit()
+        self.seed_textbox.setMaximumWidth(80)
+        layout_seed.addWidget(self.seed_textbox, 0, 1)
+        self.trim_silences_checkbox = QCheckBox("Enhance vocoder output")
+        self.trim_silences_checkbox.setToolTip("When checked, trims excess silence in vocoder output."
+            " This feature requires `webrtcvad` to be installed.")
+        layout_seed.addWidget(self.trim_silences_checkbox, 0, 2, 1, 2)
+        gen_layout.addLayout(layout_seed)
 
         self.loading_bar = QProgressBar()
         gen_layout.addWidget(self.loading_bar)

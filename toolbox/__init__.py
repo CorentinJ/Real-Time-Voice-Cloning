@@ -8,6 +8,7 @@ from toolbox.utterance import Utterance
 import numpy as np
 import traceback
 import sys
+import torch
 
 
 # Use this directory structure for your datasets, or modify it to fit your needs
@@ -38,7 +39,7 @@ recognized_datasets = [
 MAX_WAVES = 15
 
 class Toolbox:
-    def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir, low_mem):
+    def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir, low_mem, seed):
         sys.excepthook = self.excepthook
         self.datasets_root = datasets_root
         self.low_mem = low_mem
@@ -50,10 +51,17 @@ class Toolbox:
         self.waves_list = []
         self.waves_count = 0
         self.waves_namelist = []
-        
+
+        # Check for webrtcvad (enables removal of silences in vocoder output)
+        try:
+            import webrtcvad
+            self.trim_silences = True
+        except:
+            self.trim_silences = False
+
         # Initialize the events and the interface
         self.ui = UI()
-        self.reset_ui(enc_models_dir, syn_models_dir, voc_models_dir)
+        self.reset_ui(enc_models_dir, syn_models_dir, voc_models_dir, seed)
         self.setup_events()
         self.ui.start()
         
@@ -105,7 +113,8 @@ class Toolbox:
         self.ui.generate_button.clicked.connect(func)
         self.ui.synthesize_button.clicked.connect(self.synthesize)
         self.ui.vocode_button.clicked.connect(self.vocode)
-        
+        self.ui.random_seed_checkbox.clicked.connect(self.update_seed_textbox)
+
         # UMAP legend
         self.ui.clear_button.clicked.connect(self.clear_utterances)
 
@@ -118,9 +127,10 @@ class Toolbox:
     def replay_last_wav(self):
         self.ui.play(self.current_wav, Synthesizer.sample_rate)
 
-    def reset_ui(self, encoder_models_dir, synthesizer_models_dir, vocoder_models_dir):
+    def reset_ui(self, encoder_models_dir, synthesizer_models_dir, vocoder_models_dir, seed):
         self.ui.populate_browser(self.datasets_root, recognized_datasets, 0, True)
         self.ui.populate_models(encoder_models_dir, synthesizer_models_dir, vocoder_models_dir)
+        self.ui.populate_gen_options(seed, self.trim_silences)
         
     def load_from_browser(self, fpath=None):
         if fpath is None:
@@ -192,6 +202,13 @@ class Toolbox:
             self.synthesizer = Synthesizer(checkpoints_dir, low_mem=self.low_mem)
         if not self.synthesizer.is_loaded():
             self.ui.log("Loading the synthesizer %s" % self.synthesizer.checkpoint_fpath)
+
+        # Update the synthesizer random seed
+        if self.ui.random_seed_checkbox.isChecked():
+            seed = self.synthesizer.set_seed(int(self.ui.seed_textbox.text()))
+            self.ui.populate_gen_options(seed, self.trim_silences)
+        else:
+            seed = self.synthesizer.set_seed(None)
         
         texts = self.ui.text_prompt.toPlainText().split("\n")
         embed = self.ui.selected_utterance.embed
@@ -208,9 +225,20 @@ class Toolbox:
         speaker_name, spec, breaks, _ = self.current_generated
         assert spec is not None
 
+        # Initialize the vocoder model and make it determinstic, if user provides a seed
+        if self.ui.random_seed_checkbox.isChecked():
+            seed = self.synthesizer.set_seed(int(self.ui.seed_textbox.text()))
+            self.ui.populate_gen_options(seed, self.trim_silences)
+        else:
+            seed = None
+
+        if seed is not None:
+            torch.manual_seed(seed)
+
         # Synthesize the waveform
-        if not vocoder.is_loaded():
+        if not vocoder.is_loaded() or seed is not None:
             self.init_vocoder()
+
         def vocoder_progress(i, seq_len, b_size, gen_rate):
             real_time_factor = (gen_rate / Synthesizer.sample_rate) * 1000
             line = "Waveform generation: %d/%d (batch size: %d, rate: %.1fkHz - %.2fx real time)" \
@@ -232,6 +260,10 @@ class Toolbox:
         wavs = [wav[start:end] for start, end, in zip(b_starts, b_ends)]
         breaks = [np.zeros(int(0.15 * Synthesizer.sample_rate))] * len(breaks)
         wav = np.concatenate([i for w, b in zip(wavs, breaks) for i in (w, b)])
+
+        # Trim excessive silences
+        if self.ui.trim_silences_checkbox.isChecked():
+            wav = encoder.preprocess_wav(wav)
 
         # Play it
         wav = wav / np.abs(wav).max() * 0.97
@@ -299,3 +331,6 @@ class Toolbox:
         vocoder.load_model(model_fpath)
         self.ui.log("Done (%dms)." % int(1000 * (timer() - start)), "append")
         self.ui.set_loading(0)
+
+    def update_seed_textbox(self):
+       self.ui.update_seed_textbox() 
