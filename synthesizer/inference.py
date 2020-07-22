@@ -89,7 +89,7 @@ class Synthesizer:
         """
         if not self._low_mem:
             # Usual inference mode: load the model on the first request and keep it loaded.
-            # If repeatable output is requested, reload it every time.
+            # Reload it every time for deterministic operation if seed specified.
             if not self.is_loaded() or self._seed is not None:
                 self.load()
             specs, alignments = self._model.my_synthesize(embeddings, texts)

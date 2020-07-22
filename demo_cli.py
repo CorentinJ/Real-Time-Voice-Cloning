@@ -33,7 +33,7 @@ if __name__ == '__main__':
     parser.add_argument("--no_sound", action="store_true", help=\
         "If True, audio won't be played.")
     parser.add_argument("--seed", type=int, default=None, help=\
-        "Optional random number seed value for repeatable output.")
+        "Optional random number seed value to make toolbox deterministic.")
     args = parser.parse_args()
     print_args(args, parser)
     if not args.no_sound:
@@ -160,7 +160,7 @@ if __name__ == '__main__':
             ## Generating the waveform
             print("Synthesizing the waveform:")
 
-            # If seed is specified, reset torch seed and reload vocoder for repeatability
+            # If seed is specified, reset torch seed and reload vocoder
             if args.seed is not None:
                 torch.manual_seed(args.seed)
                 vocoder.load_model(args.voc_model_fpath)

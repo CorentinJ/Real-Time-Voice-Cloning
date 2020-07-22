@@ -225,7 +225,7 @@ class Toolbox:
         speaker_name, spec, breaks, _ = self.current_generated
         assert spec is not None
 
-        # If specified, initialize the vocoder model with a fixed seed for repeatability
+        # Initialize the vocoder model and make it determinstic, if user provides a seed
         if self.ui.random_seed_checkbox.isChecked():
             seed = self.synthesizer.set_seed(int(self.ui.seed_textbox.text()))
             self.ui.populate_gen_options(seed, self.trim_silences)
