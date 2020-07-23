@@ -1,4 +1,4 @@
-from synthesizer.preprocess import preprocess_librispeech
+from synthesizer.preprocess import preprocess_dataset
 from synthesizer.hparams import hparams
 from utils.argutils import print_args
 from pathlib import Path
@@ -26,6 +26,13 @@ if __name__ == "__main__":
         "Hyperparameter overrides as a comma-separated list of name-value pairs")
     parser.add_argument("--no_trim", action="store_true", help=\
         "Preprocess audio without trimming silences (not recommended).")
+    parser.add_argument("--no_alignments", action="store_true", help=\
+        "Use this option when dataset does not include alignments\
+        (these are used to split long audio files into sub-utterances.)")
+    parser.add_argument("--datasets_name", type=str, default="LibriSpeech", help=\
+        "Name of the dataset directory to process.")
+    parser.add_argument("--subfolders", type=str, default="train-clean-100, train-clean-360", help=\
+        "Comma-separated list of subfolders to process inside your dataset directory")
     args = parser.parse_args()
 
     # Process the arguments
@@ -49,4 +56,4 @@ if __name__ == "__main__":
     # Preprocess the dataset
     print_args(args, parser)
     args.hparams = hparams.parse(args.hparams)
-    preprocess_librispeech(**vars(args))    
+    preprocess_dataset(**vars(args))
