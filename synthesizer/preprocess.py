@@ -16,7 +16,7 @@ def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int,
     # Gather the input directories
     dataset_root = datasets_root.joinpath(datasets_name)
     input_dirs = []
-    input_dirs.extend([dataset_root.joinpath(subfolder) for subfolder in subfolders.split(",")])
+    input_dirs.extend([dataset_root.joinpath(subfolder.strip()) for subfolder in subfolders.split(",")])
     print("\n    ".join(map(str, ["Using data from:"] + input_dirs)))
     assert all(input_dir.exists() for input_dir in input_dirs)
     
