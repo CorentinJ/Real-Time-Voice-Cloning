@@ -70,10 +70,10 @@ def preprocess_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hparams,
 
                     # Get the corresponding text
                     # Check for .txt (for compatibility with other datasets)
-                    text_fpath = wav_fpath.with_suffix("").with_suffix(".txt")
+                    text_fpath = wav_fpath.with_suffix(".txt")
                     if not text_fpath.exists():
                         # Check for .normalized.txt (LibriTTS)
-                        text_fpath = wav_fpath.with_suffix("").with_suffix(".normalized.txt")
+                        text_fpath = wav_fpath.with_suffix(".normalized.txt")
                         assert text_fpath.exists()
                     with text_fpath.open("r") as text_file:
                         text = "".join([line for line in text_file])
