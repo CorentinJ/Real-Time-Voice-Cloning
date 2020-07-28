@@ -92,6 +92,10 @@ tts_clip_grad_norm = 1.0            # clips the gradient norm to prevent explosi
 tts_checkpoint_every = 2_000        # checkpoints the model every X steps
 # TODO: tts_phoneme_prob = 0.0              # [0 <-> 1] probability for feeding model phonemes vrs graphemes
 
+# SV2TTS
+speaker_embedding_size=256,
+silence_min_duration_split=0.4, # Duration in seconds of a silence for an utterance to be split
+utterance_min_duration=1.6,     # Duration in seconds below which utterances are discarded
 
 # ------------------------------------------------------------------------------------------------------------------#
 
