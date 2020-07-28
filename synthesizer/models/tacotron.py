@@ -44,9 +44,10 @@ class Encoder(nn.Module):
     def add_speaker_embedding(self, x, speaker_embedding):
         # SV2TTS
         # The input x is the text embedding and has a size of (1, num_chars, embed_dims)
+        # The input speaker_embedding has a size of (1, speaker_embed_dims)
         # Concat the speaker embedding for each char in the text embedding
         tiled_speaker_embedding = speaker_embedding.repeat(1, self.num_chars, 1)
-        x = torch.cat((x, tiled_speaker_embedding),2)
+        x = torch.cat((x, tiled_speaker_embedding), 2)
         return x
 
 
