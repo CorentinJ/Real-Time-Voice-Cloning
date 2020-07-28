@@ -23,29 +23,29 @@ class HighwayNetwork(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, embed_dims, num_chars, cbhg_channels, K, num_highways, dropout, speaker_embedding):
+    def __init__(self, embed_dims, num_chars, cbhg_channels, K, num_highways,
+                 dropout, speaker_embed_dims):
         super().__init__()
         self.embedding = nn.Embedding(num_chars, embed_dims)
-        self.pre_net = PreNet(embed_dims + speaker_embedding.size()[1])
+        self.pre_net = PreNet(embed_dims + speaker_embed_dims)
         self.cbhg = CBHG(K=K, in_channels=cbhg_channels, channels=cbhg_channels,
                          proj_channels=[cbhg_channels, cbhg_channels],
                          num_highways=num_highways)
         self.num_chars = num_chars
-        self.speaker_embedding = speaker_embedding
 
-    def forward(self, x):
+    def forward(self, x, speaker_embedding):
         x = self.embedding(x)
-        x = self.add_speaker_embedding(x)
+        x = self.add_speaker_embedding(x, speaker_embedding)
         x = self.pre_net(x)
         x.transpose_(1, 2)
         x = self.cbhg(x)
         return x
 
-    def add_speaker_embedding(self, x):
+    def add_speaker_embedding(self, x, speaker_embedding):
         # SV2TTS
         # The input x is the text embedding and has a size of (1, num_chars, embed_dims)
         # Concat the speaker embedding for each char in the text embedding
-        tiled_speaker_embedding = self.speaker_embedding.repeat(1, self.num_chars, 1)
+        tiled_speaker_embedding = speaker_embedding.repeat(1, self.num_chars, 1)
         x = torch.cat((x, tiled_speaker_embedding),2)
         return x
 
@@ -291,14 +291,15 @@ class Decoder(nn.Module):
 
 
 class Tacotron(nn.Module):
-    def __init__(self, embed_dims, num_chars, encoder_dims, decoder_dims, n_mels, fft_bins, postnet_dims,
-                 encoder_K, lstm_dims, postnet_K, num_highways, dropout, stop_threshold, speaker_embedding):
+    def __init__(self, embed_dims, num_chars, encoder_dims, decoder_dims, n_mels, 
+                 fft_bins, postnet_dims, encoder_K, lstm_dims, postnet_K, num_highways,
+                 dropout, stop_threshold, speaker_embed_dims):
         super().__init__()
         self.n_mels = n_mels
         self.lstm_dims = lstm_dims
         self.decoder_dims = decoder_dims
         self.encoder = Encoder(embed_dims, num_chars, encoder_dims,
-                               encoder_K, num_highways, dropout, speaker_embedding)
+                               encoder_K, num_highways, dropout, speaker_embed_dims)
         self.encoder_proj = nn.Linear(decoder_dims, decoder_dims, bias=False)
         self.decoder = Decoder(n_mels, decoder_dims, lstm_dims)
         self.postnet = CBHG(postnet_K, n_mels, postnet_dims, [256, 80], num_highways)
@@ -318,7 +319,7 @@ class Tacotron(nn.Module):
     def r(self, value):
         self.decoder.r = self.decoder.r.new_tensor(value, requires_grad=False)
 
-    def forward(self, x, m, generate_gta=False):
+    def forward(self, x, m, speaker_embedding, generate_gta=False):
         device = next(self.parameters()).device  # use same device as parameters
 
         self.step += 1
@@ -349,7 +350,7 @@ class Tacotron(nn.Module):
 
         # Project the encoder outputs to avoid
         # unnecessary matmuls in the decoder loop
-        encoder_seq = self.encoder(x)
+        encoder_seq = self.encoder(x, speaker_embedding)
         encoder_seq_proj = self.encoder_proj(encoder_seq)
 
         # Need a couple of lists for outputs
@@ -378,7 +379,7 @@ class Tacotron(nn.Module):
 
         return mel_outputs, linear, attn_scores
 
-    def generate(self, x, steps=2000):
+    def generate(self, x, speaker_embedding, steps=2000):
         self.eval()
         device = next(self.parameters()).device  # use same device as parameters
 
@@ -404,7 +405,7 @@ class Tacotron(nn.Module):
 
         # Project the encoder outputs to avoid
         # unnecessary matmuls in the decoder loop
-        encoder_seq = self.encoder(x)
+        encoder_seq = self.encoder(x, speaker_embedding)
         encoder_seq_proj = self.encoder_proj(encoder_seq)
 
         # Need a couple of lists for outputs
