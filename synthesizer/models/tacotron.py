@@ -35,10 +35,10 @@ class Encoder(nn.Module):
 
     def forward(self, x, speaker_embedding):
         x = self.embedding(x)
-        x = self.add_speaker_embedding(x, speaker_embedding)
         x = self.pre_net(x)
         x.transpose_(1, 2)
         x = self.cbhg(x)
+        x = self.add_speaker_embedding(x, speaker_embedding)
         return x
 
     def add_speaker_embedding(self, x, speaker_embedding):
