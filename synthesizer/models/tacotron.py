@@ -23,11 +23,10 @@ class HighwayNetwork(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, embed_dims, num_chars, cbhg_channels, K, num_highways,
-                 dropout, speaker_embed_dims):
+    def __init__(self, embed_dims, num_chars, cbhg_channels, K, num_highways, dropout):
         super().__init__()
         self.embedding = nn.Embedding(num_chars, embed_dims)
-        self.pre_net = PreNet(embed_dims + speaker_embed_dims)
+        self.pre_net = PreNet(embed_dims)
         self.cbhg = CBHG(K=K, in_channels=cbhg_channels, channels=cbhg_channels,
                          proj_channels=[cbhg_channels, cbhg_channels],
                          num_highways=num_highways)
@@ -43,9 +42,9 @@ class Encoder(nn.Module):
 
     def add_speaker_embedding(self, x, speaker_embedding):
         # SV2TTS
-        # The input x is the text embedding and has a size of (1, num_chars, embed_dims)
+        # The input x is the encoder output and has a size of (1, num_chars, embed_dims)
         # The input speaker_embedding has a size of (1, speaker_embed_dims)
-        # Concat the speaker embedding for each char in the text embedding
+        # Concat the speaker embedding for each char in the encoder output
         tiled_speaker_embedding = speaker_embedding.repeat(1, self.num_chars, 1)
         x = torch.cat((x, tiled_speaker_embedding), 2)
         return x
@@ -296,6 +295,10 @@ class Tacotron(nn.Module):
                  fft_bins, postnet_dims, encoder_K, lstm_dims, postnet_K, num_highways,
                  dropout, stop_threshold, speaker_embed_dims):
         super().__init__()
+        # SV2TTS
+        # Adjust decoder_dims since speaker embedding is added to encoder output
+        decoder_dims = decoder_dims + speaker_embed_dims
+
         self.n_mels = n_mels
         self.lstm_dims = lstm_dims
         self.decoder_dims = decoder_dims
