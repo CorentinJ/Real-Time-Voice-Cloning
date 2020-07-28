@@ -1,19 +1,6 @@
-from synthesizer.hparams import hparams
-from synthesizer.train import tacotron_train
+from synthesizer.train import train
 from utils.argutils import print_args
-from synthesizer import infolog
 import argparse
-import os
-
-
-def prepare_run(args):
-    modified_hp = hparams.parse(args.hparams)
-    os.environ["TF_CPP_MIN_LOG_LEVEL"] = str(args.tf_log_level)
-    run_name = args.name
-    log_dir = os.path.join(args.models_dir, "logs-{}".format(run_name))
-    os.makedirs(log_dir, exist_ok=True)
-    infolog.init(os.path.join(log_dir, "Terminal_train_log"), run_name, args.slack_url)
-    return log_dir, modified_hp
 
 
 if __name__ == "__main__":
@@ -41,15 +28,7 @@ if __name__ == "__main__":
                         help="Steps between eval on test data")
     parser.add_argument("--tacotron_train_steps", type=int, default=2000000, # Was 100000
                         help="total number of tacotron training steps")
-    parser.add_argument("--tf_log_level", type=int, default=1, help="Tensorflow C++ log level.")
-    parser.add_argument("--slack_url", default=None,
-                        help="slack webhook notification destination link")
-    parser.add_argument("--hparams", default="",
-                        help="Hyperparameter overrides as a comma-separated list of name=value "
-							 "pairs")
     args = parser.parse_args()
     print_args(args, parser)
     
-    log_dir, hparams = prepare_run(args)
-    
-    tacotron_train(args, log_dir, hparams)
+    tacotron_train(args)
