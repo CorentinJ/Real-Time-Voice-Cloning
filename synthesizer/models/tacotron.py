@@ -32,12 +32,13 @@ class Encoder(nn.Module):
                          num_highways=num_highways)
         self.num_chars = num_chars
 
-    def forward(self, x, speaker_embedding):
+    def forward(self, x, speaker_embedding=None):
         x = self.embedding(x)
         x = self.pre_net(x)
         x.transpose_(1, 2)
         x = self.cbhg(x)
-        x = self.add_speaker_embedding(x, speaker_embedding)
+        if speaker_embedding is not None:
+            x = self.add_speaker_embedding(x, speaker_embedding)
         return x
 
     def add_speaker_embedding(self, x, speaker_embedding):
@@ -293,17 +294,13 @@ class Decoder(nn.Module):
 class Tacotron(nn.Module):
     def __init__(self, embed_dims, num_chars, encoder_dims, decoder_dims, n_mels, 
                  fft_bins, postnet_dims, encoder_K, lstm_dims, postnet_K, num_highways,
-                 dropout, stop_threshold, speaker_embed_dims):
+                 dropout, stop_threshold):
         super().__init__()
-        # SV2TTS
-        # Adjust decoder_dims since speaker embedding is added to encoder output
-        decoder_dims = decoder_dims + speaker_embed_dims
-
         self.n_mels = n_mels
         self.lstm_dims = lstm_dims
         self.decoder_dims = decoder_dims
         self.encoder = Encoder(embed_dims, num_chars, encoder_dims,
-                               encoder_K, num_highways, dropout, speaker_embed_dims)
+                               encoder_K, num_highways, dropout)
         self.encoder_proj = nn.Linear(decoder_dims, decoder_dims, bias=False)
         self.decoder = Decoder(n_mels, decoder_dims, lstm_dims)
         self.postnet = CBHG(postnet_K, n_mels, postnet_dims, [256, 80], num_highways)
