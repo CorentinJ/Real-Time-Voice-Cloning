@@ -96,6 +96,6 @@ tts_checkpoint_every = 2_000        # checkpoints the model every X steps
 # ------------------------------------------------------------------------------------------------------------------#
 
 ### SV2TTS
-tts_speaker_embedding_size = 256    # embedding dimension for the speaker embedding
+tts_speaker_embedding_size = 0    # embedding dimension for the speaker embedding
 tts_silence_min_duration_split=0.4, # Duration in seconds of a silence for an utterance to be split
 tts_utterance_min_duration=1.6,     # Duration in seconds below which utterances are discarded
