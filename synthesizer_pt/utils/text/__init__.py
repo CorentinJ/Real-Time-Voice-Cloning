@@ -1,7 +1,7 @@
 """ from https://github.com/keithito/tacotron """
 import re
-from synthesizer.utils.text import cleaners
-from synthesizer.utils.text.symbols import symbols
+from synthesizer_pt.utils.text import cleaners
+from synthesizer_pt.utils.text.symbols import symbols
 
 
 # Mappings from symbol to numeric ID and vice versa:
