@@ -1,20 +1,20 @@
 import torch
 from torch import optim
 import torch.nn.functional as F
-from synthesizer.utils import hparams as hp
-from synthesizer.utils.display import *
-from synthesizer.utils.dataset import get_tts_datasets
-from synthesizer.utils.text.symbols import symbols
-from synthesizer.utils.paths import Paths
-from synthesizer.models.tacotron import Tacotron
+from synthesizer_pt.utils import hparams as hp
+from synthesizer_pt.utils.display import *
+from synthesizer_pt.utils.dataset import get_tts_datasets
+from synthesizer_pt.utils.text.symbols import symbols
+from synthesizer_pt.utils.paths import Paths
+from synthesizer_pt.models.tacotron import Tacotron
 import argparse
-from synthesizer.utils import data_parallel_workaround
+from synthesizer_pt.utils import data_parallel_workaround
 import os
 from pathlib import Path
 import time
 import numpy as np
 import sys
-from synthesizer.utils.checkpoints import save_checkpoint, restore_checkpoint
+from synthesizer_pt.utils.checkpoints import save_checkpoint, restore_checkpoint
 
 
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()

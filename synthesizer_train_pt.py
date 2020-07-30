@@ -1,4 +1,4 @@
-from synthesizer.train import train
+from synthesizer_pt.train import train
 from utils.argutils import print_args
 import argparse
 
