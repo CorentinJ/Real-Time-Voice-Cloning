@@ -18,4 +18,5 @@
 .DS_Store
 encoder/saved_models/*
 synthesizer/saved_models/*
+synthesizer_pt/saved_models/*
 vocoder/saved_models/*
