@@ -3,10 +3,10 @@ import random
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.sampler import Sampler
-from utils.dsp import *
-from utils import hparams as hp
-from utils.text import text_to_sequence
-from utils.paths import Paths
+from synthesizer_pt.utils.dsp import *
+from synthesizer_pt.utils import hparams as hp
+from synthesizer_pt.utils.text import text_to_sequence
+from synthesizer_pt.utils.paths import Paths
 from pathlib import Path
 
 

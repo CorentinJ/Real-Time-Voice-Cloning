@@ -41,7 +41,6 @@ def train(args):
                      num_highways=hp.tts_num_highways,
                      dropout=hp.tts_dropout,
                      stop_threshold=hp.tts_stop_threshold).to(device)
-                     speaker_embed_dims=hp.tts_speaker_embed_dims)
 
     if torch.cuda.is_available():
         model = model.cuda()
