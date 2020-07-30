@@ -1,10 +1,12 @@
 import torch
-from synthesizer.utils import hparams
+from synthesizer.utils import hparams as hp
 from synthesizer.utils.text.symbols import symbols
 from synthesizer.utils.paths import Paths
 from synthesizer.models.tacotron import Tacotron
 from synthesizer.utils.text import text_to_sequence
 from synthesizer.utils.display import save_attention, simple_table
+
+from synthesizer.hparams import hparams
 from synthesizer import audio
 from pathlib import Path
 from typing import Union, List
@@ -53,19 +55,19 @@ class Synthesizer:
         print('Using device:', device)
         
         # Instantiate Tacotron Model
-        self._model = Tacotron(embed_dims=hparams.tts_embed_dims,
+        self._model = Tacotron(embed_dims=hp.tts_embed_dims,
                                num_chars=len(symbols),
-                               encoder_dims=hparams.tts_encoder_dims,
-                               decoder_dims=hparams.tts_decoder_dims + hparams.tts_speaker_embedding_dims,
-                               n_mels=hparams.num_mels,
-                               fft_bins=hparams.num_mels,
-                               postnet_dims=hparams.tts_postnet_dims,
-                               encoder_K=hparams.tts_encoder_K,
-                               lstm_dims=hparams.tts_lstm_dims,
-                               postnet_K=hparams.tts_postnet_K,
-                               num_highways=hparams.tts_num_highways,
-                               dropout=hparams.tts_dropout,
-                               stop_threshold=hparams.tts_stop_threshold).to(device)
+                               encoder_dims=hp.tts_encoder_dims,
+                               decoder_dims=hp.tts_decoder_dims + hp.tts_speaker_embedding_dims,
+                               n_mels=hp.num_mels,
+                               fft_bins=hp.num_mels,
+                               postnet_dims=hp.tts_postnet_dims,
+                               encoder_K=hp.tts_encoder_K,
+                               lstm_dims=hp.tts_lstm_dims,
+                               postnet_K=hp.tts_postnet_K,
+                               num_highways=hp.tts_num_highways,
+                               dropout=hp.tts_dropout,
+                               stop_threshold=hp.tts_stop_threshold).to(device)    
 
         # Load model
         self._model.load(self.model_path)
@@ -94,7 +96,7 @@ class Synthesizer:
             if not self.is_loaded():
                 self.load()
 
-            inputs = [text_to_sequence(text.strip(), hparams.tts_cleaner_names) for text in texts]
+            inputs = [text_to_sequence(text.strip(), hp.tts_cleaner_names) for text in texts]
             if not isinstance(embeddings, list):
                 embeddings = [embeddings]
 
