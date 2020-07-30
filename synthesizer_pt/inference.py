@@ -39,7 +39,7 @@ class Synthesizer:
         self._model = Tacotron(embed_dims=hp.tts_embed_dims,
                                num_chars=len(symbols),
                                encoder_dims=hp.tts_encoder_dims,
-                               decoder_dims=hp.tts_decoder_dims + hp.tts_speaker_embedding_dims,
+                               decoder_dims=hp.tts_decoder_dims + hp.tts_speaker_embedding_size,
                                n_mels=hp.num_mels,
                                fft_bins=hp.num_mels,
                                postnet_dims=hp.tts_postnet_dims,
