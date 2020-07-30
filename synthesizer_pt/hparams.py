@@ -17,12 +17,12 @@ ignore_tts = False
 # DSP --------------------------------------------------------------------------------------------------------------#
 
 # Settings for all models
-sample_rate = 16000
+sample_rate = 22050
 n_fft = 2048
 fft_bins = n_fft // 2 + 1
 num_mels = 80
-hop_length = 200                    # For 16000 Hz, 200 = 12.5ms - in line with Tacotron 2 paper
-win_length = 800                   # For 16000 Hz, 800 = 50ms - same reason as above
+hop_length = 275                    # 12.5ms - in line with Tacotron 2 paper
+win_length = 1100                   # 50ms - same reason as above
 fmin = 40
 min_level_db = -100
 ref_level_db = 20
@@ -65,7 +65,6 @@ voc_overlap = 550                   # number of samples for crossfading between 
 
 # Model Hparams
 tts_embed_dims = 256                # embedding dimension for the graphemes/phoneme inputs
-tts_speaker_embedding_dims = 256        # embedding dimension for the speaker embedding
 tts_encoder_dims = 128
 tts_decoder_dims = 256
 tts_postnet_dims = 128
@@ -93,10 +92,6 @@ tts_clip_grad_norm = 1.0            # clips the gradient norm to prevent explosi
 tts_checkpoint_every = 2_000        # checkpoints the model every X steps
 # TODO: tts_phoneme_prob = 0.0              # [0 <-> 1] probability for feeding model phonemes vrs graphemes
 
-# SV2TTS
-speaker_embedding_size=256,
-silence_min_duration_split=0.4, # Duration in seconds of a silence for an utterance to be split
-utterance_min_duration=1.6,     # Duration in seconds below which utterances are discarded
 
 # ------------------------------------------------------------------------------------------------------------------#
 
