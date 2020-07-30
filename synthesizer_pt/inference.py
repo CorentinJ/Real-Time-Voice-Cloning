@@ -132,7 +132,7 @@ class Synthesizer:
             for i, x in enumerate(inputs, 1):
 
                 print(f'\n| Generating {i}/{len(inputs)}')
-                if hp.speaker_embedding_size > 0:
+                if hp.tts_speaker_embedding_size > 0:
                     speaker_embedding = torch.tensor(embeddings[i-1]).float()
                 else:
                     speaker_embedding = None
