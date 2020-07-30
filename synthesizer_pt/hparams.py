@@ -65,6 +65,7 @@ voc_overlap = 550                   # number of samples for crossfading between 
 
 # Model Hparams
 tts_embed_dims = 256                # embedding dimension for the graphemes/phoneme inputs
+tts_speaker_embedding_dims = 256        # embedding dimension for the speaker embedding
 tts_encoder_dims = 128
 tts_decoder_dims = 256
 tts_postnet_dims = 128

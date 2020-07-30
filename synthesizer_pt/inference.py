@@ -12,25 +12,50 @@ from typing import Union, List
 import numpy as np
 import librosa
 
+hp.configure("synthesizer_pt/hparams.py")
 
 class Synthesizer:
-    sample_rate = 16000 #hparams.sample_rate
-    #hparams = hparams
+    sample_rate = hp.sample_rate
     
-    def __init__(self, model_path: Path, verbose=True, low_mem=False):
+    def __init__(self, model_fpath: Path, verbose=True, low_mem=False):
         """
         Creates a synthesizer ready for inference. The actual model isn't loaded in memory until
         needed or until load() is called.
         
-        :param model_path: path to the trained model file
+        :param model_fpath: path to the trained model file
         """
         self.verbose = verbose
-        self.model_path = model_path
+        self.model_fpath = model_fpath
  
-        # Prepare the model
-        self._model = None
+        # Check for GPU
+        if torch.cuda.is_available():
+            device = torch.device('cuda')
+        else:
+            device = torch.device('cpu')
+        if self.verbose:
+            print('Synthesizer using device:', device)
+        
+        # Instantiate Tacotron Model
+        self._model = Tacotron(embed_dims=hp.tts_embed_dims,
+                               num_chars=len(symbols),
+                               encoder_dims=hp.tts_encoder_dims,
+                               decoder_dims=hp.tts_decoder_dims + hp.tts_speaker_embedding_dims,
+                               n_mels=hp.num_mels,
+                               fft_bins=hp.num_mels,
+                               postnet_dims=hp.tts_postnet_dims,
+                               encoder_K=hp.tts_encoder_K,
+                               lstm_dims=hp.tts_lstm_dims,
+                               postnet_K=hp.tts_postnet_K,
+                               num_highways=hp.tts_num_highways,
+                               dropout=hp.tts_dropout,
+                               stop_threshold=hp.tts_stop_threshold).to(device)    
+        self._model.load(model_fpath)
+        #self.checkpoint = torch.load(model_fpath, device)
+        self._model.load_state_dict(self.checkpoint)
+        self._model.eval()
+
         if verbose:
-            print("Found synthesizer \"%s\" trained to step %d" % (model_name, step))
+            print("Loaded synthesizer \"%s\" trained to step %d" % (model_fpath.name, self.checkpoint["step"]))
      
     def is_loaded(self):
         """
