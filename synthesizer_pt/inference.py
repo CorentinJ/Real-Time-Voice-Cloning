@@ -50,12 +50,10 @@ class Synthesizer:
                                dropout=hp.tts_dropout,
                                stop_threshold=hp.tts_stop_threshold).to(device)    
         self._model.load(model_fpath)
-        #self.checkpoint = torch.load(model_fpath, device)
-        self._model.load_state_dict(self.checkpoint)
         self._model.eval()
 
         if verbose:
-            print("Loaded synthesizer \"%s\" trained to step %d" % (model_fpath.name, self.checkpoint["step"]))
+            print("Loaded synthesizer \"%s\" trained to step %d" % (model_fpath.name, self._model.state_dict()["step"]))
      
     def is_loaded(self):
         """
