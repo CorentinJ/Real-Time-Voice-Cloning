@@ -1,4 +1,4 @@
-from utils.files import get_files
+from synthesizer.utils.files import get_files
 from pathlib import Path
 from typing import Union
 
