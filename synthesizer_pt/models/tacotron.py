@@ -46,6 +46,7 @@ class Encoder(nn.Module):
         # The input x is the encoder output and has a size of (1, num_chars, embed_dims)
         # The input speaker_embedding has a size of (1, speaker_embed_dims)
         # Concat the speaker embedding for each char in the encoder output
+        raise NotImplementedError #Need to check dimensions
         tiled_speaker_embedding = speaker_embedding.repeat(1, self.num_chars, 1)
         x = torch.cat((x, tiled_speaker_embedding), 2)
         return x

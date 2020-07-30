@@ -26,6 +26,7 @@ class Synthesizer:
         """
         self.verbose = verbose
         self.model_fpath = model_fpath
+        self._low_mem = low_mem
  
         # Check for GPU
         if torch.cuda.is_available():
@@ -125,13 +126,18 @@ class Synthesizer:
             tts_k = self._model.get_step() // 1000
 
             simple_table([('Tacotron', str(tts_k) + 'k'),
-                        ('r', tts_model.r)])
+                        ('r', self._model.r)])
 
             specs = []
             for i, x in enumerate(inputs, 1):
 
                 print(f'\n| Generating {i}/{len(inputs)}')
-                _, m, attention = self._model.generate(x, speaker_embedding[i-1])
+                if hp.speaker_embedding_size > 0:
+                    speaker_embedding = torch.tensor(embeddings[i-1]).float()
+                else:
+                    speaker_embedding = None
+
+                _, m, attention = self._model.generate(x, speaker_embedding)
                 # Fix mel spectrogram scaling to be from -1 to 1
                 m = m / 4
                 np.clip(m, -1, 1, out=m)

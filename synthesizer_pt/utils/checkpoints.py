@@ -1,6 +1,6 @@
 import torch
-from utils.paths import Paths
-from models.tacotron import Tacotron
+from synthesizer_pt.utils.paths import Paths
+from synthesizer_pt.models.tacotron import Tacotron
 
 
 def get_checkpoint_paths(checkpoint_type: str, paths: Paths):
