@@ -1,13 +1,12 @@
 import torch
-from synthesizer.utils import hparams as hp
-from synthesizer.utils.text.symbols import symbols
-from synthesizer.utils.paths import Paths
-from synthesizer.models.tacotron import Tacotron
-from synthesizer.utils.text import text_to_sequence
-from synthesizer.utils.display import save_attention, simple_table
+from synthesizer_pt.utils import hparams as hp
+from synthesizer_pt.utils.text.symbols import symbols
+from synthesizer_pt.utils.paths import Paths
+from synthesizer_pt.models.tacotron import Tacotron
+from synthesizer_pt.utils.text import text_to_sequence
+from synthesizer_pt.utils.display import save_attention, simple_table
 
-from synthesizer.hparams import hparams
-from synthesizer import audio
+from synthesizer_pt import audio
 from pathlib import Path
 from typing import Union, List
 import numpy as np
