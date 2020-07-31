@@ -15,16 +15,27 @@ import time
 import numpy as np
 import sys
 from synthesizer_pt.utils.checkpoints import save_checkpoint, restore_checkpoint
+import synthesizer_pt.hparams as hp
 
 
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
 
 
 def train(args):
-    hp.configure(args.hp_file)  # Load hparams from file
     paths = Paths(hp.data_path, hp.voc_model_id, hp.tts_model_id)
 
     force_gta = args.GTA
+
+    if torch.cuda.is_available():
+        device = torch.device('cuda')
+
+        for session in hp.tts_schedule:
+            _, _, _, batch_size = session
+            if batch_size % torch.cuda.device_count() != 0:
+                raise ValueError('`batch_size` must be evenly divisible by n_gpus!')
+    else:
+        device = torch.device('cpu')
+    print('Using device:', device)
 
     # Instantiate Tacotron Model
     print('\nInitialising Tacotron Model...\n')
@@ -42,17 +53,6 @@ def train(args):
                      dropout=hp.tts_dropout,
                      stop_threshold=hp.tts_stop_threshold).to(device)
 
-    if torch.cuda.is_available():
-        model = model.cuda()
-        device = torch.device('cuda')
-
-        for session in hp.tts_schedule:
-            _, _, _, batch_size = session
-            if batch_size % torch.cuda.device_count() != 0:
-                raise ValueError('`batch_size` must be evenly divisible by n_gpus!')
-    else:
-        device = torch.device('cpu')
-    print('Using device:', device)
 
     # Initialize the optimizer
     optimizer = optim.Adam(model.parameters())
