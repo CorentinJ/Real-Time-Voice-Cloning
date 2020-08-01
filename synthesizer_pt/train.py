@@ -292,7 +292,10 @@ def model_test_mode(args, feeder, hparams, global_step):
         return model
 
 
-def train(log_dir, args, hparams):
+def train(run_id: str, syn_dir: Path, models_dir: Path,
+          save_every: int, backup_every: int, force_restart:bool):
+
+    log_dir = os.path.join(models_dir, run_id)
     save_dir = os.path.join(log_dir, "taco_pretrained")
     plot_dir = os.path.join(log_dir, "plots")
     wav_dir = os.path.join(log_dir, "wavs")
@@ -300,7 +303,6 @@ def train(log_dir, args, hparams):
     eval_dir = os.path.join(log_dir, "eval-dir")
     eval_plot_dir = os.path.join(eval_dir, "plots")
     eval_wav_dir = os.path.join(eval_dir, "wavs")
-    tensorboard_dir = os.path.join(log_dir, "tacotron_events")
     meta_folder = os.path.join(log_dir, "metas")
     os.makedirs(save_dir, exist_ok=True)
     os.makedirs(plot_dir, exist_ok=True)
@@ -309,29 +311,15 @@ def train(log_dir, args, hparams):
     os.makedirs(eval_dir, exist_ok=True)
     os.makedirs(eval_plot_dir, exist_ok=True)
     os.makedirs(eval_wav_dir, exist_ok=True)
-    os.makedirs(tensorboard_dir, exist_ok=True)
     os.makedirs(meta_folder, exist_ok=True)
     
-    checkpoint_fpath = os.path.join(save_dir, "tacotron_model.ckpt")
+    checkpoint_fpath = os.path.join(save_dir, "tacotron_model.pt")
     metadat_fpath = os.path.join(args.synthesizer_root, "train.txt")
     
     log("Checkpoint path: {}".format(checkpoint_fpath))
     log("Loading training data from: {}".format(metadat_fpath))
     log("Using model: Tacotron")
     log(hparams_debug_string())
-    
-    # Start by setting a seed for repeatability
-    tf.compat.v1.set_random_seed(hparams.tacotron_random_seed)
-    
-    # Set up data feeder
-    coord = tf.train.Coordinator()
-    with tf.compat.v1.variable_scope("datafeeder") as scope:
-        feeder = Feeder(coord, metadat_fpath, hparams)
-    
-    # Set up model:
-    global_step = tf.Variable(0, name="global_step", trainable=False)
-    model, stats = model_train_mode(args, feeder, hparams, global_step)
-    eval_model = model_test_mode(args, feeder, hparams, global_step)
     
     # Embeddings metadata
     char_embedding_meta = os.path.join(meta_folder, "CharacterEmbeddings.tsv")
@@ -349,14 +337,10 @@ def train(log_dir, args, hparams):
     step = 0
     time_window = ValueWindow(100)
     loss_window = ValueWindow(100)
-    saver = tf.compat.v1.train.Saver(max_to_keep=5)
     
     log("Tacotron training set to a maximum of {} steps".format(args.tacotron_train_steps))
     
-    # Memory allocation on the GPU as needed
-    config = tf.compat.v1.ConfigProto()
-    config.gpu_options.allow_growth = True
-    config.allow_soft_placement = True
+
     
     # Train
     with tf.compat.v1.Session(config=config) as sess:
