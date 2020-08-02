@@ -40,30 +40,27 @@ class SynthesizerDataset(Dataset):
         return len(self.samples_fpaths)
 
 
-def collate_synthesizer(batch):
-    mel_win = hp.voc_seq_len // hp.hop_length + 2 * hp.voc_pad
-    max_offsets = [x[0].shape[-1] -2 - (mel_win + 2 * hp.voc_pad) for x in batch]
-    mel_offsets = [np.random.randint(0, offset) for offset in max_offsets]
-    sig_offsets = [(offset + hp.voc_pad) * hp.hop_length for offset in mel_offsets]
+def collate_synthesizer(batch, r):
 
-    mels = [x[0][:, mel_offsets[i]:mel_offsets[i] + mel_win] for i, x in enumerate(batch)]
+    x_lens = [len(x[0]) for x in batch]
+    max_x_len = max(x_lens)
 
-    labels = [x[1][sig_offsets[i]:sig_offsets[i] + hp.voc_seq_len + 1] for i, x in enumerate(batch)]
+    chars = [pad1d(x[0], max_x_len) for x in batch]
+    chars = np.stack(chars)
 
-    mels = np.stack(mels).astype(np.float32)
-    labels = np.stack(labels).astype(np.int64)
+    spec_lens = [x[1].shape[-1] for x in batch]
+    max_spec_len = max(spec_lens) + 1 
+    if max_spec_len % r != 0:
+        max_spec_len += r - max_spec_len % r 
 
-    mels = torch.tensor(mels)
-    labels = torch.tensor(labels).long()
+    mel = [pad2d(x[1], max_spec_len) for x in batch]
+    mel = np.stack(mel)
 
-    x = labels[:, :hp.voc_seq_len]
-    y = labels[:, 1:]
+    embeds = [x[2] for x in batch]
 
-    bits = 16 if hp.voc_mode == 'MOL' else hp.bits
+    chars = torch.tensor(chars).long()
+    mel = torch.tensor(mel)
 
-    x = audio.label_2_float(x.float(), bits)
-
-    if hp.voc_mode == 'MOL' :
-        y = audio.label_2_float(y.float(), bits)
-
-    return x, y, mels
+    # scale spectrograms to -4 <--> 4
+    mel = (mel * 8.) - 4.
+    return chars, mel, embeds
