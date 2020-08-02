@@ -1,7 +1,6 @@
 import torch
 from torch import optim
 import torch.nn.functional as F
-from synthesizer_pt.utils import hparams as hp
 from synthesizer_pt.utils.display import *
 from synthesizer_pt.utils.dataset import get_tts_datasets
 from synthesizer_pt.utils.text.symbols import symbols
@@ -178,16 +177,17 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
             running_loss = 0
 
             # Perform 1 epoch
-            for i, (x, m, ids, _) in enumerate(data_loader, 1):
+            for i, (x, m, e) in enumerate(data_loader, 1):
 
-                x, m = x.to(device), m.to(device)
+                #x = text, m = mel, e = embed
+                x, m, e = x.to(device), m.to(device), e.to(device)
 
                 # Forward pass
                 # Parallelize model onto GPUS using workaround due to python bug
                 if device.type == 'cuda' and torch.cuda.device_count() > 1:
-                    m1_hat, m2_hat, attention = data_parallel_workaround(model, x, m)
+                    m1_hat, m2_hat, attention = data_parallel_workaround(model, x, m, e)
                 else:
-                    m1_hat, m2_hat, attention = model(x, m)
+                    m1_hat, m2_hat, attention = model(x, m, e)
 
                 # Backward pass
                 m1_loss = F.l1_loss(m1_hat, m)
@@ -221,12 +221,10 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                     # doesn't produce artifacts
                     model.save(weights_fpath, optimizer)
 
-                if attn_example in ids:
-                    idx = ids.index(attn_example)
-                    save_attention(np_now(attention[idx][:, :160]), paths.tts_attention/f'{step}')
-                    save_spectrogram(np_now(m2_hat[idx]), paths.tts_mel_plot/f'{step}', 600)
-
                 msg = f'| Epoch: {epoch}/{epochs} ({i}/{total_iters}) | Loss: {avg_loss:#.4} | {speed:#.2} steps/s | Step: {k}k | '
                 stream(msg)
 
+            # Save some results every epoch for evaluation
+            save_attention(np_now(attention[idx][:, :160]), paths.tts_attention/f'{step}')
+            save_spectrogram(np_now(m2_hat[idx]), plot_dir/f'{step}', 600)
             print("")

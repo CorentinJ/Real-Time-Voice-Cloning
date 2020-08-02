@@ -1,7 +1,7 @@
 from torch.utils.data import Dataset
 from pathlib import Path
 from vocoder import audio
-from synthesizer_pt.utils import hparams as hp
+from synthesizer_pt import hparams as hp
 import numpy as np
 import torch
 
@@ -15,9 +15,10 @@ class SynthesizerDataset(Dataset):
         
         mel_fnames = [x[1] for x in metadata if int(x[4])]
         mel_fpaths = [mel_dir.joinpath(fname) for fname in mel_fnames]
-        embed_fnames = [x[0] for x in metadata if int(x[4])]
+        embed_fnames = [x[2] for x in metadata if int(x[4])]
         embed_fpaths = [embed_dir.joinpath(fname) for fname in embed_fnames]
         self.samples_fpaths = list(zip(mel_fpaths, embed_fpaths))
+        self.samples_texts = [x[5] for x in metadata if int(x[4])] 
         
         print("Found %d samples" % len(self.samples_fpaths))
     
@@ -30,7 +31,10 @@ class SynthesizerDataset(Dataset):
         # Load the embed
         embed = np.load(embed_path)
         
-        return mel.astype(np.float32), embed.astype(np.float32)
+        # Get the text
+        text = self.samples_texts[index]
+
+        return text, mel.astype(np.float32), embed.astype(np.float32)
 
     def __len__(self):
         return len(self.samples_fpaths)
