@@ -33,7 +33,6 @@ log = infolog.log
 
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
 
-
 def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
          backup_every: int, force_restart:bool, train_steps:int):
 
@@ -162,7 +161,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
             p["lr"] = lr
 
         data_loader = DataLoader(dataset,
-                                 collate_fn=collate_synthesizer,
+                                 collate_fn=lambda batch: collate_synthesizer(batch, r),
                                  batch_size=hp.tts_batch_size,
                                  num_workers=2,
                                  shuffle=True,

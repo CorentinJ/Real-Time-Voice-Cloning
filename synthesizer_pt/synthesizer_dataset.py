@@ -64,3 +64,9 @@ def collate_synthesizer(batch, r):
     # scale spectrograms to -4 <--> 4
     mel = (mel * 8.) - 4.
     return chars, mel, embeds
+
+def pad1d(x, max_len):
+    return np.pad(x, (0, max_len - len(x)), mode='constant')
+
+def pad2d(x, max_len):
+    return np.pad(x, ((0, 0), (0, max_len - x.shape[-1])), mode='constant')
