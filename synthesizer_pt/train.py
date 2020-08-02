@@ -20,7 +20,7 @@ from synthesizer_pt.utils.text import sequence_to_text
 from synthesizer_pt.feeder import Feeder
 from synthesizer_pt.utils import ValueWindow, plot
 from synthesizer_pt import infolog, audio
-from synthesizer_pt.synthesizer_dataset import SynthesizerDataset
+from synthesizer_pt.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
 from torch.utils.data import DataLoader
 from datetime import datetime
 from tqdm import tqdm
@@ -157,8 +157,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path,
                       ('Outputs/Step (r)', model.r)])
 
         data_loader = DataLoader(dataset,
-                                 collate_fn=collate_vocoder,
-                                 batch_size=hp.voc_batch_size,
+                                 collate_fn=collate_synthesizer,
+                                 batch_size=hp.tts_batch_size,
                                  num_workers=2,
                                  shuffle=True,
                                  pin_memory=True)
