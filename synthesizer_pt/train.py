@@ -116,10 +116,10 @@ def train(run_id: str, syn_dir: Path, models_dir: Path,
     weights_fpath = model_dir.joinpath(run_id + ".pt")
     if force_restart or not weights_fpath.exists():
         print("\nStarting the training of Tacotron from scratch\n")
-        model.save(weights_fpath)
+        model.save(weights_fpath, optimizer)
     else:
         print("\nLoading weights at %s" % weights_fpath)
-        model.load(weights_fpath)
+        model.load(weights_fpath, optimizer)
         print("Tacotron weights loaded from step %d" % model.step)
     
     # Initialize the dataset
@@ -151,6 +151,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path,
 
         model.r = r
 
+        # Begin the training
         simple_table([(f'Steps with r={r}', str(training_steps//1000) + 'k Steps'),
                       ('Batch Size', batch_size),
                       ('Learning Rate', lr),
@@ -162,26 +163,11 @@ def train(run_id: str, syn_dir: Path, models_dir: Path,
                                  num_workers=2,
                                  shuffle=True,
                                  pin_memory=True)
-        start = time.time()
-        running_loss = 0.
 
-        train_set, attn_example = get_tts_datasets(paths.data, batch_size, r)
-        tts_train_loop(paths, model, optimizer, train_set, lr, training_steps, attn_example)
+        total_iters = len(train_set)
+        epochs = train_steps // total_iters + 1
 
-    print('Training Complete.')
-
-
-
-
-def tts_train_loop(paths: Paths, model: Tacotron, optimizer, train_set, lr, train_steps, attn_example):
-    device = next(model.parameters()).device  # use same device as model parameters
-
-    for g in optimizer.param_groups: g['lr'] = lr
-
-    total_iters = len(train_set)
-    epochs = train_steps // total_iters + 1
-
-    for e in range(1, epochs+1):
+        for epoch in range(1, epochs+1):
 
         start = time.time()
         running_loss = 0
@@ -229,11 +215,11 @@ def tts_train_loop(paths: Paths, model: Tacotron, optimizer, train_set, lr, trai
                 save_attention(np_now(attention[idx][:, :160]), paths.tts_attention/f'{step}')
                 save_spectrogram(np_now(m2_hat[idx]), paths.tts_mel_plot/f'{step}', 600)
 
-            msg = f'| Epoch: {e}/{epochs} ({i}/{total_iters}) | Loss: {avg_loss:#.4} | {speed:#.2} steps/s | Step: {k}k | '
+            msg = f'| Epoch: {epoch}/{epochs} ({i}/{total_iters}) | Loss: {avg_loss:#.4} | {speed:#.2} steps/s | Step: {k}k | '
             stream(msg)
 
         # Must save latest optimizer state to ensure that resuming training
         # doesn't produce artifacts
         save_checkpoint('tts', paths, model, optimizer, is_silent=True)
         model.log(paths.tts_log, msg)
-        print(' ')
+        print("")

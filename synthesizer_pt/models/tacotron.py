@@ -458,10 +458,14 @@ class Tacotron(nn.Module):
         with open(path, 'a') as f:
             print(msg, file=f)
 
-    def load(self, path: Union[str, Path]):
-        # Use device of model params as location for loaded state
-        device = next(self.parameters()).device
-        state_dict = torch.load(path, map_location=device)
+    def load(self, path, optimizer):
+        checkpoint = torch.load(path)
+        if "optimizer_state" in checkpoint:
+            self.load_state_dict(checkpoint["model_state"])
+            optimizer.load_state_dict(checkpoint["optimizer_state"])
+        else:
+            # Backwards compatibility
+            self.load_state_dict(checkpoint)
 
         # Backwards compatibility with old saved models
         if 'r' in state_dict and not 'decoder.r' in state_dict:
@@ -469,11 +473,11 @@ class Tacotron(nn.Module):
 
         self.load_state_dict(state_dict, strict=False)
 
-    def save(self, path: Union[str, Path]):
-        # No optimizer argument because saving a model should not include data
-        # only relevant in the training process - it should only be properties
-        # of the model itself. Let caller take care of saving optimzier state.
-        torch.save(self.state_dict(), path)
+    def save(self, path, optimizer):
+        torch.save({
+            "model_state": self.state_dict(),
+            "optimizer_state": optimizer_state_dict(),
+        }, path)
 
     def num_params(self, print_out=True):
         parameters = filter(lambda p: p.requires_grad, self.parameters())
