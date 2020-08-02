@@ -467,12 +467,6 @@ class Tacotron(nn.Module):
             # Backwards compatibility
             self.load_state_dict(checkpoint)
 
-        # Backwards compatibility with old saved models
-        if 'r' in state_dict and not 'decoder.r' in state_dict:
-            self.r = state_dict['r']
-
-        self.load_state_dict(state_dict, strict=False)
-
     def save(self, path, optimizer):
         torch.save({
             "model_state": self.state_dict(),

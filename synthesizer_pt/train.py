@@ -35,8 +35,8 @@ log = infolog.log
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
 
 
-def train(run_id: str, syn_dir: Path, models_dir: Path,
-          save_every: int, backup_every: int, force_restart:bool):
+def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
+         backup_every: int, force_restart:bool, train_steps:int):
 
     log_dir = os.path.join(models_dir, run_id)
     save_dir = os.path.join(log_dir, "taco_pretrained")
@@ -109,6 +109,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path,
                      dropout=hp.tts_dropout,
                      stop_threshold=hp.tts_stop_threshold).to(device)
 
+    # Initialize the optimizer
+    optimizer = optim.Adam(model.parameters())
 
     # Load the weights
     model_dir = models_dir.joinpath(run_id)
@@ -157,6 +159,9 @@ def train(run_id: str, syn_dir: Path, models_dir: Path,
                       ('Learning Rate', lr),
                       ('Outputs/Step (r)', model.r)])
 
+        for p in optimizer.param_groups:
+            p["lr"] = lr
+
         data_loader = DataLoader(dataset,
                                  collate_fn=collate_synthesizer,
                                  batch_size=hp.tts_batch_size,
@@ -164,7 +169,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path,
                                  shuffle=True,
                                  pin_memory=True)
 
-        total_iters = len(train_set)
+        total_iters = len(dataset) 
         epochs = train_steps // total_iters + 1
 
         for epoch in range(1, epochs+1):
@@ -173,7 +178,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path,
             running_loss = 0
 
             # Perform 1 epoch
-            for i, (x, m, ids, _) in enumerate(train_set, 1):
+            for i, (x, m, ids, _) in enumerate(data_loader, 1):
 
                 x, m = x.to(device), m.to(device)
 
