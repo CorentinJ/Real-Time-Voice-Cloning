@@ -169,57 +169,59 @@ def train(run_id: str, syn_dir: Path, models_dir: Path,
 
         for epoch in range(1, epochs+1):
 
-        start = time.time()
-        running_loss = 0
+            start = time.time()
+            running_loss = 0
 
-        # Perform 1 epoch
-        for i, (x, m, ids, _) in enumerate(train_set, 1):
+            # Perform 1 epoch
+            for i, (x, m, ids, _) in enumerate(train_set, 1):
 
-            x, m = x.to(device), m.to(device)
+                x, m = x.to(device), m.to(device)
 
-            # Parallelize model onto GPUS using workaround due to python bug
-            if device.type == 'cuda' and torch.cuda.device_count() > 1:
-                m1_hat, m2_hat, attention = data_parallel_workaround(model, x, m)
-            else:
-                m1_hat, m2_hat, attention = model(x, m)
+                # Forward pass
+                # Parallelize model onto GPUS using workaround due to python bug
+                if device.type == 'cuda' and torch.cuda.device_count() > 1:
+                    m1_hat, m2_hat, attention = data_parallel_workaround(model, x, m)
+                else:
+                    m1_hat, m2_hat, attention = model(x, m)
 
-            m1_loss = F.l1_loss(m1_hat, m)
-            m2_loss = F.l1_loss(m2_hat, m)
+                # Backward pass
+                m1_loss = F.l1_loss(m1_hat, m)
+                m2_loss = F.l1_loss(m2_hat, m)
 
-            loss = m1_loss + m2_loss
+                loss = m1_loss + m2_loss
 
-            optimizer.zero_grad()
-            loss.backward()
-            if hp.tts_clip_grad_norm is not None:
-                grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), hp.tts_clip_grad_norm)
-                if np.isnan(grad_norm):
-                    print('grad_norm was NaN!')
+                optimizer.zero_grad()
+                loss.backward()
 
-            optimizer.step()
+                if hp.tts_clip_grad_norm is not None:
+                    grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), hp.tts_clip_grad_norm)
+                    if np.isnan(grad_norm):
+                        print('grad_norm was NaN!')
 
-            running_loss += loss.item()
-            avg_loss = running_loss / i
+                optimizer.step()
 
-            speed = i / (time.time() - start)
+                running_loss += loss.item()
+                avg_loss = running_loss / i
 
-            step = model.get_step()
-            k = step // 1000
+                speed = i / (time.time() - start)
 
-            if step % hp.tts_checkpoint_every == 0:
-                ckpt_name = f'taco_step{k}K'
-                save_checkpoint('tts', paths, model, optimizer,
-                                name=ckpt_name, is_silent=True)
+                step = model.get_step()
+                k = step // 1000
 
-            if attn_example in ids:
-                idx = ids.index(attn_example)
-                save_attention(np_now(attention[idx][:, :160]), paths.tts_attention/f'{step}')
-                save_spectrogram(np_now(m2_hat[idx]), paths.tts_mel_plot/f'{step}', 600)
+                if backup_every != 0 and step % backup_every == 0 : 
+                    model.checkpoint(model_dir, optimizer)
+    
+                if save_every != 0 and step % save_every == 0 : 
+                    # Must save latest optimizer state to ensure that resuming training
+                    # doesn't produce artifacts
+                    model.save(weights_fpath, optimizer)
 
-            msg = f'| Epoch: {epoch}/{epochs} ({i}/{total_iters}) | Loss: {avg_loss:#.4} | {speed:#.2} steps/s | Step: {k}k | '
-            stream(msg)
+                if attn_example in ids:
+                    idx = ids.index(attn_example)
+                    save_attention(np_now(attention[idx][:, :160]), paths.tts_attention/f'{step}')
+                    save_spectrogram(np_now(m2_hat[idx]), paths.tts_mel_plot/f'{step}', 600)
 
-        # Must save latest optimizer state to ensure that resuming training
-        # doesn't produce artifacts
-        save_checkpoint('tts', paths, model, optimizer, is_silent=True)
-        model.log(paths.tts_log, msg)
-        print("")
+                msg = f'| Epoch: {epoch}/{epochs} ({i}/{total_iters}) | Loss: {avg_loss:#.4} | {speed:#.2} steps/s | Step: {k}k | '
+                stream(msg)
+
+            print("")
