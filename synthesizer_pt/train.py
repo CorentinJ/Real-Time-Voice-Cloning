@@ -20,6 +20,7 @@ from synthesizer_pt.utils.text import sequence_to_text
 from synthesizer_pt.feeder import Feeder
 from synthesizer_pt.utils import ValueWindow, plot
 from synthesizer_pt import infolog, audio
+from synthesizer_pt.synthesizer_dataset import SynthesizerDataset
 from datetime import datetime
 from tqdm import tqdm
 import numpy as np
@@ -31,12 +32,6 @@ log = infolog.log
 
 
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
-
-
-def train_old(args):
-    paths = Paths(hp.data_path, hp.voc_model_id, hp.tts_model_id)
-
-    force_gta = args.GTA
 
 
 def create_gta_features(model: Tacotron, train_set, save_path: Path):
@@ -232,7 +227,28 @@ def train(run_id: str, syn_dir: Path, models_dir: Path,
 
     # Initialize the optimizer
     optimizer = optim.Adam(model.parameters())
-    restore_checkpoint('tts', paths, model, optimizer, create_if_missing=True)
+
+    # Load the weights
+    model_dir = models_dir.joinpath(run_id)
+    model_dir.mkdir(exist_ok=True)
+    weights_fpath = model_dir.joinpath(run_id + ".pt")
+    if force_restart or not weights_fpath.exists():
+        print("\nStarting the training of Tacotron from scratch\n")
+        model.save(weights_fpath, optimizer)
+    else:
+        print("\nLoading weights at %s" % weights_fpath)
+        model.load(weights_fpath, optimizer)
+        print("Tacotron weights loaded from step %d" % model.step)
+    
+    # Initialize the dataset
+    metadata_fpath = syn_dir.joinpath("train.txt")
+    mel_dir = syn_dir.joinpath("mels")
+    embed_dir = syn_dir.joinpath("embeds")
+    dataset = SynthesizerDataset(metadata_fpath, mel_dir, wav_dir)
+    test_loader = DataLoader(dataset,
+                             batch_size=1,
+                             shuffle=True,
+                             pin_memory=True)
 
     if not force_gta:
         for i, session in enumerate(hp.tts_schedule):
