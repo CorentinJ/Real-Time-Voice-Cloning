@@ -36,8 +36,8 @@ class SynthesizerDataset(Dataset):
         #print(mel_path)
         #print(embed_path)
         
-        # Load the mel spectrogram and adjust its range to [-1, 1]
-        mel = np.load(mel_path).T.astype(np.float32) / hp.mel_max_abs_value
+        # Load the mel spectrogram (range adjusted to [-1, 1] during preprocessing)
+        mel = np.load(mel_path).T.astype(np.float32)
         
         # Load the embed
         embed = np.load(embed_path)
@@ -76,9 +76,6 @@ def collate_synthesizer(batch, r):
 
     mel = [pad2d(x[1], max_spec_len) for x in batch]
     mel = np.stack(mel)
-
-    # scale spectrograms to -4 <--> 4
-    mel = (mel * 8.) - 4.
 
     # Speaker embedding (SV2TTS)
     embeds = [x[2] for x in batch]
