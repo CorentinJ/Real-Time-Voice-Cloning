@@ -40,7 +40,7 @@ class Synthesizer:
         self._model = Tacotron(embed_dims=hp.tts_embed_dims,
                                num_chars=len(symbols),
                                encoder_dims=hp.tts_encoder_dims,
-                               decoder_dims=hp.tts_decoder_dims + hp.tts_speaker_embedding_size,
+                               decoder_dims=hp.tts_decoder_dims,
                                n_mels=hp.num_mels,
                                fft_bins=hp.num_mels,
                                postnet_dims=hp.tts_postnet_dims,
@@ -49,7 +49,8 @@ class Synthesizer:
                                postnet_K=hp.tts_postnet_K,
                                num_highways=hp.tts_num_highways,
                                dropout=hp.tts_dropout,
-                               stop_threshold=hp.tts_stop_threshold).to(device)    
+                               stop_threshold=hp.tts_stop_threshold,
+                               speaker_embedding_size=hp.tts_speaker_embedding_size).to(device)
         self._model.load(model_fpath)
         self._model.eval()
 
@@ -81,7 +82,7 @@ class Synthesizer:
         self._model = Tacotron(embed_dims=hp.tts_embed_dims,
                                num_chars=len(symbols),
                                encoder_dims=hp.tts_encoder_dims,
-                               decoder_dims=hp.tts_decoder_dims + hp.tts_speaker_embedding_dims,
+                               decoder_dims=hp.tts_decoder_dims,
                                n_mels=hp.num_mels,
                                fft_bins=hp.num_mels,
                                postnet_dims=hp.tts_postnet_dims,
@@ -90,7 +91,8 @@ class Synthesizer:
                                postnet_K=hp.tts_postnet_K,
                                num_highways=hp.tts_num_highways,
                                dropout=hp.tts_dropout,
-                               stop_threshold=hp.tts_stop_threshold).to(device)    
+                               stop_threshold=hp.tts_stop_threshold,
+                               speaker_embedding_size=hp.tts_speaker_embedding_size).to(device)
 
         # Load model
         self._model.load(self.model_path)
