@@ -458,14 +458,17 @@ class Tacotron(nn.Module):
         with open(path, 'a') as f:
             print(msg, file=f)
 
-    def load(self, path, optimizer):
-        checkpoint = torch.load(path)
-        if "optimizer_state" in checkpoint:
+    def load(self, path, optimizer=None):
+        # Use device of model params as location for loaded state
+        device = next(self.parameters()).device
+        checkpoint = torch.load(path, map_location=device)
+
+        if "optimizer_state" in checkpoint and optimizer is not None:
             self.load_state_dict(checkpoint["model_state"])
             optimizer.load_state_dict(checkpoint["optimizer_state"])
         else:
-            # Backwards compatibility
-            self.load_state_dict(checkpoint)
+            # Backwards compaibility for testing purposes with WaveRNN pretrained model
+            self.load_state_dict(checkpoint, strict=False)
 
     def save(self, path, optimizer):
         torch.save({
