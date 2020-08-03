@@ -421,6 +421,9 @@ class Tacotron(nn.Module):
         # Need an initial context vector
         context_vec = torch.zeros(batch_size, self.decoder_dims, device=device)
 
+        # SV2TTS: Run the encoder with the speaker embedding
+        encoder_out = self.encoder(x, speaker_embedding)
+
         # SV2TTS: Reduce the size so this is transparent to the decoder
         # This also avoids unnecessary matmuls in the decoder loop
         encoder_seq = self.encoder_proj(encoder_out)
