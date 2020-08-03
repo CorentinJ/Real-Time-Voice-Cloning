@@ -169,6 +169,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
 
         total_iters = len(dataset) 
         epochs = train_steps // total_iters + 1
+        steps_per_epoch = np.ceil(total_iters / batch_size).astype(np.int32)
 
         for epoch in range(1, epochs+1):
 
@@ -220,10 +221,10 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                     # doesn't produce artifacts
                     model.save(weights_fpath, optimizer)
 
-                msg = f'| Epoch: {epoch}/{epochs} ({i}/{total_iters}) | Loss: {avg_loss:#.4} | {speed:#.2} steps/s | Step: {k}k | '
+                msg = f'| Epoch: {epoch}/{epochs} ({i}/{steps_per_epoch}) | Loss: {avg_loss:#.4} | {speed:#.2} steps/s | Step: {k}k | '
                 stream(msg)
 
             # Save some results every epoch for evaluation
-            save_attention(np_now(attention[idx][:, :160]), paths.tts_attention/f'{step}')
-            save_spectrogram(np_now(m2_hat[idx]), plot_dir/f'{step}', 600)
+            save_attention(np_now(attention[0][:, :160]), Path(f'{plot_dir}/{step}'))
+            save_spectrogram(np_now(m2_hat[0]), Path(f'{plot_dir}/{step})'), 600)
             print("")
