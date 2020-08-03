@@ -80,7 +80,6 @@ tts_stop_threshold = -3.4           # Value below which audio generation ends.
                                     # frame that has all values < -3.4
 
 # Training
-tts_batch_size = 32
 tts_schedule = [(7,  1e-3,  10_000,  32),   # progressive training schedule
                 (5,  1e-4, 100_000,  32),   # (r, lr, step, batch_size)
                 (2,  1e-4, 180_000,  16),

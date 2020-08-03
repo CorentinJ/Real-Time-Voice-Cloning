@@ -161,7 +161,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
 
         data_loader = DataLoader(dataset,
                                  collate_fn=lambda batch: collate_synthesizer(batch, r),
-                                 batch_size=hp.tts_batch_size,
+                                 batch_size=batch_size,
                                  num_workers=2,
                                  shuffle=True,
                                  pin_memory=True)
