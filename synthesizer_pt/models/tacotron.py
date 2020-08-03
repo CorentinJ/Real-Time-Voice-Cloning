@@ -43,12 +43,63 @@ class Encoder(nn.Module):
 
     def add_speaker_embedding(self, x, speaker_embedding):
         # SV2TTS
-        # The input x is the encoder output and has a size of (1, num_chars, embed_dims)
-        # The input speaker_embedding has a size of (1, speaker_embed_dims)
-        # Concat the speaker embedding for each char in the encoder output
-        raise NotImplementedError #Need to check dimensions
-        tiled_speaker_embedding = speaker_embedding.repeat(1, self.num_chars, 1)
-        x = torch.cat((x, tiled_speaker_embedding), 2)
+        # The input x is the encoder output and is a 3D tensor with size (batch_size, num_chars, hp.tts_embed_dims)
+        # The input speaker_embedding is also a 2D tensor with size (batch_size, hp.speaker_embedding_size)
+        # This concats the speaker embedding for each char in the encoder output
+
+        # ### Example ###
+        # Here is a simple example that demonstrates how we perform the concat.
+        # Suppose we have a batch_size = 4, num_chars = 3, and speaker_embedding_size = 2.
+        # The encoder output size is not relevant to the example and can be anything.
+        # For each of the 4 utterances in the batch, we have a speaker embedding of length 2
+        # speaker_embedding might look like this tensor "a" below:
+        #
+        # >>> a
+        # tensor([[1, 2],
+        #         [3, 4],
+        #         [5, 6],
+        #         [7, 8]])
+        #
+        # # where [1, 2] is the embedding for the speaker in batch 1,
+        # # [3, 4] is the embedding for the speaker in batch 2, etc.
+        # #
+        # # This has size (4,2) and we now wish to concat this with the text tensor
+        # # which has size (4,3,x). This means we need to duplicate the tensor 3 times
+        # # (once for each char of the text). The repeat_interleave output needs to be
+        # # resized and transposed to get it all to line up as we are intending.
+        #
+        # >>> a.repeat_interleave(3,dim=1).reshape(4,2,3).transpose(1,2)
+        # tensor([[[1, 2],
+        #          [1, 2],
+        #          [1, 2]],
+        #
+        #         [[3, 4],
+        #          [3, 4],
+        #          [3, 4]],
+        #
+        #         [[5, 6],
+        #          [5, 6],
+        #          [5, 6]],
+        #
+        #         [[7, 8],
+        #          [7, 8],
+        #          [7, 8]]])
+
+        # Save the dimensions as human-readable names
+        batch_size = x.size()[0]
+        num_chars = x.size()[1]
+        speaker_embedding_size = speaker_embedding.size()[1]
+
+        # Start by making a copy of each speaker embedding to match the input text length
+        # The output of this has size (batch_size, num_chars * hp.tts_embed_dims)
+        e = speaker_embedding.repeat_interleave(num_chars, dim=1)
+
+        # Reshape it and transpose
+        e = e.reshape(batch_size, speaker_embedding_size, num_chars)
+        e = e.transpose(1, 2)
+
+        # Concatenate the tiled speaker embedding with the encoder output
+        x = torch.cat((x, e), 2)
         return x
 
 
