@@ -235,7 +235,7 @@ class Decoder(nn.Module):
     # Class variable because its value doesn't change between classes
     # yet ought to be scoped by class because its a property of a Decoder
     max_r = 20
-    def __init__(self, n_mels, decoder_dims, lstm_dims, speaker_embedding_size):
+    def __init__(self, n_mels, decoder_dims, lstm_dims):
         super().__init__()
         self.register_buffer('r', torch.tensor(1, dtype=torch.int))
         self.n_mels = n_mels
@@ -313,7 +313,6 @@ class Tacotron(nn.Module):
         self.n_mels = n_mels
         self.lstm_dims = lstm_dims
         self.decoder_dims = decoder_dims
-        self.speaker_embedding_size = speaker_embedding_size
         self.encoder = Encoder(embed_dims, num_chars, encoder_dims,
                                encoder_K, num_highways, dropout)
         self.encoder_proj = nn.Linear(decoder_dims + speaker_embedding_size, decoder_dims, bias=False)
@@ -422,10 +421,10 @@ class Tacotron(nn.Module):
         # Need an initial context vector
         context_vec = torch.zeros(batch_size, self.decoder_dims, device=device)
 
-        # Project the encoder outputs to avoid
-        # unnecessary matmuls in the decoder loop
-        encoder_seq = self.encoder(x, speaker_embedding)
-        encoder_seq_proj = self.encoder_proj(encoder_seq)
+        # SV2TTS: Reduce the size so this is transparent to the decoder
+        # This also avoids unnecessary matmuls in the decoder loop
+        encoder_seq = self.encoder_proj(encoder_out)
+        encoder_seq_proj = encoder_seq
 
         # Need a couple of lists for outputs
         mel_outputs, attn_scores = [], []
