@@ -13,7 +13,7 @@ if __name__ == "__main__":
     parser.add_argument("syn_dir", type=str, default=argparse.SUPPRESS, help= \
         "Path to the synthesizer directory that contains the ground truth mel spectrograms, "
         "the wavs and the embeds.")
-    parser.add_argument("-m", "--models_dir", type=str, default="synthesizer/saved_models/", help=\
+    parser.add_argument("-m", "--models_dir", type=str, default="synthesizer_pt/saved_models/", help=\
         "Path to the output directory that will contain the saved model weights and the logs.")
     parser.add_argument("-s", "--save_every", type=int, default=1000, help= \
         "Number of steps between updates of the model on the disk. Set to 0 to never save the "

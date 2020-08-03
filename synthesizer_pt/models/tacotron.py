@@ -483,11 +483,17 @@ class Tacotron(nn.Module):
             # Backwards compaibility for testing purposes with WaveRNN pretrained model
             self.load_state_dict(checkpoint, strict=False)
 
-    def save(self, path, optimizer):
-        torch.save({
-            "model_state": self.state_dict(),
-            "optimizer_state": optimizer_state_dict(),
-        }, path)
+    def save(self, path, optimizer=None):
+        if optimizer is not None:
+            torch.save({
+                "model_state": self.state_dict(),
+                "optimizer_state": optimizer_state_dict(),
+            }, path)
+        else:
+            torch.save({
+                "model_state": self.state_dict(),
+            }, path)
+
 
     def num_params(self, print_out=True):
         parameters = filter(lambda p: p.requires_grad, self.parameters())

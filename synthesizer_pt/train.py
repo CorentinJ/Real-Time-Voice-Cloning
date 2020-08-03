@@ -95,7 +95,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
     model = Tacotron(embed_dims=hp.tts_embed_dims,
                      num_chars=len(symbols),
                      encoder_dims=hp.tts_encoder_dims,
-                     decoder_dims=hp.tts_decoder_dims,
+                     decoder_dims=hp.tts_decoder_dims + hp.tts_speaker_embedding_size,
                      n_mels=hp.num_mels,
                      fft_bins=hp.num_mels,
                      postnet_dims=hp.tts_postnet_dims,
@@ -115,7 +115,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
     weights_fpath = model_dir.joinpath(run_id + ".pt")
     if force_restart or not weights_fpath.exists():
         print("\nStarting the training of Tacotron from scratch\n")
-        model.save(weights_fpath, optimizer)
+        model.save(weights_fpath)
     else:
         print("\nLoading weights at %s" % weights_fpath)
         model.load(weights_fpath, optimizer)
