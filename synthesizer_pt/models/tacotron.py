@@ -50,11 +50,16 @@ class Encoder(nn.Module):
         # Save the dimensions as human-readable names
         batch_size = x.size()[0]
         num_chars = x.size()[1]
-        speaker_embedding_size = speaker_embedding.size()[1]
+
+        if batch_size == 1:
+            idx = 0
+        else:
+            idx = 1
 
         # Start by making a copy of each speaker embedding to match the input text length
         # The output of this has size (batch_size, num_chars * hp.tts_embed_dims)
-        e = speaker_embedding.repeat_interleave(num_chars, dim=1)
+        speaker_embedding_size = speaker_embedding.size()[idx]
+        e = speaker_embedding.repeat_interleave(num_chars, dim=idx)
 
         # Reshape it and transpose
         e = e.reshape(batch_size, speaker_embedding_size, num_chars)
