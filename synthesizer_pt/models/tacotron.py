@@ -23,7 +23,8 @@ class HighwayNetwork(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, embed_dims, num_chars, cbhg_channels, K, num_highways, dropout):
+    def __init__(self, embed_dims, num_chars, cbhg_channels, K, num_highways, dropout,
+                 speaker_embedding_size):
         super().__init__()
         self.embedding = nn.Embedding(num_chars, embed_dims)
         self.pre_net = PreNet(embed_dims)
@@ -31,6 +32,7 @@ class Encoder(nn.Module):
                          proj_channels=[cbhg_channels, cbhg_channels],
                          num_highways=num_highways)
         self.num_chars = num_chars
+        self.speaker_embedding_size = speaker_embedding_size
 
     def forward(self, x, speaker_embedding=None):
         x = self.embedding(x)
@@ -44,14 +46,15 @@ class Encoder(nn.Module):
     def add_speaker_embedding(self, x, speaker_embedding):
         # SV2TTS
         # The input x is the encoder output and is a 3D tensor with size (batch_size, num_chars, hp.tts_embed_dims)
-        # The input speaker_embedding is also a 2D tensor with size (batch_size, hp.speaker_embedding_size)
+        # When training, speaker_embedding is also a 2D tensor with size (batch_size, hp.speaker_embedding_size)
+        #     (for inference, speaker_embedding is a 1D tensor with size (hp.speaker_embedding_size))
         # This concats the speaker embedding for each char in the encoder output
 
         # Save the dimensions as human-readable names
         batch_size = x.size()[0]
         num_chars = x.size()[1]
 
-        if batch_size == 1:
+        if speaker_embedding.dim() == 1:
             idx = 0
         else:
             idx = 1
@@ -318,8 +321,8 @@ class Tacotron(nn.Module):
         self.n_mels = n_mels
         self.lstm_dims = lstm_dims
         self.decoder_dims = decoder_dims
-        self.encoder = Encoder(embed_dims, num_chars, encoder_dims,
-                               encoder_K, num_highways, dropout)
+        self.encoder = Encoder(embed_dims, num_chars, encoder_dims, encoder_K,
+                               num_highways, dropout, speaker_embedding_size)
         self.encoder_proj = nn.Linear(decoder_dims + speaker_embedding_size, decoder_dims, bias=False)
         self.decoder = Decoder(n_mels, decoder_dims, lstm_dims)
         self.postnet = CBHG(postnet_K, n_mels, postnet_dims, [256, 80], num_highways)
