@@ -214,8 +214,9 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                 k = step // 1000
 
                 if backup_every != 0 and step % backup_every == 0 : 
-                    model.checkpoint(model_dir, optimizer)
-    
+                    backup_fpath = Path(f'{str(weights_fpath.parent)}_{k}k.pt')
+                    model.save(backup_fpath, optimizer)
+
                 if save_every != 0 and step % save_every == 0 : 
                     # Must save latest optimizer state to ensure that resuming training
                     # doesn't produce artifacts
