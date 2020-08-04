@@ -17,6 +17,7 @@ from synthesizer_pt.utils.checkpoints import save_checkpoint, restore_checkpoint
 import synthesizer_pt.hparams as hp
 from synthesizer_pt.utils.text import sequence_to_text
 from synthesizer_pt.utils import ValueWindow, plot
+from synthesizer_pt.utils.dsp import reconstruct_waveform
 from synthesizer_pt import infolog, audio
 from synthesizer_pt.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
 from torch.utils.data import DataLoader
@@ -242,10 +243,10 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                     allow_pickle=False)
 
             # save griffin lim inverted wav for debug (mel -> wav)
-            #wav = audio.inv_mel_spectrogram(mel_prediction.T, hp)
-            #audio.save_wav(wav,
-            #               os.path.join(wav_dir, "step-{}-wave-from-mel.wav".format(step)),
-            #               sr=hparams.sample_rate)
+            wav = reconstruct_waveform(mel_prediction.T)
+            audio.save_wav(wav,
+                           os.path.join(wav_dir, "step-{}-wave-from-mel.wav".format(step)),
+                           sr=hp.sample_rate)
 
             # save real and predicted mel-spectrogram plot to disk (control purposes)
             plot.plot_spectrogram(mel_prediction, os.path.join(plot_dir,

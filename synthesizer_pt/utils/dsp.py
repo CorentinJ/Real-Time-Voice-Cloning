@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import librosa
-from synthesizer_pt.utils import hparams as hp
+from synthesizer_pt import hparams as hp
 from scipy.signal import lfilter
 
 
