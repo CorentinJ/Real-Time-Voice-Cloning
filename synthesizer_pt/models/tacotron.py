@@ -498,7 +498,7 @@ class Tacotron(nn.Module):
         if optimizer is not None:
             torch.save({
                 "model_state": self.state_dict(),
-                "optimizer_state": optimizer_state_dict(),
+                "optimizer_state": optimizer.state_dict(),
             }, path)
         else:
             torch.save({
