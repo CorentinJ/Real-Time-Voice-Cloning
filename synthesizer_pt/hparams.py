@@ -17,13 +17,13 @@ ignore_tts = False
 # DSP --------------------------------------------------------------------------------------------------------------#
 
 # Settings for all models
-sample_rate = 22050
-n_fft = 2048
+sample_rate = 16000
+n_fft = 800
 fft_bins = n_fft // 2 + 1
 num_mels = 80
-hop_length = 275                    # 12.5ms - in line with Tacotron 2 paper
-win_length = 1100                   # 50ms - same reason as above
-fmin = 40
+hop_length = 200                    # For 16000 Hz, 200 = 12.5ms - in line with Tacotron 2 paper
+win_length = 800                   # For 16000 Hz, 800 = 50ms - same reason as above
+fmin = 50
 min_level_db = -100
 ref_level_db = 20
 bits = 9                            # bit depth of signal
@@ -85,7 +85,7 @@ tts_schedule = [(7,  1e-3,  10_000,  32),   # progressive training schedule
                 (2,  1e-4, 180_000,  16),
                 (2,  1e-4, 350_000,  8)]
 
-tts_max_mel_len = 1250              # if you have a couple of extremely long spectrograms you might want to use this
+tts_max_mel_len = 900               # if you have a couple of extremely long spectrograms you might want to use this
 tts_bin_lengths = True              # bins the spectrogram lengths before sampling in data loader - speeds up training
 tts_clip_grad_norm = 1.0            # clips the gradient norm to prevent explosion - set to None if not needed
 tts_checkpoint_every = 2_000        # checkpoints the model every X steps
