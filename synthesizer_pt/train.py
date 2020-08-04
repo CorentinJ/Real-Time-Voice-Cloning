@@ -32,6 +32,9 @@ log = infolog.log
 
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
 
+def time_string():
+    return datetime.now().strftime("%Y-%m-%d %H:%M")
+
 def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
          backup_every: int, force_restart:bool, train_steps:int):
 
@@ -226,6 +229,32 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                 stream(msg)
 
             # Save some results every epoch for evaluation
-            save_attention(np_now(attention[0][:, :160]), Path(f'{plot_dir}/{step}'))
-            save_spectrogram(np_now(m2_hat[0]), Path(f'{plot_dir}/{step})'), 600)
+            save_attention(np_now(attention[0][:, :160]), Path(f'{plot_dir}/attention_step_{step}'))
+            save_spectrogram(np_now(m2_hat[0]), Path(f'{plot_dir}/mel_step_{step}'), 600)
+
+            mel_prediction = np_now(m2_hat[0]).T
+            target_spectrogram = np_now(m[0]).T
+            input_seq = np_now(x[0])
+
+            # save predicted mel spectrogram to disk (debug)
+            mel_filename = "mel-prediction-step-{}.npy".format(step)
+            np.save(os.path.join(mel_dir, mel_filename), mel_prediction.T,
+                    allow_pickle=False)
+
+            # save griffin lim inverted wav for debug (mel -> wav)
+            #wav = audio.inv_mel_spectrogram(mel_prediction.T, hp)
+            #audio.save_wav(wav,
+            #               os.path.join(wav_dir, "step-{}-wave-from-mel.wav".format(step)),
+            #               sr=hparams.sample_rate)
+
+            # save real and predicted mel-spectrogram plot to disk (control purposes)
+            plot.plot_spectrogram(mel_prediction, os.path.join(plot_dir,
+                                                               "step-{}-mel-spectrogram.png".format(
+                                                                   step)),
+                                  title="{}, {}, step={}, loss={:.5f}".format("Tacotron",
+                                                                              time_string(),
+                                                                              step, loss),
+                                  target_spectrogram=target_spectrogram,
+                                  max_len=target_spectrogram.size // hp.num_mels)
+            log("Input at step {}: {}".format(step, sequence_to_text(input_seq)))
             print("")
