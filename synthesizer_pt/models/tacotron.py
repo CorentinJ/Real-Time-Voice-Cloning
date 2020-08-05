@@ -489,13 +489,10 @@ class Tacotron(nn.Module):
         # Use device of model params as location for loaded state
         device = next(self.parameters()).device
         checkpoint = torch.load(path, map_location=device)
+        self.load_state_dict(checkpoint["model_state"])
 
         if "optimizer_state" in checkpoint and optimizer is not None:
-            self.load_state_dict(checkpoint["model_state"])
             optimizer.load_state_dict(checkpoint["optimizer_state"])
-        else:
-            # Backwards compaibility for testing purposes with WaveRNN pretrained model
-            self.load_state_dict(checkpoint, strict=False)
 
     def save(self, path, optimizer=None):
         if optimizer is not None:
