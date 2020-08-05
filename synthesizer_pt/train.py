@@ -43,7 +43,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
     save_dir = os.path.join(log_dir, "taco_pretrained")
     plot_dir = os.path.join(log_dir, "plots")
     wav_dir = os.path.join(log_dir, "wavs")
-    mel_dir = os.path.join(log_dir, "mel-spectrograms")
+    mel_output_dir = os.path.join(log_dir, "mel-spectrograms")
     eval_dir = os.path.join(log_dir, "eval-dir")
     eval_plot_dir = os.path.join(eval_dir, "plots")
     eval_wav_dir = os.path.join(eval_dir, "wavs")
@@ -51,7 +51,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
     os.makedirs(save_dir, exist_ok=True)
     os.makedirs(plot_dir, exist_ok=True)
     os.makedirs(wav_dir, exist_ok=True)
-    os.makedirs(mel_dir, exist_ok=True)
+    os.makedirs(mel_output_dir, exist_ok=True)
     os.makedirs(eval_dir, exist_ok=True)
     os.makedirs(eval_plot_dir, exist_ok=True)
     os.makedirs(eval_wav_dir, exist_ok=True)
@@ -236,7 +236,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                                        input_seq=np_now(x[sample_idx]),
                                        step=step,
                                        plot_dir=plot_dir,
-                                       mel_dir=mel_dir,
+                                       mel_output_dir=mel_output_dir,
                                        wav_dir=wav_dir,
                                        sample_num=sample_idx+1,
                                        loss=loss)
@@ -254,21 +254,21 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                                    input_seq=np_now(x[sample_idx]),
                                    step=step,
                                    plot_dir=plot_dir,
-                                   mel_dir=mel_dir,
+                                   mel_output_dir=mel_output_dir,
                                    wav_dir=wav_dir,
                                    sample_num=sample_idx+1,
                                    loss=loss)
             print("")
 
 def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
-               plot_dir, mel_dir, wav_dir, sample_num, loss):
+               plot_dir, mel_output_dir, wav_dir, sample_num, loss):
     # Save some results for evaluation
     save_attention(attention, Path(f'{plot_dir}/attention_step_{step}_sample_{sample_num}'))
     save_spectrogram(mel_prediction.T, Path(f'{plot_dir}/mel_step_{step}_sample_{sample_num}'), 600)
 
     # save predicted mel spectrogram to disk (debug)
     mel_filename = "mel-prediction-step-{}_sample_{}.npy".format(step, sample_num)
-    np.save(os.path.join(mel_dir, mel_filename), mel_prediction.T,
+    np.save(os.path.join(mel_output_dir, mel_filename), mel_prediction.T,
             allow_pickle=False)
 
     # save griffin lim inverted wav for debug (mel -> wav)
