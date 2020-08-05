@@ -74,7 +74,9 @@ def collate_synthesizer(batch, r):
     if max_spec_len % r != 0:
         max_spec_len += r - max_spec_len % r 
 
-    mel = [pad2d(x[1], max_spec_len) for x in batch]
+    # WaveRNN mel spectrograms are normalized to [0, 1] so zero padding adds silence
+    # SV2TTS: Pad with -4 instead since that represents silence in our saved mels
+    mel = [pad2d(x[1], max_spec_len, pad_value=-4) for x in batch]
     mel = np.stack(mel)
 
     # Speaker embedding (SV2TTS)
@@ -88,8 +90,8 @@ def collate_synthesizer(batch, r):
 
     return chars, mel, embeds
 
-def pad1d(x, max_len):
-    return np.pad(x, (0, max_len - len(x)), mode='constant')
+def pad1d(x, max_len, pad_value=0):
+    return np.pad(x, (0, max_len - len(x)), mode='constant', constant_values=pad_value)
 
-def pad2d(x, max_len):
-    return np.pad(x, ((0, 0), (0, max_len - x.shape[-1])), mode='constant')
+def pad2d(x, max_len, pad_value=0):
+    return np.pad(x, ((0, 0), (0, max_len - x.shape[-1])), mode='constant', constant_values=pad_value)
