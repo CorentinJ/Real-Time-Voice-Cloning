@@ -19,8 +19,7 @@ class Synthesizer:
     
     def __init__(self, model_fpath: Path, verbose=True, low_mem=False):
         """
-        Creates a synthesizer ready for inference. The actual model isn't loaded in memory until
-        needed or until load() is called.
+        The model isn't instantiated and loaded in memory until needed or until load() is called.
         
         :param model_fpath: path to the trained model file
         """
@@ -30,55 +29,25 @@ class Synthesizer:
  
         # Check for GPU
         if torch.cuda.is_available():
-            device = torch.device('cuda')
+            self.device = torch.device('cuda')
         else:
-            device = torch.device('cpu')
+            self.device = torch.device('cpu')
         if self.verbose:
-            print('Synthesizer using device:', device)
+            print('Synthesizer using device:', self.device)
         
-        # Instantiate Tacotron Model
-        self._model = Tacotron(embed_dims=hp.tts_embed_dims,
-                               num_chars=len(symbols),
-                               encoder_dims=hp.tts_encoder_dims,
-                               decoder_dims=hp.tts_decoder_dims,
-                               n_mels=hp.num_mels,
-                               fft_bins=hp.num_mels,
-                               postnet_dims=hp.tts_postnet_dims,
-                               encoder_K=hp.tts_encoder_K,
-                               lstm_dims=hp.tts_lstm_dims,
-                               postnet_K=hp.tts_postnet_K,
-                               num_highways=hp.tts_num_highways,
-                               dropout=hp.tts_dropout,
-                               stop_threshold=hp.tts_stop_threshold,
-                               speaker_embedding_size=hp.tts_speaker_embedding_size).to(device)
-        self._model.load(model_fpath)
-        self._model.eval()
+        # Tacotron model will be instantiated later on first use.
+        self._model = None
 
-        if verbose:
-            print("Loaded synthesizer \"%s\" trained to step %d" % (model_fpath.name, self._model.state_dict()["step"]))
-     
     def is_loaded(self):
         """
-        Whether the model is loaded in GPU memory.
+        Whether the model is loaded in memory.
         """
         return self._model is not None
     
     def load(self):
         """
-        Effectively loads the model to GPU memory given the weights file that was passed in the
-        constructor.
+        Instantiates and loads the model given the weights file that was passed in the constructor.
         """
-        if self._low_mem:
-            raise Exception("Cannot load the synthesizer permanently in low mem mode")
-
-        # Check for GPU
-        if torch.cuda.is_available():
-            device = torch.device('cuda')
-        else:
-            device = torch.device('cpu')
-        print('Using device:', device)
-        
-        # Instantiate Tacotron Model
         self._model = Tacotron(embed_dims=hp.tts_embed_dims,
                                num_chars=len(symbols),
                                encoder_dims=hp.tts_encoder_dims,
@@ -92,10 +61,13 @@ class Synthesizer:
                                num_highways=hp.tts_num_highways,
                                dropout=hp.tts_dropout,
                                stop_threshold=hp.tts_stop_threshold,
-                               speaker_embedding_size=hp.tts_speaker_embedding_size).to(device)
+                               speaker_embedding_size=hp.tts_speaker_embedding_size).to(self.device)
 
-        # Load model
-        self._model.load(self.model_path)
+        self._model.load(self.model_fpath)
+        self._model.eval()
+
+        if self.verbose:
+            print("Loaded synthesizer \"%s\" trained to step %d" % (self.model_fpath.name, self._model.state_dict()["step"]))
 
     def synthesize_spectrograms(self, texts: List[str],
                                 embeddings: Union[np.ndarray, List[np.ndarray]],
@@ -111,42 +83,42 @@ class Synthesizer:
         :return: a list of N melspectrograms as numpy arrays of shape (80, Mi), where Mi is the 
         sequence length of spectrogram i, and possibly the alignments.
         """
+        # Load the model on the first request. For low_mem it is loaded every time.
+        if not self.is_loaded():
+            self.load()
+
+        inputs = [text_to_sequence(text.strip(), hp.tts_cleaner_names) for text in texts]
+        if not isinstance(embeddings, list):
+            embeddings = [embeddings]
+
+        tts_k = self._model.get_step() // 1000
+
+        simple_table([('Tacotron', str(tts_k) + 'k'),
+                    ('r', self._model.r)])
+
+        specs = []
+        for i, x in enumerate(inputs, 1):
+
+            print(f'\n| Generating {i}/{len(inputs)}')
+            if hp.tts_speaker_embedding_size > 0:
+                speaker_embedding = torch.tensor(embeddings[i-1]).float()
+            else:
+                speaker_embedding = None
+
+            m, _, attention = self._model.generate(x, speaker_embedding)
+
+            # Enforce mel spectrogram scaling to be from -1 to 1
+            np.clip(m, -1, 1, out=m)
+            specs.append(m)
+
         if self._low_mem:
-            # Low memory inference mode: load the model upon every request. The model has to be 
-            # loaded in a separate process to be able to release GPU memory (a simple workaround 
-            # to tensorflow's intricacies) - TODO: Reimplement for pytorch if needed
-            raise NotImplementedError
-        else:
-            # Usual inference mode: load the model on the first request and keep it loaded.
-            if not self.is_loaded():
-                self.load()
+            # Low memory inference mode: delete model following every request.
+            # The model has to be instantiated and loaded on every use.
+            del self._model
+            self._model = None
 
-            inputs = [text_to_sequence(text.strip(), hp.tts_cleaner_names) for text in texts]
-            if not isinstance(embeddings, list):
-                embeddings = [embeddings]
-
-            tts_k = self._model.get_step() // 1000
-
-            simple_table([('Tacotron', str(tts_k) + 'k'),
-                        ('r', self._model.r)])
-
-            specs = []
-            for i, x in enumerate(inputs, 1):
-
-                print(f'\n| Generating {i}/{len(inputs)}')
-                if hp.tts_speaker_embedding_size > 0:
-                    speaker_embedding = torch.tensor(embeddings[i-1]).float()
-                else:
-                    speaker_embedding = None
-
-                _, m, attention = self._model.generate(x, speaker_embedding)
-                # Fix mel spectrogram scaling to be from -1 to 1
-                m = m / 4
-                np.clip(m, -1, 1, out=m)
-                specs.append(m)
-
-            print('\n\nDone.\n')
-            return (specs, alignments) if return_alignments else specs
+        print('\n\nDone.\n')
+        return (specs, alignments) if return_alignments else specs
 
     @staticmethod
     def load_preprocess_wav(fpath):
