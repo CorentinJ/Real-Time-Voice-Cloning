@@ -268,7 +268,7 @@ def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
 
     # save predicted mel spectrogram to disk (debug)
     mel_filename = "mel-prediction-step-{}_sample_{}.npy".format(step, sample_num)
-    np.save(os.path.join(mel_output_dir, mel_filename), mel_prediction.T,
+    np.save(os.path.join(mel_output_dir, mel_filename), mel_prediction,
             allow_pickle=False)
 
     # save griffin lim inverted wav for debug (mel -> wav)
