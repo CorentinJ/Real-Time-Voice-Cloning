@@ -272,7 +272,7 @@ def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
             allow_pickle=False)
 
     # save griffin lim inverted wav for debug (mel -> wav)
-    wav = reconstruct_waveform(mel_prediction)
+    wav = reconstruct_waveform(mel_prediction.T)
     audio.save_wav(wav,
                    os.path.join(wav_dir, "step-{}-wave-from-mel_sample_{}.wav".format(step, sample_num)),
                    sr=hp.sample_rate)
