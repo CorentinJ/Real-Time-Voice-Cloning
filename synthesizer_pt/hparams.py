@@ -90,7 +90,10 @@ tts_bin_lengths = True              # bins the spectrogram lengths before sampli
 tts_clip_grad_norm = 1.0            # clips the gradient norm to prevent explosion - set to None if not needed
 tts_checkpoint_every = 2_000        # checkpoints the model every X steps
 # TODO: tts_phoneme_prob = 0.0              # [0 <-> 1] probability for feeding model phonemes vrs graphemes
-
+tts_eval_interval = 0               # evaluates the model every X steps:
+                                    #     if X = 0, evaluates every epoch
+                                    #     if X < 0, never evaluates
+tts_eval_num_samples = 22            # makes this number of samples
 
 # ------------------------------------------------------------------------------------------------------------------#
 
