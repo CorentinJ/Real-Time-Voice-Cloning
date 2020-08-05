@@ -93,7 +93,7 @@ tts_checkpoint_every = 2_000        # checkpoints the model every X steps
 tts_eval_interval = 0               # evaluates the model every X steps:
                                     #     if X = 0, evaluates every epoch
                                     #     if X < 0, never evaluates
-tts_eval_num_samples = 22            # makes this number of samples
+tts_eval_num_samples = 1            # makes this number of samples
 
 # ------------------------------------------------------------------------------------------------------------------#
 
