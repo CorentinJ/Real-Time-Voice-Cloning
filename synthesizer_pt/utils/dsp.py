@@ -105,6 +105,10 @@ def decode_mu_law(y, mu, from_labels=True):
 def reconstruct_waveform(mel, n_iter=32):
     """Uses Griffin-Lim phase reconstruction to convert from a normalized
     mel spectrogram back into a waveform."""
+    # Apply a rescaling to [0, 1] to account for difference in RTVC vs fatchord mel scaling
+    mel = (mel + 4) / 8
+    np.clip(mel, 0, 1, out=mel)
+
     denormalized = denormalize(mel)
     amp_mel = db_to_amp(denormalized)
     S = librosa.feature.inverse.mel_to_stft(
