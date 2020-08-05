@@ -331,8 +331,8 @@ class Tacotron(nn.Module):
         self.init_model()
         self.num_params()
 
-        self.register_buffer('step', torch.zeros(1, dtype=torch.long))
-        self.register_buffer('stop_threshold', torch.tensor(stop_threshold, dtype=torch.float32))
+        self.step = nn.Parameter(torch.zeros(1).long(), requires_grad=False)
+        self.stop_threshold = nn.Parameter(torch.tensor(stop_threshold).float32(), requires_grad=False)
 
     @property
     def r(self):

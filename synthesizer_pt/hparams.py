@@ -24,6 +24,7 @@ num_mels = 80
 hop_length = 200                    # For 16000 Hz, 200 = 12.5ms - in line with Tacotron 2 paper
 win_length = 800                   # For 16000 Hz, 800 = 50ms - same reason as above
 fmin = 50
+max_abs_value = 4.                  # Data will be [-max, max]. Gradient explodes if too big, premature convergence if too small.
 min_level_db = -100
 ref_level_db = 20
 bits = 9                            # bit depth of signal
