@@ -1,5 +1,5 @@
 import torch
-from synthesizer_pt.utils import hparams as hp
+from synthesizer_pt import hparams as hp
 from synthesizer_pt.utils.text.symbols import symbols
 from synthesizer_pt.utils.paths import Paths
 from synthesizer_pt.models.tacotron import Tacotron
@@ -12,10 +12,10 @@ from typing import Union, List
 import numpy as np
 import librosa
 
-hp.configure("synthesizer_pt/hparams.py")
 
 class Synthesizer:
     sample_rate = hp.sample_rate
+    hparams = hp
     
     def __init__(self, model_fpath: Path, verbose=True, low_mem=False):
         """
@@ -126,9 +126,9 @@ class Synthesizer:
         Loads and preprocesses an audio file under the same conditions the audio files were used to
         train the synthesizer. 
         """
-        wav = librosa.load(str(fpath), hparams.sample_rate)[0]
-        if hparams.rescale:
-            wav = wav / np.abs(wav).max() * hparams.rescaling_max
+        wav = librosa.load(str(fpath), hp.sample_rate)[0]
+        if hp.tts_rescale:
+            wav = wav / np.abs(wav).max() * hp.tts_rescaling_max
         return wav
 
     @staticmethod
@@ -142,7 +142,7 @@ class Synthesizer:
         else:
             wav = fpath_or_wav
         
-        mel_spectrogram = audio.melspectrogram(wav, hparams).astype(np.float32)
+        mel_spectrogram = audio.melspectrogram(wav, hp).astype(np.float32)
         return mel_spectrogram
     
     @staticmethod
@@ -151,4 +151,4 @@ class Synthesizer:
         Inverts a mel spectrogram using Griffin-Lim. The mel spectrogram is expected to have been built
         with the same parameters present in hparams.py.
         """
-        return audio.inv_mel_spectrogram(mel, hparams)
+        return audio.inv_mel_spectrogram(mel, hp)

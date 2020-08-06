@@ -14,9 +14,6 @@ def save_wav(wav, path, sr):
     #proposed by @dsmiller
     wavfile.write(path, sr, wav.astype(np.int16))
 
-def save_wavenet_wav(wav, path, sr):
-    librosa.output.write_wav(path, wav, sr=sr)
-
 def preemphasis(wav, k, preemphasize=True):
     if preemphasize:
         return signal.lfilter([1, -k], [1], wav)
@@ -26,27 +23,6 @@ def inv_preemphasis(wav, k, inv_preemphasize=True):
     if inv_preemphasize:
         return signal.lfilter([1], [1, -k], wav)
     return wav
-
-#From https://github.com/r9y9/wavenet_vocoder/blob/master/audio.py
-def start_and_end_indices(quantized, silence_threshold=2):
-    for start in range(quantized.size):
-        if abs(quantized[start] - 127) > silence_threshold:
-            break
-    for end in range(quantized.size - 1, 1, -1):
-        if abs(quantized[end] - 127) > silence_threshold:
-            break
-    
-    assert abs(quantized[start] - 127) > silence_threshold
-    assert abs(quantized[end] - 127) > silence_threshold
-    
-    return start, end
-
-def get_hop_size(hparams):
-    hop_size = hparams.hop_size
-    if hop_size is None:
-        assert hparams.frame_shift_ms is not None
-        hop_size = int(hparams.frame_shift_ms / 1000 * hparams.sample_rate)
-    return hop_size
 
 def linearspectrogram(wav, hparams):
     D = _stft(preemphasis(wav, hparams.preemphasis, hparams.preemphasize), hparams)
@@ -73,13 +49,7 @@ def inv_linear_spectrogram(linear_spectrogram, hparams):
     
     S = _db_to_amp(D + hparams.ref_level_db) #Convert back to linear
     
-    if hparams.use_lws:
-        processor = _lws_processor(hparams)
-        D = processor.run_lws(S.astype(np.float64).T ** hparams.power)
-        y = processor.istft(D).astype(np.float32)
-        return inv_preemphasis(y, hparams.preemphasis, hparams.preemphasize)
-    else:
-        return inv_preemphasis(_griffin_lim(S ** hparams.power, hparams), hparams.preemphasis, hparams.preemphasize)
+    return inv_preemphasis(_griffin_lim(S ** hparams.power, hparams), hparams.preemphasis, hparams.preemphasize)
 
 def inv_mel_spectrogram(mel_spectrogram, hparams):
     """Converts mel spectrogram to waveform using librosa"""
@@ -90,17 +60,7 @@ def inv_mel_spectrogram(mel_spectrogram, hparams):
     
     S = _mel_to_linear(_db_to_amp(D + hparams.ref_level_db), hparams)  # Convert back to linear
     
-    if hparams.use_lws:
-        processor = _lws_processor(hparams)
-        D = processor.run_lws(S.astype(np.float64).T ** hparams.power)
-        y = processor.istft(D).astype(np.float32)
-        return inv_preemphasis(y, hparams.preemphasis, hparams.preemphasize)
-    else:
-        return inv_preemphasis(_griffin_lim(S ** hparams.power, hparams), hparams.preemphasis, hparams.preemphasize)
-
-def _lws_processor(hparams):
-    import lws
-    return lws.lws(hparams.n_fft, get_hop_size(hparams), fftsize=hparams.win_size, mode="speech")
+    return inv_preemphasis(_griffin_lim(S ** hparams.power, hparams), hparams.preemphasis, hparams.preemphasize)
 
 def _griffin_lim(S, hparams):
     """librosa implementation of Griffin-Lim
@@ -115,37 +75,11 @@ def _griffin_lim(S, hparams):
     return y
 
 def _stft(y, hparams):
-    if hparams.use_lws:
-        return _lws_processor(hparams).stft(y).T
-    else:
-        return librosa.stft(y=y, n_fft=hparams.n_fft, hop_length=get_hop_size(hparams), win_length=hparams.win_size)
+    return librosa.stft(y=y, n_fft=hparams.n_fft, hop_length=hparams.hop_length, win_length=hparams.win_length)
 
 def _istft(y, hparams):
-    return librosa.istft(y, hop_length=get_hop_size(hparams), win_length=hparams.win_size)
+    return librosa.istft(y, hop_length=hparams.hop_length, win_length=hparams.win_length)
 
-##########################################################
-#Those are only correct when using lws!!! (This was messing with Wavenet quality for a long time!)
-def num_frames(length, fsize, fshift):
-    """Compute number of time frames of spectrogram
-    """
-    pad = (fsize - fshift)
-    if length % fshift == 0:
-        M = (length + pad * 2 - fsize) // fshift + 1
-    else:
-        M = (length + pad * 2 - fsize) // fshift + 2
-    return M
-
-
-def pad_lr(x, fsize, fshift):
-    """Compute left and right padding
-    """
-    M = num_frames(len(x), fsize, fshift)
-    pad = (fsize - fshift)
-    T = len(x) + 2 * pad
-    r = (M - 1) * fshift + fsize - T
-    return pad, pad + r
-##########################################################
-#Librosa correct padding
 def librosa_pad_lr(x, fsize, fshift):
     return 0, (x.shape[0] // fshift + 1) * fshift - x.shape[0]
 
@@ -166,9 +100,9 @@ def _mel_to_linear(mel_spectrogram, hparams):
     return np.maximum(1e-10, np.dot(_inv_mel_basis, mel_spectrogram))
 
 def _build_mel_basis(hparams):
-    assert hparams.fmax <= hparams.sample_rate // 2
+    fmax = hparams.sample_rate // 2
     return librosa.filters.mel(hparams.sample_rate, hparams.n_fft, n_mels=hparams.num_mels,
-                               fmin=hparams.fmin, fmax=hparams.fmax)
+                               fmin=hparams.fmin, fmax=fmax)
 
 def _amp_to_db(x, hparams):
     min_level = np.exp(hparams.min_level_db / 20 * np.log(10))

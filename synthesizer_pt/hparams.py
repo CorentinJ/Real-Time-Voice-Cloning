@@ -97,6 +97,17 @@ tts_eval_interval = 0               # evaluates the model every X steps:
                                     #     if X < 0, never evaluates
 tts_eval_num_samples = 1            # makes this number of samples
 
+# Data Preprocessing
+tts_rescale = True
+tts_rescaling_max = 0.9
+preemphasize=True                  
+preemphasis=0.97                    # filter coefficient to use if preemphasize is True
+
+# Mel visualization and Griffin-Lim
+signal_normalization=True           
+allow_clipping_in_normalization=True# Only relevant if mel_normalization = True
+power = 1.5
+griffin_lim_iters=60
 # ------------------------------------------------------------------------------------------------------------------#
 
 ### SV2TTS
