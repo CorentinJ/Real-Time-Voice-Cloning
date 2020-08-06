@@ -229,7 +229,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                 if hp.tts_eval_interval > 0 and step % hp.tts_eval_interval == 0:
                     for sample_idx in range(hp.tts_eval_num_samples):
                         # At most, generate samples equal to number in the batch
-                        if sample_idx + 1 < len(x):
+                        if sample_idx + 1 <= len(x):
                             eval_model(attention=np_now(attention[sample_idx][:, :160]),
                                        mel_prediction=np_now(m2_hat[sample_idx]).T,
                                        target_spectrogram=np_now(m[sample_idx]).T,
@@ -247,7 +247,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
             if hp.tts_eval_interval == 0:
                 for sample_idx in range(hp.tts_eval_num_samples):
                     # At most, generate samples equal to number in the batch
-                    if sample_idx + 1 < len(x):
+                    if sample_idx + 1 <= len(x):
                         eval_model(attention=np_now(attention[sample_idx][:, :160]),
                                    mel_prediction=np_now(m2_hat[sample_idx]).T,
                                    target_spectrogram=np_now(m[sample_idx]).T,
