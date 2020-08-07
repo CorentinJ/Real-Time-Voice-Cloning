@@ -21,7 +21,7 @@ SV2TTS is a three-stage deep learning framework that allows to create a numerica
 ## News
 **13/11/19**: I'm now working full time and I will not maintain this repo anymore. To anyone who reads this:
 - **If you just want to clone your voice (and not someone else's):** I recommend our free plan on [Resemble.AI](https://www.resemble.ai/). Firstly because you will get a better voice quality and less prosody errors, and secondly because it will not require a complex setup like this repo does.
-- **If this is not your case:** proceed with this repository, but be warned: not only is the environment is a mess to setup, but you might end up being disappointed by the results. If you're planning to work on a serious project, my strong advice: go to another repo. Go [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/issues/364) for more info.
+- **If this is not your case:** proceed with this repository, but be warned: not only is the environment a mess to setup, but you might end up being disappointed by the results. If you're planning to work on a serious project, my strong advice: find another TTS repo. Go [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/issues/364) for more info.
 
 **20/08/19:** I'm working on [resemblyzer](https://github.com/resemble-ai/Resemblyzer), an independent package for the voice encoder. You can use your trained encoder models from this repo with it.
 
