@@ -264,7 +264,6 @@ def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
                plot_dir, mel_output_dir, wav_dir, sample_num, loss):
     # Save some results for evaluation
     save_attention(attention, Path(f'{plot_dir}/attention_step_{step}_sample_{sample_num}'))
-    save_spectrogram(mel_prediction.T, Path(f'{plot_dir}/mel_step_{step}_sample_{sample_num}'), 600)
 
     # save predicted mel spectrogram to disk (debug)
     mel_filename = "mel-prediction-step-{}_sample_{}.npy".format(step, sample_num)
