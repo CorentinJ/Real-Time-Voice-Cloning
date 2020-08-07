@@ -106,9 +106,6 @@ class Synthesizer:
                 speaker_embedding = None
 
             m, _, attention = self._model.generate(x, speaker_embedding)
-
-            # Enforce mel spectrogram scaling to be from -1 to 1
-            np.clip(m, -1, 1, out=m)
             specs.append(m)
 
         if self._low_mem:
