@@ -195,7 +195,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
 
                 # Backward pass
                 m1_loss = F.l1_loss(m1_hat, m)
-                m2_loss = F.l1_loss(m2_hat, m)
+                m2_loss = F.l1_loss(m2_hat, audio._mel_to_linear(m))
 
                 loss = m1_loss + m2_loss
 
