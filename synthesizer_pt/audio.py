@@ -87,11 +87,11 @@ def librosa_pad_lr(x, fsize, fshift):
 _mel_basis = None
 _inv_mel_basis = None
 
-def _linear_to_mel(spectogram, hparams):
+def _linear_to_mel(spectrogram, hparams):
     global _mel_basis
     if _mel_basis is None:
         _mel_basis = _build_mel_basis(hparams)
-    return np.dot(_mel_basis, spectogram)
+    return np.dot(_mel_basis, spectrogram)
 
 def _mel_to_linear(mel_spectrogram, hparams):
     global _inv_mel_basis
