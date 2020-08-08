@@ -8,13 +8,11 @@ num_mels = 80
 hop_length = 200                    # For 16000 Hz, 200 = 12.5ms - in line with Tacotron 2 paper
 win_length = 800                    # For 16000 Hz, 800 = 50ms - same reason as above
 fmin = 50
-symmetric_mels = True               # If true, data is rescaled to be [-max, max]. If false, [0, max].
 max_abs_value = 4.                  # Gradient explodes if too big, premature convergence if too small.
 min_level_db = -100
 ref_level_db = 20
 bits = 9                            # bit depth of signal
 mu_law = True                       # Recommended to suppress noise if using raw bits in hp.voc_mode below
-peak_norm = False                   # Normalise to the peak of each wav file
 
 
 # TACOTRON/TTS -----------------------------------------------------------------------------------------------------#
@@ -42,8 +40,6 @@ tts_schedule = [(7,  1e-3,  10_000,  20),   # progressive training schedule
                 (2,  1e-4, 180_000,  10),
                 (2,  1e-4, 350_000,  8)]
 
-tts_max_mel_len = 900               # if you have a couple of extremely long spectrograms you might want to use this
-tts_bin_lengths = True              # bins the spectrogram lengths before sampling in data loader - speeds up training
 tts_clip_grad_norm = 1.0            # clips the gradient norm to prevent explosion - set to None if not needed
 tts_eval_interval = 2000            # evaluates the model every X steps:
                                     #     if X = 0, evaluates every epoch
@@ -51,8 +47,9 @@ tts_eval_interval = 2000            # evaluates the model every X steps:
 tts_eval_num_samples = 1            # makes this number of samples
 
 # Data Preprocessing
-tts_rescale = True
-tts_rescaling_max = 0.9
+max_mel_frames = 900                # if you have a couple of extremely long spectrograms you might want to use this
+rescale = True
+rescaling_max = 0.9
 preemphasize=True                  
 preemphasis=0.97                    # filter coefficient to use if preemphasize is True
 
@@ -64,6 +61,6 @@ griffin_lim_iters=60
 # ------------------------------------------------------------------------------------------------------------------#
 
 ### SV2TTS
-tts_speaker_embedding_size = 256    # embedding dimension for the speaker embedding
-tts_silence_min_duration_split=0.4  # Duration in seconds of a silence for an utterance to be split
-tts_utterance_min_duration=1.6      # Duration in seconds below which utterances are discarded
+speaker_embedding_size = 256    # embedding dimension for the speaker embedding
+silence_min_duration_split=0.4  # Duration in seconds of a silence for an utterance to be split
+utterance_min_duration=1.6      # Duration in seconds below which utterances are discarded

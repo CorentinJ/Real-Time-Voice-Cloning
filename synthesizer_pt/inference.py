@@ -122,8 +122,8 @@ class Synthesizer:
         train the synthesizer. 
         """
         wav = librosa.load(str(fpath), hp.sample_rate)[0]
-        if hp.tts_rescale:
-            wav = wav / np.abs(wav).max() * hp.tts_rescaling_max
+        if hp.rescale:
+            wav = wav / np.abs(wav).max() * hp.rescaling_max
         return wav
 
     @staticmethod

@@ -5,8 +5,9 @@ from torch.utils.data import DataLoader
 from synthesizer_pt import audio
 import synthesizer_pt.hparams as hp
 from synthesizer_pt.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
-from synthesizer_pt.utils import ValueWindow, plot, data_parallel_workaround
+from synthesizer_pt.utils import ValueWindow, data_parallel_workaround
 from synthesizer_pt.utils.display import *
+from synthesizer_pt.utils.plot import plot_spectrogram
 from synthesizer_pt.utils.symbols import symbols
 from synthesizer_pt.utils.text import sequence_to_text
 from synthesizer_pt.models.tacotron import Tacotron
@@ -96,7 +97,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                      num_highways=hp.tts_num_highways,
                      dropout=hp.tts_dropout,
                      stop_threshold=hp.tts_stop_threshold,
-                     speaker_embedding_size=hp.tts_speaker_embedding_size).to(device)
+                     speaker_embedding_size=hp.speaker_embedding_size).to(device)
 
     # Initialize the optimizer
     optimizer = optim.Adam(model.parameters())
@@ -207,7 +208,10 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                     # doesn't produce artifacts
                     model.save(weights_fpath, optimizer)
 
-                if hp.tts_eval_interval > 0 and step % hp.tts_eval_interval == 0:
+                # Evaluate model to generate samples
+                epoch_eval = hp.tts_eval_interval == 0 and i == total_iters  # If epoch is done
+                step_eval = hp.tts_eval_interval > 0 and step % hp.tts_eval_interval == 0  # Every N steps
+                if epoch_eval or step_eval:
                     for sample_idx in range(hp.tts_eval_num_samples):
                         # At most, generate samples equal to number in the batch
                         if sample_idx + 1 <= len(x):
@@ -225,20 +229,6 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                 msg = f'| Epoch: {epoch}/{epochs} ({i}/{steps_per_epoch}) | Loss: {loss_window.average:#.4} | {1./time_window.average:#.2} steps/s | Step: {k}k | '
                 stream(msg)
 
-            if hp.tts_eval_interval == 0:
-                for sample_idx in range(hp.tts_eval_num_samples):
-                    # At most, generate samples equal to number in the batch
-                    if sample_idx + 1 <= len(x):
-                        eval_model(attention=np_now(attention[sample_idx][:, :160]),
-                                   mel_prediction=np_now(m2_hat[sample_idx]).T,
-                                   target_spectrogram=np_now(m[sample_idx]).T,
-                                   input_seq=np_now(x[sample_idx]),
-                                   step=step,
-                                   plot_dir=plot_dir,
-                                   mel_output_dir=mel_output_dir,
-                                   wav_dir=wav_dir,
-                                   sample_num=sample_idx+1,
-                                   loss=loss)
             print("")
 
 def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
@@ -258,12 +248,12 @@ def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
                    sr=hp.sample_rate)
 
     # save real and predicted mel-spectrogram plot to disk (control purposes)
-    plot.plot_spectrogram(mel_prediction, os.path.join(plot_dir,
-                                                       "step-{}-mel-spectrogram_sample_{}.png".format(
-                                                           step, sample_num)),
-                          title="{}, {}, step={}, loss={:.5f}".format("Tacotron",
-                                                                      time_string(),
-                                                                      step, loss),
-                          target_spectrogram=target_spectrogram,
-                          max_len=target_spectrogram.size // hp.num_mels)
+    plot_spectrogram(mel_prediction, os.path.join(plot_dir,
+                                                  "step-{}-mel-spectrogram_sample_{}.png".format(
+                                                      step, sample_num)),
+                     title="{}, {}, step={}, loss={:.5f}".format("Tacotron",
+                                                                 time_string(),
+                                                                  step, loss),
+                     target_spectrogram=target_spectrogram,
+                     max_len=target_spectrogram.size // hp.num_mels)
     print("Input at step {}: {}".format(step, sequence_to_text(input_seq)))

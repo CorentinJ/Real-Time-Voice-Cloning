@@ -258,9 +258,9 @@ def get_hparams_as_tuple():
     # Returns hparams as a NamedTuple to support multiprocessing, since modules can't be pickled
     from synthesizer_pt import hparams
     return hyperparameters(sample_rate = hparams.sample_rate,
-                           rescale = hparams.tts_rescale,
-                           rescaling_max = hparams.tts_rescaling_max,
-                           utterance_min_duration = hparams.tts_utterance_min_duration,
+                           rescale = hparams.rescale,
+                           rescaling_max = hparams.rescaling_max,
+                           utterance_min_duration = hparams.utterance_min_duration,
                            preemphasis = hparams.preemphasis,
                            preemphasize = hparams.preemphasize,
                            n_fft = hparams.n_fft,
@@ -272,8 +272,8 @@ def get_hparams_as_tuple():
                            ref_level_db = hparams.ref_level_db,
                            signal_normalization = hparams.signal_normalization,
                            max_abs_value = hparams.max_abs_value,
-                           max_mel_frames = hparams.tts_max_mel_len,
-                           silence_min_duration_split = hparams.tts_silence_min_duration_split,
+                           max_mel_frames = hparams.max_mel_frames,
+                           silence_min_duration_split = hparams.silence_min_duration_split,
                            )
 
 
