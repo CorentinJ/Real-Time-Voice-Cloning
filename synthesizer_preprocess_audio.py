@@ -1,9 +1,9 @@
-from synthesizer.preprocess import preprocess_dataset
-from synthesizer.hparams import hparams
+from synthesizer_pt.preprocess import preprocess_dataset
+from synthesizer_pt import hparams
 from utils.argutils import print_args
 from pathlib import Path
 import argparse
-
+from dataclasses import dataclass
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -22,8 +22,6 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--skip_existing", action="store_true", help=\
         "Whether to overwrite existing files with the same name. Useful if the preprocessing was "
         "interrupted.")
-    parser.add_argument("--hparams", type=str, default="", help=\
-        "Hyperparameter overrides as a comma-separated list of name-value pairs")
     parser.add_argument("--no_trim", action="store_true", help=\
         "Preprocess audio without trimming silences (not recommended).")
     parser.add_argument("--no_alignments", action="store_true", help=\
@@ -55,5 +53,4 @@ if __name__ == "__main__":
 
     # Preprocess the dataset
     print_args(args, parser)
-    args.hparams = hparams.parse(args.hparams)
     preprocess_dataset(**vars(args))
