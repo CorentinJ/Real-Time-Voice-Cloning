@@ -1,5 +1,5 @@
-import pathos
-from synthesizer_pt import audio, hparams
+from multiprocessing.pool import Pool 
+from synthesizer_pt import audio
 from functools import partial
 from itertools import chain
 from encoder import inference as encoder
@@ -11,7 +11,7 @@ import librosa
 
 
 def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int,
-                           skip_existing: bool, no_alignments: bool,
+                           skip_existing: bool, hparams, no_alignments: bool,
                            datasets_name: str, subfolders: str):
     # Gather the input directories
     dataset_root = datasets_root.joinpath(datasets_name)
@@ -31,7 +31,6 @@ def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int,
     speaker_dirs = list(chain.from_iterable(input_dir.glob("*") for input_dir in input_dirs))
     func = partial(preprocess_speaker, out_dir=out_dir, skip_existing=skip_existing, 
                    hparams=hparams, no_alignments=no_alignments)
-    Pool = pathos.multiprocessing.ProcessPool
     job = Pool(n_processes).imap(func, speaker_dirs)
     for speaker_metadata in tqdm(job, datasets_name, len(speaker_dirs), unit="speakers"):
         for metadatum in speaker_metadata:
@@ -65,8 +64,8 @@ def preprocess_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hparams,
                 for wav_fpath in wav_fpaths:
                     # Load the audio waveform
                     wav, _ = librosa.load(str(wav_fpath), hparams.sample_rate)
-                    if hparams.tts_rescale:
-                        wav = wav / np.abs(wav).max() * hparams.tts_rescaling_max
+                    if hparams.rescale:
+                        wav = wav / np.abs(wav).max() * hparams.rescaling_max
 
                     # Get the corresponding text
                     # Check for .txt (for compatibility with other datasets)
@@ -114,8 +113,8 @@ def preprocess_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hparams,
 def split_on_silences(wav_fpath, words, end_times, hparams):
     # Load the audio waveform
     wav, _ = librosa.load(str(wav_fpath), hparams.sample_rate)
-    if hparams.tts_rescale:
-        wav = wav / np.abs(wav).max() * hparams.tts_rescaling_max
+    if hparams.rescale:
+        wav = wav / np.abs(wav).max() * hparams.rescaling_max
     
     words = np.array(words)
     start_times = np.array([0.0] + end_times[:-1])
@@ -124,7 +123,7 @@ def split_on_silences(wav_fpath, words, end_times, hparams):
     assert words[0] == "" and words[-1] == ""
     
     # Find pauses that are too long
-    mask = (words == "") & (end_times - start_times >= hparams.tts.silence_min_duration_split)
+    mask = (words == "") & (end_times - start_times >= hparams.silence_min_duration_split)
     mask[0] = mask[-1] = True
     breaks = np.where(mask)[0]
 
@@ -141,14 +140,14 @@ def split_on_silences(wav_fpath, words, end_times, hparams):
     segment_durations = [start_times[end] - end_times[start] for start, end in segments]
     i = 0
     while i < len(segments) and len(segments) > 1:
-        if segment_durations[i] < hparams.tts_utterance_min_duration:
+        if segment_durations[i] < hparams.utterance_min_duration:
             # See if the segment can be re-attached with the right or the left segment
             left_duration = float("inf") if i == 0 else segment_durations[i - 1]
             right_duration = float("inf") if i == len(segments) - 1 else segment_durations[i + 1]
             joined_duration = segment_durations[i] + min(left_duration, right_duration)
 
             # Do not re-attach if it causes the joined utterance to be too long
-            if joined_duration > hparams.hop_size * hparams.tts_max_mel_len / hparams.sample_rate:
+            if joined_duration > hparams.hop_length * hparams.max_mel_frames / hparams.sample_rate:
                 i += 1
                 continue
 
@@ -205,7 +204,7 @@ def process_utterance(wav: np.ndarray, text: str, out_dir: Path, basename: str,
         return None
     
     # Skip utterances that are too short
-    if len(wav) < hparams.tts_utterance_min_duration * hparams.sample_rate:
+    if len(wav) < hparams.utterance_min_duration * hparams.sample_rate:
         return None
     
     # Compute the mel spectrogram
@@ -213,7 +212,7 @@ def process_utterance(wav: np.ndarray, text: str, out_dir: Path, basename: str,
     mel_frames = mel_spectrogram.shape[1]
     
     # Skip utterances that are too long
-    if mel_frames > hparams.tts_max_mel_len:
+    if mel_frames > hparams.max_mel_frames:
         return None
     
     # Write the spectrogram, embed and audio to disk
@@ -251,7 +250,6 @@ def create_embeddings(synthesizer_root: Path, encoder_model_fpath: Path, n_proce
     # TODO: improve on the multiprocessing, it's terrible. Disk I/O is the bottleneck here.
     # Embed the utterances in separate threads
     func = partial(embed_utterance, encoder_model_fpath=encoder_model_fpath)
-    Pool = pathos.multiprocessing.ProcessPool
     job = Pool(n_processes).imap(func, fpaths)
     list(tqdm(job, "Embedding", len(fpaths), unit="utterances"))
     

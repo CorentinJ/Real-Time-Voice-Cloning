@@ -112,29 +112,14 @@ def _db_to_amp(x):
     return np.power(10.0, (x) * 0.05)
 
 def _normalize(S, hparams):
-    if hparams.allow_clipping_in_normalization:
-        if hparams.symmetric_mels:
-            return np.clip((2 * hparams.max_abs_value) * ((S - hparams.min_level_db) / (-hparams.min_level_db)) - hparams.max_abs_value,
-                           -hparams.max_abs_value, hparams.max_abs_value)
-        else:
-            return np.clip(hparams.max_abs_value * ((S - hparams.min_level_db) / (-hparams.min_level_db)), 0, hparams.max_abs_value)
-    
-    assert S.max() <= 0 and S.min() - hparams.min_level_db >= 0
-    if hparams.symmetric_mels:
-        return (2 * hparams.max_abs_value) * ((S - hparams.min_level_db) / (-hparams.min_level_db)) - hparams.max_abs_value
-    else:
-        return hparams.max_abs_value * ((S - hparams.min_level_db) / (-hparams.min_level_db))
+    # For simplicity we have assumed the user allows clipping in normalization
+    # and is using symmetric mels. To handle other cases consult an older version of the code.
+    return np.clip((2 * hparams.max_abs_value) * ((S - hparams.min_level_db) / (-hparams.min_level_db)) - hparams.max_abs_value,
+                   -hparams.max_abs_value, hparams.max_abs_value)
 
 def _denormalize(D, hparams):
-    if hparams.allow_clipping_in_normalization:
-        if hparams.symmetric_mels:
-            return (((np.clip(D, -hparams.max_abs_value,
-                              hparams.max_abs_value) + hparams.max_abs_value) * -hparams.min_level_db / (2 * hparams.max_abs_value))
-                    + hparams.min_level_db)
-        else:
-            return ((np.clip(D, 0, hparams.max_abs_value) * -hparams.min_level_db / hparams.max_abs_value) + hparams.min_level_db)
-    
-    if hparams.symmetric_mels:
-        return (((D + hparams.max_abs_value) * -hparams.min_level_db / (2 * hparams.max_abs_value)) + hparams.min_level_db)
-    else:
-        return ((D * -hparams.min_level_db / hparams.max_abs_value) + hparams.min_level_db)
+    # For simplicity we have assumed the user allows clipping in normalization
+    # and is using symmetric mels. To handle other cases consult an older version of the code.
+    return (((np.clip(D, -hparams.max_abs_value,
+                      hparams.max_abs_value) + hparams.max_abs_value) * -hparams.min_level_db / (2 * hparams.max_abs_value))
+            + hparams.min_level_db)
