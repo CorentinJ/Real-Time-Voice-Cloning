@@ -17,7 +17,6 @@ from synthesizer_pt.utils.checkpoints import save_checkpoint, restore_checkpoint
 import synthesizer_pt.hparams as hp
 from synthesizer_pt.utils.text import sequence_to_text
 from synthesizer_pt.utils import ValueWindow, plot
-from synthesizer_pt.utils.dsp import reconstruct_waveform
 from synthesizer_pt import audio
 from synthesizer_pt.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
 from torch.utils.data import DataLoader
