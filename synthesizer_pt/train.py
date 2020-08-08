@@ -1,31 +1,21 @@
 import torch
 from torch import optim
 import torch.nn.functional as F
+from torch.utils.data import DataLoader
+from synthesizer_pt import audio
+import synthesizer_pt.hparams as hp
+from synthesizer_pt.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
+from synthesizer_pt.utils import ValueWindow, plot, data_parallel_workaround
 from synthesizer_pt.utils.display import *
-from synthesizer_pt.utils.dataset import get_tts_datasets
-from synthesizer_pt.utils.text.symbols import symbols
-from synthesizer_pt.utils.paths import Paths
+from synthesizer_pt.utils.symbols import symbols
+from synthesizer_pt.utils.text import sequence_to_text
 from synthesizer_pt.models.tacotron import Tacotron
-import argparse
-from synthesizer_pt.utils import data_parallel_workaround
+from datetime import datetime
 import os
 from pathlib import Path
 import time
 import numpy as np
 import sys
-from synthesizer_pt.utils.checkpoints import save_checkpoint, restore_checkpoint
-import synthesizer_pt.hparams as hp
-from synthesizer_pt.utils.text import sequence_to_text
-from synthesizer_pt.utils import ValueWindow, plot
-from synthesizer_pt import audio
-from synthesizer_pt.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
-from torch.utils.data import DataLoader
-from datetime import datetime
-from tqdm import tqdm
-import numpy as np
-import traceback
-import time
-import os
 
 
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
@@ -173,12 +163,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
         steps_per_epoch = np.ceil(total_iters / batch_size).astype(np.int32)
 
         for epoch in range(1, epochs+1):
-
-            start = time.time()
-            running_loss = 0
-
-            # Perform 1 epoch
             for i, (x, m, e) in enumerate(data_loader, 1):
+                start_time = time.time()
 
                 #x = text, m = mel, e = embed
                 x, m, e = x.to(device), m.to(device), e.to(device)
@@ -206,10 +192,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
 
                 optimizer.step()
 
-                running_loss += loss.item()
-                avg_loss = running_loss / i
-
-                speed = i / (time.time() - start)
+                time_window.append(time.time() - start_time)
+                loss_window.append(loss.item())
 
                 step = model.get_step()
                 k = step // 1000
@@ -238,7 +222,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                                        sample_num=sample_idx+1,
                                        loss=loss)
 
-                msg = f'| Epoch: {epoch}/{epochs} ({i}/{steps_per_epoch}) | Loss: {avg_loss:#.4} | {speed:#.2} steps/s | Step: {k}k | '
+                msg = f'| Epoch: {epoch}/{epochs} ({i}/{steps_per_epoch}) | Loss: {loss_window.average:#.4} | {1./time_window.average:#.2} steps/s | Step: {k}k | '
                 stream(msg)
 
             if hp.tts_eval_interval == 0:
