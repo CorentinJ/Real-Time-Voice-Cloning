@@ -1,10 +1,9 @@
+import torch
 from torch.utils.data import Dataset
+import numpy as np
 from pathlib import Path
-from vocoder import audio
 from synthesizer_pt import hparams as hp
 from synthesizer_pt.utils.text import text_to_sequence
-import numpy as np
-import torch
 
 
 class SynthesizerDataset(Dataset):
@@ -30,13 +29,6 @@ class SynthesizerDataset(Dataset):
             index = index[0]
 
         mel_path, embed_path = self.samples_fpaths[index]
-
-        # For debugging
-        #print(index)
-        #print(mel_path)
-        #print(embed_path)
-        
-        # Load the mel spectrogram (range adjusted to [-1, 1] during preprocessing)
         mel = np.load(mel_path).T.astype(np.float32)
         
         # Load the embed
@@ -45,11 +37,6 @@ class SynthesizerDataset(Dataset):
         # Get the text and clean it
         text = text_to_sequence(self.samples_texts[index], hp.tts_cleaner_names)
         
-        # For debugging
-        #from synthesizer_pt.utils.text import symbols
-        #print([symbols[i] for i in text])
-        #print(text)
-
         # Convert the list returned by text_to_sequence to a numpy array
         text = np.asarray(text).astype(np.int32)
 
@@ -60,7 +47,6 @@ class SynthesizerDataset(Dataset):
 
 
 def collate_synthesizer(batch, r):
-
     # Text
     x_lens = [len(x[0]) for x in batch]
     max_x_len = max(x_lens)
@@ -75,11 +61,8 @@ def collate_synthesizer(batch, r):
         max_spec_len += r - max_spec_len % r 
 
     # WaveRNN mel spectrograms are normalized to [0, 1] so zero padding adds silence
-    # SV2TTS: For symmetric mels, pad with -1*max_abs_value instead as that represents silence
-    if hp.symmetric_mels:
-        mel_pad_value = -1 * hp.max_abs_value
-    else:
-        mel_pad_value = 0 
+    # SV2TTS uses symmetric mels, where -1*max_abs_value is silence.
+    mel_pad_value = -1 * hp.max_abs_value
     mel = [pad2d(x[1], max_spec_len, pad_value=mel_pad_value) for x in batch]
     mel = np.stack(mel)
 
@@ -95,7 +78,7 @@ def collate_synthesizer(batch, r):
     return chars, mel, embeds
 
 def pad1d(x, max_len, pad_value=0):
-    return np.pad(x, (0, max_len - len(x)), mode='constant', constant_values=pad_value)
+    return np.pad(x, (0, max_len - len(x)), mode="constant", constant_values=pad_value)
 
 def pad2d(x, max_len, pad_value=0):
-    return np.pad(x, ((0, 0), (0, max_len - x.shape[-1])), mode='constant', constant_values=pad_value)
+    return np.pad(x, ((0, 0), (0, max_len - x.shape[-1])), mode="constant", constant_values=pad_value)
