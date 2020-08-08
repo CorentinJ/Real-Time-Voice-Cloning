@@ -8,6 +8,7 @@ from utils import logmmse
 from tqdm import tqdm
 import numpy as np
 import librosa
+from typing import NamedTuple
 
 
 def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int,
@@ -253,3 +254,45 @@ def create_embeddings(synthesizer_root: Path, encoder_model_fpath: Path, n_proce
     job = Pool(n_processes).imap(func, fpaths)
     list(tqdm(job, "Embedding", len(fpaths), unit="utterances"))
     
+def get_hparams_as_tuple():
+    # Returns hparams as a NamedTuple to support multiprocessing, since modules can't be pickled
+    from synthesizer_pt import hparams
+    return hyperparameters(sample_rate = hparams.sample_rate,
+                           rescale = hparams.tts_rescale,
+                           rescaling_max = hparams.tts_rescaling_max,
+                           utterance_min_duration = hparams.tts_utterance_min_duration,
+                           preemphasis = hparams.preemphasis,
+                           preemphasize = hparams.preemphasize,
+                           n_fft = hparams.n_fft,
+                           hop_length = hparams.hop_length,
+                           win_length = hparams.win_length,
+                           num_mels = hparams.num_mels,
+                           fmin = hparams.fmin,
+                           min_level_db = hparams.min_level_db,
+                           ref_level_db = hparams.ref_level_db,
+                           signal_normalization = hparams.signal_normalization,
+                           max_abs_value = hparams.max_abs_value,
+                           max_mel_frames = hparams.tts_max_mel_len,
+                           silence_min_duration_split = hparams.tts_silence_min_duration_split,
+                           )
+
+
+class hyperparameters(NamedTuple):
+    # This is a workaround because multiprocessing cannot pickle the "hparams" module
+    fmin: float
+    hop_length: int
+    max_abs_value: float
+    max_mel_frames: int
+    min_level_db: float
+    num_mels: int
+    n_fft: int
+    preemphasis: float
+    preemphasize: bool
+    ref_level_db: float
+    rescale: bool
+    rescaling_max: float
+    sample_rate: int
+    signal_normalization: bool
+    silence_min_duration_split: float
+    utterance_min_duration: float
+    win_length: int
