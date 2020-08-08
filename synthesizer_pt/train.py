@@ -18,7 +18,7 @@ import synthesizer_pt.hparams as hp
 from synthesizer_pt.utils.text import sequence_to_text
 from synthesizer_pt.utils import ValueWindow, plot
 from synthesizer_pt.utils.dsp import reconstruct_waveform
-from synthesizer_pt import infolog, audio
+from synthesizer_pt import audio
 from synthesizer_pt.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
 from torch.utils.data import DataLoader
 from datetime import datetime
@@ -27,8 +27,6 @@ import numpy as np
 import traceback
 import time
 import os
-
-log = infolog.log
 
 
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
@@ -60,9 +58,9 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
     checkpoint_fpath = os.path.join(save_dir, "pretrained.pt")
     metadat_fpath = os.path.join(syn_dir, "train.txt")
     
-    log("Checkpoint path: {}".format(checkpoint_fpath))
-    log("Loading training data from: {}".format(metadat_fpath))
-    log("Using model: Tacotron")
+    print("Checkpoint path: {}".format(checkpoint_fpath))
+    print("Loading training data from: {}".format(metadat_fpath))
+    print("Using model: Tacotron")
     
     # Embeddings metadata
     char_embedding_meta = os.path.join(meta_folder, "CharacterEmbeddings.tsv")
@@ -285,4 +283,4 @@ def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
                                                                       step, loss),
                           target_spectrogram=target_spectrogram,
                           max_len=target_spectrogram.size // hp.num_mels)
-    log("Input at step {}: {}".format(step, sequence_to_text(input_seq)))
+    print("Input at step {}: {}".format(step, sequence_to_text(input_seq)))
