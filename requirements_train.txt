@@ -1,5 +1,5 @@
-# This is a list of recommended packages that also enables GPU support.
+# This is a list of recommended packages for training.
 # You will also need the packages listed in requirements.txt
 
-tensorflow-gpu==1.15   # Enables GPU support for synthesizer
+visdom                 # Used to visualize encoder training progress
 webrtcvad              # Better noise reduction when processing audio files

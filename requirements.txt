@@ -1,5 +1,4 @@
 umap-learn
-visdom
 librosa>=0.5.1
 matplotlib>=2.0.2
 numpy>=1.14.0
