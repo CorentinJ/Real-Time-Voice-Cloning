@@ -257,23 +257,23 @@ def create_embeddings(synthesizer_root: Path, encoder_model_fpath: Path, n_proce
 def get_hparams_as_tuple():
     # Returns hparams as a NamedTuple to support multiprocessing, since modules can't be pickled
     from synthesizer_pt import hparams
-    return hyperparameters(sample_rate = hparams.sample_rate,
-                           rescale = hparams.rescale,
-                           rescaling_max = hparams.rescaling_max,
-                           utterance_min_duration = hparams.utterance_min_duration,
-                           preemphasis = hparams.preemphasis,
-                           preemphasize = hparams.preemphasize,
-                           n_fft = hparams.n_fft,
+    return hyperparameters(fmin = hparams.fmin,
                            hop_length = hparams.hop_length,
-                           win_length = hparams.win_length,
-                           num_mels = hparams.num_mels,
-                           fmin = hparams.fmin,
-                           min_level_db = hparams.min_level_db,
-                           ref_level_db = hparams.ref_level_db,
-                           signal_normalization = hparams.signal_normalization,
                            max_abs_value = hparams.max_abs_value,
                            max_mel_frames = hparams.max_mel_frames,
+                           min_level_db = hparams.min_level_db,
+                           num_mels = hparams.num_mels,
+                           n_fft = hparams.n_fft,
+                           preemphasis = hparams.preemphasis,
+                           preemphasize = hparams.preemphasize,
+                           ref_level_db = hparams.ref_level_db,
+                           rescale = hparams.rescale,
+                           rescaling_max = hparams.rescaling_max,
+                           sample_rate = hparams.sample_rate,
+                           signal_normalization = hparams.signal_normalization,
                            silence_min_duration_split = hparams.silence_min_duration_split,
+                           utterance_min_duration = hparams.utterance_min_duration,
+                           win_length = hparams.win_length,
                            )
 
 
