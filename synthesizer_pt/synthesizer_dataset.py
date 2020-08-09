@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import Dataset
 import numpy as np
 from pathlib import Path
-from synthesizer_pt import hparams as hp
+from synthesizer_pt import hparams
 from synthesizer_pt.utils.text import text_to_sequence
 
 
@@ -35,7 +35,7 @@ class SynthesizerDataset(Dataset):
         embed = np.load(embed_path)
 
         # Get the text and clean it
-        text = text_to_sequence(self.samples_texts[index], hp.tts_cleaner_names)
+        text = text_to_sequence(self.samples_texts[index], hparams.tts_cleaner_names)
         
         # Convert the list returned by text_to_sequence to a numpy array
         text = np.asarray(text).astype(np.int32)
@@ -62,7 +62,7 @@ def collate_synthesizer(batch, r):
 
     # WaveRNN mel spectrograms are normalized to [0, 1] so zero padding adds silence
     # SV2TTS uses symmetric mels, where -1*max_abs_value is silence.
-    mel_pad_value = -1 * hp.max_abs_value
+    mel_pad_value = -1 * hparams.max_abs_value
     mel = [pad2d(x[1], max_spec_len, pad_value=mel_pad_value) for x in batch]
     mel = np.stack(mel)
 

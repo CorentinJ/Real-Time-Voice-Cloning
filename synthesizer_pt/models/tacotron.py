@@ -45,9 +45,9 @@ class Encoder(nn.Module):
 
     def add_speaker_embedding(self, x, speaker_embedding):
         # SV2TTS
-        # The input x is the encoder output and is a 3D tensor with size (batch_size, num_chars, hp.tts_embed_dims)
-        # When training, speaker_embedding is also a 2D tensor with size (batch_size, hp.speaker_embedding_size)
-        #     (for inference, speaker_embedding is a 1D tensor with size (hp.speaker_embedding_size))
+        # The input x is the encoder output and is a 3D tensor with size (batch_size, num_chars, tts_embed_dims)
+        # When training, speaker_embedding is also a 2D tensor with size (batch_size, speaker_embedding_size)
+        #     (for inference, speaker_embedding is a 1D tensor with size (speaker_embedding_size))
         # This concats the speaker embedding for each char in the encoder output
 
         # Save the dimensions as human-readable names
@@ -60,7 +60,7 @@ class Encoder(nn.Module):
             idx = 1
 
         # Start by making a copy of each speaker embedding to match the input text length
-        # The output of this has size (batch_size, num_chars * hp.tts_embed_dims)
+        # The output of this has size (batch_size, num_chars * tts_embed_dims)
         speaker_embedding_size = speaker_embedding.size()[idx]
         e = speaker_embedding.repeat_interleave(num_chars, dim=idx)
 

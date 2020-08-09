@@ -2,8 +2,7 @@ import torch
 from torch import optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
-from synthesizer_pt import audio
-import synthesizer_pt.hparams as hp
+from synthesizer_pt import audio, hparams
 from synthesizer_pt.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
 from synthesizer_pt.utils import ValueWindow, data_parallel_workaround
 from synthesizer_pt.utils.display import *
@@ -74,7 +73,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
     if torch.cuda.is_available():
         device = torch.device('cuda')
 
-        for session in hp.tts_schedule:
+        for session in hparams.tts_schedule:
             _, _, _, batch_size = session
             if batch_size % torch.cuda.device_count() != 0:
                 raise ValueError('`batch_size` must be evenly divisible by n_gpus!')
@@ -84,20 +83,20 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
 
     # Instantiate Tacotron Model
     print('\nInitialising Tacotron Model...\n')
-    model = Tacotron(embed_dims=hp.tts_embed_dims,
+    model = Tacotron(embed_dims=hparams.tts_embed_dims,
                      num_chars=len(symbols),
-                     encoder_dims=hp.tts_encoder_dims,
-                     decoder_dims=hp.tts_decoder_dims,
-                     n_mels=hp.num_mels,
-                     fft_bins=hp.num_mels,
-                     postnet_dims=hp.tts_postnet_dims,
-                     encoder_K=hp.tts_encoder_K,
-                     lstm_dims=hp.tts_lstm_dims,
-                     postnet_K=hp.tts_postnet_K,
-                     num_highways=hp.tts_num_highways,
-                     dropout=hp.tts_dropout,
-                     stop_threshold=hp.tts_stop_threshold,
-                     speaker_embedding_size=hp.speaker_embedding_size).to(device)
+                     encoder_dims=hparams.tts_encoder_dims,
+                     decoder_dims=hparams.tts_decoder_dims,
+                     n_mels=hparams.num_mels,
+                     fft_bins=hparams.num_mels,
+                     postnet_dims=hparams.tts_postnet_dims,
+                     encoder_K=hparams.tts_encoder_K,
+                     lstm_dims=hparams.tts_lstm_dims,
+                     postnet_K=hparams.tts_postnet_K,
+                     num_highways=hparams.tts_num_highways,
+                     dropout=hparams.tts_dropout,
+                     stop_threshold=hparams.tts_stop_threshold,
+                     speaker_embedding_size=hparams.speaker_embedding_size).to(device)
 
     # Initialize the optimizer
     optimizer = optim.Adam(model.parameters())
@@ -124,7 +123,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                              shuffle=True,
                              pin_memory=True)
 
-    for i, session in enumerate(hp.tts_schedule):
+    for i, session in enumerate(hparams.tts_schedule):
         current_step = model.get_step()
 
         r, lr, max_step, batch_size = session
@@ -134,7 +133,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
         # Do we need to change to the next session?
         if current_step >= max_step:
             # Are there no further sessions than the current one?
-            if i == len(hp.tts_schedule)-1:
+            if i == len(hparams.tts_schedule)-1:
                 # We have completed training. Breaking is same as continue
                 break
             else:
@@ -186,8 +185,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                 optimizer.zero_grad()
                 loss.backward()
 
-                if hp.tts_clip_grad_norm is not None:
-                    grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), hp.tts_clip_grad_norm)
+                if hparams.tts_clip_grad_norm is not None:
+                    grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), hparams.tts_clip_grad_norm)
                     if np.isnan(grad_norm):
                         print('grad_norm was NaN!')
 
@@ -209,10 +208,10 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                     model.save(weights_fpath, optimizer)
 
                 # Evaluate model to generate samples
-                epoch_eval = hp.tts_eval_interval == 0 and i == total_iters  # If epoch is done
-                step_eval = hp.tts_eval_interval > 0 and step % hp.tts_eval_interval == 0  # Every N steps
+                epoch_eval = hparams.tts_eval_interval == 0 and i == total_iters  # If epoch is done
+                step_eval = hparams.tts_eval_interval > 0 and step % hparams.tts_eval_interval == 0  # Every N steps
                 if epoch_eval or step_eval:
-                    for sample_idx in range(hp.tts_eval_num_samples):
+                    for sample_idx in range(hparams.tts_eval_num_samples):
                         # At most, generate samples equal to number in the batch
                         if sample_idx + 1 <= len(x):
                             eval_model(attention=np_now(attention[sample_idx][:, :160]),
@@ -245,7 +244,7 @@ def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
     wav = audio.inv_mel_spectrogram(mel_prediction.T, hp)
     audio.save_wav(wav,
                    os.path.join(wav_dir, "step-{}-wave-from-mel_sample_{}.wav".format(step, sample_num)),
-                   sr=hp.sample_rate)
+                   sr=hparams.sample_rate)
 
     # save real and predicted mel-spectrogram plot to disk (control purposes)
     plot_spectrogram(mel_prediction, os.path.join(plot_dir,
@@ -255,5 +254,5 @@ def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
                                                                  time_string(),
                                                                   step, loss),
                      target_spectrogram=target_spectrogram,
-                     max_len=target_spectrogram.size // hp.num_mels)
+                     max_len=target_spectrogram.size // hparams.num_mels)
     print("Input at step {}: {}".format(step, sequence_to_text(input_seq)))
