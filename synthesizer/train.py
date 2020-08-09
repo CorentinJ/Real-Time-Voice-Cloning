@@ -152,8 +152,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                                  pin_memory=True)
 
         total_iters = len(dataset) 
-        epochs = training_steps // total_iters + 1
         steps_per_epoch = np.ceil(total_iters / batch_size).astype(np.int32)
+        epochs = np.ceil(training_steps / steps_per_epoch).astype(np.int32)
 
         for epoch in range(1, epochs+1):
             for i, (x, m, e) in enumerate(data_loader, 1):
