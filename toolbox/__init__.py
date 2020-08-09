@@ -1,10 +1,10 @@
-from toolbox.ui import UI
+from toolbox_pt.ui import UI
 from encoder import inference as encoder
-from synthesizer.inference import Synthesizer
+from synthesizer_pt.inference import Synthesizer
 from vocoder import inference as vocoder
 from pathlib import Path
 from time import perf_counter as timer
-from toolbox.utterance import Utterance
+from toolbox_pt.utterance import Utterance
 import numpy as np
 import traceback
 import sys
@@ -195,24 +195,27 @@ class Toolbox:
         self.ui.log("Generating the mel spectrogram...")
         self.ui.set_loading(1)
         
-        # Synthesize the spectrogram
-        if self.synthesizer is None:
-            model_dir = self.ui.current_synthesizer_model_dir
-            checkpoints_dir = model_dir.joinpath("taco_pretrained")
-            self.synthesizer = Synthesizer(checkpoints_dir, low_mem=self.low_mem)
-        if not self.synthesizer.is_loaded():
-            self.ui.log("Loading the synthesizer %s" % self.synthesizer.checkpoint_fpath)
-
-        # Update the synthesizer random seed
+        # Make synthesis determinstic, if user provides a seed
         if self.ui.random_seed_checkbox.isChecked():
-            seed = self.synthesizer.set_seed(int(self.ui.seed_textbox.text()))
+            seed = int(self.ui.seed_textbox.text())
             self.ui.populate_gen_options(seed, self.trim_silences)
         else:
-            seed = self.synthesizer.set_seed(None)
-        
+            seed = None
+
+        if seed is not None:
+            torch.manual_seed(seed)
+
+        # Synthesize the spectrogram
+        if self.synthesizer is None or seed is not None:
+            model_dir = self.ui.current_synthesizer_model_dir
+            checkpoint_fpath = model_dir.joinpath("{}.pt".format(model_dir.name))
+            self.synthesizer = Synthesizer(checkpoint_fpath, low_mem=self.low_mem)
+        if not self.synthesizer.is_loaded():
+            self.ui.log("Loading the synthesizer %s" % checkpoint_fpath)
+
         texts = self.ui.text_prompt.toPlainText().split("\n")
         embed = self.ui.selected_utterance.embed
-        embeds = np.stack([embed] * len(texts))
+        embeds = [embed] * len(texts)
         specs = self.synthesizer.synthesize_spectrograms(texts, embeds)
         breaks = [spec.shape[1] for spec in specs]
         spec = np.concatenate(specs, axis=1)
@@ -227,7 +230,7 @@ class Toolbox:
 
         # Initialize the vocoder model and make it determinstic, if user provides a seed
         if self.ui.random_seed_checkbox.isChecked():
-            seed = self.synthesizer.set_seed(int(self.ui.seed_textbox.text()))
+            seed = int(self.ui.seed_textbox.text())
             self.ui.populate_gen_options(seed, self.trim_silences)
         else:
             seed = None
@@ -255,7 +258,7 @@ class Toolbox:
         self.ui.log(" Done!", "append")
         
         # Add breaks
-        b_ends = np.cumsum(np.array(breaks) * Synthesizer.hparams.hop_size)
+        b_ends = np.cumsum(np.array(breaks) * Synthesizer.hparams.hop_length)
         b_starts = np.concatenate(([0], b_ends[:-1]))
         wavs = [wav[start:end] for start, end, in zip(b_starts, b_ends)]
         breaks = [np.zeros(int(0.15 * Synthesizer.sample_rate))] * len(breaks)
