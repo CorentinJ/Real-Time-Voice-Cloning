@@ -1,5 +1,5 @@
 from pathlib import Path
-from toolbox import Toolbox
+from toolbox_pt import Toolbox
 from utils.argutils import print_args
 from utils.modelutils import check_model_paths
 import argparse
@@ -19,7 +19,7 @@ if __name__ == '__main__':
                         default=None)
     parser.add_argument("-e", "--enc_models_dir", type=Path, default="encoder/saved_models", 
                         help="Directory containing saved encoder models")
-    parser.add_argument("-s", "--syn_models_dir", type=Path, default="synthesizer/saved_models", 
+    parser.add_argument("-s", "--syn_models_dir", type=Path, default="synthesizer_pt/saved_models", 
                         help="Directory containing saved synthesizer models")
     parser.add_argument("-v", "--voc_models_dir", type=Path, default="vocoder/saved_models", 
                         help="Directory containing saved vocoder models")
