@@ -27,28 +27,20 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
          backup_every: int, force_restart:bool, train_steps:int):
 
     log_dir = os.path.join(models_dir, run_id)
-    save_dir = os.path.join(log_dir, "taco_pretrained")
     plot_dir = os.path.join(log_dir, "plots")
     wav_dir = os.path.join(log_dir, "wavs")
     mel_output_dir = os.path.join(log_dir, "mel-spectrograms")
-    eval_dir = os.path.join(log_dir, "eval-dir")
-    eval_plot_dir = os.path.join(eval_dir, "plots")
-    eval_wav_dir = os.path.join(eval_dir, "wavs")
     meta_folder = os.path.join(log_dir, "metas")
-    os.makedirs(save_dir, exist_ok=True)
     os.makedirs(plot_dir, exist_ok=True)
     os.makedirs(wav_dir, exist_ok=True)
     os.makedirs(mel_output_dir, exist_ok=True)
-    os.makedirs(eval_dir, exist_ok=True)
-    os.makedirs(eval_plot_dir, exist_ok=True)
-    os.makedirs(eval_wav_dir, exist_ok=True)
     os.makedirs(meta_folder, exist_ok=True)
     
     checkpoint_fpath = os.path.join(save_dir, "pretrained.pt")
-    metadat_fpath = os.path.join(syn_dir, "train.txt")
+    metadata_fpath = os.path.join(syn_dir, "train.txt")
     
     print("Checkpoint path: {}".format(checkpoint_fpath))
-    print("Loading training data from: {}".format(metadat_fpath))
+    print("Loading training data from: {}".format(metadata_fpath))
     print("Using model: Tacotron")
     
     # Embeddings metadata
@@ -71,18 +63,18 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
     
     # From WaveRNN/train_tacotron.py
     if torch.cuda.is_available():
-        device = torch.device('cuda')
+        device = torch.device("cuda")
 
         for session in hparams.tts_schedule:
             _, _, _, batch_size = session
             if batch_size % torch.cuda.device_count() != 0:
-                raise ValueError('`batch_size` must be evenly divisible by n_gpus!')
+                raise ValueError("`batch_size` must be evenly divisible by n_gpus!")
     else:
-        device = torch.device('cpu')
-    print('Using device:', device)
+        device = torch.device("cpu")
+    print("Using device:", device)
 
     # Instantiate Tacotron Model
-    print('\nInitialising Tacotron Model...\n')
+    print("\nInitialising Tacotron Model...\n")
     model = Tacotron(embed_dims=hparams.tts_embed_dims,
                      num_chars=len(symbols),
                      encoder_dims=hparams.tts_encoder_dims,
@@ -133,7 +125,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
         # Do we need to change to the next session?
         if current_step >= max_step:
             # Are there no further sessions than the current one?
-            if i == len(hparams.tts_schedule)-1:
+            if i == len(hparams.tts_schedule) - 1:
                 # We have completed training. Breaking is same as continue
                 break
             else:
@@ -143,7 +135,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
         model.r = r
 
         # Begin the training
-        simple_table([(f'Steps with r={r}', str(training_steps//1000) + 'k Steps'),
+        simple_table([(f'Steps with r={r}', str(training_steps // 1000) + 'k Steps'),
                       ('Batch Size', batch_size),
                       ('Learning Rate', lr),
                       ('Outputs/Step (r)', model.r)])
@@ -171,7 +163,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
 
                 # Forward pass
                 # Parallelize model onto GPUS using workaround due to python bug
-                if device.type == 'cuda' and torch.cuda.device_count() > 1:
+                if device.type == "cuda" and torch.cuda.device_count() > 1:
                     m1_hat, m2_hat, attention = data_parallel_workaround(model, x, m, e)
                 else:
                     m1_hat, m2_hat, attention = model(x, m, e)
@@ -188,7 +180,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                 if hparams.tts_clip_grad_norm is not None:
                     grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), hparams.tts_clip_grad_norm)
                     if np.isnan(grad_norm):
-                        print('grad_norm was NaN!')
+                        print("grad_norm was NaN!")
 
                 optimizer.step()
 
@@ -222,10 +214,10 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                                        plot_dir=plot_dir,
                                        mel_output_dir=mel_output_dir,
                                        wav_dir=wav_dir,
-                                       sample_num=sample_idx+1,
+                                       sample_num=sample_idx + 1,
                                        loss=loss)
 
-                msg = f'| Epoch: {epoch}/{epochs} ({i}/{steps_per_epoch}) | Loss: {loss_window.average:#.4} | {1./time_window.average:#.2} steps/s | Step: {k}k | '
+                msg = f"| Epoch: {epoch}/{epochs} ({i}/{steps_per_epoch}) | Loss: {loss_window.average:#.4} | {1./time_window.average:#.2} steps/s | Step: {k}k | "
                 stream(msg)
 
             print("")
@@ -233,7 +225,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
 def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
                plot_dir, mel_output_dir, wav_dir, sample_num, loss):
     # Save some results for evaluation
-    save_attention(attention, Path(f'{plot_dir}/attention_step_{step}_sample_{sample_num}'))
+    save_attention(attention, Path(f"{plot_dir}/attention_step_{step}_sample_{sample_num}"))
 
     # save predicted mel spectrogram to disk (debug)
     mel_filename = "mel-prediction-step-{}_sample_{}.npy".format(step, sample_num)
