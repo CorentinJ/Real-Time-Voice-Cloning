@@ -50,16 +50,16 @@ tts_eval_num_samples = 1            # makes this number of samples
 max_mel_frames = 900                # if you have a couple of extremely long spectrograms you might want to use this
 rescale = True
 rescaling_max = 0.9
-preemphasize=True                  
-preemphasis=0.97                    # filter coefficient to use if preemphasize is True
+preemphasize = True                  
+preemphasis = 0.97                  # filter coefficient to use if preemphasize is True
 
 # Mel visualization and Griffin-Lim
-signal_normalization=True           
+signal_normalization = True           
 power = 1.5
-griffin_lim_iters=60
+griffin_lim_iters = 60
 # ------------------------------------------------------------------------------------------------------------------#
 
 ### SV2TTS
 speaker_embedding_size = 256    # embedding dimension for the speaker embedding
-silence_min_duration_split=0.4  # Duration in seconds of a silence for an utterance to be split
-utterance_min_duration=1.6      # Duration in seconds below which utterances are discarded
+silence_min_duration_split = 0.4  # Duration in seconds of a silence for an utterance to be split
+utterance_min_duration = 1.6      # Duration in seconds below which utterances are discarded
