@@ -23,8 +23,6 @@ if __name__ == "__main__":
         "model.")
     parser.add_argument("-f", "--force_restart", action="store_true", help= \
         "Do not load any saved model and restart from scratch.")
-    parser.add_argument("--train_steps", type=int, default=2000000, help= \
-        "Number of steps to train the model before exiting.")
     args = parser.parse_args()
     args.syn_dir = Path(args.syn_dir)
     args.models_dir = Path(args.models_dir)
