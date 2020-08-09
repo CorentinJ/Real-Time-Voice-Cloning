@@ -1,4 +1,4 @@
-import synthesizer_pt.hparams as _syn_hp
+import synthesizer.hparams as _syn_hp
 
 
 # Audio settings------------------------------------------------------------------------
