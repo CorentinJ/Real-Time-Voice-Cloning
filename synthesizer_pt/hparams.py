@@ -55,7 +55,6 @@ preemphasis=0.97                    # filter coefficient to use if preemphasize 
 
 # Mel visualization and Griffin-Lim
 signal_normalization=True           
-allow_clipping_in_normalization=True# Only relevant if signal_normalization = True
 power = 1.5
 griffin_lim_iters=60
 # ------------------------------------------------------------------------------------------------------------------#
