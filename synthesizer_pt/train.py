@@ -24,7 +24,7 @@ def time_string():
     return datetime.now().strftime("%Y-%m-%d %H:%M")
 
 def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
-         backup_every: int, force_restart:bool, train_steps:int):
+         backup_every: int, force_restart:bool):
 
     log_dir = os.path.join(models_dir, run_id)
     plot_dir = os.path.join(log_dir, "plots")
@@ -126,7 +126,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
         if current_step >= max_step:
             # Are there no further sessions than the current one?
             if i == len(hparams.tts_schedule) - 1:
-                # We have completed training. Breaking is same as continue
+                # We have completed training. Save the model and exit
+                model.save(weights_fpath, optimizer)
                 break
             else:
                 # There is a following session, go to it
@@ -151,7 +152,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                                  pin_memory=True)
 
         total_iters = len(dataset) 
-        epochs = train_steps // total_iters + 1
+        epochs = training_steps // total_iters + 1
         steps_per_epoch = np.ceil(total_iters / batch_size).astype(np.int32)
 
         for epoch in range(1, epochs+1):
