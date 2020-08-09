@@ -73,7 +73,7 @@ class Synthesizer:
         """
         Synthesizes mel spectrograms from texts and speaker embeddings.
 
-        :param texts: a list of N text prompts to/ be synthesized
+        :param texts: a list of N text prompts to be synthesized
         :param embeddings: a numpy array or list of speaker embeddings of shape (N, 256) 
         :param return_alignments: if True, a matrix representing the alignments between the 
         characters
