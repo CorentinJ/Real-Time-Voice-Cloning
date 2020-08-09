@@ -85,14 +85,16 @@ class Synthesizer:
         if not self.is_loaded():
             self.load()
 
+            # Print some info about the model when it is loaded            
+            tts_k = self._model.get_step() // 1000
+
+            simple_table([('Tacotron', str(tts_k) + "k"),
+                        ("r", self._model.r)])
+
+
         inputs = [text_to_sequence(text.strip(), hparams.tts_cleaner_names) for text in texts]
         if not isinstance(embeddings, list):
             embeddings = [embeddings]
-
-        tts_k = self._model.get_step() // 1000
-
-        simple_table([('Tacotron', str(tts_k) + "k"),
-                    ("r", self._model.r)])
 
         specs = []
         for i, x in enumerate(inputs, 1):
