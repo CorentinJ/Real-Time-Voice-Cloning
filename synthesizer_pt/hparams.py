@@ -7,7 +7,7 @@ fft_bins = n_fft // 2 + 1
 num_mels = 80
 hop_length = 200                    # For 16000 Hz, 200 = 12.5ms - in line with Tacotron 2 paper
 win_length = 800                    # For 16000 Hz, 800 = 50ms - same reason as above
-fmin = 50
+fmin = 55
 max_abs_value = 4.                  # Gradient explodes if too big, premature convergence if too small.
 min_level_db = -100
 ref_level_db = 20
@@ -19,12 +19,12 @@ mu_law = True                       # Recommended to suppress noise if using raw
 
 
 # Model Hparams
-tts_embed_dims = 256                # embedding dimension for the graphemes/phoneme inputs
+tts_embed_dims = 512                # embedding dimension for the graphemes/phoneme inputs
 tts_encoder_dims = 128
 tts_decoder_dims = 256
 tts_postnet_dims = 128
 tts_encoder_K = 16
-tts_lstm_dims = 512
+tts_lstm_dims = 1024
 tts_postnet_K = 8
 tts_num_highways = 4
 tts_dropout = 0.5
@@ -35,9 +35,9 @@ tts_stop_threshold = -3.4           # Value below which audio generation ends.
                                     # frame that has all values < -3.4
 
 # Training
-tts_schedule = [(7,  1e-3,  10_000,  20),   # progressive training schedule
-                (5,  1e-4, 100_000,  20),   # (r, lr, step, batch_size)
-                (2,  1e-4, 180_000,  10),
+tts_schedule = [(7,  1e-3,  10_000,  32),   # progressive training schedule
+                (5,  1e-4, 100_000,  32),   # (r, lr, step, batch_size)
+                (2,  1e-4, 180_000,  16),
                 (2,  1e-4, 350_000,  8)]
 
 tts_clip_grad_norm = 1.0            # clips the gradient norm to prevent explosion - set to None if not needed
