@@ -27,9 +27,9 @@ class Synthesizer:
  
         # Check for GPU
         if torch.cuda.is_available():
-            self.device = torch.device('cuda')
+            self.device = torch.device("cuda")
         else:
-            self.device = torch.device('cpu')
+            self.device = torch.device("cpu")
         if self.verbose:
             print('Synthesizer using device:', self.device)
         
@@ -91,13 +91,13 @@ class Synthesizer:
 
         tts_k = self._model.get_step() // 1000
 
-        simple_table([('Tacotron', str(tts_k) + 'k'),
-                    ('r', self._model.r)])
+        simple_table([('Tacotron', str(tts_k) + "k"),
+                    ("r", self._model.r)])
 
         specs = []
         for i, x in enumerate(inputs, 1):
 
-            print(f'\n| Generating {i}/{len(inputs)}')
+            print(f"\n| Generating {i}/{len(inputs)}")
 
             speaker_embedding = torch.tensor(embeddings[i-1]).float()
             m, _, attention = self._model.generate(x, speaker_embedding)
@@ -109,7 +109,7 @@ class Synthesizer:
             del self._model
             self._model = None
 
-        print('\n\nDone.\n')
+        print("\n\nDone.\n")
         return (specs, alignments) if return_alignments else specs
 
     @staticmethod
