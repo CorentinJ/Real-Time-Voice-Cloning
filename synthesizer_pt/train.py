@@ -36,7 +36,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
     os.makedirs(mel_output_dir, exist_ok=True)
     os.makedirs(meta_folder, exist_ok=True)
     
-    checkpoint_fpath = os.path.join(save_dir, "pretrained.pt")
+    checkpoint_fpath = os.path.join(log_dir, "pretrained.pt")
     metadata_fpath = os.path.join(syn_dir, "train.txt")
     
     print("Checkpoint path: {}".format(checkpoint_fpath))
@@ -190,6 +190,10 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                 step = model.get_step()
                 k = step // 1000
 
+                msg = f"| Epoch: {epoch}/{epochs} ({i}/{steps_per_epoch}) | Loss: {loss_window.average:#.4} | {1./time_window.average:#.2} steps/s | Step: {k}k | "
+                stream(msg)
+
+                # Backup or save model as appropriate
                 if backup_every != 0 and step % backup_every == 0 : 
                     backup_fpath = Path(f'{str(weights_fpath.parent)}/{run_id}_{k}k.pt')
                     model.save(backup_fpath, optimizer)
@@ -200,7 +204,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                     model.save(weights_fpath, optimizer)
 
                 # Evaluate model to generate samples
-                epoch_eval = hparams.tts_eval_interval == 0 and i == total_iters  # If epoch is done
+                epoch_eval = hparams.tts_eval_interval == 0 and i == steps_per_epoch  # If epoch is done
                 step_eval = hparams.tts_eval_interval > 0 and step % hparams.tts_eval_interval == 0  # Every N steps
                 if epoch_eval or step_eval:
                     for sample_idx in range(hparams.tts_eval_num_samples):
@@ -217,9 +221,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
                                        sample_num=sample_idx + 1,
                                        loss=loss)
 
-                msg = f"| Epoch: {epoch}/{epochs} ({i}/{steps_per_epoch}) | Loss: {loss_window.average:#.4} | {1./time_window.average:#.2} steps/s | Step: {k}k | "
-                stream(msg)
-
+            # Add line break after every epoch
             print("")
 
 def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
@@ -233,7 +235,7 @@ def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
             allow_pickle=False)
 
     # save griffin lim inverted wav for debug (mel -> wav)
-    wav = audio.inv_mel_spectrogram(mel_prediction.T, hp)
+    wav = audio.inv_mel_spectrogram(mel_prediction.T, hparams)
     audio.save_wav(wav,
                    os.path.join(wav_dir, "step-{}-wave-from-mel_sample_{}.wav".format(step, sample_num)),
                    sr=hparams.sample_rate)
