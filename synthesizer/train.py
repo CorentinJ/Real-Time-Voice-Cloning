@@ -2,14 +2,14 @@ import torch
 from torch import optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
-from synthesizer_pt import audio, hparams
-from synthesizer_pt.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
-from synthesizer_pt.utils import ValueWindow, data_parallel_workaround
-from synthesizer_pt.utils.display import *
-from synthesizer_pt.utils.plot import plot_spectrogram
-from synthesizer_pt.utils.symbols import symbols
-from synthesizer_pt.utils.text import sequence_to_text
-from synthesizer_pt.models.tacotron import Tacotron
+from synthesizer import audio, hparams
+from synthesizer.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
+from synthesizer.utils import ValueWindow, data_parallel_workaround
+from synthesizer.utils.display import *
+from synthesizer.utils.plot import plot_spectrogram
+from synthesizer.utils.symbols import symbols
+from synthesizer.utils.text import sequence_to_text
+from synthesizer.models.tacotron import Tacotron
 from datetime import datetime
 import os
 from pathlib import Path

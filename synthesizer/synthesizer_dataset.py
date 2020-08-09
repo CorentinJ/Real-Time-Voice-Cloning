@@ -2,8 +2,8 @@ import torch
 from torch.utils.data import Dataset
 import numpy as np
 from pathlib import Path
-from synthesizer_pt import hparams
-from synthesizer_pt.utils.text import text_to_sequence
+from synthesizer import hparams
+from synthesizer.utils.text import text_to_sequence
 
 
 class SynthesizerDataset(Dataset):

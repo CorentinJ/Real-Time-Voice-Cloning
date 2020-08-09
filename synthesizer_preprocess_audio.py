@@ -1,4 +1,4 @@
-from synthesizer_pt.preprocess import preprocess_dataset, get_hparams_as_tuple
+from synthesizer.preprocess import preprocess_dataset, get_hparams_as_tuple
 from utils.argutils import print_args
 from pathlib import Path
 import argparse

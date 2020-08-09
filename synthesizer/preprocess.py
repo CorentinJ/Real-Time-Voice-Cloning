@@ -1,5 +1,5 @@
 from multiprocessing.pool import Pool 
-from synthesizer_pt import audio
+from synthesizer import audio
 from functools import partial
 from itertools import chain
 from encoder import inference as encoder
@@ -256,7 +256,7 @@ def create_embeddings(synthesizer_root: Path, encoder_model_fpath: Path, n_proce
     
 def get_hparams_as_tuple():
     # Returns hparams as a NamedTuple to support multiprocessing, since modules can't be pickled
-    from synthesizer_pt import hparams
+    from synthesizer import hparams
     return hyperparameters(fmin = hparams.fmin,
                            hop_length = hparams.hop_length,
                            max_abs_value = hparams.max_abs_value,

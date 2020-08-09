@@ -1,10 +1,10 @@
 import torch
-from synthesizer_pt import hparams
-from synthesizer_pt.utils.symbols import symbols
-from synthesizer_pt.models.tacotron import Tacotron
-from synthesizer_pt.utils.text import text_to_sequence
-from synthesizer_pt.utils.display import save_attention, simple_table
-from synthesizer_pt import audio
+from synthesizer import hparams
+from synthesizer.utils.symbols import symbols
+from synthesizer.models.tacotron import Tacotron
+from synthesizer.utils.text import text_to_sequence
+from synthesizer.utils.display import save_attention, simple_table
+from synthesizer import audio
 from pathlib import Path
 from typing import Union, List
 import numpy as np

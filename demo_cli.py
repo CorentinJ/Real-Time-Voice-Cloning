@@ -1,7 +1,7 @@
 from encoder.params_model import model_embedding_size as speaker_embedding_size
 from utils.argutils import print_args
 from utils.modelutils import check_model_paths
-from synthesizer_pt.inference import Synthesizer
+from synthesizer.inference import Synthesizer
 from encoder import inference as encoder
 from vocoder import inference as vocoder
 from pathlib import Path
@@ -22,7 +22,7 @@ if __name__ == '__main__':
                         default="encoder/saved_models/pretrained.pt",
                         help="Path to a saved encoder")
     parser.add_argument("-s", "--syn_model_fpath", type=Path, 
-                        default="synthesizer_pt/saved_models/pretrained/pretrained.pt",
+                        default="synthesizer/saved_models/pretrained/pretrained.pt",
                         help="Path to a saved synthesizer")
     parser.add_argument("-v", "--voc_model_fpath", type=Path, 
                         default="vocoder/saved_models/pretrained/pretrained.pt",
