@@ -35,10 +35,12 @@ tts_stop_threshold = -3.4           # Value below which audio generation ends.
                                     # frame that has all values < -3.4
 
 # Training
-tts_schedule = [(7,  1e-3,  10_000,  32),   # progressive training schedule
-                (5,  1e-4, 100_000,  32),   # (r, lr, step, batch_size)
-                (2,  1e-4, 180_000,  16),
-                (2,  1e-4, 350_000,  8)]
+tts_schedule = [(7,  1e-3,  20_000,  16),   # progressive training schedule
+                (6,  3e-4,  50_000,  16),   # (r, lr, step, batch_size)
+                (5,  3e-4, 100_000,  10),
+                (4,  3e-4, 200_000,  8),
+                (3,  3e-4, 300_000,  6),
+                (2,  3e-4, 500_000,  6)]
 
 tts_clip_grad_norm = 1.0            # clips the gradient norm to prevent explosion - set to None if not needed
 tts_eval_interval = 2000            # evaluates the model every X steps:
