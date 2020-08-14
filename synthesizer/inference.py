@@ -102,7 +102,7 @@ class Synthesizer:
             print(f"\n| Generating {i}/{len(inputs)}")
 
             speaker_embedding = torch.tensor(embeddings[i-1]).float()
-            m, _, attention = self._model.generate(x, speaker_embedding)
+            _, m, attention = self._model.generate(x, speaker_embedding)
             specs.append(m)
 
         if self._low_mem:
