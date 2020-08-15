@@ -207,11 +207,7 @@ class Toolbox:
 
         # Synthesize the spectrogram
         if self.synthesizer is None or seed is not None:
-            model_dir = self.ui.current_synthesizer_model_dir
-            checkpoint_fpath = model_dir.joinpath("{}.pt".format(model_dir.name))
-            self.synthesizer = Synthesizer(checkpoint_fpath, low_mem=self.low_mem)
-        if not self.synthesizer.is_loaded():
-            self.ui.log("Loading the synthesizer %s" % checkpoint_fpath)
+            self.init_synthesizer()
 
         texts = self.ui.text_prompt.toPlainText().split("\n")
         embed = self.ui.selected_utterance.embed
@@ -319,6 +315,16 @@ class Toolbox:
         self.ui.set_loading(1)
         start = timer()
         encoder.load_model(model_fpath)
+        self.ui.log("Done (%dms)." % int(1000 * (timer() - start)), "append")
+        self.ui.set_loading(0)
+
+    def init_synthesizer(self):
+        model_fpath = self.ui.current_synthesizer_fpath
+
+        self.ui.log("Loading the synthesizer %s... " % model_fpath)
+        self.ui.set_loading(1)
+        start = timer()
+        self.synthesizer = Synthesizer(model_fpath, low_mem=self.low_mem)
         self.ui.log("Done (%dms)." % int(1000 * (timer() - start)), "append")
         self.ui.set_loading(0)
            
