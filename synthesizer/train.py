@@ -156,7 +156,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
         epochs = np.ceil(training_steps / steps_per_epoch).astype(np.int32)
 
         for epoch in range(1, epochs+1):
-            for i, (x, m, e) in enumerate(data_loader, 1):
+            for i, (x, m, e, _) in enumerate(data_loader, 1):
                 start_time = time.time()
 
                 #x = text, m = mel, e = embed
