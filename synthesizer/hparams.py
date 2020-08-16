@@ -3,14 +3,15 @@
 # Settings for all models
 sample_rate = 16000
 n_fft = 800
-fft_bins = n_fft // 2 + 1
 num_mels = 80
 hop_length = 200                    # For 16000 Hz, 200 = 12.5ms - in line with Tacotron 2 paper
 win_length = 800                    # For 16000 Hz, 800 = 50ms - same reason as above
 fmin = 55
-max_abs_value = 4.                  # Gradient explodes if too big, premature convergence if too small.
 min_level_db = -100
 ref_level_db = 20
+max_abs_value = 4.                  # Gradient explodes if too big, premature convergence if too small.
+preemphasis = 0.97                  # filter coefficient to use if preemphasize is True
+preemphasize = True                  
 
 
 # TACOTRON/TTS -----------------------------------------------------------------------------------------------------#
@@ -50,9 +51,6 @@ tts_eval_num_samples = 1            # makes this number of samples
 max_mel_frames = 900                # if you have a couple of extremely long spectrograms you might want to use this
 rescale = True
 rescaling_max = 0.9
-preemphasize = True                  
-preemphasis = 0.97                  # filter coefficient to use if preemphasize is True
-
 synthesis_batch_size = 32           # For vocoder preprocessing only.
                                     # Batch size can be larger that of training
                                     # since not keeping track of gradients
@@ -64,6 +62,6 @@ griffin_lim_iters = 60
 # ------------------------------------------------------------------------------------------------------------------#
 
 ### SV2TTS
-speaker_embedding_size = 256    # embedding dimension for the speaker embedding
+speaker_embedding_size = 256      # embedding dimension for the speaker embedding
 silence_min_duration_split = 0.4  # Duration in seconds of a silence for an utterance to be split
 utterance_min_duration = 1.6      # Duration in seconds below which utterances are discarded
