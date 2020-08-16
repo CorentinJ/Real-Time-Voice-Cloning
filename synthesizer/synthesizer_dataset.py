@@ -19,6 +19,7 @@ class SynthesizerDataset(Dataset):
         embed_fpaths = [embed_dir.joinpath(fname) for fname in embed_fnames]
         self.samples_fpaths = list(zip(mel_fpaths, embed_fpaths))
         self.samples_texts = [x[5].strip() for x in metadata if int(x[4])]
+        self.metadata = metadata
         
         print("Found %d samples" % len(self.samples_fpaths))
     
