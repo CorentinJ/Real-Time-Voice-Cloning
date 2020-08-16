@@ -31,7 +31,7 @@ class Synthesizer:
         else:
             self.device = torch.device("cpu")
         if self.verbose:
-            print('Synthesizer using device:', self.device)
+            print("Synthesizer using device:", self.device)
         
         # Tacotron model will be instantiated later on first use.
         self._model = None
@@ -88,7 +88,7 @@ class Synthesizer:
             # Print some info about the model when it is loaded            
             tts_k = self._model.get_step() // 1000
 
-            simple_table([('Tacotron', str(tts_k) + "k"),
+            simple_table([("Tacotron", str(tts_k) + "k"),
                         ("r", self._model.r)])
 
 

@@ -136,10 +136,10 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
         model.r = r
 
         # Begin the training
-        simple_table([(f'Steps with r={r}', str(training_steps // 1000) + 'k Steps'),
-                      ('Batch Size', batch_size),
-                      ('Learning Rate', lr),
-                      ('Outputs/Step (r)', model.r)])
+        simple_table([(f"Steps with r={r}", str(training_steps // 1000) + 'k Steps'),
+                      ("Batch Size", batch_size),
+                      ("Learning Rate", lr),
+                      ("Outputs/Step (r)", model.r)])
 
         for p in optimizer.param_groups:
             p["lr"] = lr
@@ -196,7 +196,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
 
                 # Backup or save model as appropriate
                 if backup_every != 0 and step % backup_every == 0 : 
-                    backup_fpath = Path(f'{str(weights_fpath.parent)}/{run_id}_{k}k.pt')
+                    backup_fpath = Path(f"{str(weights_fpath.parent)}/{run_id}_{k}k.pt")
                     model.save(backup_fpath, optimizer)
 
                 if save_every != 0 and step % save_every == 0 : 
