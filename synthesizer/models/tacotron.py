@@ -27,7 +27,7 @@ class Encoder(nn.Module):
                  speaker_embedding_size):
         super().__init__()
         self.embedding = nn.Embedding(num_chars, embed_dims)
-        self.pre_net = PreNet(embed_dims)
+        self.pre_net = PreNet(embed_dims, dropout=dropout)
         self.cbhg = CBHG(K=K, in_channels=cbhg_channels, channels=cbhg_channels,
                          proj_channels=[cbhg_channels, cbhg_channels],
                          num_highways=num_highways)
