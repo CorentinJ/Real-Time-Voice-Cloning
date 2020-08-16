@@ -11,8 +11,6 @@ fmin = 55
 max_abs_value = 4.                  # Gradient explodes if too big, premature convergence if too small.
 min_level_db = -100
 ref_level_db = 20
-bits = 9                            # bit depth of signal
-mu_law = True                       # Recommended to suppress noise if using raw bits in hp.voc_mode below
 
 
 # TACOTRON/TTS -----------------------------------------------------------------------------------------------------#
