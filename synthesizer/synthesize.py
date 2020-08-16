@@ -66,27 +66,24 @@ def run_synthesis(in_dir, out_dir, model_dir):
                              pin_memory=True)
 
     # Generate GTA mels
-    saved_mels_metadata = []
     meta_out_fpath = os.path.join(out_dir, "synthesized.txt")
 
-    for i, (x, m, e, idx) in tqdm(enumerate(data_loader), total=len(data_loader)):
-        #x = text, m = mel, e = embed, idx = index (used later)
-        x, m, e = x.to(device), m.to(device), e.to(device)
-
-        # Parallelize model onto GPUS using workaround due to python bug
-        if device.type == "cuda" and torch.cuda.device_count() > 1:
-            _, mel, _ = data_parallel_workaround(model, x, m, e)
-        else:
-            _, mel, _ = model(x, m, e)
-
-        for j, k in enumerate(idx):
-            # Write the spectrogram to disk
-            # Note: outputs mel-spectrogram files and target ones have same names, just different folders
-            mel_filename = os.path.join(synth_dir, dataset.metadata[k][1])
-            np.save(mel_filename, mel[j].detach().cpu().numpy().T, allow_pickle=False)
-            saved_mels_metadata.append(dataset.metadata[k])
-
-    # Write metadata into the synthesized file 
     with open(meta_out_fpath, "w") as file:
-        for elems in saved_mels_metadata:
-            file.write("|".join([str(x) for x in elems]))
+        for i, (x, m, e, idx) in tqdm(enumerate(data_loader), total=len(data_loader)):
+            #x = text, m = mel, e = embed, idx = index (used later)
+            x, m, e = x.to(device), m.to(device), e.to(device)
+
+            # Parallelize model onto GPUS using workaround due to python bug
+            if device.type == "cuda" and torch.cuda.device_count() > 1:
+                _, mel, _ = data_parallel_workaround(model, x, m, e)
+            else:
+                _, mel, _ = model(x, m, e)
+
+            for j, k in enumerate(idx):
+                # Write the spectrogram to disk
+                # Note: outputs mel-spectrogram files and target ones have same names, just different folders
+                mel_filename = os.path.join(synth_dir, dataset.metadata[k][1])
+                np.save(mel_filename, mel[j].detach().cpu().numpy().T, allow_pickle=False)
+
+                # Write metadata into the synthesized file
+                file.write("|".join(dataset.metadata[k]))
