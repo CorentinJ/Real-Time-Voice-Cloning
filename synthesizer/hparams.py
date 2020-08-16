@@ -55,8 +55,8 @@ rescaling_max = 0.9
 preemphasize = True                  
 preemphasis = 0.97                  # filter coefficient to use if preemphasize is True
 
-synthesis_batch_size = 128          # For vocoder preprocessing only.
-                                    # Batch size can be ~16x that of training
+synthesis_batch_size = 32           # For vocoder preprocessing only.
+                                    # Batch size can be larger that of training
                                     # since not keeping track of gradients
 
 # Mel visualization and Griffin-Lim
