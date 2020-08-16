@@ -245,7 +245,7 @@ class Decoder(nn.Module):
     max_r = 20
     def __init__(self, n_mels, decoder_dims, lstm_dims, dropout):
         super().__init__()
-        self.register_buffer('r', torch.tensor(1, dtype=torch.int))
+        self.register_buffer("r", torch.tensor(1, dtype=torch.int))
         self.n_mels = n_mels
         self.prenet = PreNet(n_mels, dropout=dropout)
         self.attn_net = LSA(decoder_dims)
@@ -331,8 +331,8 @@ class Tacotron(nn.Module):
         self.init_model()
         self.num_params()
 
-        self.register_buffer('step', torch.zeros(1, dtype=torch.long))
-        self.register_buffer('stop_threshold', torch.tensor(stop_threshold, dtype=torch.float32))
+        self.register_buffer("step", torch.zeros(1, dtype=torch.long))
+        self.register_buffer("stop_threshold", torch.tensor(stop_threshold, dtype=torch.float32))
 
     @property
     def r(self):
@@ -482,7 +482,7 @@ class Tacotron(nn.Module):
         self.step = self.step.data.new_tensor(1)
 
     def log(self, path, msg):
-        with open(path, 'a') as f:
+        with open(path, "a") as f:
             print(msg, file=f)
 
     def load(self, path, optimizer=None):
@@ -510,5 +510,5 @@ class Tacotron(nn.Module):
         parameters = filter(lambda p: p.requires_grad, self.parameters())
         parameters = sum([np.prod(p.size()) for p in parameters]) / 1_000_000
         if print_out:
-            print('Trainable Parameters: %.3fM' % parameters)
+            print("Trainable Parameters: %.3fM" % parameters)
         return parameters

@@ -139,7 +139,7 @@ class Toolbox:
                          self.ui.current_speaker_name,
                          self.ui.current_utterance_name)
             name = str(fpath.relative_to(self.datasets_root))
-            speaker_name = self.ui.current_dataset_name + '_' + self.ui.current_speaker_name
+            speaker_name = self.ui.current_dataset_name + "_" + self.ui.current_speaker_name
             
             # Select the next utterance
             if self.ui.auto_next_checkbox.isChecked():
