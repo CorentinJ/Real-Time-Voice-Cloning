@@ -5,7 +5,7 @@ from utils.modelutils import check_model_paths
 import argparse
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description="Runs the toolbox",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
