@@ -20,6 +20,9 @@ class Synthesizer:
         The model isn't instantiated and loaded in memory until needed or until load() is called.
         
         :param model_fpath: path to the trained model file
+        :param verbose: if False, prints less information when using the model
+        :param low_mem: if True, the resources used by the model will be released after each usage.
+        Adds a large overhead, only recommended if your GPU memory is low (<= 2gb)
         """
         self.verbose = verbose
         self.model_fpath = model_fpath
@@ -102,7 +105,7 @@ class Synthesizer:
             print(f"\n| Generating {i}/{len(inputs)}")
 
             speaker_embedding = torch.tensor(embeddings[i-1]).float()
-            _, m, attention = self._model.generate(x, speaker_embedding)
+            _, m, alignments = self._model.generate(x, speaker_embedding)
             specs.append(m)
 
         if self._low_mem:
