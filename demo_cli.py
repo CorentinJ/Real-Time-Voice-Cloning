@@ -63,7 +63,7 @@ if __name__ == '__main__':
     ## Load the models one by one.
     print("Preparing the encoder, the synthesizer and the vocoder...")
     encoder.load_model(args.enc_model_fpath)
-    synthesizer = Synthesizer(args.syn_model_fpath)
+    synthesizer = Synthesizer(args.syn_model_fpath, low_mem=args.low_mem, seed=args.seed)
     vocoder.load_model(args.voc_model_fpath)
     
     
@@ -148,6 +148,11 @@ if __name__ == '__main__':
             ## Generating the spectrogram
             text = input("Write a sentence (+-20 words) to be synthesized:\n")
             
+            # If seed is specified, reset torch seed and force synthesizer reload
+            if args.seed is not None:
+                torch.manual_seed(args.seed)
+                del synthesizer._model
+
             # The synthesizer works in batch, so you need to put your data in a list or numpy array
             texts = [text]
             embeds = [embed]
