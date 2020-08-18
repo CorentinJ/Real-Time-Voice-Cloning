@@ -1,24 +1,20 @@
 import collections
 
 
-field_names = [
-    "sample_rate", "n_fft", "num_mels", "hop_length", "win_length", "fmin", "min_level_db",
-    "ref_level_db", "max_abs_value", "preemphasis", "preemphasize", "tts_embed_dims",
-    "tts_encoder_dims", "tts_decoder_dims", "tts_postnet_dims", "tts_encoder_K",
-    "tts_lstm_dims", "tts_postnet_K", "tts_num_highways", "tts_dropout", "tts_cleaner_names",
-    "tts_stop_threshold", "tts_schedule", "tts_clip_grad_norm", "tts_eval_interval",
-    "tts_eval_num_samples", "max_mel_frames", "rescale", "rescaling_max", "synthesis_batch_size",
-    "signal_normalization", "power", "griffin_lim_iters", "speaker_embedding_size",
-    "silence_min_duration_split", "utterance_min_duration"]
-
+# hparams are defined as a namedtuple to allow multiprocessing
 class HParams(
-    collections.namedtuple("HParams", field_names)):
-    """
-    Hyperparameters for the synthesizer.
-    """
+    collections.namedtuple("HParams", [
+        "sample_rate", "n_fft", "num_mels", "hop_length", "win_length", "fmin", "min_level_db",
+        "ref_level_db", "max_abs_value", "preemphasis", "preemphasize", "tts_embed_dims",
+        "tts_encoder_dims", "tts_decoder_dims", "tts_postnet_dims", "tts_encoder_K",
+        "tts_lstm_dims", "tts_postnet_K", "tts_num_highways", "tts_dropout", "tts_cleaner_names",
+        "tts_stop_threshold", "tts_schedule", "tts_clip_grad_norm", "tts_eval_interval",
+        "tts_eval_num_samples", "max_mel_frames", "rescale", "rescaling_max", "synthesis_batch_size",
+        "signal_normalization", "power", "griffin_lim_iters", "speaker_embedding_size",
+        "silence_min_duration_split", "utterance_min_duration"])):
+
 
 def get_default_hparams():
-# Returns hparams as a NamedTuple to support multiprocessing, since modules can't be pickled
     return HParams(
         # DSP --------------------------------------------------------------------------------------------------------------#
 
@@ -88,11 +84,5 @@ def get_default_hparams():
         silence_min_duration_split = 0.4,  # Duration in seconds of a silence for an utterance to be split
         utterance_min_duration = 1.6,      # Duration in seconds below which utterances are discarded
     )
-
-def hparams_debug_string(hparams, field_names=field_names):
-    values = list(hparams)
-    assert len(field_names) == len(values)
-    hp = ["  %s: %s" % (name, values[i]) for i, name in enumerate(field_names)]
-    return "Hyperparameters:\n" + "\n".join(hp)
 
 hparams = get_default_hparams()
