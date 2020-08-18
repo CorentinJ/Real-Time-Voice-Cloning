@@ -206,7 +206,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                     model.save(weights_fpath, optimizer)
 
                 # Evaluate model to generate samples
-                epoch_eval = hparams.tts_eval_interval == 0 and i == steps_per_epoch  # If epoch is done
+                epoch_eval = hparams.tts_eval_interval == -1 and i == steps_per_epoch  # If epoch is done
                 step_eval = hparams.tts_eval_interval > 0 and step % hparams.tts_eval_interval == 0  # Every N steps
                 if epoch_eval or step_eval:
                     for sample_idx in range(hparams.tts_eval_num_samples):

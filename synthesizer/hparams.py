@@ -59,10 +59,10 @@ hparams = HParams(
                         (2,  3e-4, 500_000,  6)],
 
         tts_clip_grad_norm = 1.0,            # clips the gradient norm to prevent explosion - set to None if not needed
-        tts_eval_interval = 2000,            # evaluates the model every X steps:
-                                             #     if X = 0, evaluates every epoch
-                                             #     if X < 0, never evaluates
-        tts_eval_num_samples = 1,            # makes this number of samples
+        tts_eval_interval = 2000,            # Number of steps between model evaluation (sample generation)
+                                             # Set to -1 to generate after completing epoch, or 0 to disable
+
+        tts_eval_num_samples = 1,            # Makes this number of samples
 
         # Data Preprocessing
         max_mel_frames = 900,                # if you have a couple of extremely long spectrograms you might want to use this
