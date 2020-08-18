@@ -26,8 +26,8 @@ class ValueWindow():
     self._window_size = window_size
     self._values = []
 
-  def append(self, x): 
-    self._values = self._values[-(self._window_size - 1):] + [x] 
+  def append(self, x):
+    self._values = self._values[-(self._window_size - 1):] + [x]
 
   @property
   def sum(self):
