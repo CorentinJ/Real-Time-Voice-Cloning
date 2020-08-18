@@ -12,7 +12,9 @@ class HParams(
         "tts_eval_num_samples", "max_mel_frames", "rescale", "rescaling_max", "synthesis_batch_size",
         "signal_normalization", "power", "griffin_lim_iters", "speaker_embedding_size",
         "silence_min_duration_split", "utterance_min_duration"])):
-
+    """
+    Hyperparameters for the synthesizer.
+    """
 
 def get_default_hparams():
     return HParams(
