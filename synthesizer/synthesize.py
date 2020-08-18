@@ -106,4 +106,4 @@ def run_synthesis(in_dir, out_dir, model_dir):
                 np.save(mel_filename, mel, allow_pickle=False)
 
                 # Write metadata into the synthesized file
-                file.write("|".join(dataset.metadata[k]))
+                file.write("|".join(dataset.metadata[k[0]]))
