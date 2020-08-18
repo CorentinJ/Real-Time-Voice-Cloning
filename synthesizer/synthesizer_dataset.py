@@ -41,10 +41,7 @@ class SynthesizerDataset(Dataset):
         # Convert the list returned by text_to_sequence to a numpy array
         text = np.asarray(text).astype(np.int32)
 
-        # Collect metadata for vocoder preprocessing
-        meta = (index, np.size(mel,1))
-
-        return text, mel.astype(np.float32), embed.astype(np.float32), meta
+        return text, mel.astype(np.float32), embed.astype(np.float32), index
 
     def __len__(self):
         return len(self.samples_fpaths)
@@ -73,8 +70,8 @@ def collate_synthesizer(batch, r):
     # Speaker embedding (SV2TTS)
     embeds = [x[2] for x in batch]
 
-    # Metadata (for vocoder preprocessing)
-    metas = [x[3] for x in batch]
+    # Index (for vocoder preprocessing)
+    indices = [x[3] for x in batch]
 
 
     # Convert all to tensor
@@ -82,7 +79,7 @@ def collate_synthesizer(batch, r):
     mel = torch.tensor(mel)
     embeds = torch.tensor(embeds)
 
-    return chars, mel, embeds, metas
+    return chars, mel, embeds, indices
 
 def pad1d(x, max_len, pad_value=0):
     return np.pad(x, (0, max_len - len(x)), mode="constant", constant_values=pad_value)

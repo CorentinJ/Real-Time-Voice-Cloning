@@ -69,7 +69,7 @@ def run_synthesis(in_dir, out_dir, model_dir):
     meta_out_fpath = os.path.join(out_dir, "synthesized.txt")
 
     with open(meta_out_fpath, "w") as file:
-        for i, (x, m, e, meta) in tqdm(enumerate(data_loader), total=len(data_loader)):
+        for i, (x, m, e, idx) in tqdm(enumerate(data_loader), total=len(data_loader)):
             #x = text, m = mel, e = embed, idx = index (used later)
             x, m, e = x.to(device), m.to(device), e.to(device)
 
@@ -79,31 +79,16 @@ def run_synthesis(in_dir, out_dir, model_dir):
             else:
                 _, mels, _ = model(x, m, e)
 
-            for j, k in enumerate(meta):
-                # meta contains tuples which have (index, target_len)
-
+            for j, k in enumerate(idx):
                 # Note: outputs mel-spectrogram files and target ones have same names, just different folders
-                mel_filename = os.path.join(synth_dir, dataset.metadata[k[0]][1])
+                mel_filename = os.path.join(synth_dir, dataset.metadata[k][1])
                 mel = mels[j].detach().cpu().numpy().T
 
                 # Use the length of the ground truth mel to remove padding from the generated mels
-                mel = mel[:k[1]]
-
-                # The following approaches were also tested for padding removal
-                """
-                # Remove excess padding using the silence threshold hparam
-                while max(mel[-1]) < hparams.tts_stop_threshold:
-                    mel = mel[:-1]
-                
-                # fatchord's tacotron stops at the first frame where all values are below stop threshold
-                # (but no sooner than the 11th frame to prevent premature termination of decoder loop)
-                min_f = 10 * model.r
-                stop = min_f + np.min(np.where(np.max(mel[min_f:],1) < hparams.tts_stop_threshold))
-                mel = mel[:stop, :]
-                """
+                mel = mel[:int(dataset.metadata[k][4])]
 
                 # Write the spectrogram to disk
                 np.save(mel_filename, mel, allow_pickle=False)
 
                 # Write metadata into the synthesized file
-                file.write("|".join(dataset.metadata[k[0]]))
+                file.write("|".join(dataset.metadata[k]))
