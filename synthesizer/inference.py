@@ -121,7 +121,7 @@ class Synthesizer:
     def load_preprocess_wav(fpath):
         """
         Loads and preprocesses an audio file under the same conditions the audio files were used to
-        train the synthesizer. 
+        train the synthesizer.
         """
         wav = librosa.load(str(fpath), hparams.sample_rate)[0]
         if hparams.rescale:

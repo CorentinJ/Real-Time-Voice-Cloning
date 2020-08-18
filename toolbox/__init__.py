@@ -195,7 +195,7 @@ class Toolbox:
         self.ui.log("Generating the mel spectrogram...")
         self.ui.set_loading(1)
         
-        # Update the synthesizer random seed 
+        # Update the synthesizer random seed
         if self.ui.random_seed_checkbox.isChecked():
             seed = int(self.ui.seed_textbox.text())
             self.ui.populate_gen_options(seed, self.trim_silences)
