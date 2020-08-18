@@ -131,8 +131,8 @@ class Synthesizer:
     @staticmethod
     def make_spectrogram(fpath_or_wav: Union[str, Path, np.ndarray]):
         """
-        Creates a mel spectrogram from an audio file in the same manner as the mel spectrograms that
-        were fed to the synthesizer when training. 
+        Creates a mel spectrogram from an audio file in the same manner as the mel spectrograms that 
+        were fed to the synthesizer when training.
         """
         if isinstance(fpath_or_wav, str) or isinstance(fpath_or_wav, Path):
             wav = Synthesizer.load_preprocess_wav(fpath_or_wav)

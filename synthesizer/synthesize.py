@@ -67,7 +67,6 @@ def run_synthesis(in_dir, out_dir, model_dir):
 
     # Generate GTA mels
     meta_out_fpath = os.path.join(out_dir, "synthesized.txt")
-
     with open(meta_out_fpath, "w") as file:
         for i, (x, m, e, idx) in tqdm(enumerate(data_loader), total=len(data_loader)):
             #x = text, m = mel, e = embed, idx = index (used later)

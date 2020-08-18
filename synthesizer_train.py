@@ -1,6 +1,5 @@
 from synthesizer.train import train
 from utils.argutils import print_args
-from pathlib import Path
 import argparse
 
 
@@ -24,10 +23,7 @@ if __name__ == "__main__":
     parser.add_argument("-f", "--force_restart", action="store_true", help= \
         "Do not load any saved model and restart from scratch.")
     args = parser.parse_args()
-    args.syn_dir = Path(args.syn_dir)
-    args.models_dir = Path(args.models_dir)
-    args.models_dir.mkdir(exist_ok=True)
-    
-    # Run the training
     print_args(args, parser)
+
+    # Run the training
     train(**vars(args))

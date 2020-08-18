@@ -24,23 +24,28 @@ def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
 def time_string():
     return datetime.now().strftime("%Y-%m-%d %H:%M")
 
-def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
+def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
          backup_every: int, force_restart:bool):
 
-    log_dir = os.path.join(models_dir, run_id)
-    plot_dir = os.path.join(log_dir, "plots")
-    wav_dir = os.path.join(log_dir, "wavs")
-    mel_output_dir = os.path.join(log_dir, "mel-spectrograms")
-    meta_folder = os.path.join(log_dir, "metas")
-    os.makedirs(plot_dir, exist_ok=True)
-    os.makedirs(wav_dir, exist_ok=True)
-    os.makedirs(mel_output_dir, exist_ok=True)
-    os.makedirs(meta_folder, exist_ok=True)
+    syn_dir = Path(syn_dir)
+    models_dir = Path(models_dir)
+    models_dir.mkdir(exist_ok=True)
+
+    model_dir = models_dir.joinpath(run_id)
+    plot_dir = model_dir.joinpath("plots")
+    wav_dir = model_dir.joinpath("wavs")
+    mel_output_dir = model_dir.joinpath("mel-spectrograms")
+    meta_folder = model_dir.joinpath("metas")
+    model_dir.mkdir(exist_ok=True)
+    plot_dir.mkdir(exist_ok=True)
+    wav_dir.mkdir(exist_ok=True)
+    mel_output_dir.mkdir(exist_ok=True)
+    meta_folder.mkdir(exist_ok=True)
     
-    checkpoint_fpath = os.path.join(log_dir, "pretrained.pt")
-    metadata_fpath = os.path.join(syn_dir, "train.txt")
+    weights_fpath = model_dir.joinpath(run_id).with_suffix(".pt")
+    metadata_fpath = syn_dir.joinpath("train.txt")
     
-    print("Checkpoint path: {}".format(checkpoint_fpath))
+    print("Checkpoint path: {}".format(weights_fpath))
     print("Loading training data from: {}".format(metadata_fpath))
     print("Using model: Tacotron")
     
@@ -95,9 +100,6 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
     optimizer = optim.Adam(model.parameters())
 
     # Load the weights
-    model_dir = models_dir.joinpath(run_id)
-    model_dir.mkdir(exist_ok=True)
-    weights_fpath = model_dir.joinpath(run_id + ".pt")
     if force_restart or not weights_fpath.exists():
         print("\nStarting the training of Tacotron from scratch\n")
         model.save(weights_fpath)
@@ -229,26 +231,21 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,
 def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
                plot_dir, mel_output_dir, wav_dir, sample_num, loss):
     # Save some results for evaluation
-    save_attention(attention, Path(f"{plot_dir}/attention_step_{step}_sample_{sample_num}"))
+    save_attention(attention, plot_dir.joinpath("attention_step_{}_sample_{}".format(step, sample_num)))
 
     # save predicted mel spectrogram to disk (debug)
-    mel_filename = "mel-prediction-step-{}_sample_{}.npy".format(step, sample_num)
-    np.save(os.path.join(mel_output_dir, mel_filename), mel_prediction,
-            allow_pickle=False)
+    mel_output_fpath = mel_output_dir.joinpath("mel-prediction-step-{}_sample_{}.npy".format(step, sample_num))
+    np.save(str(mel_output_fpath), mel_prediction, allow_pickle=False)
 
     # save griffin lim inverted wav for debug (mel -> wav)
     wav = audio.inv_mel_spectrogram(mel_prediction.T, hparams)
-    audio.save_wav(wav,
-                   os.path.join(wav_dir, "step-{}-wave-from-mel_sample_{}.wav".format(step, sample_num)),
-                   sr=hparams.sample_rate)
+    wav_fpath = wav_dir.joinpath("step-{}-wave-from-mel_sample_{}.wav".format(step, sample_num))
+    audio.save_wav(wav, str(wav_fpath), sr=hparams.sample_rate)
 
     # save real and predicted mel-spectrogram plot to disk (control purposes)
-    plot_spectrogram(mel_prediction, os.path.join(plot_dir,
-                                                  "step-{}-mel-spectrogram_sample_{}.png".format(
-                                                      step, sample_num)),
-                     title="{}, {}, step={}, loss={:.5f}".format("Tacotron",
-                                                                 time_string(),
-                                                                  step, loss),
+    spec_fpath = plot_dir.joinpath("step-{}-mel-spectrogram_sample_{}.png".format(step, sample_num))
+    plot_spectrogram(mel_prediction, str(spec_fpath),
+                     title="{}, {}, step={}, loss={:.5f}".format("Tacotron", time_string(), step, loss),
                      target_spectrogram=target_spectrogram,
                      max_len=target_spectrogram.size // hparams.num_mels)
     print("Input at step {}: {}".format(step, sequence_to_text(input_seq)))
