@@ -6,8 +6,8 @@ from synthesizer.hparams import hparams as _syn_hp
 sample_rate = _syn_hp.sample_rate
 n_fft = _syn_hp.n_fft
 num_mels = _syn_hp.num_mels
-hop_length = _syn_hp.hop_length
-win_length = _syn_hp.win_length
+hop_length = _syn_hp.hop_size
+win_length = _syn_hp.win_size
 fmin = _syn_hp.fmin
 min_level_db = _syn_hp.min_level_db
 ref_level_db = _syn_hp.ref_level_db

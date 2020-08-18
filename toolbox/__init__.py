@@ -139,7 +139,7 @@ class Toolbox:
                          self.ui.current_speaker_name,
                          self.ui.current_utterance_name)
             name = str(fpath.relative_to(self.datasets_root))
-            speaker_name = self.ui.current_dataset_name + "_" + self.ui.current_speaker_name
+            speaker_name = self.ui.current_dataset_name + '_' + self.ui.current_speaker_name
             
             # Select the next utterance
             if self.ui.auto_next_checkbox.isChecked():
@@ -195,7 +195,7 @@ class Toolbox:
         self.ui.log("Generating the mel spectrogram...")
         self.ui.set_loading(1)
         
-        # Make synthesis determinstic, if user provides a seed
+        # Update the synthesizer random seed 
         if self.ui.random_seed_checkbox.isChecked():
             seed = int(self.ui.seed_textbox.text())
             self.ui.populate_gen_options(seed, self.trim_silences)
@@ -254,7 +254,7 @@ class Toolbox:
         self.ui.log(" Done!", "append")
         
         # Add breaks
-        b_ends = np.cumsum(np.array(breaks) * Synthesizer.hparams.hop_length)
+        b_ends = np.cumsum(np.array(breaks) * Synthesizer.hparams.hop_size)
         b_starts = np.concatenate(([0], b_ends[:-1]))
         wavs = [wav[start:end] for start, end, in zip(b_starts, b_ends)]
         breaks = [np.zeros(int(0.15 * Synthesizer.sample_rate))] * len(breaks)

@@ -10,7 +10,7 @@ from synthesizer.utils import ValueWindow, data_parallel_workaround
 from synthesizer.utils.plot import plot_spectrogram
 from synthesizer.utils.symbols import symbols
 from synthesizer.utils.text import sequence_to_text
-from utils.display import *
+from vocoder.display import *
 from datetime import datetime
 import numpy as np
 import os

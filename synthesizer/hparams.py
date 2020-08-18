@@ -4,14 +4,15 @@ import collections
 # hparams are defined as a namedtuple to allow multiprocessing
 class HParams(
     collections.namedtuple("HParams", [
-        "sample_rate", "n_fft", "num_mels", "hop_length", "win_length", "fmin", "min_level_db",
+        "sample_rate", "n_fft", "num_mels", "hop_size", "win_size", "fmin", "min_level_db",
         "ref_level_db", "max_abs_value", "preemphasis", "preemphasize", "tts_embed_dims",
         "tts_encoder_dims", "tts_decoder_dims", "tts_postnet_dims", "tts_encoder_K",
         "tts_lstm_dims", "tts_postnet_K", "tts_num_highways", "tts_dropout", "tts_cleaner_names",
         "tts_stop_threshold", "tts_schedule", "tts_clip_grad_norm", "tts_eval_interval",
         "tts_eval_num_samples", "max_mel_frames", "rescale", "rescaling_max", "synthesis_batch_size",
         "signal_normalization", "power", "griffin_lim_iters", "speaker_embedding_size",
-        "silence_min_duration_split", "utterance_min_duration"])):
+        "silence_min_duration_split", "utterance_min_duration",
+        "fmax", "allow_clipping_in_normalization", "clip_mels_length", "use_lws", "symmetric_mels"])):
     """
     Hyperparameters for the synthesizer.
     """
@@ -24,8 +25,8 @@ def get_default_hparams():
         sample_rate = 16000,
         n_fft = 800,
         num_mels = 80,
-        hop_length = 200,                    # For 16000 Hz, 200 = 12.5ms - in line with Tacotron 2 paper
-        win_length = 800,                    # For 16000 Hz, 800 = 50ms - same reason as above
+        hop_size = 200,                      # For 16000 Hz, 200 = 12.5ms - in line with Tacotron 2 paper
+        win_size = 800,                      # For 16000 Hz, 800 = 50ms - same reason as above
         fmin = 55,
         min_level_db = -100,
         ref_level_db = 20,
@@ -82,9 +83,17 @@ def get_default_hparams():
         # ------------------------------------------------------------------------------------------------------------------#
 
         ### SV2TTS
-        speaker_embedding_size = 256,      # embedding dimension for the speaker embedding
-        silence_min_duration_split = 0.4,  # Duration in seconds of a silence for an utterance to be split
-        utterance_min_duration = 1.6,      # Duration in seconds below which utterances are discarded
+        speaker_embedding_size = 256,            # embedding dimension for the speaker embedding
+        silence_min_duration_split = 0.4,        # Duration in seconds of a silence for an utterance to be split
+        utterance_min_duration = 1.6,            # Duration in seconds below which utterances are discarded
+
+        ### Audio processing options
+        fmax = 8000,                             # Set to sample_rate // 2
+        allow_clipping_in_normalization = True,  # Used when signal_normalization = True
+        clip_mels_length = True,                 # Used with max_mel_frames
+        use_lws = False,                         # "Fast spectrogram phase recovery using local weighted sums"
+        symmetric_mels = True,                   # Sets mel range to [-max_abs_value, max_abs_value] if True,
+                                                 #               and [0, max_abs_value] if False
     )
 
 hparams = get_default_hparams()

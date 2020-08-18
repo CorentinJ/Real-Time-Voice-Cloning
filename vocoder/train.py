@@ -1,16 +1,16 @@
-import torch
-import torch.nn.functional as F
-from torch import optim
-from torch.utils.data import DataLoader
-import vocoder.hparams as hp
 from vocoder.models.fatchord_version import WaveRNN
 from vocoder.vocoder_dataset import VocoderDataset, collate_vocoder
 from vocoder.distribution import discretized_mix_logistic_loss
+from vocoder.display import stream, simple_table
 from vocoder.gen_wavernn import gen_testset
-from utils.display import stream, simple_table
-import numpy as np
+from torch.utils.data import DataLoader
 from pathlib import Path
+from torch import optim
+import torch.nn.functional as F
+import vocoder.hparams as hp
+import numpy as np
 import time
+import torch
 
 
 def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_truth: bool,

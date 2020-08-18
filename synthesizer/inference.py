@@ -4,7 +4,7 @@ from synthesizer.hparams import hparams
 from synthesizer.models.tacotron import Tacotron
 from synthesizer.utils.symbols import symbols
 from synthesizer.utils.text import text_to_sequence
-from utils.display import save_attention, simple_table
+from vocoder.display import save_attention, simple_table
 from pathlib import Path
 from typing import Union, List
 import numpy as np

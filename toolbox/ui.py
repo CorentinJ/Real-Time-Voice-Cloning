@@ -107,7 +107,7 @@ class UI(QDialog):
         if len(utterances) < self.min_umap_points:
             self.umap_ax.text(.5, .5, "Add %d more points to\ngenerate the projections" % 
                               (self.min_umap_points - len(utterances)), 
-                              horizontalalignment="center", fontsize=15)
+                              horizontalalignment='center', fontsize=15)
             self.umap_ax.set_title("")
             
         # Compute the projections
@@ -130,7 +130,7 @@ class UI(QDialog):
                 self.umap_ax.scatter(projection[0], projection[1], c=[color], marker=mark,
                                      label=label)
             # self.umap_ax.set_title("UMAP projections")
-            self.umap_ax.legend(prop={"size": 10})
+            self.umap_ax.legend(prop={'size': 10})
 
         # Draw the plot
         self.umap_ax.set_aspect("equal", "datalim")
@@ -309,7 +309,7 @@ class UI(QDialog):
                 self.current_speaker_name
             )
             utterances = []
-            for extension in ["mp3", "flac", "wav", "m4a"]:
+            for extension in ['mp3', 'flac', 'wav', 'm4a']:
                 utterances.extend(Path(utterances_root).glob("**/*.%s" % extension))
             utterances = [fpath.relative_to(utterances_root) for fpath in utterances]
             self.repopulate_box(self.utterance_box, utterances, random)
@@ -375,7 +375,7 @@ class UI(QDialog):
             self.logs[-1] += line
         elif mode == "overwrite":
             self.logs[-1] = line
-        log_text = "\n".join(self.logs)
+        log_text = '\n'.join(self.logs)
         
         self.log_window.setText(log_text)
         self.app.processEvents()

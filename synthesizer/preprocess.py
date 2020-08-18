@@ -1,6 +1,5 @@
 from multiprocessing.pool import Pool 
 from synthesizer import audio
-from synthesizer.hparams import hparams
 from functools import partial
 from itertools import chain
 from encoder import inference as encoder
@@ -12,7 +11,7 @@ import librosa
 
 
 def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int,
-                           skip_existing: bool, no_alignments: bool,
+                           skip_existing: bool, hparams, no_alignments: bool,
                            datasets_name: str, subfolders: str):
     # Gather the input directories
     dataset_root = datasets_root.joinpath(datasets_name)
@@ -148,7 +147,7 @@ def split_on_silences(wav_fpath, words, end_times, hparams):
             joined_duration = segment_durations[i] + min(left_duration, right_duration)
 
             # Do not re-attach if it causes the joined utterance to be too long
-            if joined_duration > hparams.hop_length * hparams.max_mel_frames / hparams.sample_rate:
+            if joined_duration > hparams.hop_size * hparams.max_mel_frames / hparams.sample_rate:
                 i += 1
                 continue
 
@@ -213,7 +212,7 @@ def process_utterance(wav: np.ndarray, text: str, out_dir: Path, basename: str,
     mel_frames = mel_spectrogram.shape[1]
     
     # Skip utterances that are too long
-    if mel_frames > hparams.max_mel_frames:
+    if mel_frames > hparams.max_mel_frames and hparams.clip_mels_length:
         return None
     
     # Write the spectrogram, embed and audio to disk
@@ -253,3 +252,4 @@ def create_embeddings(synthesizer_root: Path, encoder_model_fpath: Path, n_proce
     func = partial(embed_utterance, encoder_model_fpath=encoder_model_fpath)
     job = Pool(n_processes).imap(func, fpaths)
     list(tqdm(job, "Embedding", len(fpaths), unit="utterances"))
+    
