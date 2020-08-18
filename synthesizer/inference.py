@@ -4,7 +4,7 @@ from synthesizer.hparams import hparams
 from synthesizer.models.tacotron import Tacotron
 from synthesizer.utils.symbols import symbols
 from synthesizer.utils.text import text_to_sequence
-from vocoder.display import save_attention, simple_table
+from vocoder.display import simple_table
 from pathlib import Path
 from typing import Union, List
 import numpy as np
@@ -24,8 +24,8 @@ class Synthesizer:
         :param low_mem: if True, the resources used by the model will be released after each usage.
         Adds a large overhead, only recommended if your GPU memory is low (<= 2gb)
         """
-        self.verbose = verbose
         self.model_fpath = model_fpath
+        self.verbose = verbose
         self._low_mem = low_mem
  
         # Check for GPU
@@ -121,7 +121,7 @@ class Synthesizer:
     def load_preprocess_wav(fpath):
         """
         Loads and preprocesses an audio file under the same conditions the audio files were used to
-        train the synthesizer.
+        train the synthesizer. 
         """
         wav = librosa.load(str(fpath), hparams.sample_rate)[0]
         if hparams.rescale:
@@ -132,7 +132,7 @@ class Synthesizer:
     def make_spectrogram(fpath_or_wav: Union[str, Path, np.ndarray]):
         """
         Creates a mel spectrogram from an audio file in the same manner as the mel spectrograms that
-        were fed to the synthesizer when training.
+        were fed to the synthesizer when training. 
         """
         if isinstance(fpath_or_wav, str) or isinstance(fpath_or_wav, Path):
             wav = Synthesizer.load_preprocess_wav(fpath_or_wav)
