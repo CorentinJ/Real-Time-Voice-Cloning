@@ -63,7 +63,7 @@ if __name__ == '__main__':
     ## Load the models one by one.
     print("Preparing the encoder, the synthesizer and the vocoder...")
     encoder.load_model(args.enc_model_fpath)
-    synthesizer = Synthesizer(args.syn_model_fpath, low_mem=args.low_mem, seed=args.seed)
+    synthesizer = Synthesizer(args.syn_model_fpath, low_mem=args.low_mem)
     vocoder.load_model(args.voc_model_fpath)
     
     
