@@ -1,5 +1,6 @@
 from multiprocessing.pool import Pool 
 from synthesizer import audio
+from synthesizer.hparams import hparams
 from functools import partial
 from itertools import chain
 from encoder import inference as encoder
@@ -8,11 +9,10 @@ from utils import logmmse
 from tqdm import tqdm
 import numpy as np
 import librosa
-from typing import NamedTuple
 
 
 def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int,
-                           skip_existing: bool, hparams, no_alignments: bool,
+                           skip_existing: bool, no_alignments: bool,
                            datasets_name: str, subfolders: str):
     # Gather the input directories
     dataset_root = datasets_root.joinpath(datasets_name)
@@ -253,46 +253,3 @@ def create_embeddings(synthesizer_root: Path, encoder_model_fpath: Path, n_proce
     func = partial(embed_utterance, encoder_model_fpath=encoder_model_fpath)
     job = Pool(n_processes).imap(func, fpaths)
     list(tqdm(job, "Embedding", len(fpaths), unit="utterances"))
-    
-def get_hparams_as_tuple():
-    # Returns hparams as a NamedTuple to support multiprocessing, since modules can't be pickled
-    from synthesizer import hparams
-    return hyperparameters(fmin = hparams.fmin,
-                           hop_length = hparams.hop_length,
-                           max_abs_value = hparams.max_abs_value,
-                           max_mel_frames = hparams.max_mel_frames,
-                           min_level_db = hparams.min_level_db,
-                           num_mels = hparams.num_mels,
-                           n_fft = hparams.n_fft,
-                           preemphasis = hparams.preemphasis,
-                           preemphasize = hparams.preemphasize,
-                           ref_level_db = hparams.ref_level_db,
-                           rescale = hparams.rescale,
-                           rescaling_max = hparams.rescaling_max,
-                           sample_rate = hparams.sample_rate,
-                           signal_normalization = hparams.signal_normalization,
-                           silence_min_duration_split = hparams.silence_min_duration_split,
-                           utterance_min_duration = hparams.utterance_min_duration,
-                           win_length = hparams.win_length,
-                           )
-
-
-class hyperparameters(NamedTuple):
-    # This is a workaround because multiprocessing cannot pickle the "hparams" module
-    fmin: float
-    hop_length: int
-    max_abs_value: float
-    max_mel_frames: int
-    min_level_db: float
-    num_mels: int
-    n_fft: int
-    preemphasis: float
-    preemphasize: bool
-    ref_level_db: float
-    rescale: bool
-    rescaling_max: float
-    sample_rate: int
-    signal_normalization: bool
-    silence_min_duration_split: float
-    utterance_min_duration: float
-    win_length: int

@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
-from synthesizer import hparams
+from synthesizer.hparams import hparams
 from synthesizer.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
 from synthesizer.models.tacotron import Tacotron
 from synthesizer.utils.text import text_to_sequence

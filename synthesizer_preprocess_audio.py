@@ -1,4 +1,4 @@
-from synthesizer.preprocess import preprocess_dataset, get_hparams_as_tuple
+from synthesizer.preprocess import preprocess_dataset
 from utils.argutils import print_args
 from pathlib import Path
 import argparse
@@ -52,7 +52,4 @@ if __name__ == "__main__":
 
     # Preprocess the dataset
     print_args(args, parser)
-
-    # Pass the hparams to preprocess as a NamedTuple instead of a module to allow multiprocessing
-    args.hparams = get_hparams_as_tuple()
     preprocess_dataset(**vars(args))

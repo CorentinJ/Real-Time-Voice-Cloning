@@ -1,7 +1,8 @@
 import torch
-from synthesizer import audio, hparams
-from synthesizer.utils.symbols import symbols
+from synthesizer import audio
+from synthesizer.hparams import hparams
 from synthesizer.models.tacotron import Tacotron
+from synthesizer.utils.symbols import symbols
 from synthesizer.utils.text import text_to_sequence
 from utils.display import save_attention, simple_table
 from pathlib import Path
