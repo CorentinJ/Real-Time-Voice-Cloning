@@ -1,4 +1,5 @@
 from synthesizer.preprocess import preprocess_dataset
+from synthesizer.hparams import hparams
 from utils.argutils import print_args
 from pathlib import Path
 import argparse
@@ -49,6 +50,9 @@ if __name__ == "__main__":
                 "noise removal and is recommended. Please install and try again. If installation fails, "
                 "use --no_trim to disable this error message.")
     del args.no_trim
+
+    # Add hparams to args
+    args.hparams = hparams
 
     # Preprocess the dataset
     print_args(args, parser)

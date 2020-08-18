@@ -84,7 +84,7 @@ hparams = HParams(
         utterance_min_duration = 1.6,            # Duration in seconds below which utterances are discarded
 
         ### Audio processing options
-        fmax = 8000,                             # Set to sample_rate // 2
+        fmax = 7600,                             # Set to sample_rate // 2
         allow_clipping_in_normalization = True,  # Used when signal_normalization = True
         clip_mels_length = True,                 # Used with max_mel_frames
         use_lws = False,                         # "Fast spectrogram phase recovery using local weighted sums"
