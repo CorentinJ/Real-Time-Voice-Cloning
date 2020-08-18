@@ -49,18 +49,6 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
     print("Loading training data from: {}".format(metadata_fpath))
     print("Using model: Tacotron")
     
-    # Embeddings metadata
-    char_embedding_meta = os.path.join(meta_folder, "CharacterEmbeddings.tsv")
-    if not os.path.isfile(char_embedding_meta):
-        with open(char_embedding_meta, "w", encoding="utf-8") as f:
-            for symbol in symbols:
-                if symbol == " ":
-                    symbol = "\\s"  # For visual purposes, swap space with \s
-                
-                f.write("{}\n".format(symbol))
-    
-    char_embedding_meta = char_embedding_meta.replace(log_dir, "..")
-    
     # Book keeping
     step = 0
     time_window = ValueWindow(100)
@@ -103,6 +91,16 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
     if force_restart or not weights_fpath.exists():
         print("\nStarting the training of Tacotron from scratch\n")
         model.save(weights_fpath)
+
+        # Embeddings metadata
+        char_embedding_fpath = meta_folder.joinpath("CharacterEmbeddings.tsv")
+        with open(char_embedding_fpath, "w", encoding="utf-8") as f:
+            for symbol in symbols:
+                if symbol == " ":
+                    symbol = "\\s"  # For visual purposes, swap space with \s
+
+                f.write("{}\n".format(symbol))
+
     else:
         print("\nLoading weights at %s" % weights_fpath)
         model.load(weights_fpath, optimizer)
