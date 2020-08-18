@@ -1,24 +1,20 @@
-import collections
+import pprint
+
+class HParams(object):
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+    def __setitem__(self, key, value):
+        setattr(self, key, value)
+
+    def __getitem__(self, key):
+        return getattr(self, key)
+
+    def __repr__(self):
+        return pprint.pformat(self.__dict__)
 
 
-# hparams are defined as a namedtuple to allow multiprocessing
-class HParams(
-    collections.namedtuple("HParams", [
-        "sample_rate", "n_fft", "num_mels", "hop_size", "win_size", "fmin", "min_level_db",
-        "ref_level_db", "max_abs_value", "preemphasis", "preemphasize", "tts_embed_dims",
-        "tts_encoder_dims", "tts_decoder_dims", "tts_postnet_dims", "tts_encoder_K",
-        "tts_lstm_dims", "tts_postnet_K", "tts_num_highways", "tts_dropout", "tts_cleaner_names",
-        "tts_stop_threshold", "tts_schedule", "tts_clip_grad_norm", "tts_eval_interval",
-        "tts_eval_num_samples", "max_mel_frames", "rescale", "rescaling_max", "synthesis_batch_size",
-        "signal_normalization", "power", "griffin_lim_iters", "speaker_embedding_size",
-        "silence_min_duration_split", "utterance_min_duration",
-        "fmax", "allow_clipping_in_normalization", "clip_mels_length", "use_lws", "symmetric_mels"])):
-    """
-    Hyperparameters for the synthesizer.
-    """
-
-def get_default_hparams():
-    return HParams(
+hparams = HParams(
         # DSP --------------------------------------------------------------------------------------------------------------#
 
         # Settings for all models
@@ -94,6 +90,4 @@ def get_default_hparams():
         use_lws = False,                         # "Fast spectrogram phase recovery using local weighted sums"
         symmetric_mels = True,                   # Sets mel range to [-max_abs_value, max_abs_value] if True,
                                                  #               and [0, max_abs_value] if False
-    )
-
-hparams = get_default_hparams()
+        )
