@@ -16,10 +16,12 @@ class HParams(object):
 
     def parse(self, string):
         # Overrides hparams from a comma-separated string of name=value pairs
-        overrides = [s.split("=") for s in string.split(",")]
-        keys, values = zip(*overrides)
-        for k in keys:
-            self.__dict__[k] = ast.literal_eval(values[keys.index(k)])
+        if len(string) > 0:
+            overrides = [s.split("=") for s in string.split(",")]
+            keys, values = zip(*overrides)
+            for k in keys:
+                self.__dict__[k] = ast.literal_eval(values[keys.index(k)])
+
         return self
 
 
