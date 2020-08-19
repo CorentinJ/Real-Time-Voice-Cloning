@@ -24,7 +24,7 @@ def time_string():
     return datetime.now().strftime("%Y-%m-%d %H:%M")
 
 def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
-         backup_every: int, force_restart:bool):
+         backup_every: int, force_restart:bool, hparams):
 
     syn_dir = Path(syn_dir)
     models_dir = Path(models_dir)
