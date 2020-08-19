@@ -19,7 +19,7 @@ def run_synthesis(in_dir, out_dir, model_dir):
     # Check for GPU
     if torch.cuda.is_available():
         device = torch.device("cuda")
-        if synthesis_batch_size % torch.cuda.device_count() != 0:
+        if hparams.synthesis_batch_size % torch.cuda.device_count() != 0:
             raise ValueError("`hparams.synthesis_batch_size` must be evenly divisible by n_gpus!")
     else:
         device = torch.device("cpu")
