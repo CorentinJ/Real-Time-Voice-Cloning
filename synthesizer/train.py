@@ -3,7 +3,6 @@ import torch.nn.functional as F
 from torch import optim
 from torch.utils.data import DataLoader
 from synthesizer import audio
-from synthesizer.hparams import hparams
 from synthesizer.models.tacotron import Tacotron
 from synthesizer.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
 from synthesizer.utils import ValueWindow, data_parallel_workaround

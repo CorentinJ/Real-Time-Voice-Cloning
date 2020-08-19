@@ -1,3 +1,4 @@
+from synthesizer.hparams import hparams
 from synthesizer.train import train
 from utils.argutils import print_args
 import argparse
@@ -22,8 +23,13 @@ if __name__ == "__main__":
         "model.")
     parser.add_argument("-f", "--force_restart", action="store_true", help= \
         "Do not load any saved model and restart from scratch.")
+    parser.add_argument("--hparams", default="",
+                        help="Hyperparameter overrides as a comma-separated list of name=value "
+							 "pairs")
     args = parser.parse_args()
     print_args(args, parser)
+
+    args.hparams = hparams.parse(args.hparams)
 
     # Run the training
     train(**vars(args))

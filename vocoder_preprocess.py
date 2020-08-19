@@ -1,4 +1,5 @@
 from synthesizer.synthesize import run_synthesis
+from synthesizer.hparams import hparams
 from utils.argutils import print_args
 import argparse
 import os
@@ -24,10 +25,14 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--out_dir", type=str, default=argparse.SUPPRESS, help= \
         "Path to the output vocoder directory that will contain the ground truth aligned mel "
         "spectrograms. Defaults to <datasets_root>/SV2TTS/vocoder/.")
+    parser.add_argument("--hparams", default="",
+                        help="Hyperparameter overrides as a comma-separated list of name=value "
+                             "pairs")
     parser.add_argument("--no_trim", action="store_true", help=\
         "Preprocess audio without trimming silences (not recommended).")
     args = parser.parse_args()
     print_args(args, parser)
+    modified_hp = hparams.parse(args.hparams)
     
     if not hasattr(args, "in_dir"):
         args.in_dir = os.path.join(args.datasets_root, "SV2TTS", "synthesizer")
@@ -44,5 +49,5 @@ if __name__ == "__main__":
                 "use --no_trim to disable this error message.")
     del args.no_trim
 
-    run_synthesis(args.in_dir, args.out_dir, args.model_dir)
+    run_synthesis(args.in_dir, args.out_dir, args.model_dir, modified_hp)
 

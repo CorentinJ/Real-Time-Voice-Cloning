@@ -22,6 +22,8 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--skip_existing", action="store_true", help=\
         "Whether to overwrite existing files with the same name. Useful if the preprocessing was "
         "interrupted.")
+    parser.add_argument("--hparams", type=str, default="", help=\
+        "Hyperparameter overrides as a comma-separated list of name-value pairs")
     parser.add_argument("--no_trim", action="store_true", help=\
         "Preprocess audio without trimming silences (not recommended).")
     parser.add_argument("--no_alignments", action="store_true", help=\
@@ -51,9 +53,7 @@ if __name__ == "__main__":
                 "use --no_trim to disable this error message.")
     del args.no_trim
 
-    # Add hparams to args
-    args.hparams = hparams
-
     # Preprocess the dataset
     print_args(args, parser)
+    args.hparams = hparams.parse(args.hparams)
     preprocess_dataset(**vars(args))

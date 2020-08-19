@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
-from synthesizer.hparams import hparams
+from synthesizer.hparams import hparams_debug_string
 from synthesizer.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
 from synthesizer.models.tacotron import Tacotron
 from synthesizer.utils.text import text_to_sequence
@@ -11,10 +11,11 @@ from tqdm import tqdm
 import os
 
 
-def run_synthesis(in_dir, out_dir, model_dir):
+def run_synthesis(in_dir, out_dir, model_dir, hparams):
     # This generates ground truth-aligned mels for vocoder training
     synth_dir = os.path.join(out_dir, "mels_gta")
     os.makedirs(synth_dir, exist_ok=True)
+    print(hparams_debug_string(hparams))
 
     # Check for GPU
     if torch.cuda.is_available():

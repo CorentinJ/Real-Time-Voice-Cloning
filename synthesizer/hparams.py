@@ -1,3 +1,4 @@
+import ast
 import pprint
 
 class HParams(object):
@@ -12,6 +13,14 @@ class HParams(object):
 
     def __repr__(self):
         return pprint.pformat(self.__dict__)
+
+    def parse(self, string):
+        # Overrides hparams from a comma-separated string of name=value pairs
+        overrides = [s.split("=") for s in string.split(",")]
+        keys, values = zip(*overrides)
+        for k in keys:
+            self.__dict__[k] = ast.literal_eval(values[keys.index(k)])
+        return self
 
 
 hparams = HParams(
@@ -91,3 +100,6 @@ hparams = HParams(
         symmetric_mels = True,                   # Sets mel range to [-max_abs_value, max_abs_value] if True,
                                                  #               and [0, max_abs_value] if False
         )
+
+def hparams_debug_string(hparams=hparams):
+    return str(hparams)
