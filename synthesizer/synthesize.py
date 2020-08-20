@@ -46,7 +46,7 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
     model_dir = Path(model_dir)
     model_fpath = model_dir.joinpath(model_dir.stem).with_suffix(".pt")
     print("\nLoading weights at %s" % model_fpath)
-    model.load(str(model_fpath))
+    model.load(model_fpath)
     print("Tacotron weights loaded from step %d" % model.step)
 
     # Synthesize using same reduction factor as the model is currently trained
