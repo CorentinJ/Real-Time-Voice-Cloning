@@ -235,8 +235,9 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
 def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
                plot_dir, mel_output_dir, wav_dir, sample_num, loss, hparams):
     # Save some results for evaluation
-    plot_alignment(attention, plot_dir.joinpath("attention_step_{}_sample_{}".format(step, sample_num)),
-                   title="{}, {}, step={}, loss={:.5f}".format("Tacotron", time_string(), step, loss),)
+    align_fpath = plot_dir.joinpath("attention_step_{}_sample_{}.png".format(step, sample_num))
+    title_str = "{}, {}, step={}, loss={:.5f}".format("Tacotron", time_string(), step, loss)
+    plot_alignment(attention, str(align_fpath), title=title_str)
 
     # save predicted mel spectrogram to disk (debug)
     mel_output_fpath = mel_output_dir.joinpath("mel-prediction-step-{}_sample_{}.npy".format(step, sample_num))
@@ -249,8 +250,7 @@ def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
 
     # save real and predicted mel-spectrogram plot to disk (control purposes)
     spec_fpath = plot_dir.joinpath("step-{}-mel-spectrogram_sample_{}.png".format(step, sample_num))
-    plot_spectrogram(mel_prediction, str(spec_fpath),
-                     title="{}, {}, step={}, loss={:.5f}".format("Tacotron", time_string(), step, loss),
+    plot_spectrogram(mel_prediction, str(spec_fpath), title=title_str,
                      target_spectrogram=target_spectrogram,
                      max_len=target_spectrogram.size // hparams.num_mels)
     print("Input at step {}: {}".format(step, sequence_to_text(input_seq)))
