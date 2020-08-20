@@ -196,7 +196,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
 
                 # Backup or save model as appropriate
                 if backup_every != 0 and step % backup_every == 0 : 
-                    backup_fpath = Path(f"{str(weights_fpath.parent)}/{run_id}_{k}k.pt")
+                    backup_fpath = Path("{}/{}_{}k.pt".format(str(weights_fpath.parent), run_id, k))
                     model.save(backup_fpath, optimizer)
 
                 if save_every != 0 and step % save_every == 0 : 
