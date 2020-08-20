@@ -6,7 +6,7 @@ from synthesizer import audio
 from synthesizer.models.tacotron import Tacotron
 from synthesizer.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
 from synthesizer.utils import ValueWindow, data_parallel_workaround
-from synthesizer.utils.plot import plot_spectrogram
+from synthesizer.utils.plot import plot_alignment, plot_spectrogram
 from synthesizer.utils.symbols import symbols
 from synthesizer.utils.text import sequence_to_text
 from vocoder.display import *
@@ -215,8 +215,9 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                             mel_length = int(dataset.metadata[idx[sample_idx]][4])
                             mel_prediction = np_now(m2_hat[sample_idx]).T[:mel_length]
                             target_spectrogram = np_now(m[sample_idx]).T[:mel_length]
+                            attention_len = mel_length // model.r
 
-                            eval_model(attention=np_now(attention[sample_idx][:, :160]),
+                            eval_model(attention=np_now(attention[sample_idx][:, :attention_len]),
                                        mel_prediction=mel_prediction,
                                        target_spectrogram=target_spectrogram,
                                        input_seq=np_now(x[sample_idx]),
@@ -234,7 +235,8 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
 def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
                plot_dir, mel_output_dir, wav_dir, sample_num, loss, hparams):
     # Save some results for evaluation
-    save_attention(attention, plot_dir.joinpath("attention_step_{}_sample_{}".format(step, sample_num)))
+    plot_alignment(attention, plot_dir.joinpath("attention_step_{}_sample_{}".format(step, sample_num)),
+                   title="{}, {}, step={}, loss={:.5f}".format("Tacotron", time_string(), step, loss),)
 
     # save predicted mel spectrogram to disk (debug)
     mel_output_fpath = mel_output_dir.joinpath("mel-prediction-step-{}_sample_{}.npy".format(step, sample_num))
