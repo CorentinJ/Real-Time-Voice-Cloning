@@ -220,13 +220,14 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                                        mel_output_dir=mel_output_dir,
                                        wav_dir=wav_dir,
                                        sample_num=sample_idx + 1,
-                                       loss=loss)
+                                       loss=loss,
+                                       hparams=hparams)
 
             # Add line break after every epoch
             print("")
 
 def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
-               plot_dir, mel_output_dir, wav_dir, sample_num, loss):
+               plot_dir, mel_output_dir, wav_dir, sample_num, loss, hparams):
     # Save some results for evaluation
     save_attention(attention, plot_dir.joinpath("attention_step_{}_sample_{}".format(step, sample_num)))
 
