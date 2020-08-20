@@ -156,10 +156,10 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
         epochs = np.ceil(training_steps / steps_per_epoch).astype(np.int32)
 
         for epoch in range(1, epochs+1):
-            for i, (x, m, e, _) in enumerate(data_loader, 1):
+            for i, (x, m, e, idx) in enumerate(data_loader, 1):
                 start_time = time.time()
 
-                #x = text, m = mel, e = embed
+                #x = text, m = mel, e = embed, idx = index (used later)
                 x, m, e = x.to(device), m.to(device), e.to(device)
 
                 # Forward pass
@@ -211,9 +211,14 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                     for sample_idx in range(hparams.tts_eval_num_samples):
                         # At most, generate samples equal to number in the batch
                         if sample_idx + 1 <= len(x):
+                            # Remove padding from mels using frame length in metadata
+                            mel_length = int(dataset.metadata[idx[sample_idx]][4])
+                            mel_prediction = np_now(m2_hat[sample_idx]).T[:mel_length]
+                            target_spectrogram = np_now(m[sample_idx]).T[:mel_length]
+
                             eval_model(attention=np_now(attention[sample_idx][:, :160]),
-                                       mel_prediction=np_now(m2_hat[sample_idx]).T,
-                                       target_spectrogram=np_now(m[sample_idx]).T,
+                                       mel_prediction=mel_prediction,
+                                       target_spectrogram=target_spectrogram,
                                        input_seq=np_now(x[sample_idx]),
                                        step=step,
                                        plot_dir=plot_dir,
