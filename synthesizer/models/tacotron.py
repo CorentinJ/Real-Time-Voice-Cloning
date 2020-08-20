@@ -482,7 +482,7 @@ class Tacotron(nn.Module):
     def load(self, path, optimizer=None):
         # Use device of model params as location for loaded state
         device = next(self.parameters()).device
-        checkpoint = torch.load(path, map_location=device)
+        checkpoint = torch.load(str(path), map_location=device)
         self.load_state_dict(checkpoint["model_state"])
 
         if "optimizer_state" in checkpoint and optimizer is not None:
@@ -493,11 +493,11 @@ class Tacotron(nn.Module):
             torch.save({
                 "model_state": self.state_dict(),
                 "optimizer_state": optimizer.state_dict(),
-            }, path)
+            }, str(path))
         else:
             torch.save({
                 "model_state": self.state_dict(),
-            }, path)
+            }, str(path))
 
 
     def num_params(self, print_out=True):
