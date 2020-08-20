@@ -34,7 +34,7 @@ SV2TTS is a three-stage deep learning framework that allows to create a numerica
 
 ### 1. Install Requirements
 
-**Python 3.6+** is needed to run the toolbox.
+**Python 3.6 or 3.7** is needed to run the toolbox.
 
 * Install [PyTorch](https://pytorch.org/get-started/locally/) (>=1.0.1).
 * Install [ffmpeg](https://ffmpeg.org/download.html#get-packages).
