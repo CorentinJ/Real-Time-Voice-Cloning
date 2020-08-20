@@ -49,6 +49,9 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
     model.load(model_fpath)
     print("Tacotron weights loaded from step %d" % model.step)
 
+    # Synthesize using same reduction factor as the model is currently trained
+    r = np.int32(model.r)
+
     # Set model to eval mode (disable gradient and zoneout)
     model.eval()
 
@@ -60,7 +63,7 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
 
     dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir)
     data_loader = DataLoader(dataset,
-                             collate_fn=lambda batch: collate_synthesizer(batch, model.r),
+                             collate_fn=lambda batch: collate_synthesizer(batch, r),
                              batch_size=hparams.synthesis_batch_size,
                              num_workers=2,
                              shuffle=False,
