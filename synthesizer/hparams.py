@@ -41,12 +41,12 @@ hparams = HParams(
         preemphasize = True,
 
         ### Tacotron Text-to-Speech (TTS)
-        tts_embed_dims = 512,                       # Embedding dimension for the graphemes/phoneme inputs
+        tts_embed_dims = 256,                       # Embedding dimension for the graphemes/phoneme inputs
         tts_encoder_dims = 128,
         tts_decoder_dims = 256,
         tts_postnet_dims = 128,
         tts_encoder_K = 16,
-        tts_lstm_dims = 1024,
+        tts_lstm_dims = 512,
         tts_postnet_K = 8,
         tts_num_highways = 4,
         tts_dropout = 0.5,
@@ -57,12 +57,12 @@ hparams = HParams(
                                                     # frame that has all values < -3.4
 
         ### Tacotron Training
-        tts_schedule = [(7,  1e-3,  20_000,  16),   # Progressive training schedule
-                        (6,  3e-4,  50_000,  16),   # (r, lr, step, batch_size)
-                        (5,  3e-4, 100_000,  10),   #
-                        (4,  3e-4, 200_000,  8),    # r = reduction factor (# of mel frames
-                        (3,  3e-4, 300_000,  6),    #     synthesized for each decoder iteration)
-                        (2,  3e-4, 500_000,  6)],   # lr = learning rate
+        tts_schedule = [(7,  1e-3,  20_000,  32),   # Progressive training schedule
+                        (6,  3e-4,  50_000,  28),   # (r, lr, step, batch_size)
+                        (5,  2e-4, 100_000,  22),   #
+                        (4,  1e-4, 200_000,  16),   # r = reduction factor (# of mel frames
+                        (3,  1e-4, 300_000,  12),   #     synthesized for each decoder iteration)
+                        (2,  1e-4, 600_000,  8)],   # lr = learning rate
 
         tts_clip_grad_norm = 1.0,                   # clips the gradient norm to prevent explosion - set to None if not needed
         tts_eval_interval = 2000,                   # Number of steps between model evaluation (sample generation)
