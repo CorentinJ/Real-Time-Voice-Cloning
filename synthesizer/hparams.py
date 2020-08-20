@@ -79,9 +79,7 @@ hparams = HParams(
         max_mel_frames = 900,                # if you have a couple of extremely long spectrograms you might want to use this
         rescale = True,
         rescaling_max = 0.9,
-        synthesis_batch_size = 32,           # For vocoder preprocessing only.
-                                             # Batch size can be larger that of training
-                                             # since not keeping track of gradients
+        synthesis_batch_size = 16,           # For vocoder preprocessing only.
 
         # Mel visualization and Griffin-Lim
         signal_normalization = True,
