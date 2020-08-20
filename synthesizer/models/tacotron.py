@@ -23,53 +23,19 @@ class HighwayNetwork(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, embed_dims, num_chars, cbhg_channels, K, num_highways, dropout,
-                 speaker_embedding_size):
+    def __init__(self, embed_dims, num_chars, cbhg_channels, K, num_highways, dropout):
         super().__init__()
         self.embedding = nn.Embedding(num_chars, embed_dims)
-        self.pre_net = PreNet(embed_dims, dropout=dropout)
+        self.pre_net = PreNet(embed_dims)
         self.cbhg = CBHG(K=K, in_channels=cbhg_channels, channels=cbhg_channels,
                          proj_channels=[cbhg_channels, cbhg_channels],
                          num_highways=num_highways)
-        self.num_chars = num_chars
-        self.speaker_embedding_size = speaker_embedding_size
 
-    def forward(self, x, speaker_embedding=None):
+    def forward(self, x):
         x = self.embedding(x)
         x = self.pre_net(x)
         x.transpose_(1, 2)
         x = self.cbhg(x)
-        if speaker_embedding is not None:
-            x = self.add_speaker_embedding(x, speaker_embedding)
-        return x
-
-    def add_speaker_embedding(self, x, speaker_embedding):
-        # SV2TTS
-        # The input x is the encoder output and is a 3D tensor with size (batch_size, num_chars, tts_embed_dims)
-        # When training, speaker_embedding is also a 2D tensor with size (batch_size, speaker_embedding_size)
-        #     (for inference, speaker_embedding is a 1D tensor with size (speaker_embedding_size))
-        # This concats the speaker embedding for each char in the encoder output
-
-        # Save the dimensions as human-readable names
-        batch_size = x.size()[0]
-        num_chars = x.size()[1]
-
-        if speaker_embedding.dim() == 1:
-            idx = 0
-        else:
-            idx = 1
-
-        # Start by making a copy of each speaker embedding to match the input text length
-        # The output of this has size (batch_size, num_chars * tts_embed_dims)
-        speaker_embedding_size = speaker_embedding.size()[idx]
-        e = speaker_embedding.repeat_interleave(num_chars, dim=idx)
-
-        # Reshape it and transpose
-        e = e.reshape(batch_size, speaker_embedding_size, num_chars)
-        e = e.transpose(1, 2)
-
-        # Concatenate the tiled speaker embedding with the encoder output
-        x = torch.cat((x, e), 2)
         return x
 
 
@@ -176,10 +142,10 @@ class PreNet(nn.Module):
     def forward(self, x):
         x = self.fc1(x)
         x = F.relu(x)
-        x = F.dropout(x, self.p, training=True)
+        x = F.dropout(x, self.p, training=self.training)
         x = self.fc2(x)
         x = F.relu(x)
-        x = F.dropout(x, self.p, training=True)
+        x = F.dropout(x, self.p, training=self.training)
         return x
 
 
@@ -243,11 +209,11 @@ class Decoder(nn.Module):
     # Class variable because its value doesn't change between classes
     # yet ought to be scoped by class because its a property of a Decoder
     max_r = 20
-    def __init__(self, n_mels, decoder_dims, lstm_dims, dropout):
+    def __init__(self, n_mels, decoder_dims, lstm_dims):
         super().__init__()
-        self.register_buffer("r", torch.tensor(1, dtype=torch.int))
+        self.register_buffer('r', torch.tensor(1, dtype=torch.int))
         self.n_mels = n_mels
-        self.prenet = PreNet(n_mels, dropout=dropout)
+        self.prenet = PreNet(n_mels)
         self.attn_net = LSA(decoder_dims)
         self.attn_rnn = nn.GRUCell(decoder_dims + decoder_dims // 2, decoder_dims)
         self.rnn_input = nn.Linear(2 * decoder_dims, lstm_dims)
@@ -314,25 +280,24 @@ class Decoder(nn.Module):
 
 
 class Tacotron(nn.Module):
-    def __init__(self, embed_dims, num_chars, encoder_dims, decoder_dims, n_mels, 
-                 fft_bins, postnet_dims, encoder_K, lstm_dims, postnet_K, num_highways,
-                 dropout, stop_threshold, speaker_embedding_size):
+    def __init__(self, embed_dims, num_chars, encoder_dims, decoder_dims, n_mels, fft_bins, postnet_dims,
+                 encoder_K, lstm_dims, postnet_K, num_highways, dropout, stop_threshold):
         super().__init__()
         self.n_mels = n_mels
         self.lstm_dims = lstm_dims
         self.decoder_dims = decoder_dims
-        self.encoder = Encoder(embed_dims, num_chars, encoder_dims, encoder_K,
-                               num_highways, dropout, speaker_embedding_size)
-        self.encoder_proj = nn.Linear(decoder_dims + speaker_embedding_size, decoder_dims, bias=False)
-        self.decoder = Decoder(n_mels, decoder_dims, lstm_dims, dropout)
+        self.encoder = Encoder(embed_dims, num_chars, encoder_dims,
+                               encoder_K, num_highways, dropout)
+        self.encoder_proj = nn.Linear(decoder_dims, decoder_dims, bias=False)
+        self.decoder = Decoder(n_mels, decoder_dims, lstm_dims)
         self.postnet = CBHG(postnet_K, n_mels, postnet_dims, [256, 80], num_highways)
         self.post_proj = nn.Linear(postnet_dims * 2, fft_bins, bias=False)
 
         self.init_model()
         self.num_params()
 
-        self.register_buffer("step", torch.zeros(1, dtype=torch.long))
-        self.register_buffer("stop_threshold", torch.tensor(stop_threshold, dtype=torch.float32))
+        self.register_buffer('step', torch.zeros(1, dtype=torch.long))
+        self.register_buffer('stop_threshold', torch.tensor(stop_threshold, dtype=torch.float32))
 
     @property
     def r(self):
@@ -342,10 +307,16 @@ class Tacotron(nn.Module):
     def r(self, value):
         self.decoder.r = self.decoder.r.new_tensor(value, requires_grad=False)
 
-    def forward(self, x, m, speaker_embedding):
+    def forward(self, x, m, generate_gta=False):
         device = next(self.parameters()).device  # use same device as parameters
 
         self.step += 1
+
+        if generate_gta:
+            self.eval()
+        else:
+            self.train()
+
         batch_size, _, steps  = m.size()
 
         # Initialise all hidden states and pack into tuple
@@ -365,13 +336,10 @@ class Tacotron(nn.Module):
         # Need an initial context vector
         context_vec = torch.zeros(batch_size, self.decoder_dims, device=device)
 
-        # SV2TTS: Run the encoder with the speaker embedding
-        encoder_out = self.encoder(x, speaker_embedding)
-
-        # SV2TTS: Reduce the size so this is transparent to the decoder
-        # This also avoids unnecessary matmuls in the decoder loop
-        encoder_seq = self.encoder_proj(encoder_out)
-        encoder_seq_proj = encoder_seq
+        # Project the encoder outputs to avoid
+        # unnecessary matmuls in the decoder loop
+        encoder_seq = self.encoder(x)
+        encoder_seq_proj = self.encoder_proj(encoder_seq)
 
         # Need a couple of lists for outputs
         mel_outputs, attn_scores = [], []
@@ -399,7 +367,7 @@ class Tacotron(nn.Module):
 
         return mel_outputs, linear, attn_scores
 
-    def generate(self, x, speaker_embedding=None, steps=2000):
+    def generate(self, x, steps=2000):
         self.eval()
         device = next(self.parameters()).device  # use same device as parameters
 
@@ -423,13 +391,10 @@ class Tacotron(nn.Module):
         # Need an initial context vector
         context_vec = torch.zeros(batch_size, self.decoder_dims, device=device)
 
-        # SV2TTS: Run the encoder with the speaker embedding
-        encoder_out = self.encoder(x, speaker_embedding)
-
-        # SV2TTS: Reduce the size so this is transparent to the decoder
-        # This also avoids unnecessary matmuls in the decoder loop
-        encoder_seq = self.encoder_proj(encoder_out)
-        encoder_seq_proj = encoder_seq
+        # Project the encoder outputs to avoid
+        # unnecessary matmuls in the decoder loop
+        encoder_seq = self.encoder(x)
+        encoder_seq_proj = self.encoder_proj(encoder_seq)
 
         # Need a couple of lists for outputs
         mel_outputs, attn_scores = [], []
@@ -476,33 +441,29 @@ class Tacotron(nn.Module):
         self.step = self.step.data.new_tensor(1)
 
     def log(self, path, msg):
-        with open(path, "a") as f:
+        with open(path, 'a') as f:
             print(msg, file=f)
 
-    def load(self, path, optimizer=None):
+    def load(self, path: Union[str, Path]):
         # Use device of model params as location for loaded state
         device = next(self.parameters()).device
-        checkpoint = torch.load(str(path), map_location=device)
-        self.load_state_dict(checkpoint["model_state"])
+        state_dict = torch.load(path, map_location=device)
 
-        if "optimizer_state" in checkpoint and optimizer is not None:
-            optimizer.load_state_dict(checkpoint["optimizer_state"])
+        # Backwards compatibility with old saved models
+        if 'r' in state_dict and not 'decoder.r' in state_dict:
+            self.r = state_dict['r']
 
-    def save(self, path, optimizer=None):
-        if optimizer is not None:
-            torch.save({
-                "model_state": self.state_dict(),
-                "optimizer_state": optimizer.state_dict(),
-            }, str(path))
-        else:
-            torch.save({
-                "model_state": self.state_dict(),
-            }, str(path))
+        self.load_state_dict(state_dict, strict=False)
 
+    def save(self, path: Union[str, Path]):
+        # No optimizer argument because saving a model should not include data
+        # only relevant in the training process - it should only be properties
+        # of the model itself. Let caller take care of saving optimzier state.
+        torch.save(self.state_dict(), path)
 
     def num_params(self, print_out=True):
         parameters = filter(lambda p: p.requires_grad, self.parameters())
         parameters = sum([np.prod(p.size()) for p in parameters]) / 1_000_000
         if print_out:
-            print("Trainable Parameters: %.3fM" % parameters)
+            print('Trainable Parameters: %.3fM' % parameters)
         return parameters
