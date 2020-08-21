@@ -313,7 +313,7 @@ class Decoder(nn.Module):
 class Tacotron(nn.Module):
     def __init__(self, embed_dims, num_chars, encoder_dims, decoder_dims, n_mels, 
                  fft_bins, postnet_dims, encoder_K, lstm_dims, postnet_K, num_highways,
-                 dropout, stop_threshold, speaker_embedding_size=0):
+                 dropout, stop_threshold, speaker_embedding_size):
         super().__init__()
         self.n_mels = n_mels
         self.lstm_dims = lstm_dims
@@ -339,7 +339,7 @@ class Tacotron(nn.Module):
     def r(self, value):
         self.decoder.r = self.decoder.r.new_tensor(value, requires_grad=False)
 
-    def forward(self, x, m, speaker_embedding=None):
+    def forward(self, x, m, speaker_embedding):
         device = next(self.parameters()).device  # use same device as parameters
 
         self.step += 1
