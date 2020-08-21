@@ -61,7 +61,7 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
     mel_dir = in_dir.joinpath("mels")
     embed_dir = in_dir.joinpath("embeds")
 
-    dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir)
+    dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
     data_loader = DataLoader(dataset,
                              collate_fn=lambda batch: collate_synthesizer(batch, r),
                              batch_size=hparams.synthesis_batch_size,

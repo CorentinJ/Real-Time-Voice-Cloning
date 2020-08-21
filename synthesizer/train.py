@@ -109,7 +109,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
     metadata_fpath = syn_dir.joinpath("train.txt")
     mel_dir = syn_dir.joinpath("mels")
     embed_dir = syn_dir.joinpath("embeds")
-    dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir)
+    dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
     test_loader = DataLoader(dataset,
                              batch_size=1,
                              shuffle=True,
