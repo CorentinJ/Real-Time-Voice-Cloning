@@ -23,16 +23,13 @@ class HighwayNetwork(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, embed_dims, num_chars, cbhg_channels, K, num_highways, dropout,
-                 speaker_embedding_size):
+    def __init__(self, embed_dims, num_chars, cbhg_channels, K, num_highways, dropout):
         super().__init__()
         self.embedding = nn.Embedding(num_chars, embed_dims)
         self.pre_net = PreNet(embed_dims, dropout=dropout)
         self.cbhg = CBHG(K=K, in_channels=cbhg_channels, channels=cbhg_channels,
                          proj_channels=[cbhg_channels, cbhg_channels],
                          num_highways=num_highways)
-        self.num_chars = num_chars
-        self.speaker_embedding_size = speaker_embedding_size
 
     def forward(self, x, speaker_embedding=None):
         x = self.embedding(x)
@@ -321,8 +318,8 @@ class Tacotron(nn.Module):
         self.n_mels = n_mels
         self.lstm_dims = lstm_dims
         self.decoder_dims = decoder_dims
-        self.encoder = Encoder(embed_dims, num_chars, encoder_dims, encoder_K,
-                               num_highways, dropout, speaker_embedding_size)
+        self.encoder = Encoder(embed_dims, num_chars, encoder_dims,
+                               encoder_K, num_highways, dropout)
         self.encoder_proj = nn.Linear(decoder_dims + speaker_embedding_size, decoder_dims, bias=False)
         self.decoder = Decoder(n_mels, decoder_dims, lstm_dims, dropout)
         self.postnet = CBHG(postnet_K, n_mels, postnet_dims, [256, 80], num_highways)
