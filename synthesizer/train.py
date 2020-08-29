@@ -12,7 +12,6 @@ from synthesizer.utils.text import sequence_to_text
 from vocoder.display import *
 from datetime import datetime
 import numpy as np
-import os
 from pathlib import Path
 import sys
 import time
@@ -156,22 +155,23 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
         epochs = np.ceil(training_steps / steps_per_epoch).astype(np.int32)
 
         for epoch in range(1, epochs+1):
-            for i, (x, m, e, idx) in enumerate(data_loader, 1):
+            for i, (texts, mels, embeds, idx) in enumerate(data_loader, 1):
                 start_time = time.time()
 
-                #x = text, m = mel, e = embed, idx = index (used later)
-                x, m, e = x.to(device), m.to(device), e.to(device)
+                texts = texts.to(device)
+                mels = mels.to(device)
+                embeds = embeds.to(device)
 
                 # Forward pass
                 # Parallelize model onto GPUS using workaround due to python bug
                 if device.type == "cuda" and torch.cuda.device_count() > 1:
-                    m1_hat, m2_hat, attention = data_parallel_workaround(model, x, m, e)
+                    m1_hat, m2_hat, attention = data_parallel_workaround(model, texts, mels, embeds)
                 else:
-                    m1_hat, m2_hat, attention = model(x, m, e)
+                    m1_hat, m2_hat, attention = model(texts, mels, embeds)
 
                 # Backward pass
-                m1_loss = F.l1_loss(m1_hat, m)
-                m2_loss = F.l1_loss(m2_hat, m)
+                m1_loss = F.l1_loss(m1_hat, mels)
+                m2_loss = F.l1_loss(m2_hat, mels)
 
                 loss = m1_loss + m2_loss
 
@@ -210,17 +210,17 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                 if epoch_eval or step_eval:
                     for sample_idx in range(hparams.tts_eval_num_samples):
                         # At most, generate samples equal to number in the batch
-                        if sample_idx + 1 <= len(x):
+                        if sample_idx + 1 <= len(texts):
                             # Remove padding from mels using frame length in metadata
                             mel_length = int(dataset.metadata[idx[sample_idx]][4])
                             mel_prediction = np_now(m2_hat[sample_idx]).T[:mel_length]
-                            target_spectrogram = np_now(m[sample_idx]).T[:mel_length]
+                            target_spectrogram = np_now(mels[sample_idx]).T[:mel_length]
                             attention_len = mel_length // model.r
 
                             eval_model(attention=np_now(attention[sample_idx][:, :attention_len]),
                                        mel_prediction=mel_prediction,
                                        target_spectrogram=target_spectrogram,
-                                       input_seq=np_now(x[sample_idx]),
+                                       input_seq=np_now(texts[sample_idx]),
                                        step=step,
                                        plot_dir=plot_dir,
                                        mel_output_dir=mel_output_dir,
