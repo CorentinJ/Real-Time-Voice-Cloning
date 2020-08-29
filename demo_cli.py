@@ -11,6 +11,7 @@ import librosa
 import argparse
 import torch
 import sys
+import os
 
 
 if __name__ == '__main__':
@@ -27,9 +28,8 @@ if __name__ == '__main__':
     parser.add_argument("-v", "--voc_model_fpath", type=Path, 
                         default="vocoder/saved_models/pretrained/pretrained.pt",
                         help="Path to a saved vocoder")
-    parser.add_argument("--low_mem", action="store_true", help=\
-        "If True, the memory used by the synthesizer will be freed after each use. Adds large "
-        "overhead but allows to save some GPU memory for lower-end GPUs.")
+    parser.add_argument("--cpu", action="store_true", help=\
+        "If True, processing is done on CPU, even when a GPU is available.")
     parser.add_argument("--no_sound", action="store_true", help=\
         "If True, audio won't be played.")
     parser.add_argument("--seed", type=int, default=None, help=\
@@ -38,6 +38,10 @@ if __name__ == '__main__':
     print_args(args, parser)
     if not args.no_sound:
         import sounddevice as sd
+
+    if args.cpu:
+        # Hide GPUs from Pytorch to force CPU processing
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
         
     print("Running a test of your configuration...\n")
     if torch.cuda.is_available():

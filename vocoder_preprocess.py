@@ -30,6 +30,8 @@ if __name__ == "__main__":
                              "pairs")
     parser.add_argument("--no_trim", action="store_true", help=\
         "Preprocess audio without trimming silences (not recommended).")
+    parser.add_argument("--cpu", action="store_true", help=\
+        "If True, processing is done on CPU, even when a GPU is available.")
     args = parser.parse_args()
     print_args(args, parser)
     modified_hp = hparams.parse(args.hparams)
@@ -38,6 +40,10 @@ if __name__ == "__main__":
         args.in_dir = os.path.join(args.datasets_root, "SV2TTS", "synthesizer")
     if not hasattr(args, "out_dir"):
         args.out_dir = os.path.join(args.datasets_root, "SV2TTS", "vocoder")
+
+    if args.cpu:
+        # Hide GPUs from Pytorch to force CPU processing
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
     
     # Verify webrtcvad is available
     if not args.no_trim:

@@ -15,18 +15,15 @@ class Synthesizer:
     sample_rate = hparams.sample_rate
     hparams = hparams
     
-    def __init__(self, model_fpath: Path, verbose=True, low_mem=False):
+    def __init__(self, model_fpath: Path, verbose=True):
         """
         The model isn't instantiated and loaded in memory until needed or until load() is called.
         
         :param model_fpath: path to the trained model file
         :param verbose: if False, prints less information when using the model
-        :param low_mem: if True, the resources used by the model will be released after each usage.
-        Adds a large overhead, only recommended if your GPU memory is low (<= 2gb)
         """
         self.model_fpath = model_fpath
         self.verbose = verbose
-        self._low_mem = low_mem
  
         # Check for GPU
         if torch.cuda.is_available():
@@ -84,7 +81,7 @@ class Synthesizer:
         :return: a list of N melspectrograms as numpy arrays of shape (80, Mi), where Mi is the 
         sequence length of spectrogram i, and possibly the alignments.
         """
-        # Load the model on the first request. For low_mem it is loaded every time.
+        # Load the model on the first request.
         if not self.is_loaded():
             self.load()
 
@@ -107,12 +104,6 @@ class Synthesizer:
             speaker_embedding = torch.tensor(embeddings[i-1]).float().to(self.device)
             _, m, alignments = self._model.generate(x, speaker_embedding)
             specs.append(m)
-
-        if self._low_mem:
-            # Low memory inference mode: delete model following every request.
-            # The model has to be instantiated and loaded on every use.
-            del self._model
-            self._model = None
 
         print("\n\nDone.\n")
         return (specs, alignments) if return_alignments else specs

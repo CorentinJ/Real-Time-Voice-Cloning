@@ -39,10 +39,9 @@ recognized_datasets = [
 MAX_WAVES = 15
 
 class Toolbox:
-    def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir, low_mem, seed):
+    def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir, seed):
         sys.excepthook = self.excepthook
         self.datasets_root = datasets_root
-        self.low_mem = low_mem
         self.utterances = set()
         self.current_generated = (None, None, None, None) # speaker_name, spec, breaks, wav
         
@@ -324,7 +323,7 @@ class Toolbox:
         self.ui.log("Loading the synthesizer %s... " % model_fpath)
         self.ui.set_loading(1)
         start = timer()
-        self.synthesizer = Synthesizer(model_fpath, low_mem=self.low_mem)
+        self.synthesizer = Synthesizer(model_fpath)
         self.ui.log("Done (%dms)." % int(1000 * (timer() - start)), "append")
         self.ui.set_loading(0)
            
