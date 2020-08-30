@@ -34,7 +34,7 @@ if __name__ == '__main__':
     if args.cpu:
         # Hide GPUs from Pytorch to force CPU processing
         os.environ["CUDA_VISIBLE_DEVICES"] = ""
-        del args.cpu
+    del args.cpu
 
     ## Remind the user to download pretrained models if needed
     check_model_paths(encoder_path=args.enc_models_dir, synthesizer_path=args.syn_models_dir,
