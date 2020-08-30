@@ -74,7 +74,7 @@ hparams = HParams(
         max_mel_frames = 900,
         rescale = True,
         rescaling_max = 0.9,
-        synthesis_batch_size = 16,                  # For vocoder preprocessing only.
+        synthesis_batch_size = 16,                  # For vocoder preprocessing and inference.
 
         ### Mel Visualization and Griffin-Lim
         signal_normalization = True,

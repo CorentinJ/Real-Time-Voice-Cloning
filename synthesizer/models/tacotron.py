@@ -401,8 +401,7 @@ class Tacotron(nn.Module):
         self.eval()
         device = next(self.parameters()).device  # use same device as parameters
 
-        batch_size = 1
-        x = torch.as_tensor(x, dtype=torch.long, device=device).unsqueeze(0)
+        batch_size, _  = x.size()
 
         # Need to initialise all hidden states and pack into tuple for tidyness
         attn_hidden = torch.zeros(batch_size, self.decoder_dims, device=device)
@@ -451,12 +450,10 @@ class Tacotron(nn.Module):
         linear = self.post_proj(postnet_out)
 
 
-        linear = linear.transpose(1, 2)[0].cpu().data.numpy()
-        mel_outputs = mel_outputs[0].cpu().data.numpy()
+        linear = linear.transpose(1, 2)
 
         # For easy visualisation
         attn_scores = torch.cat(attn_scores, 1)
-        attn_scores = attn_scores.cpu().data.numpy()[0]
 
         self.train()
 

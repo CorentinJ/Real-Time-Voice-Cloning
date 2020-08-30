@@ -91,21 +91,46 @@ class Synthesizer:
             simple_table([("Tacotron", str(tts_k) + "k"),
                         ("r", self._model.r)])
 
-
+        # Preprocess text inputs
         inputs = [text_to_sequence(text.strip(), hparams.tts_cleaner_names) for text in texts]
         if not isinstance(embeddings, list):
             embeddings = [embeddings]
 
+        # Batch inputs
+        batched_inputs = [inputs[i:i+hparams.synthesis_batch_size]
+                             for i in range(0, len(inputs), hparams.synthesis_batch_size)]
+        batched_embeds = [embeddings[i:i+hparams.synthesis_batch_size]
+                             for i in range(0, len(embeddings), hparams.synthesis_batch_size)]
+
         specs = []
-        for i, x in enumerate(inputs, 1):
+        for i, batch in enumerate(batched_inputs, 1):
+            if len(batched_inputs) > 1 and self.verbose:
+                print(f"\n| Generating {i}/{len(batched_inputs)}")
 
-            print(f"\n| Generating {i}/{len(inputs)}")
+            # Pad texts so they are all the same length
+            text_lens = [len(text) for text in batch]
+            max_text_len = max(text_lens)
+            chars = [pad1d(text, max_text_len) for text in batch]
+            chars = np.stack(chars)
 
-            speaker_embedding = torch.tensor(embeddings[i-1]).float().to(self.device)
-            _, m, alignments = self._model.generate(x, speaker_embedding)
-            specs.append(m)
+            # Stack speaker embeddings into 2D array for batch processing
+            speaker_embeds = np.stack(batched_embeds[i-1])
 
-        print("\n\nDone.\n")
+            # Convert to tensor
+            chars = torch.tensor(chars).long().to(self.device)
+            speaker_embeddings = torch.tensor(speaker_embeds).float().to(self.device)
+
+            # Inference
+            _, mels, alignments = self._model.generate(chars, speaker_embeddings)
+            mels = mels.detach().cpu().numpy()
+            for m in mels:
+                # Trim silence from end of each spectrogram
+                while np.max(m[:, -1]) < hparams.tts_stop_threshold:
+                    m = m[:, :-1]
+                specs.append(m)
+
+        if self.verbose:
+            print("\n\nDone.\n")
         return (specs, alignments) if return_alignments else specs
 
     @staticmethod
@@ -140,3 +165,7 @@ class Synthesizer:
         with the same parameters present in hparams.py.
         """
         return audio.inv_mel_spectrogram(mel, hparams)
+
+
+def pad1d(x, max_len, pad_value=0):
+    return np.pad(x, (0, max_len - len(x)), mode="constant", constant_values=pad_value)
