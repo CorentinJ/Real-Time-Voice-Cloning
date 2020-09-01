@@ -9,7 +9,8 @@ import numpy as np
 import traceback
 import sys
 import torch
-
+import librosa
+from audioread.exceptions import NoBackendError
 
 # Use this directory structure for your datasets, or modify it to fit your needs
 recognized_datasets = [
@@ -39,7 +40,14 @@ recognized_datasets = [
 MAX_WAVES = 15
 
 class Toolbox:
-    def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir, low_mem, seed):
+    def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir, low_mem, seed, no_mp3_support):
+        if not no_mp3_support:
+            try:
+                librosa.load(r"sample\sample_MP3.mp3")
+            except NoBackendError:
+                print("NoBackendError Exceptions raised please Install ffmpeg or rerun using no_mp3_support")
+                exit(-1)
+
         sys.excepthook = self.excepthook
         self.datasets_root = datasets_root
         self.low_mem = low_mem
@@ -64,7 +72,7 @@ class Toolbox:
         self.reset_ui(enc_models_dir, syn_models_dir, voc_models_dir, seed)
         self.setup_events()
         self.ui.start()
-        
+
     def excepthook(self, exc_type, exc_value, exc_tb):
         traceback.print_exception(exc_type, exc_value, exc_tb)
         self.ui.log("Exception: %s" % exc_value)
@@ -149,7 +157,11 @@ class Toolbox:
         else:
             name = fpath.name
             speaker_name = fpath.parent.name
-        
+
+        if (str(fpath)[-3:] == "mp3"):
+                print("Error: No mp3 file argument was passed but an mp3 file was used")
+                exit(-1)
+
         # Get the wav from the disk. We take the wav with the vocoder/synthesizer format for
         # playback, so as to have a fair comparison with the generated audio
         wav = Synthesizer.load_preprocess_wav(fpath)
