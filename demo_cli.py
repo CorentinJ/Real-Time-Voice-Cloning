@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
             if (str(in_fpath)[-3:] == "mp3"):
                 print("Can't Use mp3 files please try again:")
-                in_fpath = Path(input(message).replace("\"", "").replace("\'", ""))
+                continue
             ## Computing the embedding
             # First, we load the wav using the function that the speaker encoder provides. This is 
             # important: there is preprocessing that must be applied.
