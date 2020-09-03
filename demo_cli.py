@@ -11,7 +11,7 @@ import librosa
 import argparse
 import torch
 import sys
-
+from audioread.exceptions import NoBackendError
 
 if __name__ == '__main__':
     ## Info & args
@@ -34,12 +34,23 @@ if __name__ == '__main__':
         "If True, audio won't be played.")
     parser.add_argument("--seed", type=int, default=None, help=\
         "Optional random number seed value to make toolbox deterministic.")
+    parser.add_argument("--no_mp3_support", action="store_true", help=\
+        "If True, disallows loading mp3 files to prevent audioread errors when ffmpeg is not installed.")
     args = parser.parse_args()
     print_args(args, parser)
     if not args.no_sound:
         import sounddevice as sd
+
+    if not args.no_mp3_support:
+        try:
+            librosa.load("samples/1320_00000.mp3")
+        except NoBackendError:
+            print("Librosa will be unable to open mp3 files if additional software is not installed.\n"
+                  "Please install ffmpeg or add the '--no_mp3_support' option to proceed without support for mp3 files.")
+            exit(-1)
         
     print("Running a test of your configuration...\n")
+        
     if torch.cuda.is_available():
         device_id = torch.cuda.current_device()
         gpu_properties = torch.cuda.get_device_properties(device_id)
@@ -123,8 +134,10 @@ if __name__ == '__main__':
             message = "Reference voice: enter an audio filepath of a voice to be cloned (mp3, " \
                       "wav, m4a, flac, ...):\n"
             in_fpath = Path(input(message).replace("\"", "").replace("\'", ""))
-            
-            
+
+            if in_fpath.suffix.lower() == ".mp3" and args.no_mp3_support:
+                print("Can't Use mp3 files please try again:")
+                continue
             ## Computing the embedding
             # First, we load the wav using the function that the speaker encoder provides. This is 
             # important: there is preprocessing that must be applied.
