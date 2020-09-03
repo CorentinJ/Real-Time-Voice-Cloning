@@ -203,6 +203,12 @@ def process_utterance(wav: np.ndarray, text: str, out_dir: Path, basename: str,
     if skip_existing and mel_fpath.exists() and wav_fpath.exists():
         return None
     
+    # Remove silences from utterance
+    if hparams.trim_silences:
+        wav = encoder.preprocess_wav(wav)
+        if len(wav) == 0:
+            return None
+
     # Skip utterances that are too short
     if len(wav) < hparams.utterance_min_duration * hparams.sample_rate:
         return None
