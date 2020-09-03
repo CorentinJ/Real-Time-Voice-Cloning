@@ -35,7 +35,7 @@ if __name__ == '__main__':
     parser.add_argument("--seed", type=int, default=None, help=\
         "Optional random number seed value to make toolbox deterministic.")
     parser.add_argument("--no_mp3_support", action="store_true", help=\
-        "If True, no mp3 files are allowed.")
+        "If True, disallows loading mp3 files to prevent audioread errors when ffmpeg is not installed.")
     args = parser.parse_args()
     print_args(args, parser)
     if not args.no_sound:
