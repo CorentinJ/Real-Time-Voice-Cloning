@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     if not args.no_mp3_support:
         try:
-            librosa.load("samples/sample_MP3.mp3")
+            librosa.load("samples/1320_00000.mp3")
         except NoBackendError:
             print("Librosa will be unable to open mp3 files if additional software is not installed.\n"
                   "Please install ffmpeg or add the '--no_mp3_support' option to proceed without support for mp3 files.")
