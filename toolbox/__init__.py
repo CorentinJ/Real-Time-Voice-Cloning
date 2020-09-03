@@ -161,7 +161,7 @@ class Toolbox:
 
         if fpath.suffix.lower() == ".mp3" and self.no_mp3_support:
                 self.ui.log("Error: No mp3 file argument was passed but an mp3 file was used")
-                exit(-1)
+                return
 
         # Get the wav from the disk. We take the wav with the vocoder/synthesizer format for
         # playback, so as to have a fair comparison with the generated audio
