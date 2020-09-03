@@ -158,7 +158,7 @@ class Toolbox:
             name = fpath.name
             speaker_name = fpath.parent.name
 
-        if (str(fpath)[-3:] == "mp3"):
+        if fpath.suffix.lower() == ".mp3" and self.no_mp3_support:
                 self.ui.log("Error: No mp3 file argument was passed but an mp3 file was used")
                 exit(-1)
 
