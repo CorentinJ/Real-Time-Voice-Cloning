@@ -159,7 +159,7 @@ class Toolbox:
             speaker_name = fpath.parent.name
 
         if (str(fpath)[-3:] == "mp3"):
-                print("Error: No mp3 file argument was passed but an mp3 file was used")
+                self.ui.log("Error: No mp3 file argument was passed but an mp3 file was used")
                 exit(-1)
 
         # Get the wav from the disk. We take the wav with the vocoder/synthesizer format for
