@@ -85,6 +85,7 @@ hparams = HParams(
         speaker_embedding_size = 256,               # Dimension for the speaker embedding
         silence_min_duration_split = 0.4,           # Duration in seconds of a silence for an utterance to be split
         utterance_min_duration = 1.6,               # Duration in seconds below which utterances are discarded
+        trim_silences = True,                       # If true, removes silence when preprocessing
         )
 
 def hparams_debug_string():
