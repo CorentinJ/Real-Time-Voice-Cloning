@@ -104,7 +104,7 @@ class Synthesizer:
 
         specs = []
         for i, batch in enumerate(batched_inputs, 1):
-            if len(batched_inputs) > 1 and self.verbose:
+            if self.verbose:
                 print(f"\n| Generating {i}/{len(batched_inputs)}")
 
             # Pad texts so they are all the same length
