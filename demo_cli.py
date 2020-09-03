@@ -135,7 +135,7 @@ if __name__ == '__main__':
                       "wav, m4a, flac, ...):\n"
             in_fpath = Path(input(message).replace("\"", "").replace("\'", ""))
 
-            if fpath.suffix.lower() == ".mp3" and args.no_mp3_support:
+            if in_fpath.suffix.lower() == ".mp3" and args.no_mp3_support:
                 print("Can't Use mp3 files please try again:")
                 continue
             ## Computing the embedding
