@@ -28,6 +28,8 @@ if __name__ == '__main__':
         "If True, processing is done on CPU, even when a GPU is available.")
     parser.add_argument("--seed", type=int, default=None, help=\
         "Optional random number seed value to make toolbox deterministic.")
+    parser.add_argument("--no_mp3_support", action="store_true", help=\
+        "If True, no mp3 files are allowed.")
     args = parser.parse_args()
     print_args(args, parser)
 
