@@ -168,7 +168,7 @@ if __name__ == '__main__':
             # If seed is specified, reset torch seed and force synthesizer reload
             if args.seed is not None:
                 torch.manual_seed(args.seed)
-                synthesizer = Synthesizer(args.syn_model_fpath, low_mem=args.low_mem)
+                synthesizer = Synthesizer(args.syn_model_fpath)
 
             # The synthesizer works in batch, so you need to put your data in a list or numpy array
             texts = [text]
