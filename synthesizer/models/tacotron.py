@@ -23,10 +23,13 @@ class HighwayNetwork(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, embed_dims, num_chars, cbhg_channels, K, num_highways, dropout):
+    def __init__(self, embed_dims, num_chars, encoder_dims, K, num_highways, dropout):
         super().__init__()
+        prenet_dims = (encoder_dims * 2, encoder_dims)
+        cbhg_channels = encoder_dims
         self.embedding = nn.Embedding(num_chars, embed_dims)
-        self.pre_net = PreNet(embed_dims, dropout=dropout)
+        self.pre_net = PreNet(embed_dims, fc1_dims=prenet_dims[0], fc2_dims=prenet_dims[1],
+                              dropout=dropout)
         self.cbhg = CBHG(K=K, in_channels=cbhg_channels, channels=cbhg_channels,
                          proj_channels=[cbhg_channels, cbhg_channels],
                          num_highways=num_highways)
@@ -240,14 +243,16 @@ class Decoder(nn.Module):
     # Class variable because its value doesn't change between classes
     # yet ought to be scoped by class because its a property of a Decoder
     max_r = 20
-    def __init__(self, n_mels, decoder_dims, lstm_dims, dropout):
+    def __init__(self, n_mels, decoder_dims, lstm_dims, dropout, speaker_embedding_size):
         super().__init__()
         self.register_buffer("r", torch.tensor(1, dtype=torch.int))
         self.n_mels = n_mels
-        self.prenet = PreNet(n_mels, dropout=dropout)
+        prenet_dims = (decoder_dims, decoder_dims // 2)
+        self.prenet = PreNet(n_mels, fc1_dims=prenet_dims[0], fc2_dims=prenet_dims[1],
+                             dropout=dropout)
         self.attn_net = LSA(decoder_dims)
-        self.attn_rnn = nn.GRUCell(decoder_dims + decoder_dims // 2, decoder_dims)
-        self.rnn_input = nn.Linear(2 * decoder_dims, lstm_dims)
+        self.attn_rnn = nn.GRUCell(decoder_dims + prenet_dims[1] + speaker_embedding_size, decoder_dims)
+        self.rnn_input = nn.Linear(2 * decoder_dims + speaker_embedding_size, lstm_dims)
         self.res_rnn1 = nn.LSTMCell(lstm_dims, lstm_dims)
         self.res_rnn2 = nn.LSTMCell(lstm_dims, lstm_dims)
         self.mel_proj = nn.Linear(lstm_dims, n_mels * self.max_r, bias=False)
@@ -318,10 +323,11 @@ class Tacotron(nn.Module):
         self.n_mels = n_mels
         self.lstm_dims = lstm_dims
         self.decoder_dims = decoder_dims
+        self.speaker_embedding_size = speaker_embedding_size
         self.encoder = Encoder(embed_dims, num_chars, encoder_dims,
                                encoder_K, num_highways, dropout)
         self.encoder_proj = nn.Linear(decoder_dims + speaker_embedding_size, decoder_dims, bias=False)
-        self.decoder = Decoder(n_mels, decoder_dims, lstm_dims, dropout)
+        self.decoder = Decoder(n_mels, decoder_dims, lstm_dims, dropout, speaker_embedding_size)
         self.postnet = CBHG(postnet_K, n_mels, postnet_dims,
                             [postnet_dims * 2, fft_bins], num_highways)
         self.post_proj = nn.Linear(postnet_dims * 2, fft_bins, bias=False)
@@ -361,15 +367,12 @@ class Tacotron(nn.Module):
         go_frame = torch.zeros(batch_size, self.n_mels, device=device)
 
         # Need an initial context vector
-        context_vec = torch.zeros(batch_size, self.decoder_dims, device=device)
+        context_vec = torch.zeros(batch_size, self.decoder_dims + self.speaker_embedding_size, device=device)
 
         # SV2TTS: Run the encoder with the speaker embedding
-        encoder_out = self.encoder(x, speaker_embedding)
-
-        # SV2TTS: Reduce the size so this is transparent to the decoder
-        # This also avoids unnecessary matmuls in the decoder loop
-        encoder_seq = self.encoder_proj(encoder_out)
-        encoder_seq_proj = encoder_seq
+        # The projection avoids unnecessary matmuls in the decoder loop
+        encoder_seq = self.encoder(x, speaker_embedding)
+        encoder_seq_proj = self.encoder_proj(encoder_seq)
 
         # Need a couple of lists for outputs
         mel_outputs, attn_scores = [], []
@@ -418,15 +421,12 @@ class Tacotron(nn.Module):
         go_frame = torch.zeros(batch_size, self.n_mels, device=device)
 
         # Need an initial context vector
-        context_vec = torch.zeros(batch_size, self.decoder_dims, device=device)
+        context_vec = torch.zeros(batch_size, self.decoder_dims + self.speaker_embedding_size, device=device)
 
         # SV2TTS: Run the encoder with the speaker embedding
-        encoder_out = self.encoder(x, speaker_embedding)
-
-        # SV2TTS: Reduce the size so this is transparent to the decoder
-        # This also avoids unnecessary matmuls in the decoder loop
-        encoder_seq = self.encoder_proj(encoder_out)
-        encoder_seq_proj = encoder_seq
+        # The projection avoids unnecessary matmuls in the decoder loop
+        encoder_seq = self.encoder(x, speaker_embedding)
+        encoder_seq_proj = self.encoder_proj(encoder_seq)
 
         # Need a couple of lists for outputs
         mel_outputs, attn_scores = [], []
