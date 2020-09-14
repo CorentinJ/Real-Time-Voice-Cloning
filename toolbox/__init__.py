@@ -72,7 +72,7 @@ class Toolbox:
         
         user_audio = os.path.join(self.datasets_root, "UserAudio")
         for folder in os.listdir(user_audio):
-            if os.path.isfile(os.path.join(user_audio, folder)):
+            if not os.path.isdir(os.path.join(user_audio, folder)):
                 recognized_datasets.append(os.path.join("UserAudio", folder))
 
         # Initialize the events and the interface
