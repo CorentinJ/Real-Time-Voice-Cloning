@@ -8,10 +8,12 @@ from toolbox.utterance import Utterance
 import numpy as np
 import traceback
 import sys
+import os
 import torch
 import librosa
 from audioread.exceptions import NoBackendError
 
+    
 # Use this directory structure for your datasets, or modify it to fit your needs
 recognized_datasets = [
     "LibriSpeech/dev-clean",
@@ -67,6 +69,11 @@ class Toolbox:
             self.trim_silences = True
         except:
             self.trim_silences = False
+        
+        user_audio = os.path.join(self.datasets_root, "UserAudio")
+        for folder in os.listdir(user_audio):
+            if os.path.isfile(os.path.join(user_audio, folder)):
+                recognized_datasets.append(os.path.join("UserAudio", folder))
 
         # Initialize the events and the interface
         self.ui = UI()
