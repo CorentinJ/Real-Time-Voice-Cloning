@@ -280,7 +280,7 @@ class UI(QDialog):
                     if datasets_root is None else "o not have any of the recognized datasets" \
                                                   " in %s" % datasets_root) 
                 self.log(msg)
-                msg += ".\nThe recognized datasets are:\n\t%s\nFeel free to add your own. You " \
+                msg += ".\nThe recognized datasets are:\n\t%s\nFeel free to add your own with the UserAudio directory. You " \
                        "can still use the toolbox by recording samples yourself." % \
                        ("\n\t".join(recognized_datasets))
                 print(msg, file=sys.stderr)
