@@ -74,7 +74,7 @@ class Toolbox:
         # Check for audio supplied by user
         user_audio = os.path.join(self.datasets_root, "UserAudio")
         
-        if os.path.isfile(user_audio):
+        if os.path.isdir(user_audio):
             for folder in os.listdir(user_audio):
                 if os.path.isdir(os.path.join(user_audio, folder)):
                     recognized_datasets.append(os.path.join("UserAudio", folder))
