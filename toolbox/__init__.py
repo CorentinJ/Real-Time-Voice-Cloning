@@ -71,10 +71,13 @@ class Toolbox:
         except:
             self.trim_silences = False
         
+        # Check for audio supplied by user
         user_audio = os.path.join(self.datasets_root, "UserAudio")
-        for folder in os.listdir(user_audio):
-            if os.path.isdir(os.path.join(user_audio, folder)):
-                recognized_datasets.append(os.path.join("UserAudio", folder))
+        
+        if os.path.isfile(user_audio):
+            for folder in os.listdir(user_audio):
+                if os.path.isdir(os.path.join(user_audio, folder)):
+                    recognized_datasets.append(os.path.join("UserAudio", folder))
 
         # Initialize the events and the interface
         self.ui = UI()
