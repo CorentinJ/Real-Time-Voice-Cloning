@@ -99,15 +99,15 @@ class Synthesizer:
             # loaded in a separate process to be able to release GPU memory (a simple workaround 
             # to tensorflow's intricacies)
             specs, alignments = Pool(1, context=SpawnContext()).starmap(Synthesizer._one_shot_synthesize_spectrograms,
-                                                [(self.checkpoint_fpath, embeddings, texts)])[0]
+                                                [(self.checkpoint_fpath, embeddings, texts, self._seed)])[0]
     
         return (specs, alignments) if return_alignments else specs
 
     @staticmethod
-    def _one_shot_synthesize_spectrograms(checkpoint_fpath, embeddings, texts):
+    def _one_shot_synthesize_spectrograms(checkpoint_fpath, embeddings, texts, seed):
         # Load the model and forward the inputs
         tf.compat.v1.reset_default_graph()
-        model = Tacotron2(checkpoint_fpath, hparams, seed=self._seed)
+        model = Tacotron2(checkpoint_fpath, hparams, seed=seed)
         specs, alignments = model.my_synthesize(embeddings, texts)
         
         # Detach the outputs (not doing so will cause the process to hang)
