@@ -2,6 +2,7 @@ from synthesizer.tacotron2 import Tacotron2
 from synthesizer.hparams import hparams
 from multiprocess.pool import Pool  # You're free to use either one
 #from multiprocessing import Pool   # 
+from multiprocess.context import SpawnContext
 from synthesizer import audio
 from pathlib import Path
 from typing import Union, List
@@ -97,7 +98,7 @@ class Synthesizer:
             # Low memory inference mode: load the model upon every request. The model has to be 
             # loaded in a separate process to be able to release GPU memory (a simple workaround 
             # to tensorflow's intricacies)
-            specs, alignments = Pool(1).starmap(Synthesizer._one_shot_synthesize_spectrograms, 
+            specs, alignments = Pool(1, context=SpawnContext()).starmap(Synthesizer._one_shot_synthesize_spectrograms,
                                                 [(self.checkpoint_fpath, embeddings, texts)])[0]
     
         return (specs, alignments) if return_alignments else specs
