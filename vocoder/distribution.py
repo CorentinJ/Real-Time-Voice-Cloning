@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 
 def log_sum_exp(x):
-    """ numerically stable log_sum_exp implementation that prevents overflow """
+    
     # TF ordering
     axis = len(x.size()) - 1
     m, _ = torch.max(x, dim=axis)
