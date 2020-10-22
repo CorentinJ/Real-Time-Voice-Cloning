@@ -11,13 +11,29 @@ import vocoder.hparams as hp
 import numpy as np
 import time
 import torch
-
+import os
+import wandb
 
 def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_truth: bool,
           save_every: int, backup_every: int, force_restart: bool):
     # Check to make sure the hop length is correctly factorised
     assert np.cumprod(hp.voc_upsample_factors)[-1] == hp.hop_length
     
+    wandb_disabled = os.environ.get('WANDB_DISABLED')
+    if wandb_disabled == 'true':
+        wandb_log = False
+    else:
+        wandb_log = True
+    print("Automatic Weights & Biases logging enabled, to disable set os.environ['WANDB_DISABLED'] = 'true'")
+    if wandb_log and wandb.run is None:
+        config = { 'rnn_dims': hp.voc_rnn_dims, 'fc_dims': hp.voc_fc_dims,
+                    'bits': hp.bits, 'pad': hp.voc_pad, 
+                    'upsample_factors': hp.voc_upsample_factors, 'feat_dims': hp.num_mels,
+                    'feat_dims': hp.num_mels, 'compute_dims': hp.voc_compute_dims,
+                    'res_out_dims': hp.voc_res_out_dims, 'res_blocks': hp.voc_res_blocks,
+                    'hop_length': hp.hop_length, 'sample_rate': hp.sample_rate,
+                    'mode': hp.voc_mode}
+        wandb.init(project='Voice-cloning', group=run_id, name='vocoder',config=config)
     # Instantiate the model
     print("Initializing the model...")
     model = WaveRNN(
@@ -120,8 +136,11 @@ def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_tr
                 f"Loss: {avg_loss:.4f} | {speed:.1f} " \
                 f"steps/s | Step: {k}k | "
             stream(msg)
+            
+            if wandb.run:
+                wandb.log({"Loss": avg_loss, "Steps/s": k})
 
 
         gen_testset(model, test_loader, hp.voc_gen_at_checkpoint, hp.voc_gen_batched,
                     hp.voc_target, hp.voc_overlap, model_dir)
-        print("")
+        

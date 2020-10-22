@@ -12,9 +12,9 @@ import numpy as np
 import traceback
 import time
 import os
+import wandb
 
 log = infolog.log
-
 
 def add_embedding_stats(summary_writer, embedding_names, paths_to_meta, checkpoint_path):
     # Create tensorboard projector
@@ -37,11 +37,13 @@ def add_train_stats(model, hparams):
         for i in range(hparams.tacotron_num_gpus):
             tf.compat.v1.summary.histogram("mel_outputs %d" % i, model.tower_mel_outputs[i])
             tf.compat.v1.summary.histogram("mel_targets %d" % i, model.tower_mel_targets[i])
+                    
         tf.compat.v1.summary.scalar("before_loss", model.before_loss)
         tf.compat.v1.summary.scalar("after_loss", model.after_loss)
         
         if hparams.predict_linear:
             tf.compat.v1.summary.scalar("linear_loss", model.linear_loss)
+                
             for i in range(hparams.tacotron_num_gpus):
                 tf.compat.v1.summary.histogram("mel_outputs %d" % i, model.tower_linear_outputs[i])
                 tf.compat.v1.summary.histogram("mel_targets %d" % i, model.tower_linear_targets[i])
@@ -57,6 +59,7 @@ def add_train_stats(model, hparams):
         tf.compat.v1.summary.histogram("gradient_norm", gradient_norms)
         tf.compat.v1.summary.scalar("max_gradient_norm", tf.reduce_max(input_tensor=gradient_norms))  # visualize
         # gradients (in case of explosion)
+
         return tf.compat.v1.summary.merge_all()
 
 
@@ -212,6 +215,10 @@ def train(log_dir, args, hparams):
                 loss_window.append(loss)
                 message = "Step {:7d} [{:.3f} sec/step, loss={:.5f}, avg_loss={:.5f}]".format(
                     step, time_window.average, loss, loss_window.average)
+                
+                if wandb.run:
+                    wandb.log({"Loss": loss, "Avg Loss": loss_window.average})
+                    
                 log(message, end="\r", slack=(step % args.checkpoint_interval == 0))
                 print(message)
                 
@@ -222,6 +229,9 @@ def train(log_dir, args, hparams):
                 if step % args.summary_interval == 0:
                     log("\nWriting summary at step {}".format(step))
                     summary_writer.add_summary(sess.run(stats), step)
+                    if wandb.run:
+                        wandb.tensorboard.log(sess.run(stats))
+                    
                 
                 if step % args.eval_interval == 0:
                     # Run eval and save eval stats
@@ -291,7 +301,7 @@ def train(log_dir, args, hparams):
                     audio.save_wav(wav, os.path.join(eval_wav_dir,
                                                      "step-{}-eval-wave-from-mel.wav".format(step)),
                                    sr=hparams.sample_rate)
-                    
+                        
                     plot.plot_alignment(align, os.path.join(eval_plot_dir,
                                                             "step-{}-eval-align.png".format(step)),
                                         title="{}, {}, step={}, loss={:.5f}".format("Tacotron",
@@ -318,6 +328,30 @@ def train(log_dir, args, hparams):
                                                   "Tacotron", time_string(), step, eval_loss),
                                               target_spectrogram=lin_t,
                                               max_len=t_len, auto_aspect=True)
+                    
+                    if wandb.run:
+                        wandb.log({"Evalutation Loss": eval_loss,
+                                   "Before Loss": before_loss,
+                                   "After Loss": after_loss,
+                                   "stop_token_loss": stop_token_loss,
+                                   "Eval wave from mel": wandb.Audio(os.path.join(eval_wav_dir,
+                                                         "step-{}-eval-wave-from-mel.wav".format(
+                                                             step))),
+                                   "Eval Alignment": wandb.Image(os.path.join(eval_plot_dir,
+                                                            "step-{}-eval-align.png".format(step))),
+                                   "Eval Mel Spectrogram": wandb.Image( os.path.join(eval_plot_dir,
+                                                              "step-{"
+															  "}-eval-mel-spectrogram.png".format(
+                                                                  step)))
+                                   
+                                  })
+                        if hparams.predict_linear:
+                                wandb.log({"Eval Linear Spectrogram": wandb.Image( 
+                                                                    "step-{}-eval-linear-spectrogram.png".format(step)),
+                                           "Eval wave from linear": wandb.Audio(os.path.join(eval_wav_dir,
+                                                         "step-{}-eval-wave-from-linear.wav".format(
+                                                             step)))})
+                    
                     
                     log("Eval loss for global step {}: {:.3f}".format(step, eval_loss))
                     log("Writing eval summary!")
@@ -348,6 +382,7 @@ def train(log_dir, args, hparams):
                     audio.save_wav(wav,
                                    os.path.join(wav_dir, "step-{}-wave-from-mel.wav".format(step)),
                                    sr=hparams.sample_rate)
+
                     
                     # save alignment plot to disk (control purposes)
                     plot.plot_alignment(alignment,
@@ -365,6 +400,12 @@ def train(log_dir, args, hparams):
                                                                                       step, loss),
                                           target_spectrogram=target,
                                           max_len=target_length)
+                    if wandb.run:
+                        wandb.log({
+                            "Wave from Mel": wandb.Audio(os.path.join(wav_dir, "step-{}-wave-from-mel.wav".format(step))),
+                            "Alignment": wandb.Image(os.path.join(plot_dir, "step-{}-align.png".format(step))),
+                            "Mel Spectrogram": os.path.join(plot_dir, "step-{}-mel-spectrogram.png".format(step))
+                             })
                     log("Input at step {}: {}".format(step, sequence_to_text(input_seq)))
                 
                 if step % args.embedding_interval == 0 or step == args.tacotron_train_steps or step == 1:
@@ -389,4 +430,14 @@ def train(log_dir, args, hparams):
 
 
 def tacotron_train(args, log_dir, hparams):
+    print(log_dir)
+    wandb_disabled = os.environ.get('WANDB_DISABLED')
+    if wandb_disabled == 'true':
+        wandb_log = False
+    else:
+        wandb_log = True
+    print("Automatic Weights & Biases logging enabled, to disable set os.environ['WANDB_DISABLED'] = 'true'")
+    if wandb_log and wandb.run is None:
+        wandb.init(project='Voice-cloning',name='synthesizer', group=args.name, config=hparams.values())
+    
     return train(log_dir, args, hparams)

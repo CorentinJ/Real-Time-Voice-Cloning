@@ -1,6 +1,6 @@
 from vocoder.models.fatchord_version import  WaveRNN
 from vocoder.audio import *
-
+import wandb
 
 def gen_testset(model: WaveRNN, test_set, samples, batched, target, overlap, save_path):
     k = model.get_step() // 1000
@@ -28,4 +28,8 @@ def gen_testset(model: WaveRNN, test_set, samples, batched, target, overlap, sav
 
         wav = model.generate(m, batched, target, overlap, hp.mu_law)
         save_wav(wav, save_str)
+        if wandb.run:
+            wandb.log({"target wave": wandb.Audio(str(save_path.joinpath("%dk_steps_%d_target.wav" % (k, i))))})
+            wandb.log({"Generated wave": wandb.Audio(str(save_str))})
+            
 

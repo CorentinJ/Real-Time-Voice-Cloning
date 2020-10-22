@@ -1,3 +1,5 @@
+import os
+
 from encoder.visualizations import Visualizations
 from encoder.data_objects import SpeakerVerificationDataLoader, SpeakerVerificationDataset
 from encoder.params_model import *
@@ -5,6 +7,11 @@ from encoder.model import SpeakerEncoder
 from utils.profiler import Profiler
 from pathlib import Path
 import torch
+import wandb
+
+
+
+
 
 def sync(device: torch.device):
     # For correct profiling (cuda operations are async)
@@ -15,6 +22,16 @@ def sync(device: torch.device):
 def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int, save_every: int,
           backup_every: int, vis_every: int, force_restart: bool, visdom_server: str,
           no_visdom: bool):
+    wandb_disabled = os.environ.get('WANDB_DISABLED')
+    if wandb_disabled == 'true':
+        wandb_log = False
+    else:
+        wandb_log = True
+        print("Automatic Weights & Biases logging enabled, to disable set os.environ['WANDB_DISABLED'] = 'true'")
+    
+    if wandb_log and wandb.run is None:
+        wandb.init(project="Voice-cloning", group=run_id, name="encoder")
+        
     # Create a dataset and a dataloader
     dataset = SpeakerVerificationDataset(clean_data_root)
     loader = SpeakerVerificationDataLoader(
@@ -23,7 +40,7 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int,
         utterances_per_speaker,
         num_workers=8,
     )
-    
+
     # Setup the device on which to run the forward pass and the loss. These can be different, 
     # because the forward pass is faster on the GPU whereas the loss is often (depending on your
     # hyperparameters) faster on the CPU.
@@ -91,6 +108,8 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int,
         # learning_rate = optimizer.param_groups[0]["lr"]
         vis.update(loss.item(), eer, step)
         
+ 
+            
         # Draw projections and save them to the backup folder
         if umap_every != 0 and step % umap_every == 0:
             print("Drawing and saving projections (step %d)" % step)
@@ -99,6 +118,7 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int,
             embeds = embeds.detach().cpu().numpy()
             vis.draw_projections(embeds, utterances_per_speaker, step, projection_fpath)
             vis.save()
+
 
         # Overwrite the latest version of the model
         if save_every != 0 and step % save_every == 0:

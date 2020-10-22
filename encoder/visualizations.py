@@ -6,6 +6,7 @@ import numpy as np
 # import webbrowser
 import visdom
 import umap
+import wandb 
 
 colormap = np.array([
     [76, 255, 0],
@@ -71,10 +72,15 @@ class Visualizations:
         for param_name in (p for p in dir(params_model) if not p.startswith("__")):
             value = getattr(params_model, param_name)
             param_string += "\t%s: %s<br>" % (param_name, value)
+            if wandb.run:
+                wandb.config.update({param_name: value})
+            
         param_string += "<b>Data parameters</b>:<br>"
         for param_name in (p for p in dir(params_data) if not p.startswith("__")):
             value = getattr(params_data, param_name)
             param_string += "\t%s: %s<br>" % (param_name, value)
+            if wandb.run:
+                wandb.config.update({param_name: value})
         self.vis.text(param_string, opts={"title": "Parameters"})
         
     def log_dataset(self, dataset: SpeakerVerificationDataset):
@@ -98,6 +104,7 @@ class Visualizations:
             implementation_string, 
             opts={"title": "Training implementation"}
         )
+        print("Implementation_String ==> ",implementation_string)
 
     def update(self, loss, eer, step):
         # Update the tracking data
@@ -115,6 +122,10 @@ class Visualizations:
                       (int(np.mean(self.step_times)), int(np.std(self.step_times)))
         print("\nStep %6d   Loss: %.4f   EER: %.4f   %s" %
               (step, np.mean(self.losses), np.mean(self.eers), time_string))
+        
+        if wandb.run:
+            wandb.log({"Avg. Loss": np.mean(self.losses), "Avg. EER": np.mean(self.eers)})
+     
         if not self.disabled:
             self.loss_win = self.vis.line(
                 [np.mean(self.losses)],
@@ -166,6 +177,8 @@ class Visualizations:
         plt.scatter(projected[:, 0], projected[:, 1], c=colors)
         plt.gca().set_aspect("equal", "datalim")
         plt.title("UMAP projection (step %d)" % step)
+        if wandb.run:
+            wandb.log({"Projections": plt})
         if not self.disabled:
             self.projection_win = self.vis.matplot(plt, win=self.projection_win)
         if out_fpath is not None:
