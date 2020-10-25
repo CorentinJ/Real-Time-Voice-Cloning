@@ -4,6 +4,7 @@ import numpy as np
 import tensorflow as tf
 from scipy import signal
 from scipy.io import wavfile
+import soundfile as sf
 
 
 def load_wav(path, sr):
@@ -15,7 +16,7 @@ def save_wav(wav, path, sr):
     wavfile.write(path, sr, wav.astype(np.int16))
 
 def save_wavenet_wav(wav, path, sr):
-    librosa.output.write_wav(path, wav, sr=sr)
+    sf.write(path, wav.astype(np.float32), sr)
 
 def preemphasis(wav, k, preemphasize=True):
     if preemphasize:
