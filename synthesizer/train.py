@@ -16,6 +16,7 @@ import wandb
 
 log = infolog.log
 
+
 def add_embedding_stats(summary_writer, embedding_names, paths_to_meta, checkpoint_path):
     # Create tensorboard projector
     config = tf.contrib.tensorboard.plugins.projector.ProjectorConfig()
@@ -36,14 +37,12 @@ def add_train_stats(model, hparams):
     with tf.compat.v1.variable_scope("stats") as scope:
         for i in range(hparams.tacotron_num_gpus):
             tf.compat.v1.summary.histogram("mel_outputs %d" % i, model.tower_mel_outputs[i])
-            tf.compat.v1.summary.histogram("mel_targets %d" % i, model.tower_mel_targets[i])
-                    
+            tf.compat.v1.summary.histogram("mel_targets %d" % i, model.tower_mel_targets[i])            
         tf.compat.v1.summary.scalar("before_loss", model.before_loss)
         tf.compat.v1.summary.scalar("after_loss", model.after_loss)
         
         if hparams.predict_linear:
             tf.compat.v1.summary.scalar("linear_loss", model.linear_loss)
-                
             for i in range(hparams.tacotron_num_gpus):
                 tf.compat.v1.summary.histogram("mel_outputs %d" % i, model.tower_linear_outputs[i])
                 tf.compat.v1.summary.histogram("mel_targets %d" % i, model.tower_linear_targets[i])
@@ -301,7 +300,6 @@ def train(log_dir, args, hparams):
                     audio.save_wav(wav, os.path.join(eval_wav_dir,
                                                      "step-{}-eval-wave-from-mel.wav".format(step)),
                                    sr=hparams.sample_rate)
-                        
                     plot.plot_alignment(align, os.path.join(eval_plot_dir,
                                                             "step-{}-eval-align.png".format(step)),
                                         title="{}, {}, step={}, loss={:.5f}".format("Tacotron",
@@ -382,7 +380,6 @@ def train(log_dir, args, hparams):
                     audio.save_wav(wav,
                                    os.path.join(wav_dir, "step-{}-wave-from-mel.wav".format(step)),
                                    sr=hparams.sample_rate)
-
                     
                     # save alignment plot to disk (control purposes)
                     plot.plot_alignment(alignment,

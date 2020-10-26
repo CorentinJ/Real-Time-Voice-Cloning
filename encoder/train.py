@@ -10,9 +10,6 @@ import torch
 import wandb
 
 
-
-
-
 def sync(device: torch.device):
     # For correct profiling (cuda operations are async)
     if device.type == "cuda":
@@ -107,9 +104,7 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int,
         # Update visualizations
         # learning_rate = optimizer.param_groups[0]["lr"]
         vis.update(loss.item(), eer, step)
-        
- 
-            
+                
         # Draw projections and save them to the backup folder
         if umap_every != 0 and step % umap_every == 0:
             print("Drawing and saving projections (step %d)" % step)
@@ -118,7 +113,6 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int,
             embeds = embeds.detach().cpu().numpy()
             vis.draw_projections(embeds, utterances_per_speaker, step, projection_fpath)
             vis.save()
-
 
         # Overwrite the latest version of the model
         if save_every != 0 and step % save_every == 0:
