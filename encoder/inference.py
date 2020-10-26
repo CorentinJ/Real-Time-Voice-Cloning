@@ -4,6 +4,7 @@ from encoder.audio import preprocess_wav   # We want to expose this function fro
 from matplotlib import cm
 from encoder import audio
 from pathlib import Path
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -171,7 +172,9 @@ def plot_embedding_as_heatmap(embed, ax=None, title="", shape=None, color_range=
     cmap = cm.get_cmap()
     mappable = ax.imshow(embed, cmap=cmap)
     cbar = plt.colorbar(mappable, ax=ax, fraction=0.046, pad=0.04)
-    cbar.set_clim(*color_range)
+    norm = mcolors.Normalize()
+    sm = cm.ScalarMappable(cmap=cmap, norm=norm)
+    sm.set_clim(*color_range)
     
     ax.set_xticks([]), ax.set_yticks([])
     ax.set_title(title)
