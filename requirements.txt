@@ -13,3 +13,4 @@ inflect
 PyQt5
 multiprocess
 numba==0.48
+wandb
