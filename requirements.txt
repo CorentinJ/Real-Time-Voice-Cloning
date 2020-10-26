@@ -1,8 +1,8 @@
 tensorflow==1.15
 umap-learn
 visdom
-librosa>=0.5.1
-matplotlib>=2.0.2
+librosa>=0.8.0
+matplotlib>=3.3.0
 numpy>=1.14.0
 scipy>=1.0.0
 tqdm
@@ -12,5 +12,5 @@ Unidecode
 inflect
 PyQt5
 multiprocess
-numba==0.48
+numba
 wandb
