@@ -402,9 +402,9 @@ def train(log_dir, args, hparams):
                                           max_len=target_length)
                     if wandb.run:
                         wandb.log({
-                            "Wave from Mel": wandb.Audio(os.path.join(wav_dir, "step-{}-wave-from-mel.wav".format(step))),
-                            "Alignment": wandb.Image(os.path.join(plot_dir, "step-{}-align.png".format(step))),
-                            "Mel Spectrogram": os.path.join(plot_dir, "step-{}-mel-spectrogram.png".format(step))
+                        "Wave from Mel": wandb.Audio(os.path.join(wav_dir, "step-{}-wave-from-mel.wav".format(step))),
+                        "Alignment": wandb.Image(os.path.join(plot_dir, "step-{}-align.png".format(step))),
+                        "Mel Spectrogram": wandb.Image(os.path.join(plot_dir, "step-{}-mel-spectrogram.png".format(step)))
                              })
                     log("Input at step {}: {}".format(step, sequence_to_text(input_seq)))
                 
