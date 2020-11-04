@@ -199,8 +199,13 @@ class UI(QDialog):
         sd.default.device = (self.audio_in_device, output_device)
     
     def play(self, wav, sample_rate):
-        sd.stop()
-        sd.play(wav, sample_rate)
+        try:
+            sd.stop()
+            sd.play(wav, sample_rate)
+        except Exception as e:
+            print(e)
+            self.log("Error in audio playback. Try selecting a different audio output device.")
+            self.log("Your device must be connected before you start the toolbox.")
         
     def stop(self):
         sd.stop()
