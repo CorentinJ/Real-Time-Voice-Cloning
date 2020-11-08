@@ -64,6 +64,194 @@ class UI(QDialog):
     max_log_lines = 5
     max_saved_utterances = 20
 
+    def __init__(self):
+        ## Initialize the application
+        self.app = QApplication(sys.argv)
+        super().__init__(None)
+        self.setWindowTitle("SV2TTS toolbox")
+
+        ## Main layouts
+        # Root
+        root_layout = QGridLayout()
+        self.setLayout(root_layout)
+
+        # Browser
+        browser_layout = QGridLayout()
+        root_layout.addLayout(browser_layout, 0, 0, 1, 2)
+
+        # Generation
+        gen_layout = QVBoxLayout()
+        root_layout.addLayout(gen_layout, 0, 2, 1, 2)
+
+        # Projections
+        self.projections_layout = QVBoxLayout()
+        root_layout.addLayout(self.projections_layout, 1, 0, 1, 1)
+
+        # Visualizations
+        vis_layout = QVBoxLayout()
+        root_layout.addLayout(vis_layout, 1, 1, 1, 3)
+
+        ## Projections
+        # UMap
+        fig, self.umap_ax = plt.subplots(figsize=(3, 3), facecolor="#F0F0F0")
+        fig.subplots_adjust(left=0.02, bottom=0.02, right=0.98, top=0.98)
+        self.projections_layout.addWidget(FigureCanvas(fig))
+        self.umap_hot = False
+        self.clear_button = QPushButton("Clear")
+        self.projections_layout.addWidget(self.clear_button)
+
+        ## Browser
+        # Dataset, speaker and utterance selection
+        i = 0
+        self.dataset_box = QComboBox()
+        browser_layout.addWidget(QLabel("<b>Dataset</b>"), i, 0)
+        browser_layout.addWidget(self.dataset_box, i + 1, 0)
+        self.speaker_box = QComboBox()
+        browser_layout.addWidget(QLabel("<b>Speaker</b>"), i, 1)
+        browser_layout.addWidget(self.speaker_box, i + 1, 1)
+        self.utterance_box = QComboBox()
+        browser_layout.addWidget(QLabel("<b>Utterance</b>"), i, 2)
+        browser_layout.addWidget(self.utterance_box, i + 1, 2)
+        self.browser_load_button = QPushButton("Load")
+        browser_layout.addWidget(self.browser_load_button, i + 1, 3)
+        i += 2
+
+        # Random buttons
+        self.random_dataset_button = QPushButton("Random")
+        browser_layout.addWidget(self.random_dataset_button, i, 0)
+        self.random_speaker_button = QPushButton("Random")
+        browser_layout.addWidget(self.random_speaker_button, i, 1)
+        self.random_utterance_button = QPushButton("Random")
+        browser_layout.addWidget(self.random_utterance_button, i, 2)
+        self.auto_next_checkbox = QCheckBox("Auto select next")
+        self.auto_next_checkbox.setChecked(True)
+        browser_layout.addWidget(self.auto_next_checkbox, i, 3)
+        i += 1
+
+        # Utterance box
+        browser_layout.addWidget(QLabel("<b>Use embedding from:</b>"), i, 0)
+        self.utterance_history = QComboBox()
+        browser_layout.addWidget(self.utterance_history, i, 1, 1, 3)
+        i += 1
+
+        # Random & next utterance buttons
+        self.browser_browse_button = QPushButton("Browse")
+        browser_layout.addWidget(self.browser_browse_button, i, 0)
+        self.record_button = QPushButton("Record")
+        browser_layout.addWidget(self.record_button, i, 1)
+        self.play_button = QPushButton("Play")
+        browser_layout.addWidget(self.play_button, i, 2)
+        self.stop_button = QPushButton("Stop")
+        browser_layout.addWidget(self.stop_button, i, 3)
+        i += 1
+
+        # Model and audio output selection
+        self.encoder_box = QComboBox()
+        browser_layout.addWidget(QLabel("<b>Encoder</b>"), i, 0)
+        browser_layout.addWidget(self.encoder_box, i + 1, 0)
+        self.synthesizer_box = QComboBox()
+        browser_layout.addWidget(QLabel("<b>Synthesizer</b>"), i, 1)
+        browser_layout.addWidget(self.synthesizer_box, i + 1, 1)
+        self.vocoder_box = QComboBox()
+        browser_layout.addWidget(QLabel("<b>Vocoder</b>"), i, 2)
+        browser_layout.addWidget(self.vocoder_box, i + 1, 2)
+
+        self.audio_out_devices_cb = QComboBox()
+        browser_layout.addWidget(QLabel("<b>Audio Output</b>"), i, 3)
+        browser_layout.addWidget(self.audio_out_devices_cb, i + 1, 3)
+        i += 2
+
+        # Replay & Save Audio
+        browser_layout.addWidget(QLabel("<b>Toolbox Output:</b>"), i, 0)
+        self.waves_cb = QComboBox()
+        self.waves_cb_model = QStringListModel()
+        self.waves_cb.setModel(self.waves_cb_model)
+        self.waves_cb.setToolTip(
+            "Select one of the last generated waves in this section for replaying or exporting"
+        )
+        browser_layout.addWidget(self.waves_cb, i, 1)
+        self.replay_wav_button = QPushButton("Replay")
+        self.replay_wav_button.setToolTip("Replay last generated vocoder")
+        browser_layout.addWidget(self.replay_wav_button, i, 2)
+        self.export_wav_button = QPushButton("Export")
+        self.export_wav_button.setToolTip(
+            "Save last generated vocoder audio in filesystem as a wav file"
+        )
+        browser_layout.addWidget(self.export_wav_button, i, 3)
+        i += 1
+
+        ## Embed & spectrograms
+        vis_layout.addStretch()
+
+        gridspec_kw = {"width_ratios": [1, 4]}
+        fig, self.current_ax = plt.subplots(
+            1, 2, figsize=(10, 2.25), facecolor="#F0F0F0", gridspec_kw=gridspec_kw
+        )
+        fig.subplots_adjust(left=0, bottom=0.1, right=1, top=0.8)
+        vis_layout.addWidget(FigureCanvas(fig))
+
+        fig, self.gen_ax = plt.subplots(
+            1, 2, figsize=(10, 2.25), facecolor="#F0F0F0", gridspec_kw=gridspec_kw
+        )
+        fig.subplots_adjust(left=0, bottom=0.1, right=1, top=0.8)
+        vis_layout.addWidget(FigureCanvas(fig))
+
+        for ax in self.current_ax.tolist() + self.gen_ax.tolist():
+            ax.set_facecolor("#F0F0F0")
+            for side in ["top", "right", "bottom", "left"]:
+                ax.spines[side].set_visible(False)
+
+        ## Generation
+        self.text_prompt = QPlainTextEdit(default_text)
+        gen_layout.addWidget(self.text_prompt, stretch=1)
+
+        self.generate_button = QPushButton("Synthesize and vocode")
+        gen_layout.addWidget(self.generate_button)
+
+        layout = QHBoxLayout()
+        self.synthesize_button = QPushButton("Synthesize only")
+        layout.addWidget(self.synthesize_button)
+        self.vocode_button = QPushButton("Vocode only")
+        layout.addWidget(self.vocode_button)
+        gen_layout.addLayout(layout)
+
+        layout_seed = QGridLayout()
+        self.random_seed_checkbox = QCheckBox("Random seed:")
+        self.random_seed_checkbox.setToolTip(
+            "When checked, makes the synthesizer and vocoder deterministic."
+        )
+        layout_seed.addWidget(self.random_seed_checkbox, 0, 0)
+        self.seed_textbox = QLineEdit()
+        self.seed_textbox.setMaximumWidth(80)
+        layout_seed.addWidget(self.seed_textbox, 0, 1)
+        self.trim_silences_checkbox = QCheckBox("Enhance vocoder output")
+        self.trim_silences_checkbox.setToolTip(
+            "When checked, trims excess silence in vocoder output."
+            " This feature requires `webrtcvad` to be installed."
+        )
+        layout_seed.addWidget(self.trim_silences_checkbox, 0, 2, 1, 2)
+        gen_layout.addLayout(layout_seed)
+
+        self.loading_bar = QProgressBar()
+        gen_layout.addWidget(self.loading_bar)
+
+        self.log_window = QLabel()
+        self.log_window.setAlignment(Qt.AlignBottom | Qt.AlignLeft)
+        gen_layout.addWidget(self.log_window)
+        self.logs = []
+        gen_layout.addStretch()
+
+        ## Set the size of the window and of the elements
+        max_size = QDesktopWidget().availableGeometry(self).size() * 0.8
+        self.resize(max_size)
+
+        ## Finalize the display
+        self.reset_interface()
+        self.show()
+
+    def start(self):
+        self.app.exec_()
+
     def draw_utterance(self, utterance: Utterance, which):
         self.draw_spec(utterance.spec, which)
         self.draw_embed(utterance.embed, utterance.name, which)
@@ -470,191 +658,3 @@ class UI(QDialog):
         self.replay_wav_button.setDisabled(True)
         self.export_wav_button.setDisabled(True)
         [self.log("") for _ in range(self.max_log_lines)]
-
-    def __init__(self):
-        ## Initialize the application
-        self.app = QApplication(sys.argv)
-        super().__init__(None)
-        self.setWindowTitle("SV2TTS toolbox")
-
-        ## Main layouts
-        # Root
-        root_layout = QGridLayout()
-        self.setLayout(root_layout)
-
-        # Browser
-        browser_layout = QGridLayout()
-        root_layout.addLayout(browser_layout, 0, 0, 1, 2)
-
-        # Generation
-        gen_layout = QVBoxLayout()
-        root_layout.addLayout(gen_layout, 0, 2, 1, 2)
-
-        # Projections
-        self.projections_layout = QVBoxLayout()
-        root_layout.addLayout(self.projections_layout, 1, 0, 1, 1)
-
-        # Visualizations
-        vis_layout = QVBoxLayout()
-        root_layout.addLayout(vis_layout, 1, 1, 1, 3)
-
-        ## Projections
-        # UMap
-        fig, self.umap_ax = plt.subplots(figsize=(3, 3), facecolor="#F0F0F0")
-        fig.subplots_adjust(left=0.02, bottom=0.02, right=0.98, top=0.98)
-        self.projections_layout.addWidget(FigureCanvas(fig))
-        self.umap_hot = False
-        self.clear_button = QPushButton("Clear")
-        self.projections_layout.addWidget(self.clear_button)
-
-        ## Browser
-        # Dataset, speaker and utterance selection
-        i = 0
-        self.dataset_box = QComboBox()
-        browser_layout.addWidget(QLabel("<b>Dataset</b>"), i, 0)
-        browser_layout.addWidget(self.dataset_box, i + 1, 0)
-        self.speaker_box = QComboBox()
-        browser_layout.addWidget(QLabel("<b>Speaker</b>"), i, 1)
-        browser_layout.addWidget(self.speaker_box, i + 1, 1)
-        self.utterance_box = QComboBox()
-        browser_layout.addWidget(QLabel("<b>Utterance</b>"), i, 2)
-        browser_layout.addWidget(self.utterance_box, i + 1, 2)
-        self.browser_load_button = QPushButton("Load")
-        browser_layout.addWidget(self.browser_load_button, i + 1, 3)
-        i += 2
-
-        # Random buttons
-        self.random_dataset_button = QPushButton("Random")
-        browser_layout.addWidget(self.random_dataset_button, i, 0)
-        self.random_speaker_button = QPushButton("Random")
-        browser_layout.addWidget(self.random_speaker_button, i, 1)
-        self.random_utterance_button = QPushButton("Random")
-        browser_layout.addWidget(self.random_utterance_button, i, 2)
-        self.auto_next_checkbox = QCheckBox("Auto select next")
-        self.auto_next_checkbox.setChecked(True)
-        browser_layout.addWidget(self.auto_next_checkbox, i, 3)
-        i += 1
-
-        # Utterance box
-        browser_layout.addWidget(QLabel("<b>Use embedding from:</b>"), i, 0)
-        self.utterance_history = QComboBox()
-        browser_layout.addWidget(self.utterance_history, i, 1, 1, 3)
-        i += 1
-
-        # Random & next utterance buttons
-        self.browser_browse_button = QPushButton("Browse")
-        browser_layout.addWidget(self.browser_browse_button, i, 0)
-        self.record_button = QPushButton("Record")
-        browser_layout.addWidget(self.record_button, i, 1)
-        self.play_button = QPushButton("Play")
-        browser_layout.addWidget(self.play_button, i, 2)
-        self.stop_button = QPushButton("Stop")
-        browser_layout.addWidget(self.stop_button, i, 3)
-        i += 1
-
-        # Model and audio output selection
-        self.encoder_box = QComboBox()
-        browser_layout.addWidget(QLabel("<b>Encoder</b>"), i, 0)
-        browser_layout.addWidget(self.encoder_box, i + 1, 0)
-        self.synthesizer_box = QComboBox()
-        browser_layout.addWidget(QLabel("<b>Synthesizer</b>"), i, 1)
-        browser_layout.addWidget(self.synthesizer_box, i + 1, 1)
-        self.vocoder_box = QComboBox()
-        browser_layout.addWidget(QLabel("<b>Vocoder</b>"), i, 2)
-        browser_layout.addWidget(self.vocoder_box, i + 1, 2)
-
-        self.audio_out_devices_cb = QComboBox()
-        browser_layout.addWidget(QLabel("<b>Audio Output</b>"), i, 3)
-        browser_layout.addWidget(self.audio_out_devices_cb, i + 1, 3)
-        i += 2
-
-        # Replay & Save Audio
-        browser_layout.addWidget(QLabel("<b>Toolbox Output:</b>"), i, 0)
-        self.waves_cb = QComboBox()
-        self.waves_cb_model = QStringListModel()
-        self.waves_cb.setModel(self.waves_cb_model)
-        self.waves_cb.setToolTip(
-            "Select one of the last generated waves in this section for replaying or exporting"
-        )
-        browser_layout.addWidget(self.waves_cb, i, 1)
-        self.replay_wav_button = QPushButton("Replay")
-        self.replay_wav_button.setToolTip("Replay last generated vocoder")
-        browser_layout.addWidget(self.replay_wav_button, i, 2)
-        self.export_wav_button = QPushButton("Export")
-        self.export_wav_button.setToolTip(
-            "Save last generated vocoder audio in filesystem as a wav file"
-        )
-        browser_layout.addWidget(self.export_wav_button, i, 3)
-        i += 1
-
-        ## Embed & spectrograms
-        vis_layout.addStretch()
-
-        gridspec_kw = {"width_ratios": [1, 4]}
-        fig, self.current_ax = plt.subplots(
-            1, 2, figsize=(10, 2.25), facecolor="#F0F0F0", gridspec_kw=gridspec_kw
-        )
-        fig.subplots_adjust(left=0, bottom=0.1, right=1, top=0.8)
-        vis_layout.addWidget(FigureCanvas(fig))
-
-        fig, self.gen_ax = plt.subplots(
-            1, 2, figsize=(10, 2.25), facecolor="#F0F0F0", gridspec_kw=gridspec_kw
-        )
-        fig.subplots_adjust(left=0, bottom=0.1, right=1, top=0.8)
-        vis_layout.addWidget(FigureCanvas(fig))
-
-        for ax in self.current_ax.tolist() + self.gen_ax.tolist():
-            ax.set_facecolor("#F0F0F0")
-            for side in ["top", "right", "bottom", "left"]:
-                ax.spines[side].set_visible(False)
-
-        ## Generation
-        self.text_prompt = QPlainTextEdit(default_text)
-        gen_layout.addWidget(self.text_prompt, stretch=1)
-
-        self.generate_button = QPushButton("Synthesize and vocode")
-        gen_layout.addWidget(self.generate_button)
-
-        layout = QHBoxLayout()
-        self.synthesize_button = QPushButton("Synthesize only")
-        layout.addWidget(self.synthesize_button)
-        self.vocode_button = QPushButton("Vocode only")
-        layout.addWidget(self.vocode_button)
-        gen_layout.addLayout(layout)
-
-        layout_seed = QGridLayout()
-        self.random_seed_checkbox = QCheckBox("Random seed:")
-        self.random_seed_checkbox.setToolTip(
-            "When checked, makes the synthesizer and vocoder deterministic."
-        )
-        layout_seed.addWidget(self.random_seed_checkbox, 0, 0)
-        self.seed_textbox = QLineEdit()
-        self.seed_textbox.setMaximumWidth(80)
-        layout_seed.addWidget(self.seed_textbox, 0, 1)
-        self.trim_silences_checkbox = QCheckBox("Enhance vocoder output")
-        self.trim_silences_checkbox.setToolTip(
-            "When checked, trims excess silence in vocoder output."
-            " This feature requires `webrtcvad` to be installed."
-        )
-        layout_seed.addWidget(self.trim_silences_checkbox, 0, 2, 1, 2)
-        gen_layout.addLayout(layout_seed)
-
-        self.loading_bar = QProgressBar()
-        gen_layout.addWidget(self.loading_bar)
-
-        self.log_window = QLabel()
-        self.log_window.setAlignment(Qt.AlignBottom | Qt.AlignLeft)
-        gen_layout.addWidget(self.log_window)
-        self.logs = []
-        gen_layout.addStretch()
-
-        ## Set the size of the window and of the elements
-        max_size = QDesktopWidget().availableGeometry(self).size() * 0.8
-        self.resize(max_size)
-
-        ## Finalize the display
-        self.reset_interface()
-        self.show()
-
-    def start(self):
-        self.app.exec_()
