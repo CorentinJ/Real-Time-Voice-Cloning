@@ -19,7 +19,6 @@ from warnings import filterwarnings, warn
 
 filterwarnings("ignore")
 
-
 colormap = (
     np.array(
         [
@@ -337,11 +336,7 @@ class UI(QDialog):
             # self.umap_ax.set_title("UMAP projections")
             self.umap_ax.legend(prop={"size": 10})
 
-        # Draw the plot
-        self.umap_ax.set_aspect("equal", "datalim")
-        self.umap_ax.set_xticks([])
-        self.umap_ax.set_yticks([])
-        self.umap_ax.figure.canvas.draw()
+        self.toolbox = toolbox
 
     def save_audio_file(self, wav, sample_rate):
         dialog = QFileDialog()
@@ -610,10 +605,7 @@ class UI(QDialog):
         self.log_window.setText(log_text)
         self.app.processEvents()
 
-    def set_loading(self, value, maximum=1):
-        self.loading_bar.setValue(value * 100)
-        self.loading_bar.setMaximum(maximum * 100)
-        self.loading_bar.setTextVisible(value != 0)
+        self.log_window.setText(log_text)
         self.app.processEvents()
 
     def populate_gen_options(self, seed, trim_silences):
