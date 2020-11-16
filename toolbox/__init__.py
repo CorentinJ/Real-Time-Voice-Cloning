@@ -1,4 +1,5 @@
 from toolbox.ui import UI
+from toolbox.audio import Audio
 from encoder import inference as encoder
 from synthesizer.inference import Synthesizer
 from vocoder import inference as vocoder
@@ -87,14 +88,168 @@ class Toolbox:
             self.trim_silences = False
 
         # Initialize the events and the interface
-        self.ui = UI(self)
-        # self.ui.reset_ui(enc_models_dir, syn_models_dir, voc_models_dir, seed)
-        # self.setup_events()
+        self.ui = UI()
+        self.reset_ui(enc_models_dir, syn_models_dir, voc_models_dir, seed)
+        # Audio
+        self.audio = Audio(self.ui, Synthesizer.sample_rate)
+        self.setup_events()
         self.ui.start()
 
     def excepthook(self, exc_type, exc_value, exc_tb):
         traceback.print_exception(exc_type, exc_value, exc_tb)
         self.ui.log("Exception: %s" % exc_value)
+
+    def setup_events(self):
+        # Dataset, speaker and utterance selection
+        self.ui.browser_load_button.clicked.connect(lambda: self.load_from_browser())
+        random_func = lambda level: lambda: self.ui.populate_browser(
+            self.datasets_root, recognized_datasets, level
+        )
+        self.ui.random_dataset_button.clicked.connect(random_func(0))
+        self.ui.random_speaker_button.clicked.connect(random_func(1))
+        self.ui.random_utterance_button.clicked.connect(random_func(2))
+        self.ui.dataset_box.currentIndexChanged.connect(random_func(1))
+        self.ui.speaker_box.currentIndexChanged.connect(random_func(2))
+
+        # Model selection
+        self.ui.encoder_box.currentIndexChanged.connect(self.init_encoder)
+
+        def func():
+            self.synthesizer = None
+
+        self.ui.synthesizer_box.currentIndexChanged.connect(func)
+        self.ui.vocoder_box.currentIndexChanged.connect(self.init_vocoder)
+
+        # Utterance selection
+        func = lambda: self.load_from_browser(self.ui.browse_file())
+        self.ui.browser_browse_button.clicked.connect(func)
+        func = lambda: self.ui.draw_utterance(self.ui.selected_utterance, "current")
+        self.ui.utterance_history.currentIndexChanged.connect(func)
+        func = lambda: self.audio.play(
+            self.ui.selected_utterance.wav, Synthesizer.sample_rate
+        )
+        self.ui.play_button.clicked.connect(func)
+        self.ui.stop_button.clicked.connect(self.audio.stop)
+        self.ui.record_button.clicked.connect(self.record)
+
+        # Audio
+        self.setup_audio_devices(Synthesizer.sample_rate)
+
+        # Wav playback & save
+        func = lambda: self.replay_last_wav()
+        self.ui.replay_wav_button.clicked.connect(func)
+        func = lambda: self.export_current_wave()
+        self.ui.export_wav_button.clicked.connect(func)
+        self.ui.waves_cb.currentIndexChanged.connect(self.set_current_wav)
+
+        # Generation
+        func = lambda: self.synthesize() or self.vocode()
+        self.ui.generate_button.clicked.connect(func)
+        self.ui.synthesize_button.clicked.connect(self.synthesize)
+        self.ui.vocode_button.clicked.connect(self.vocode)
+        self.ui.random_seed_checkbox.clicked.connect(self.update_seed_textbox)
+
+        # UMAP legend
+        self.ui.clear_button.clicked.connect(self.clear_utterances)
+
+    def setup_audio_devices(self, sample_rate):
+        input_devices, output_devices = self.audio.setup_audio_devices()
+        if len(input_devices) == 0:
+            self.log("No audio input device detected. Recording may not work.")
+            self.audio_in_device = None
+        else:
+            self.audio_in_device = input_devices[0]
+
+        if len(output_devices) == 0:
+            self.log(
+                "No supported output audio devices were found! Audio output may not work."
+            )
+            self.ui.audio_out_devices_cb.addItems(["None"])
+            self.ui.audio_out_devices_cb.setDisabled(True)
+        else:
+            self.ui.audio_out_devices_cb.clear()
+            self.ui.audio_out_devices_cb.addItems(output_devices)
+            self.ui.audio_out_devices_cb.currentTextChanged.connect(
+                self.set_audio_device
+            )
+
+        self.set_audio_device()
+
+    def set_audio_device(self):
+
+        output_device = self.ui.audio_out_devices_cb.currentText()
+        if output_device == "None":
+            output_device = None
+
+        self.audio.set_audio_device(self.audio_in_device, output_device)
+
+    def set_current_wav(self, index):
+        self.current_wav = self.waves_list[index]
+
+    def export_current_wave(self):
+        fpath = self.ui.save_audio_file()
+        self.audio.save_audio(fpath, self.current_wav, Synthesizer.sample_rate)
+
+    def replay_last_wav(self):
+        self.audio.play(self.current_wav, Synthesizer.sample_rate)
+
+    def reset_ui(
+        self, encoder_models_dir, synthesizer_models_dir, vocoder_models_dir, seed
+    ):
+        self.ui.populate_browser(self.datasets_root, recognized_datasets, 0, True)
+        self.ui.populate_models(
+            encoder_models_dir, synthesizer_models_dir, vocoder_models_dir
+        )
+        self.ui.populate_gen_options(seed, self.trim_silences)
+
+    def load_from_browser(self, fpath=None):
+        if fpath is None:
+            fpath = Path(
+                self.datasets_root,
+                self.ui.current_dataset_name,
+                self.ui.current_speaker_name,
+                self.ui.current_utterance_name,
+            )
+            name = str(fpath.relative_to(self.datasets_root))
+            speaker_name = (
+                self.ui.current_dataset_name + "_" + self.ui.current_speaker_name
+            )
+
+            # Select the next utterance
+            if self.ui.auto_next_checkbox.isChecked():
+                self.ui.browser_select_next()
+        elif fpath == "":
+            return
+        else:
+            name = fpath.name
+            speaker_name = fpath.parent.name
+
+        if fpath.suffix.lower() == ".mp3" and self.no_mp3_support:
+            self.ui.log(
+                "Error: No mp3 file argument was passed but an mp3 file was used"
+            )
+            return
+
+        # Get the wav from the disk. We take the wav with the vocoder/synthesizer format for
+        # playback, so as to have a fair comparison with the generated audio
+        wav = Synthesizer.load_preprocess_wav(fpath)
+        self.ui.log("Loaded %s" % name)
+
+        self.add_real_utterance(wav, name, speaker_name)
+
+    def record(self):
+        self.ui.record_button.setText("Recording...")
+        self.ui.record_button.setDisabled(True)
+        wav = self.audio.record_one(encoder.sampling_rate, 5)
+        self.ui.record_button.setText("Record")
+        self.ui.record_button.setDisabled(False)
+        if wav is None:
+            return
+        self.audio.play(wav, encoder.sampling_rate)
+
+        speaker_name = "user01"
+        name = speaker_name + "_rec_%05d" % np.random.randint(100000)
+        self.add_real_utterance(wav, name, speaker_name)
 
     def add_real_utterance(self, wav, name, speaker_name):
         # Compute the mel spectrogram
@@ -255,6 +410,29 @@ class Toolbox:
         # Plot it
         self.ui.draw_embed(embed, name, "generated")
         self.ui.draw_umap_projections(self.utterances)
+
+    def init_encoder(self):
+        model_fpath = self.ui.current_encoder_fpath
+
+        self.ui.log("Loading the encoder %s... " % model_fpath)
+        self.ui.set_loading(1)
+        start = timer()
+        encoder.load_model(model_fpath)
+        self.ui.log("Done (%dms)." % int(1000 * (timer() - start)), "append")
+        self.ui.set_loading(0)
+
+    def init_vocoder(self):
+        model_fpath = self.ui.current_vocoder_fpath
+        # Case of Griffin-lim
+        if model_fpath is None:
+            return
+
+        self.ui.log("Loading the vocoder %s... " % model_fpath)
+        self.ui.set_loading(1)
+        start = timer()
+        vocoder.load_model(model_fpath)
+        self.ui.log("Done (%dms)." % int(1000 * (timer() - start)), "append")
+        self.ui.set_loading(0)
 
     def update_seed_textbox(self):
         self.ui.update_seed_textbox()
