@@ -19,6 +19,7 @@ from warnings import filterwarnings, warn
 
 filterwarnings("ignore")
 
+
 colormap = (
     np.array(
         [
@@ -336,7 +337,11 @@ class UI(QDialog):
             # self.umap_ax.set_title("UMAP projections")
             self.umap_ax.legend(prop={"size": 10})
 
-        self.toolbox = toolbox
+        # Draw the plot
+        self.umap_ax.set_aspect("equal", "datalim")
+        self.umap_ax.set_xticks([])
+        self.umap_ax.set_yticks([])
+        self.umap_ax.figure.canvas.draw()
 
     def save_audio_file(self, wav, sample_rate):
         dialog = QFileDialog()
@@ -370,7 +375,10 @@ class UI(QDialog):
     #         except Exception as e:
     #             # Log a warning only if the device is not an input
     #             if not device["name"] in input_devices:
-    #                 warn("Unsupported output device %s for the sample rate: %d \nError: %s" % (device["name"], sample_rate, str(e)))
+    #                 warn(
+    #                     "Unsupported output device %s for the sample rate: %d \nError: %s"
+    #                     % (device["name"], sample_rate, str(e))
+    #                 )
     #
     #     if len(input_devices) == 0:
     #         self.log("No audio input device detected. Recording may not work.")
@@ -379,7 +387,9 @@ class UI(QDialog):
     #         self.audio_in_device = input_devices[0]
     #
     #     if len(output_devices) == 0:
-    #         self.log("No supported output audio devices were found! Audio output may not work.")
+    #         self.log(
+    #             "No supported output audio devices were found! Audio output may not work."
+    #         )
     #         self.audio_out_devices_cb.addItems(["None"])
     #         self.audio_out_devices_cb.setDisabled(True)
     #     else:
@@ -408,10 +418,10 @@ class UI(QDialog):
     #             "Error in audio playback. Try selecting a different audio output device."
     #         )
     #         self.log("Your device must be connected before you start the toolbox.")
-
+    #
     # def stop(self):
     #     sd.stop()
-
+    #
     # def record_one(self, sample_rate, duration):
     #     self.record_button.setText("Recording...")
     #     self.record_button.setDisabled(True)
@@ -605,7 +615,10 @@ class UI(QDialog):
         self.log_window.setText(log_text)
         self.app.processEvents()
 
-        self.log_window.setText(log_text)
+    def set_loading(self, value, maximum=1):
+        self.loading_bar.setValue(value * 100)
+        self.loading_bar.setMaximum(maximum * 100)
+        self.loading_bar.setTextVisible(value != 0)
         self.app.processEvents()
 
     def populate_gen_options(self, seed, trim_silences):
