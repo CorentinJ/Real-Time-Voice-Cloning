@@ -252,7 +252,7 @@ class UI(QDialog):
         fpath = QFileDialog().getOpenFileName(
             parent=self,
             caption="Select an audio file",
-            filter="Audio Files (*.mp3 *.flac *.wav *.m4a)"
+            filter="Audio Files (*.mp3 *.flac *.wav *.m4a *.ogg)"
         )
         return Path(fpath[0]) if fpath[0] != "" else ""
     
