@@ -14,3 +14,5 @@ inflect
 PyQt5
 multiprocess
 numba
+torch
+torchvision
