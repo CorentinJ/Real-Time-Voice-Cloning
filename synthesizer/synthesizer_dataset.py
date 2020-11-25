@@ -19,6 +19,7 @@ class SynthesizerDataset(Dataset):
         self.samples_fpaths = list(zip(mel_fpaths, embed_fpaths))
         self.samples_texts = [x[5].strip() for x in metadata if int(x[4])]
         self.metadata = metadata
+        self.hparams = hparams
         
         print("Found %d samples" % len(self.samples_fpaths))
     
@@ -35,7 +36,7 @@ class SynthesizerDataset(Dataset):
         embed = np.load(embed_path)
 
         # Get the text and clean it
-        text = text_to_sequence(self.samples_texts[index], hparams.tts_cleaner_names)
+        text = text_to_sequence(self.samples_texts[index], self.hparams.tts_cleaner_names)
         
         # Convert the list returned by text_to_sequence to a numpy array
         text = np.asarray(text).astype(np.int32)
@@ -46,7 +47,7 @@ class SynthesizerDataset(Dataset):
         return len(self.samples_fpaths)
 
 
-def collate_synthesizer(batch, r):
+def collate_synthesizer(batch, r, hparams):
     # Text
     x_lens = [len(x[0]) for x in batch]
     max_x_len = max(x_lens)
