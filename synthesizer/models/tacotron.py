@@ -116,7 +116,7 @@ class CBHG(nn.Module):
             hn = HighwayNetwork(channels)
             self.highways.append(hn)
 
-        self.rnn = nn.GRU(channels, channels, batch_first=True, bidirectional=True)
+        self.rnn = nn.GRU(channels, channels // 2, batch_first=True, bidirectional=True)
         self._to_flatten.append(self.rnn)
 
         # Avoid fragmentation of RNN parameters and associated warning
@@ -243,16 +243,17 @@ class Decoder(nn.Module):
     # Class variable because its value doesn't change between classes
     # yet ought to be scoped by class because its a property of a Decoder
     max_r = 20
-    def __init__(self, n_mels, decoder_dims, lstm_dims, dropout, speaker_embedding_size):
+    def __init__(self, n_mels, encoder_dims, decoder_dims, lstm_dims,
+                 dropout, speaker_embedding_size):
         super().__init__()
         self.register_buffer("r", torch.tensor(1, dtype=torch.int))
         self.n_mels = n_mels
-        prenet_dims = (decoder_dims, decoder_dims // 2)
+        prenet_dims = (decoder_dims * 2, decoder_dims * 2)
         self.prenet = PreNet(n_mels, fc1_dims=prenet_dims[0], fc2_dims=prenet_dims[1],
                              dropout=dropout)
         self.attn_net = LSA(decoder_dims)
-        self.attn_rnn = nn.GRUCell(decoder_dims + prenet_dims[1] + speaker_embedding_size, decoder_dims)
-        self.rnn_input = nn.Linear(2 * decoder_dims + speaker_embedding_size, lstm_dims)
+        self.attn_rnn = nn.GRUCell(encoder_dims + prenet_dims[1] + speaker_embedding_size, decoder_dims)
+        self.rnn_input = nn.Linear(encoder_dims + decoder_dims + speaker_embedding_size, lstm_dims)
         self.res_rnn1 = nn.LSTMCell(lstm_dims, lstm_dims)
         self.res_rnn2 = nn.LSTMCell(lstm_dims, lstm_dims)
         self.mel_proj = nn.Linear(lstm_dims, n_mels * self.max_r, bias=False)
@@ -322,15 +323,17 @@ class Tacotron(nn.Module):
         super().__init__()
         self.n_mels = n_mels
         self.lstm_dims = lstm_dims
+        self.encoder_dims = encoder_dims
         self.decoder_dims = decoder_dims
         self.speaker_embedding_size = speaker_embedding_size
         self.encoder = Encoder(embed_dims, num_chars, encoder_dims,
                                encoder_K, num_highways, dropout)
-        self.encoder_proj = nn.Linear(decoder_dims + speaker_embedding_size, decoder_dims, bias=False)
-        self.decoder = Decoder(n_mels, decoder_dims, lstm_dims, dropout, speaker_embedding_size)
+        self.encoder_proj = nn.Linear(encoder_dims + speaker_embedding_size, decoder_dims, bias=False)
+        self.decoder = Decoder(n_mels, encoder_dims, decoder_dims, lstm_dims,
+                               dropout, speaker_embedding_size)
         self.postnet = CBHG(postnet_K, n_mels, postnet_dims,
-                            [postnet_dims * 2, fft_bins], num_highways)
-        self.post_proj = nn.Linear(postnet_dims * 2, fft_bins, bias=False)
+                            [postnet_dims, fft_bins], num_highways)
+        self.post_proj = nn.Linear(postnet_dims, fft_bins, bias=False)
 
         self.init_model()
         self.num_params()
@@ -367,7 +370,7 @@ class Tacotron(nn.Module):
         go_frame = torch.zeros(batch_size, self.n_mels, device=device)
 
         # Need an initial context vector
-        context_vec = torch.zeros(batch_size, self.decoder_dims + self.speaker_embedding_size, device=device)
+        context_vec = torch.zeros(batch_size, self.encoder_dims + self.speaker_embedding_size, device=device)
 
         # SV2TTS: Run the encoder with the speaker embedding
         # The projection avoids unnecessary matmuls in the decoder loop
@@ -421,7 +424,7 @@ class Tacotron(nn.Module):
         go_frame = torch.zeros(batch_size, self.n_mels, device=device)
 
         # Need an initial context vector
-        context_vec = torch.zeros(batch_size, self.decoder_dims + self.speaker_embedding_size, device=device)
+        context_vec = torch.zeros(batch_size, self.encoder_dims + self.speaker_embedding_size, device=device)
 
         # SV2TTS: Run the encoder with the speaker embedding
         # The projection avoids unnecessary matmuls in the decoder loop
