@@ -205,9 +205,9 @@ class Attention(nn.Module):
 class LSA(nn.Module):
     def __init__(self, attn_dim, kernel_size=31, filters=32):
         super().__init__()
-        self.conv = nn.Conv1d(2, filters, padding=(kernel_size - 1) // 2, kernel_size=kernel_size, bias=False)
-        self.L = nn.Linear(filters, attn_dim, bias=True)
-        self.W = nn.Linear(attn_dim, attn_dim, bias=True)
+        self.conv = nn.Conv1d(2, filters, padding=(kernel_size - 1) // 2, kernel_size=kernel_size, bias=True)
+        self.L = nn.Linear(filters, attn_dim, bias=False)
+        self.W = nn.Linear(attn_dim, attn_dim, bias=True) # Include the attention bias in this term
         self.v = nn.Linear(attn_dim, 1, bias=False)
         self.cumulative = None
         self.attention = None
@@ -231,8 +231,8 @@ class LSA(nn.Module):
         u = u.squeeze(-1)
 
         # Smooth Attention
-        scores = torch.sigmoid(u) / torch.sigmoid(u).sum(dim=1, keepdim=True)
-        # scores = F.softmax(u, dim=1)
+        # scores = torch.sigmoid(u) / torch.sigmoid(u).sum(dim=1, keepdim=True)
+        scores = F.softmax(u, dim=1)
         self.attention = scores
         self.cumulative += self.attention
 
