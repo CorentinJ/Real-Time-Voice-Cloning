@@ -257,6 +257,7 @@ class Decoder(nn.Module):
         self.res_rnn1 = nn.LSTMCell(lstm_dims, lstm_dims)
         self.res_rnn2 = nn.LSTMCell(lstm_dims, lstm_dims)
         self.mel_proj = nn.Linear(lstm_dims, n_mels * self.max_r, bias=False)
+        self.stop_proj = nn.Linear(encoder_dims + speaker_embedding_size + lstm_dims, 1)
 
     def zoneout(self, prev, current, p=0.1):
         device = next(self.parameters()).device  # Use same device as parameters
@@ -313,7 +314,12 @@ class Decoder(nn.Module):
         hidden_states = (attn_hidden, rnn1_hidden, rnn2_hidden)
         cell_states = (rnn1_cell, rnn2_cell)
 
-        return mels, scores, hidden_states, cell_states, context_vec
+        # Stop token prediction
+        s = torch.cat((x, context_vec), dim=1)
+        s = self.stop_proj(s)
+        stop_tokens = torch.sigmoid(s)
+
+        return mels, scores, hidden_states, cell_states, context_vec, stop_tokens
 
 
 class Tacotron(nn.Module):
@@ -378,7 +384,7 @@ class Tacotron(nn.Module):
         encoder_seq_proj = self.encoder_proj(encoder_seq)
 
         # Need a couple of lists for outputs
-        mel_outputs, attn_scores = [], []
+        mel_outputs, attn_scores, stop_outputs = [], [], []
 
         # Run the decoder loop
         for t in range(0, steps, self.r):
@@ -388,6 +394,7 @@ class Tacotron(nn.Module):
                              hidden_states, cell_states, context_vec, t)
             mel_outputs.append(mel_frames)
             attn_scores.append(scores)
+            stop_outputs.extend([stop_tokens] * self.r)
 
         # Concat the mel outputs into sequence
         mel_outputs = torch.cat(mel_outputs, dim=2)
@@ -400,8 +407,9 @@ class Tacotron(nn.Module):
         # For easy visualisation
         attn_scores = torch.cat(attn_scores, 1)
         # attn_scores = attn_scores.cpu().data.numpy()
+        stop_outputs = torch.cat(stop_outputs, 1)
 
-        return mel_outputs, linear, attn_scores
+        return mel_outputs, linear, attn_scores, stop_outputs
 
     def generate(self, x, speaker_embedding=None, steps=2000):
         self.eval()
@@ -432,18 +440,19 @@ class Tacotron(nn.Module):
         encoder_seq_proj = self.encoder_proj(encoder_seq)
 
         # Need a couple of lists for outputs
-        mel_outputs, attn_scores = [], []
+        mel_outputs, attn_scores, stop_outputs = [], [], []
 
         # Run the decoder loop
         for t in range(0, steps, self.r):
             prenet_in = mel_outputs[-1][:, :, -1] if t > 0 else go_frame
-            mel_frames, scores, hidden_states, cell_states, context_vec = \
+            mel_frames, scores, hidden_states, cell_states, context_vec, stop_tokens = \
             self.decoder(encoder_seq, encoder_seq_proj, prenet_in,
                          hidden_states, cell_states, context_vec, t)
             mel_outputs.append(mel_frames)
             attn_scores.append(scores)
-            # Stop the loop if silent frames present
-            if (mel_frames < self.stop_threshold).all() and t > 10: break
+            stop_outputs.extend([stop_tokens] * self.r)
+            # Stop the loop when all stop tokens in batch exceed threshold
+            if (stop_tokens > 0.5).all() and t > 10: break
 
         # Concat the mel outputs into sequence
         mel_outputs = torch.cat(mel_outputs, dim=2)
@@ -457,6 +466,7 @@ class Tacotron(nn.Module):
 
         # For easy visualisation
         attn_scores = torch.cat(attn_scores, 1)
+        stop_outputs = torch.cat(stop_outputs, 1)
 
         self.train()
 
