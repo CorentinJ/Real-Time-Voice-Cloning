@@ -177,8 +177,8 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                     m1_hat, m2_hat, attention, stop_pred = model(texts, mels, embeds)
 
                 # Backward pass
-                m1_loss = F.l1_loss(m1_hat, mels)
-                m2_loss = F.l1_loss(m2_hat, mels)
+                m1_loss = F.mse_loss(m1_hat, mels) + F.l1_loss(m1_hat, mels)
+                m2_loss = F.mse_loss(m2_hat, mels)
                 stop_loss = F.binary_cross_entropy(stop_pred, stop)
 
                 loss = m1_loss + m2_loss + stop_loss
