@@ -180,7 +180,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
 
                 if hparams.tts_clip_grad_norm is not None:
                     grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), hparams.tts_clip_grad_norm)
-                    if np.isnan(grad_norm.cpu()):
+                    if np.isnan(grad_norm):
                         print("grad_norm was NaN!")
 
                 optimizer.step()
