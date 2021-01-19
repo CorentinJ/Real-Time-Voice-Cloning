@@ -49,12 +49,12 @@ hparams = HParams(
                                                     # frame that has all values < -3.4
 
         ### Tacotron Training
-        tts_schedule = [(7,  1e-3,  20_000,  12),   # Progressive training schedule
-                        (2,  1e-4, 100_000,  12),   # (r, lr, step, batch_size)
-                        (2,  1e-4, 180_000,  12),   #
-                        (2,  1e-4, 350_000,  8),    # r = reduction factor (# of mel frames
-                        (2,  1e-5, 500_000,  8),    #     synthesized for each decoder iteration)
-                        (2,  1e-5, 600_000,  8)],   # lr = learning rate
+        tts_schedule = [(2,  1e-3,  20_000,  12),   # Progressive training schedule
+                        (2,  5e-4,  40_000,  12),   # (r, lr, step, batch_size)
+                        (2,  2e-4,  80_000,  12),   #
+                        (2,  1e-4, 160_000,  12),   # r = reduction factor (# of mel frames
+                        (2,  3e-5, 320_000,  12),   #     synthesized for each decoder iteration)
+                        (2,  1e-5, 640_000,  12)],  # lr = learning rate
 
         tts_clip_grad_norm = 1.0,                   # clips the gradient norm to prevent explosion - set to None if not needed
         tts_eval_interval = 500,                    # Number of steps between model evaluation (sample generation)
