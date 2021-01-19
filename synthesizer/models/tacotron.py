@@ -25,7 +25,7 @@ class HighwayNetwork(nn.Module):
 class Encoder(nn.Module):
     def __init__(self, embed_dims, num_chars, encoder_dims, K, num_highways, dropout):
         super().__init__()
-        prenet_dims = (encoder_dims * 2, encoder_dims)
+        prenet_dims = (encoder_dims, encoder_dims)
         cbhg_channels = encoder_dims
         self.embedding = nn.Embedding(num_chars, embed_dims)
         self.pre_net = PreNet(embed_dims, fc1_dims=prenet_dims[0], fc2_dims=prenet_dims[1],
