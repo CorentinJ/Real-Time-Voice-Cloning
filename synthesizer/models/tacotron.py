@@ -248,7 +248,7 @@ class Decoder(nn.Module):
         super().__init__()
         self.register_buffer("r", torch.tensor(1, dtype=torch.int))
         self.n_mels = n_mels
-        prenet_dims = (decoder_dims * 2, decoder_dims * 2)
+        prenet_dims = (decoder_dims * 2, decoder_dims)
         self.prenet = PreNet(n_mels, fc1_dims=prenet_dims[0], fc2_dims=prenet_dims[1],
                              dropout=dropout)
         self.attn_net = LSA(decoder_dims)
@@ -338,7 +338,7 @@ class Tacotron(nn.Module):
         self.decoder = Decoder(n_mels, encoder_dims, decoder_dims, lstm_dims,
                                dropout, speaker_embedding_size)
         self.postnet = CBHG(postnet_K, n_mels, postnet_dims,
-                            [postnet_dims, fft_bins], num_highways)
+                            [postnet_dims * 2, fft_bins], num_highways)
         self.post_proj = nn.Linear(postnet_dims, fft_bins, bias=False)
 
         self.init_model()
