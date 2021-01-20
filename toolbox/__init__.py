@@ -40,7 +40,7 @@ recognized_datasets = [
 MAX_WAVES = 15
 
 class Toolbox:
-    def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir, low_mem, seed, no_mp3_support):
+    def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir, seed, no_mp3_support):
         if not no_mp3_support:
             try:
                 librosa.load("samples/6829_00000.mp3")
@@ -51,7 +51,6 @@ class Toolbox:
         self.no_mp3_support = no_mp3_support
         sys.excepthook = self.excepthook
         self.datasets_root = datasets_root
-        self.low_mem = low_mem
         self.utterances = set()
         self.current_generated = (None, None, None, None) # speaker_name, spec, breaks, wav
         
@@ -208,24 +207,23 @@ class Toolbox:
         self.ui.log("Generating the mel spectrogram...")
         self.ui.set_loading(1)
         
-        # Synthesize the spectrogram
-        if self.synthesizer is None:
-            model_dir = self.ui.current_synthesizer_model_dir
-            checkpoints_dir = model_dir.joinpath("taco_pretrained")
-            self.synthesizer = Synthesizer(checkpoints_dir, low_mem=self.low_mem)
-        if not self.synthesizer.is_loaded():
-            self.ui.log("Loading the synthesizer %s" % self.synthesizer.checkpoint_fpath)
-
         # Update the synthesizer random seed
         if self.ui.random_seed_checkbox.isChecked():
-            seed = self.synthesizer.set_seed(int(self.ui.seed_textbox.text()))
+            seed = int(self.ui.seed_textbox.text())
             self.ui.populate_gen_options(seed, self.trim_silences)
         else:
-            seed = self.synthesizer.set_seed(None)
-        
+            seed = None
+
+        if seed is not None:
+            torch.manual_seed(seed)
+
+        # Synthesize the spectrogram
+        if self.synthesizer is None or seed is not None:
+            self.init_synthesizer()
+
         texts = self.ui.text_prompt.toPlainText().split("\n")
         embed = self.ui.selected_utterance.embed
-        embeds = np.stack([embed] * len(texts))
+        embeds = [embed] * len(texts)
         specs = self.synthesizer.synthesize_spectrograms(texts, embeds)
         breaks = [spec.shape[1] for spec in specs]
         spec = np.concatenate(specs, axis=1)
@@ -240,7 +238,7 @@ class Toolbox:
 
         # Initialize the vocoder model and make it determinstic, if user provides a seed
         if self.ui.random_seed_checkbox.isChecked():
-            seed = self.synthesizer.set_seed(int(self.ui.seed_textbox.text()))
+            seed = int(self.ui.seed_textbox.text())
             self.ui.populate_gen_options(seed, self.trim_silences)
         else:
             seed = None
@@ -329,6 +327,16 @@ class Toolbox:
         self.ui.set_loading(1)
         start = timer()
         encoder.load_model(model_fpath)
+        self.ui.log("Done (%dms)." % int(1000 * (timer() - start)), "append")
+        self.ui.set_loading(0)
+
+    def init_synthesizer(self):
+        model_fpath = self.ui.current_synthesizer_fpath
+
+        self.ui.log("Loading the synthesizer %s... " % model_fpath)
+        self.ui.set_loading(1)
+        start = timer()
+        self.synthesizer = Synthesizer(model_fpath)
         self.ui.log("Done (%dms)." % int(1000 * (timer() - start)), "append")
         self.ui.set_loading(0)
            
