@@ -32,12 +32,15 @@ SV2TTS is a three-stage deep learning framework that allows to create a numerica
 
 ## Setup
 
-### 1. Install Requirements
+### 1. Prepare prerequisites
 
-**Python 3.6 or 3.7** is needed to run the toolbox.
+**Python 3.6+** is needed to run the toolbox.
 
 * Install [PyTorch](https://pytorch.org/get-started/locally/) (>=1.0.1).
 * Install [ffmpeg](https://ffmpeg.org/download.html#get-packages).
+* (Highly recommended, as RTVC uses outdated dependancies) Setup a virtual environment with [`venv`](https://docs.python.org/3/library/venv.html) by running `python -m venv .venv`.
+  * Activate the virtual environment with `.venv/Scripts/activate`.
+    * Do note you will need to run this command before running anything in the toolbox if you used this to install dependancies, otherwise it will return an error saying it's missing some dependancies.
 * Run `pip install -r requirements.txt` to install the remaining necessary packages.
 
 ### 2. Download Pretrained Models
