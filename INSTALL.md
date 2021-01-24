@@ -105,3 +105,39 @@ unzip pretrained.zip
 ```
 python demo_toolbox.py
 ```
+
+## Mac OSX (Untested)
+### Install prerequisites
+- [Python 3.7](https://www.python.org/downloads/mac-osx/)
+- homebrew with `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+- ffmpeg with `brew install ffmpeg`
+
+### 3. Make a virtual environment and activate it
+```
+~/.local/bin/virtualenv --python python36 rtvc
+source rtvc/bin/activate
+```
+
+### 4. Download RTVC
+```
+git clone --depth 1 https://github.com/CorentinJ/Real-Time-Voice-Cloning.git
+```
+
+### 5. Install requirements
+```
+cd Real-Time-Voice-Cloning
+pip install torch
+pip install -r requirements.txt
+pip install webrtcvad
+```
+
+### 6. Get pretrained models
+```
+wget https://www.dropbox.com/s/5udq50bkpw2hipy/pretrained.zip?dl=1 -O pretrained.zip
+unzip pretrained.zip
+```
+
+### 7. Launch toolbox
+```
+python demo_toolbox.py
+```
