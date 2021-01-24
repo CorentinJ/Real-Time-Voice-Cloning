@@ -31,4 +31,4 @@ SV2TTS is a three-stage deep learning framework that allows to create a numerica
 
 
 ## Installation and Setup
-See [INSTALL.md](INSTALL.md) for installation instructions for complete instructions.
+See [INSTALL.md](INSTALL.md) for complete installation and setup instructions.
