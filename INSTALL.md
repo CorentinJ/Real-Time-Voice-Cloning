@@ -1,4 +1,6 @@
-## Setup
+# Setup
+
+## Windows (Partially tested)
 
  ### 1. Prepare prerequisites
 
@@ -39,3 +41,67 @@
  This command installs additional GPU dependencies and recommended packages: `pip install -r requirements_gpu.txt`
 
  Additionally, you will need to ensure GPU drivers are properly installed and that your CUDA version matches your PyTorch and Tensorflow installations.
+ 
+## Ubuntu 20.04 install instructions (tested)
+### 1. Add repositories
+```
+sudo add-apt-repository universe
+sudo add-apt-repository ppa:deadsnakes/ppa
+```
+
+### 2. Install software
+```
+snap install ffmpeg
+sudo apt install python3.6 python3.6-dev python3 python3-pip git
+pip3 install virtualenv
+```
+
+Additional steps are needed to overcome bugs with portaudio and QT:
+
+* Portaudio bugfix: https://stackoverflow.com/a/60824906
+
+```
+sudo apt install libasound2-dev
+git clone -b alsapatch https://github.com/gglockner/portaudio
+cd portaudio
+./configure && make
+sudo make install
+sudo ldconfig
+cd ..
+```
+
+* QT bugfix: https://askubuntu.com/a/1069502
+
+```
+sudo apt install --reinstall libxcb-xinerama0
+```
+
+### 3. Make a virtual environment and activate it
+```
+~/.local/bin/virtualenv --python python36 rtvc
+source rtvc/bin/activate
+```
+
+### 4. Download RTVC
+```
+git clone --depth 1 https://github.com/CorentinJ/Real-Time-Voice-Cloning.git
+```
+
+### 5. Install requirements
+```
+cd Real-Time-Voice-Cloning
+pip install torch
+pip install -r requirements.txt
+pip install webrtcvad
+```
+
+### 6. Get pretrained models
+```
+wget https://www.dropbox.com/s/5udq50bkpw2hipy/pretrained.zip?dl=1 -O pretrained.zip
+unzip pretrained.zip
+```
+
+### 7. Launch toolbox
+```
+python demo_toolbox.py
+```
