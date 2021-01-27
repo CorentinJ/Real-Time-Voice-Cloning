@@ -3,7 +3,7 @@
 ## Windows (Partially tested)
 
  ### 1. Prepare prerequisites
- * Install [Python](https://www.python.org).
+ * Install [Python](https://www.python.org) 3.7. Any other version will not work.
  * Install [PyTorch](https://pytorch.org/get-started/locally/) (>=1.0.1).
  * Install [ffmpeg](https://ffmpeg.org/download.html#get-packages).
  * (Highly recommended, as RTVC uses outdated dependancies) Setup a virtual environment with [`venv`](https://docs.python.org/3/library/venv.html) by running `python -m venv .venv`.
