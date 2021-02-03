@@ -67,4 +67,4 @@ Note: Enabling GPU support is a lot of work. You will want to set this up if you
 
 This command installs additional GPU dependencies and recommended packages: `pip install -r requirements_gpu.txt`
 
-Additionally, you will need to ensure GPU drivers are properly installed and that your CUDA version matches your PyTorch and Tensorflow installations.
+As well as, you will need to ensure GPU drivers are properly installed and that your CUDA version matches your PyTorch and Tensorflow installations.
