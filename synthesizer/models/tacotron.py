@@ -237,7 +237,7 @@ class LSA(nn.Module):
         # scores = torch.sigmoid(u) / torch.sigmoid(u).sum(dim=1, keepdim=True)
         scores = F.softmax(u, dim=1)
         self.attention = scores
-        self.cumulative += self.attention
+        self.cumulative = self.cumulative + self.attention
 
         return scores.unsqueeze(-1).transpose(1, 2)
 
@@ -392,7 +392,7 @@ class Tacotron(nn.Module):
         # Run the decoder loop
         for t in range(0, steps, self.r):
             prenet_in = m[:, :, t - 1] if t > 0 else go_frame
-            mel_frames, scores, hidden_states, cell_states, context_vec = \
+            mel_frames, scores, hidden_states, cell_states, context_vec, stop_tokens = \
                 self.decoder(encoder_seq, encoder_seq_proj, prenet_in,
                              hidden_states, cell_states, context_vec, t, x)
             mel_outputs.append(mel_frames)
