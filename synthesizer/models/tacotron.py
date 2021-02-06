@@ -218,7 +218,7 @@ class LSA(nn.Module):
         self.cumulative = torch.zeros(b, t, device=device)
         self.attention = torch.zeros(b, t, device=device)
 
-    def forward(self, encoder_seq_proj, query, t):
+    def forward(self, encoder_seq_proj, query, t, chars):
 
         if t == 0: self.init_attention(encoder_seq_proj)
 
@@ -229,6 +229,9 @@ class LSA(nn.Module):
 
         u = self.v(torch.tanh(processed_query + encoder_seq_proj + processed_loc))
         u = u.squeeze(-1)
+
+        # Mask zero padding chars
+        u = u * (chars != 0).float()
 
         # Smooth Attention
         # scores = torch.sigmoid(u) / torch.sigmoid(u).sum(dim=1, keepdim=True)
@@ -265,7 +268,7 @@ class Decoder(nn.Module):
         return prev * mask + current * (1 - mask)
 
     def forward(self, encoder_seq, encoder_seq_proj, prenet_in,
-                hidden_states, cell_states, context_vec, t):
+                hidden_states, cell_states, context_vec, t, chars):
 
         # Need this for reshaping mels
         batch_size = encoder_seq.size(0)
@@ -282,7 +285,7 @@ class Decoder(nn.Module):
         attn_hidden = self.attn_rnn(attn_rnn_in.squeeze(1), attn_hidden)
 
         # Compute the attention scores
-        scores = self.attn_net(encoder_seq_proj, attn_hidden, t)
+        scores = self.attn_net(encoder_seq_proj, attn_hidden, t, chars)
 
         # Dot product to create the context vector
         context_vec = scores @ encoder_seq
@@ -391,7 +394,7 @@ class Tacotron(nn.Module):
             prenet_in = m[:, :, t - 1] if t > 0 else go_frame
             mel_frames, scores, hidden_states, cell_states, context_vec = \
                 self.decoder(encoder_seq, encoder_seq_proj, prenet_in,
-                             hidden_states, cell_states, context_vec, t)
+                             hidden_states, cell_states, context_vec, t, x)
             mel_outputs.append(mel_frames)
             attn_scores.append(scores)
             stop_outputs.extend([stop_tokens] * self.r)
@@ -447,7 +450,7 @@ class Tacotron(nn.Module):
             prenet_in = mel_outputs[-1][:, :, -1] if t > 0 else go_frame
             mel_frames, scores, hidden_states, cell_states, context_vec, stop_tokens = \
             self.decoder(encoder_seq, encoder_seq_proj, prenet_in,
-                         hidden_states, cell_states, context_vec, t)
+                         hidden_states, cell_states, context_vec, t, x)
             mel_outputs.append(mel_frames)
             attn_scores.append(scores)
             stop_outputs.extend([stop_tokens] * self.r)
