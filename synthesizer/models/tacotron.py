@@ -205,7 +205,7 @@ class Attention(nn.Module):
 class LSA(nn.Module):
     def __init__(self, attn_dim, kernel_size=31, filters=32):
         super().__init__()
-        self.conv = nn.Conv1d(2, filters, padding=(kernel_size - 1) // 2, kernel_size=kernel_size, bias=True)
+        self.conv = nn.Conv1d(1, filters, padding=(kernel_size - 1) // 2, kernel_size=kernel_size, bias=True)
         self.L = nn.Linear(filters, attn_dim, bias=False)
         self.W = nn.Linear(attn_dim, attn_dim, bias=True) # Include the attention bias in this term
         self.v = nn.Linear(attn_dim, 1, bias=False)
@@ -224,7 +224,7 @@ class LSA(nn.Module):
 
         processed_query = self.W(query).unsqueeze(1)
 
-        location = torch.cat([self.cumulative.unsqueeze(1), self.attention.unsqueeze(1)], dim=1)
+        location = self.cumulative.unsqueeze(1)
         processed_loc = self.L(self.conv(location).transpose(1, 2))
 
         u = self.v(torch.tanh(processed_query + encoder_seq_proj + processed_loc))
@@ -251,7 +251,7 @@ class Decoder(nn.Module):
         super().__init__()
         self.register_buffer("r", torch.tensor(1, dtype=torch.int))
         self.n_mels = n_mels
-        prenet_dims = (decoder_dims * 2, decoder_dims)
+        prenet_dims = (decoder_dims * 2, decoder_dims * 2)
         self.prenet = PreNet(n_mels, fc1_dims=prenet_dims[0], fc2_dims=prenet_dims[1],
                              dropout=dropout)
         self.attn_net = LSA(decoder_dims)
@@ -341,7 +341,7 @@ class Tacotron(nn.Module):
         self.decoder = Decoder(n_mels, encoder_dims, decoder_dims, lstm_dims,
                                dropout, speaker_embedding_size)
         self.postnet = CBHG(postnet_K, n_mels, postnet_dims,
-                            [postnet_dims * 2, fft_bins], num_highways)
+                            [postnet_dims, fft_bins], num_highways)
         self.post_proj = nn.Linear(postnet_dims, fft_bins, bias=False)
 
         self.init_model()
