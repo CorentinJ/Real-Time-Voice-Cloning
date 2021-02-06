@@ -33,13 +33,13 @@ hparams = HParams(
         preemphasize = True,
 
         ### Tacotron Text-to-Speech (TTS)
-        tts_embed_dims = 256,                       # Embedding dimension for the graphemes/phoneme inputs
-        tts_encoder_dims = 128,
-        tts_decoder_dims = 256,
-        tts_postnet_dims = 256,
-        tts_encoder_K = 16,
-        tts_lstm_dims = 512,
-        tts_postnet_K = 8,
+        tts_embed_dims = 512,                       # Embedding dimension for the graphemes/phoneme inputs
+        tts_encoder_dims = 256,
+        tts_decoder_dims = 128,
+        tts_postnet_dims = 128*2,
+        tts_encoder_K = 5,
+        tts_lstm_dims = 256*4,
+        tts_postnet_K = 5,
         tts_num_highways = 4,
         tts_dropout = 0.5,
         tts_cleaner_names = ["english_cleaners"],

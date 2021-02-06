@@ -25,7 +25,7 @@ class HighwayNetwork(nn.Module):
 class Encoder(nn.Module):
     def __init__(self, embed_dims, num_chars, encoder_dims, K, num_highways, dropout):
         super().__init__()
-        prenet_dims = (encoder_dims * 2, encoder_dims)
+        prenet_dims = (encoder_dims, encoder_dims)
         cbhg_channels = encoder_dims
         self.embedding = nn.Embedding(num_chars, embed_dims)
         self.pre_net = PreNet(embed_dims, fc1_dims=prenet_dims[0], fc2_dims=prenet_dims[1],
@@ -116,7 +116,7 @@ class CBHG(nn.Module):
             hn = HighwayNetwork(channels)
             self.highways.append(hn)
 
-        self.rnn = nn.GRU(channels, channels, batch_first=True, bidirectional=True)
+        self.rnn = nn.GRU(channels, channels // 2, batch_first=True, bidirectional=True)
         self._to_flatten.append(self.rnn)
 
         # Avoid fragmentation of RNN parameters and associated warning
@@ -205,9 +205,9 @@ class Attention(nn.Module):
 class LSA(nn.Module):
     def __init__(self, attn_dim, kernel_size=31, filters=32):
         super().__init__()
-        self.conv = nn.Conv1d(2, filters, padding=(kernel_size - 1) // 2, kernel_size=kernel_size, bias=False)
-        self.L = nn.Linear(filters, attn_dim, bias=True)
-        self.W = nn.Linear(attn_dim, attn_dim, bias=True)
+        self.conv = nn.Conv1d(2, filters, padding=(kernel_size - 1) // 2, kernel_size=kernel_size, bias=True)
+        self.L = nn.Linear(filters, attn_dim, bias=False)
+        self.W = nn.Linear(attn_dim, attn_dim, bias=True) # Include the attention bias in this term
         self.v = nn.Linear(attn_dim, 1, bias=False)
         self.cumulative = None
         self.attention = None
@@ -231,8 +231,8 @@ class LSA(nn.Module):
         u = u.squeeze(-1)
 
         # Smooth Attention
-        scores = torch.sigmoid(u) / torch.sigmoid(u).sum(dim=1, keepdim=True)
-        # scores = F.softmax(u, dim=1)
+        # scores = torch.sigmoid(u) / torch.sigmoid(u).sum(dim=1, keepdim=True)
+        scores = F.softmax(u, dim=1)
         self.attention = scores
         self.cumulative += self.attention
 
@@ -243,19 +243,21 @@ class Decoder(nn.Module):
     # Class variable because its value doesn't change between classes
     # yet ought to be scoped by class because its a property of a Decoder
     max_r = 20
-    def __init__(self, n_mels, decoder_dims, lstm_dims, dropout, speaker_embedding_size):
+    def __init__(self, n_mels, encoder_dims, decoder_dims, lstm_dims,
+                 dropout, speaker_embedding_size):
         super().__init__()
         self.register_buffer("r", torch.tensor(1, dtype=torch.int))
         self.n_mels = n_mels
-        prenet_dims = (decoder_dims, decoder_dims // 2)
+        prenet_dims = (decoder_dims * 2, decoder_dims)
         self.prenet = PreNet(n_mels, fc1_dims=prenet_dims[0], fc2_dims=prenet_dims[1],
                              dropout=dropout)
         self.attn_net = LSA(decoder_dims)
-        self.attn_rnn = nn.GRUCell(decoder_dims + prenet_dims[1] + speaker_embedding_size, decoder_dims)
-        self.rnn_input = nn.Linear(2 * decoder_dims + speaker_embedding_size, lstm_dims)
+        self.attn_rnn = nn.GRUCell(encoder_dims + prenet_dims[1] + speaker_embedding_size, decoder_dims)
+        self.rnn_input = nn.Linear(encoder_dims + decoder_dims + speaker_embedding_size, lstm_dims)
         self.res_rnn1 = nn.LSTMCell(lstm_dims, lstm_dims)
         self.res_rnn2 = nn.LSTMCell(lstm_dims, lstm_dims)
         self.mel_proj = nn.Linear(lstm_dims, n_mels * self.max_r, bias=False)
+        self.stop_proj = nn.Linear(encoder_dims + speaker_embedding_size + lstm_dims, 1)
 
     def zoneout(self, prev, current, p=0.1):
         device = next(self.parameters()).device  # Use same device as parameters
@@ -312,7 +314,12 @@ class Decoder(nn.Module):
         hidden_states = (attn_hidden, rnn1_hidden, rnn2_hidden)
         cell_states = (rnn1_cell, rnn2_cell)
 
-        return mels, scores, hidden_states, cell_states, context_vec
+        # Stop token prediction
+        s = torch.cat((x, context_vec), dim=1)
+        s = self.stop_proj(s)
+        stop_tokens = torch.sigmoid(s)
+
+        return mels, scores, hidden_states, cell_states, context_vec, stop_tokens
 
 
 class Tacotron(nn.Module):
@@ -322,15 +329,17 @@ class Tacotron(nn.Module):
         super().__init__()
         self.n_mels = n_mels
         self.lstm_dims = lstm_dims
+        self.encoder_dims = encoder_dims
         self.decoder_dims = decoder_dims
         self.speaker_embedding_size = speaker_embedding_size
         self.encoder = Encoder(embed_dims, num_chars, encoder_dims,
                                encoder_K, num_highways, dropout)
-        self.encoder_proj = nn.Linear(decoder_dims + speaker_embedding_size, decoder_dims, bias=False)
-        self.decoder = Decoder(n_mels, decoder_dims, lstm_dims, dropout, speaker_embedding_size)
+        self.encoder_proj = nn.Linear(encoder_dims + speaker_embedding_size, decoder_dims, bias=False)
+        self.decoder = Decoder(n_mels, encoder_dims, decoder_dims, lstm_dims,
+                               dropout, speaker_embedding_size)
         self.postnet = CBHG(postnet_K, n_mels, postnet_dims,
                             [postnet_dims * 2, fft_bins], num_highways)
-        self.post_proj = nn.Linear(postnet_dims * 2, fft_bins, bias=False)
+        self.post_proj = nn.Linear(postnet_dims, fft_bins, bias=False)
 
         self.init_model()
         self.num_params()
@@ -367,7 +376,7 @@ class Tacotron(nn.Module):
         go_frame = torch.zeros(batch_size, self.n_mels, device=device)
 
         # Need an initial context vector
-        context_vec = torch.zeros(batch_size, self.decoder_dims + self.speaker_embedding_size, device=device)
+        context_vec = torch.zeros(batch_size, self.encoder_dims + self.speaker_embedding_size, device=device)
 
         # SV2TTS: Run the encoder with the speaker embedding
         # The projection avoids unnecessary matmuls in the decoder loop
@@ -375,7 +384,7 @@ class Tacotron(nn.Module):
         encoder_seq_proj = self.encoder_proj(encoder_seq)
 
         # Need a couple of lists for outputs
-        mel_outputs, attn_scores = [], []
+        mel_outputs, attn_scores, stop_outputs = [], [], []
 
         # Run the decoder loop
         for t in range(0, steps, self.r):
@@ -385,6 +394,7 @@ class Tacotron(nn.Module):
                              hidden_states, cell_states, context_vec, t)
             mel_outputs.append(mel_frames)
             attn_scores.append(scores)
+            stop_outputs.extend([stop_tokens] * self.r)
 
         # Concat the mel outputs into sequence
         mel_outputs = torch.cat(mel_outputs, dim=2)
@@ -397,8 +407,9 @@ class Tacotron(nn.Module):
         # For easy visualisation
         attn_scores = torch.cat(attn_scores, 1)
         # attn_scores = attn_scores.cpu().data.numpy()
+        stop_outputs = torch.cat(stop_outputs, 1)
 
-        return mel_outputs, linear, attn_scores
+        return mel_outputs, linear, attn_scores, stop_outputs
 
     def generate(self, x, speaker_embedding=None, steps=2000):
         self.eval()
@@ -421,7 +432,7 @@ class Tacotron(nn.Module):
         go_frame = torch.zeros(batch_size, self.n_mels, device=device)
 
         # Need an initial context vector
-        context_vec = torch.zeros(batch_size, self.decoder_dims + self.speaker_embedding_size, device=device)
+        context_vec = torch.zeros(batch_size, self.encoder_dims + self.speaker_embedding_size, device=device)
 
         # SV2TTS: Run the encoder with the speaker embedding
         # The projection avoids unnecessary matmuls in the decoder loop
@@ -429,18 +440,19 @@ class Tacotron(nn.Module):
         encoder_seq_proj = self.encoder_proj(encoder_seq)
 
         # Need a couple of lists for outputs
-        mel_outputs, attn_scores = [], []
+        mel_outputs, attn_scores, stop_outputs = [], [], []
 
         # Run the decoder loop
         for t in range(0, steps, self.r):
             prenet_in = mel_outputs[-1][:, :, -1] if t > 0 else go_frame
-            mel_frames, scores, hidden_states, cell_states, context_vec = \
+            mel_frames, scores, hidden_states, cell_states, context_vec, stop_tokens = \
             self.decoder(encoder_seq, encoder_seq_proj, prenet_in,
                          hidden_states, cell_states, context_vec, t)
             mel_outputs.append(mel_frames)
             attn_scores.append(scores)
-            # Stop the loop if silent frames present
-            if (mel_frames < self.stop_threshold).all() and t > 10: break
+            stop_outputs.extend([stop_tokens] * self.r)
+            # Stop the loop when all stop tokens in batch exceed threshold
+            if (stop_tokens > 0.5).all() and t > 10: break
 
         # Concat the mel outputs into sequence
         mel_outputs = torch.cat(mel_outputs, dim=2)
@@ -454,6 +466,7 @@ class Tacotron(nn.Module):
 
         # For easy visualisation
         attn_scores = torch.cat(attn_scores, 1)
+        stop_outputs = torch.cat(stop_outputs, 1)
 
         self.train()
 

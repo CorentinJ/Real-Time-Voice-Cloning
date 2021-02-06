@@ -158,29 +158,37 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
             for i, (texts, mels, embeds, idx) in enumerate(data_loader, 1):
                 start_time = time.time()
 
+                # Generate stop tokens for training
+                stop = torch.ones(mels.shape[0], mels.shape[2])
+                for j, k in enumerate(idx):
+                    stop[j, :int(dataset.metadata[k][4])-1] = 0
+
                 texts = texts.to(device)
                 mels = mels.to(device)
                 embeds = embeds.to(device)
+                stop = stop.to(device)
 
                 # Forward pass
                 # Parallelize model onto GPUS using workaround due to python bug
                 if device.type == "cuda" and torch.cuda.device_count() > 1:
-                    m1_hat, m2_hat, attention = data_parallel_workaround(model, texts, mels, embeds)
+                    m1_hat, m2_hat, attention, stop_pred = data_parallel_workaround(model, texts,
+                                                                                    mels, embeds)
                 else:
-                    m1_hat, m2_hat, attention = model(texts, mels, embeds)
+                    m1_hat, m2_hat, attention, stop_pred = model(texts, mels, embeds)
 
                 # Backward pass
-                m1_loss = F.l1_loss(m1_hat, mels)
-                m2_loss = F.l1_loss(m2_hat, mels)
+                m1_loss = F.mse_loss(m1_hat, mels) + F.l1_loss(m1_hat, mels)
+                m2_loss = F.mse_loss(m2_hat, mels)
+                stop_loss = F.binary_cross_entropy(stop_pred, stop)
 
-                loss = m1_loss + m2_loss
+                loss = m1_loss + m2_loss + stop_loss
 
                 optimizer.zero_grad()
                 loss.backward()
 
                 if hparams.tts_clip_grad_norm is not None:
                     grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), hparams.tts_clip_grad_norm)
-                    if np.isnan(grad_norm.cpu()):
+                    if np.isnan(grad_norm):
                         print("grad_norm was NaN!")
 
                 optimizer.step()
@@ -228,6 +236,10 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                                        sample_num=sample_idx + 1,
                                        loss=loss,
                                        hparams=hparams)
+
+                # Break out of loop to update training schedule
+                if step >= max_step:
+                    break
 
             # Add line break after every epoch
             print("")
