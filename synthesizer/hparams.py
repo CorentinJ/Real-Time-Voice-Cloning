@@ -80,6 +80,7 @@ hparams = HParams(
         use_lws = False,                            # "Fast spectrogram phase recovery using local weighted sums"
         symmetric_mels = True,                      # Sets mel range to [-max_abs_value, max_abs_value] if True,
                                                     #               and [0, max_abs_value] if False
+        trim_silence = True,                        # Use with sample_rate of 16000 for best results
 
         ### SV2TTS
         speaker_embedding_size = 256,               # Dimension for the speaker embedding
