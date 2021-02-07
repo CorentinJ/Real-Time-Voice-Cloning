@@ -202,6 +202,10 @@ def process_utterance(wav: np.ndarray, text: str, out_dir: Path, basename: str,
     wav_fpath = out_dir.joinpath("audio", "audio-%s.npy" % basename)
     if skip_existing and mel_fpath.exists() and wav_fpath.exists():
         return None
+
+    # Trim silence
+    if hparams.trim_silence:
+        wav = encoder.preprocess_wav(wav, normalize=False, trim_silence=True)
     
     # Skip utterances that are too short
     if len(wav) < hparams.utterance_min_duration * hparams.sample_rate:

@@ -33,13 +33,13 @@ hparams = HParams(
         preemphasize = True,
 
         ### Tacotron Text-to-Speech (TTS)
-        tts_embed_dims = 256,                       # Embedding dimension for the graphemes/phoneme inputs
-        tts_encoder_dims = 128,
-        tts_decoder_dims = 256,
-        tts_postnet_dims = 256,
-        tts_encoder_K = 16,
-        tts_lstm_dims = 512,
-        tts_postnet_K = 8,
+        tts_embed_dims = 512,                       # Embedding dimension for the graphemes/phoneme inputs
+        tts_encoder_dims = 256,
+        tts_decoder_dims = 128,
+        tts_postnet_dims = 512,
+        tts_encoder_K = 5,
+        tts_lstm_dims = 1024,
+        tts_postnet_K = 5,
         tts_num_highways = 4,
         tts_dropout = 0.5,
         tts_cleaner_names = ["english_cleaners"],
@@ -80,6 +80,7 @@ hparams = HParams(
         use_lws = False,                            # "Fast spectrogram phase recovery using local weighted sums"
         symmetric_mels = True,                      # Sets mel range to [-max_abs_value, max_abs_value] if True,
                                                     #               and [0, max_abs_value] if False
+        trim_silence = True,                        # Use with sample_rate of 16000 for best results
 
         ### SV2TTS
         speaker_embedding_size = 256,               # Dimension for the speaker embedding

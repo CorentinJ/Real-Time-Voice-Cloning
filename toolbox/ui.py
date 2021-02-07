@@ -38,7 +38,6 @@ colormap = np.array([
 default_text = \
     "Welcome to the toolbox! To begin, load an utterance from your datasets or record one " \
     "yourself.\nOnce its embedding has been created, you can synthesize any text written here.\n" \
-    "With the current synthesizer model, punctuation and special characters will be ignored.\n" \
     "The synthesizer expects to generate " \
     "outputs that are somewhere between 5 and 12 seconds.\nTo mark breaks, write a new line. " \
     "Each line will be treated separately.\nThen, they are joined together to make the final " \
