@@ -27,7 +27,7 @@ python -m pip install -r requirements.txt
 
 ### 2. Download pretrained model
 
-Download file "pretrained.zip" from https://github.com/blue-fish/Real-Time-Voice-Cloning/releases/tag/v1.0
+https://www.dropbox.com/s/msozsvqfhd31sva/pretrained_pt.zip?dl=1
 
 Extract the files to their corresponding locations in your Real-Time-Voice-Cloning folder.
 
