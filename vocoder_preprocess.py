@@ -17,7 +17,7 @@ if __name__ == "__main__":
         "Path to the directory containing your SV2TTS directory. If you specify both --in_dir and "
         "--out_dir, this argument won't be used.")
     parser.add_argument("--model_dir", type=str, 
-                        default="synthesizer/saved_models/logs-pretrained/", help=\
+                        default="synthesizer/saved_models/pretrained/", help=\
         "Path to the pretrained model directory.")
     parser.add_argument("-i", "--in_dir", type=str, default=argparse.SUPPRESS, help= \
         "Path to the synthesizer directory that contains the mel spectrograms, the wavs and the "
@@ -30,6 +30,8 @@ if __name__ == "__main__":
                              "pairs")
     parser.add_argument("--no_trim", action="store_true", help=\
         "Preprocess audio without trimming silences (not recommended).")
+    parser.add_argument("--cpu", action="store_true", help=\
+        "If True, processing is done on CPU, even when a GPU is available.")
     args = parser.parse_args()
     print_args(args, parser)
     modified_hp = hparams.parse(args.hparams)
@@ -38,6 +40,10 @@ if __name__ == "__main__":
         args.in_dir = os.path.join(args.datasets_root, "SV2TTS", "synthesizer")
     if not hasattr(args, "out_dir"):
         args.out_dir = os.path.join(args.datasets_root, "SV2TTS", "vocoder")
+
+    if args.cpu:
+        # Hide GPUs from Pytorch to force CPU processing
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
     
     # Verify webrtcvad is available
     if not args.no_trim:

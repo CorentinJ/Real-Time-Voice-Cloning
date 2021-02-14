@@ -3,6 +3,7 @@ from toolbox import Toolbox
 from utils.argutils import print_args
 from utils.modelutils import check_model_paths
 import argparse
+import os
 
 
 if __name__ == '__main__':
@@ -20,15 +21,19 @@ if __name__ == '__main__':
                         help="Directory containing saved synthesizer models")
     parser.add_argument("-v", "--voc_models_dir", type=Path, default="vocoder/saved_models", 
                         help="Directory containing saved vocoder models")
-    parser.add_argument("--low_mem", action="store_true", help=\
-        "If True, the memory used by the synthesizer will be freed after each use. Adds large "
-        "overhead but allows to save some GPU memory for lower-end GPUs.")
+    parser.add_argument("--cpu", action="store_true", help=\
+        "If True, processing is done on CPU, even when a GPU is available.")
     parser.add_argument("--seed", type=int, default=None, help=\
         "Optional random number seed value to make toolbox deterministic.")
     parser.add_argument("--no_mp3_support", action="store_true", help=\
         "If True, no mp3 files are allowed.")
     args = parser.parse_args()
     print_args(args, parser)
+
+    if args.cpu:
+        # Hide GPUs from Pytorch to force CPU processing
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
+    del args.cpu
 
     ## Remind the user to download pretrained models if needed
     check_model_paths(encoder_path=args.enc_models_dir, synthesizer_path=args.syn_models_dir,

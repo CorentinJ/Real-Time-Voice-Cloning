@@ -11,6 +11,7 @@ import librosa
 import argparse
 import torch
 import sys
+import os
 from audioread.exceptions import NoBackendError
 
 if __name__ == '__main__':
@@ -21,15 +22,14 @@ if __name__ == '__main__':
     parser.add_argument("-e", "--enc_model_fpath", type=Path, 
                         default="encoder/saved_models/pretrained.pt",
                         help="Path to a saved encoder")
-    parser.add_argument("-s", "--syn_model_dir", type=Path, 
-                        default="synthesizer/saved_models/logs-pretrained/",
-                        help="Directory containing the synthesizer model")
+    parser.add_argument("-s", "--syn_model_fpath", type=Path, 
+                        default="synthesizer/saved_models/pretrained/pretrained.pt",
+                        help="Path to a saved synthesizer")
     parser.add_argument("-v", "--voc_model_fpath", type=Path, 
                         default="vocoder/saved_models/pretrained/pretrained.pt",
                         help="Path to a saved vocoder")
-    parser.add_argument("--low_mem", action="store_true", help=\
-        "If True, the memory used by the synthesizer will be freed after each use. Adds large "
-        "overhead but allows to save some GPU memory for lower-end GPUs.")
+    parser.add_argument("--cpu", action="store_true", help=\
+        "If True, processing is done on CPU, even when a GPU is available.")
     parser.add_argument("--no_sound", action="store_true", help=\
         "If True, audio won't be played.")
     parser.add_argument("--seed", type=int, default=None, help=\
@@ -40,6 +40,10 @@ if __name__ == '__main__':
     print_args(args, parser)
     if not args.no_sound:
         import sounddevice as sd
+
+    if args.cpu:
+        # Hide GPUs from Pytorch to force CPU processing
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
     if not args.no_mp3_support:
         try:
@@ -67,13 +71,14 @@ if __name__ == '__main__':
         print("Using CPU for inference.\n")
     
     ## Remind the user to download pretrained models if needed
-    check_model_paths(encoder_path=args.enc_model_fpath, synthesizer_path=args.syn_model_dir,
+    check_model_paths(encoder_path=args.enc_model_fpath,
+                      synthesizer_path=args.syn_model_fpath,
                       vocoder_path=args.voc_model_fpath)
     
     ## Load the models one by one.
     print("Preparing the encoder, the synthesizer and the vocoder...")
     encoder.load_model(args.enc_model_fpath)
-    synthesizer = Synthesizer(args.syn_model_dir.joinpath("taco_pretrained"), low_mem=args.low_mem, seed=args.seed)
+    synthesizer = Synthesizer(args.syn_model_fpath)
     vocoder.load_model(args.voc_model_fpath)
     
     
@@ -160,6 +165,11 @@ if __name__ == '__main__':
             ## Generating the spectrogram
             text = input("Write a sentence (+-20 words) to be synthesized:\n")
             
+            # If seed is specified, reset torch seed and force synthesizer reload
+            if args.seed is not None:
+                torch.manual_seed(args.seed)
+                synthesizer = Synthesizer(args.syn_model_fpath)
+
             # The synthesizer works in batch, so you need to put your data in a list or numpy array
             texts = [text]
             embeds = [embed]

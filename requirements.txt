@@ -1,4 +1,3 @@
-tensorflow==1.15
 umap-learn
 visdom
 librosa>=0.8.0
@@ -14,3 +13,4 @@ inflect
 PyQt5
 multiprocess
 numba
+webrtcvad; platform_system != "Windows"

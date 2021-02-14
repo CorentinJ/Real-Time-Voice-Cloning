@@ -1,82 +1,97 @@
-from synthesizer.tacotron2 import Tacotron2
+import torch
+from torch.utils.data import DataLoader
 from synthesizer.hparams import hparams_debug_string
-from synthesizer.infolog import log
-import tensorflow as tf
+from synthesizer.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
+from synthesizer.models.tacotron import Tacotron
+from synthesizer.utils.text import text_to_sequence
+from synthesizer.utils.symbols import symbols
+import numpy as np
+from pathlib import Path
 from tqdm import tqdm
-import time
-import os
 
-
-def run_eval(args, checkpoint_path, output_dir, hparams, sentences):
-    eval_dir = os.path.join(output_dir, "eval")
-    log_dir = os.path.join(output_dir, "logs-eval")
-    
-    #Create output path if it doesn"t exist
-    os.makedirs(eval_dir, exist_ok=True)
-    os.makedirs(log_dir, exist_ok=True)
-    os.makedirs(os.path.join(log_dir, "wavs"), exist_ok=True)
-    os.makedirs(os.path.join(log_dir, "plots"), exist_ok=True)
-    
-    log(hparams_debug_string())
-    synth = Tacotron2(checkpoint_path, hparams)
-    
-    #Set inputs batch wise
-    sentences = [sentences[i: i+hparams.tacotron_synthesis_batch_size] for i 
-                 in range(0, len(sentences), hparams.tacotron_synthesis_batch_size)]
-    
-    log("Starting Synthesis")
-    with open(os.path.join(eval_dir, "map.txt"), "w") as file:
-        for i, texts in enumerate(tqdm(sentences)):
-            start = time.time()
-            basenames = ["batch_{}_sentence_{}".format(i, j) for j in range(len(texts))]
-            mel_filenames, speaker_ids = synth.synthesize(texts, basenames, eval_dir, log_dir, None)
-            
-            for elems in zip(texts, mel_filenames, speaker_ids):
-                file.write("|".join([str(x) for x in elems]) + "\n")
-    log("synthesized mel spectrograms at {}".format(eval_dir))
-    return eval_dir
 
 def run_synthesis(in_dir, out_dir, model_dir, hparams):
-    synth_dir = os.path.join(out_dir, "mels_gta")
-    os.makedirs(synth_dir, exist_ok=True)
-    metadata_filename = os.path.join(in_dir, "train.txt")
-    print(hparams_debug_string())
-    
-    # Load the model in memory
-    weights_dir = os.path.join(model_dir, "taco_pretrained")
-    checkpoint_fpath = tf.train.get_checkpoint_state(weights_dir).model_checkpoint_path
-    synth = Tacotron2(checkpoint_fpath, hparams, gta=True)
-    
-    # Load the metadata
-    with open(metadata_filename, encoding="utf-8") as f:
-        metadata = [line.strip().split("|") for line in f]
-        frame_shift_ms = hparams.hop_size / hparams.sample_rate
-        hours = sum([int(x[4]) for x in metadata]) * frame_shift_ms / 3600
-        print("Loaded metadata for {} examples ({:.2f} hours)".format(len(metadata), hours))
-        
-    #Set inputs batch wise
-    metadata = [metadata[i: i + hparams.tacotron_synthesis_batch_size] for i in
-                range(0, len(metadata), hparams.tacotron_synthesis_batch_size)]
-    # TODO: come on big boy, fix this
-    # Quick and dirty fix to make sure that all batches have the same size 
-    metadata = metadata[:-1]
-    
-    print("Starting Synthesis")
-    mel_dir = os.path.join(in_dir, "mels")
-    embed_dir = os.path.join(in_dir, "embeds")
-    meta_out_fpath = os.path.join(out_dir, "synthesized.txt")
-    with open(meta_out_fpath, "w") as file:
-        for i, meta in enumerate(tqdm(metadata)):
-            texts = [m[5] for m in meta]
-            mel_filenames = [os.path.join(mel_dir, m[1]) for m in meta]
-            embed_filenames = [os.path.join(embed_dir, m[2]) for m in meta]
-            basenames = [os.path.basename(m).replace(".npy", "").replace("mel-", "") 
-                         for m in mel_filenames]
-            synth.synthesize(texts, basenames, synth_dir, None, mel_filenames, embed_filenames)
-            
-            for elems in meta:
-                file.write("|".join([str(x) for x in elems]) + "\n")
-                
-    print("Synthesized mel spectrograms at {}".format(synth_dir))
-    return meta_out_fpath
+    # This generates ground truth-aligned mels for vocoder training
+    synth_dir = Path(out_dir).joinpath("mels_gta")
+    synth_dir.mkdir(exist_ok=True)
+    print(hparams_debug_string(hparams))
 
+    # Check for GPU
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+        if hparams.synthesis_batch_size % torch.cuda.device_count() != 0:
+            raise ValueError("`hparams.synthesis_batch_size` must be evenly divisible by n_gpus!")
+    else:
+        device = torch.device("cpu")
+    print("Synthesizer using device:", device)
+
+    # Instantiate Tacotron model
+    model = Tacotron(embed_dims=hparams.tts_embed_dims,
+                     num_chars=len(symbols),
+                     encoder_dims=hparams.tts_encoder_dims,
+                     decoder_dims=hparams.tts_decoder_dims,
+                     n_mels=hparams.num_mels,
+                     fft_bins=hparams.num_mels,
+                     postnet_dims=hparams.tts_postnet_dims,
+                     encoder_K=hparams.tts_encoder_K,
+                     lstm_dims=hparams.tts_lstm_dims,
+                     postnet_K=hparams.tts_postnet_K,
+                     num_highways=hparams.tts_num_highways,
+                     dropout=0., # Use zero dropout for gta mels
+                     stop_threshold=hparams.tts_stop_threshold,
+                     speaker_embedding_size=hparams.speaker_embedding_size).to(device)
+
+    # Load the weights
+    model_dir = Path(model_dir)
+    model_fpath = model_dir.joinpath(model_dir.stem).with_suffix(".pt")
+    print("\nLoading weights at %s" % model_fpath)
+    model.load(model_fpath)
+    print("Tacotron weights loaded from step %d" % model.step)
+
+    # Synthesize using same reduction factor as the model is currently trained
+    r = np.int32(model.r)
+
+    # Set model to eval mode (disable gradient and zoneout)
+    model.eval()
+
+    # Initialize the dataset
+    in_dir = Path(in_dir)
+    metadata_fpath = in_dir.joinpath("train.txt")
+    mel_dir = in_dir.joinpath("mels")
+    embed_dir = in_dir.joinpath("embeds")
+
+    dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
+    data_loader = DataLoader(dataset,
+                             collate_fn=lambda batch: collate_synthesizer(batch, r),
+                             batch_size=hparams.synthesis_batch_size,
+                             num_workers=2,
+                             shuffle=False,
+                             pin_memory=True)
+
+    # Generate GTA mels
+    meta_out_fpath = Path(out_dir).joinpath("synthesized.txt")
+    with open(meta_out_fpath, "w") as file:
+        for i, (texts, mels, embeds, idx) in tqdm(enumerate(data_loader), total=len(data_loader)):
+            texts = texts.to(device)
+            mels = mels.to(device)
+            embeds = embeds.to(device)
+
+            # Parallelize model onto GPUS using workaround due to python bug
+            if device.type == "cuda" and torch.cuda.device_count() > 1:
+                _, mels_out, _ = data_parallel_workaround(model, texts, mels, embeds)
+            else:
+                _, mels_out, _ = model(texts, mels, embeds)
+
+            for j, k in enumerate(idx):
+                # Note: outputs mel-spectrogram files and target ones have same names, just different folders
+                mel_filename = Path(synth_dir).joinpath(dataset.metadata[k][1])
+                mel_out = mels_out[j].detach().cpu().numpy().T
+
+                # Use the length of the ground truth mel to remove padding from the generated mels
+                mel_out = mel_out[:int(dataset.metadata[k][4])]
+
+                # Write the spectrogram to disk
+                np.save(mel_filename, mel_out, allow_pickle=False)
+
+                # Write metadata into the synthesized file
+                file.write("|".join(dataset.metadata[k]))
