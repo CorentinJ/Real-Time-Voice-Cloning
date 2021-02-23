@@ -56,8 +56,8 @@ class SpeakerEncoder(nn.Module):
         embeds_raw = self.relu(self.linear(hidden[-1]))
         
         # L2-normalize it
-        embeds = embeds_raw / torch.norm(embeds_raw, dim=1, keepdim=True)
-        
+        embeds = embeds_raw / (torch.norm(embeds_raw, dim=1, keepdim=True) + 1e-5)        
+
         return embeds
     
     def similarity_matrix(self, embeds):
@@ -73,12 +73,12 @@ class SpeakerEncoder(nn.Module):
         
         # Inclusive centroids (1 per speaker). Cloning is needed for reverse differentiation
         centroids_incl = torch.mean(embeds, dim=1, keepdim=True)
-        centroids_incl = centroids_incl.clone() / torch.norm(centroids_incl, dim=2, keepdim=True)
+        centroids_incl = centroids_incl.clone() / (torch.norm(centroids_incl, dim=2, keepdim=True) + 1e-5)
 
         # Exclusive centroids (1 per utterance)
         centroids_excl = (torch.sum(embeds, dim=1, keepdim=True) - embeds)
         centroids_excl /= (utterances_per_speaker - 1)
-        centroids_excl = centroids_excl.clone() / torch.norm(centroids_excl, dim=2, keepdim=True)
+        centroids_excl = centroids_excl.clone() / (torch.norm(centroids_excl, dim=2, keepdim=True) + 1e-5)
 
         # Similarity matrix. The cosine similarity of already 2-normed vectors is simply the dot
         # product of these vectors (which is just an element-wise multiplication reduced by a sum).
