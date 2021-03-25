@@ -47,7 +47,7 @@ class Toolbox:
             except NoBackendError:
                 print("Librosa will be unable to open mp3 files if additional software is not installed.\n"
                   "Please install ffmpeg or add the '--no_mp3_support' option to proceed without support for mp3 files.")
-                exit(-1)
+                sys.exit(-1)
         self.no_mp3_support = no_mp3_support
         sys.excepthook = self.excepthook
         self.datasets_root = datasets_root

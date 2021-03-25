@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 
 def check_model_paths(encoder_path: Path, synthesizer_path: Path, vocoder_path: Path):
     # This function tests the model paths and makes sure at least one is valid.
@@ -14,4 +15,4 @@ def check_model_paths(encoder_path: Path, synthesizer_path: Path, vocoder_path: 
     print("Error: Model files not found. Follow these instructions to get and install the models:")
     print("https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models")
     print("********************************************************************************\n")
-    quit(-1)
+    sys.quit(-1)

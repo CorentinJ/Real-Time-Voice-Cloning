@@ -51,7 +51,7 @@ if __name__ == '__main__':
         except NoBackendError:
             print("Librosa will be unable to open mp3 files if additional software is not installed.\n"
                   "Please install ffmpeg or add the '--no_mp3_support' option to proceed without support for mp3 files.")
-            exit(-1)
+            sys.exit(-1)
         
     print("Running a test of your configuration...\n")
         
