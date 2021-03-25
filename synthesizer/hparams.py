@@ -1,7 +1,7 @@
 import ast
 import pprint
 
-class HParams(object):
+class HParams:
     def __init__(self, **kwargs): self.__dict__.update(kwargs)
     def __setitem__(self, key, value): setattr(self, key, value)
     def __getitem__(self, key): return getattr(self, key)
