@@ -1,0 +1,4 @@
+# This is a list of recommended packages for training.
+# You will also need the packages listed in requirements.txt
+
+webrtcvad              # Better noise reduction when processing audio files

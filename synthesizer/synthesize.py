@@ -3,6 +3,7 @@ from torch.utils.data import DataLoader
 from synthesizer.hparams import hparams_debug_string
 from synthesizer.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
 from synthesizer.models.tacotron import Tacotron
+from synthesizer.models.tacotron2 import Tacotron2
 from synthesizer.utils.text import text_to_sequence
 from synthesizer.utils.symbols import symbols
 import numpy as np
@@ -20,7 +21,8 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
     if torch.cuda.is_available():
         device = torch.device("cuda")
         if hparams.synthesis_batch_size % torch.cuda.device_count() != 0:
-            raise ValueError("`hparams.synthesis_batch_size` must be evenly divisible by n_gpus!")
+            raise ValueError(
+                "`hparams.synthesis_batch_size` must be evenly divisible by n_gpus!")
     else:
         device = torch.device("cpu")
     print("Synthesizer using device:", device)
@@ -37,7 +39,7 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
                      lstm_dims=hparams.tts_lstm_dims,
                      postnet_K=hparams.tts_postnet_K,
                      num_highways=hparams.tts_num_highways,
-                     dropout=0., # Use zero dropout for gta mels
+                     dropout=0.,  # Use zero dropout for gta mels
                      stop_threshold=hparams.tts_stop_threshold,
                      speaker_embedding_size=hparams.speaker_embedding_size).to(device)
 
@@ -62,7 +64,8 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
 
     dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
     data_loader = DataLoader(dataset,
-                             collate_fn=lambda batch: collate_synthesizer(batch, r),
+                             collate_fn=lambda batch: collate_synthesizer(
+                                 batch, r),
                              batch_size=hparams.synthesis_batch_size,
                              num_workers=2,
                              shuffle=False,
@@ -78,7 +81,8 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
 
             # Parallelize model onto GPUS using workaround due to python bug
             if device.type == "cuda" and torch.cuda.device_count() > 1:
-                _, mels_out, _ = data_parallel_workaround(model, texts, mels, embeds)
+                _, mels_out, _ = data_parallel_workaround(
+                    model, texts, mels, embeds)
             else:
                 _, mels_out, _ = model(texts, mels, embeds)
 
