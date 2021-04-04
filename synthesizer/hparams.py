@@ -153,7 +153,8 @@ hparams = HParams(
     batch_size=2,
     mask_padding=True,  # set model's padded outputs to padded values
     lambda_dur=2,
-    n_warm_up_step=4000,
+    n_warm_up_step=4e3,
+    lr_decay_steps=5e4,
 
     ###############################
     # Experiment Parameters        #

@@ -104,7 +104,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
     #     output_directory, log_directory, 0)
 
     epoch_offset = 1
-    current_step = 1
+    current_step = 0
     if force_restart or not weights_fpath.exists():
         print("\nStarting the training of Non Attentive Tacotron from scratch\n")
         torch.save({'current_step': current_step,
@@ -127,7 +127,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
             weights_fpath, current_step))
 
     scheduled_optim = ScheduledOptim(
-        optimizer, hparams.n_warm_up_step, current_step)
+        optimizer, hparams.lr_decay_steps, hparams.n_warm_up_step, current_step, learning_rate)
 
     model.train()
 
@@ -149,6 +149,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                     y_pred, y)
                 total_loss = mel_loss + mel_postnet_loss + duration_loss * hparams.lambda_dur
 
+                scheduled_optim.zero_grad()
                 total_loss.backward()
 
                 grad_norm = nn.utils.clip_grad_norm_(
@@ -163,16 +164,17 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                         )
                     is_overflow = True
                     print("grad_norm was NaN!")
+
                 scheduled_optim.step_and_update_lr()
-                scheduled_optim.zero_grad()
+                # print(optimizer.param_groups[0]["lr"], current_step)
 
                 msg = "Epoch [{}/{}] | Step [{}/{}] | Total Loss: {:.4f} | Mel Loss: {:.4f} | Mel PostNet Loss: {:.4f} | Duration Loss: {:.4f}".format(
-                    epoch, hparams.epochs, current_step, total_step, total_loss.item(), mel_loss.item(), mel_postnet_loss.item(), duration_loss.item())
-                stream(msg)
+                    epoch, hparams.epochs, current_step+1, total_step, total_loss.item(), mel_loss.item(), mel_postnet_loss.item(), duration_loss.item())
+                # stream(msg)
 
                 if wandbb:
                     wandb.log({'Epoch': epoch, 'Step': current_step,
-                               'Total Loss': total_loss.item(), "Mel Loss": mel_loss.item(), 'Mel Postnet Loss': mel_postnet_loss.item(), 'Duration Loss': duration_loss.item(), 'Learning Rate': learning_rate})
+                               'Total Loss': total_loss.item(), "Mel Loss": mel_loss.item(), 'Mel Postnet Loss': mel_postnet_loss.item(), 'Duration Loss': duration_loss.item(), 'Learning Rate': optimizer.param_groups[0]["lr"]})
 
                 if not is_overflow and backup_every != 0 and current_step % backup_every == 0:
                     backup_fpath = Path(
