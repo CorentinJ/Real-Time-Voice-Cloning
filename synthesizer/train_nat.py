@@ -36,7 +36,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
           backup_every: int,  force_restart: bool, wandbb: bool, hparams):
 
     if wandbb:
-        wandb.init(project='RTVC', entity='garvit32',
+        wandb.init(project='RTVC', entity='hertzai',
                    name='NAT-{}'.format(run_id))
 
     syn_dir = Path(syn_dir)
@@ -170,7 +170,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
 
                 msg = "Epoch [{}/{}] | Step [{}/{}] | Total Loss: {:.4f} | Mel Loss: {:.4f} | Mel PostNet Loss: {:.4f} | Duration Loss: {:.4f}".format(
                     epoch, hparams.epochs, current_step+1, total_step, total_loss.item(), mel_loss.item(), mel_postnet_loss.item(), duration_loss.item())
-                # stream(msg)
+                stream(msg)
 
                 if wandbb:
                     wandb.log({'Epoch': epoch, 'Step': current_step,

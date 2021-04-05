@@ -32,3 +32,4 @@ synthesizer/preprocess_old.py
 test_data/*
 synthesizer/inference_copy.py
 voice_clone_preprocessing.ipynb
+wandb
