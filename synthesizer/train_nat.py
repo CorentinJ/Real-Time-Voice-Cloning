@@ -37,7 +37,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
 
     if wandbb:
         wandb.init(project='RTVC', entity='hertzai',
-                   name='NAT-{}'.format(run_id))
+                   name='NAT-{}'.format(run_id), resume=True)
 
     syn_dir = Path(syn_dir)
     models_dir = Path(models_dir)
