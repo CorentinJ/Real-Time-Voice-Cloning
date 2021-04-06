@@ -213,7 +213,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                             eval_model(
                                 mel_prediction=mel_prediction,
                                 target_spectrogram=target_spectrogram,
-                                input_seq=np_now(x[0][sample_idx]),
+                                input_seq=dataset.metadata[idx[sample_idx]][6],
                                 duration=duration,
                                 step=current_step,
                                 plot_dir=plot_dir,
@@ -250,7 +250,7 @@ def eval_model(mel_prediction, target_spectrogram, input_seq, duration, step,
     plot_spectrogram(mel_prediction.T, str(spec_fpath), title=title_str,
                      target_spectrogram=target_spectrogram.T,
                      max_len=target_spectrogram.size // hparams.num_mels)
-    print("Input at step {}: {}".format(step, sequence_to_text(input_seq)))
+    print("Input at step {}: {}".format(step, input_seq))
 
     dur_fpath = dur_dir.joinpath(
         "step-{}-alignment_sample_{}.png".format(step, sample_num))
