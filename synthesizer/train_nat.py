@@ -183,14 +183,14 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                                 'state_dict': model.state_dict(),
                                 'optimizer': optimizer.state_dict(),
                                 'epoch': epoch,
-                                'learning_rate': learning_rate}, backup_fpath)
+                                'learning_rate': optimizer.param_groups[0]["lr"]}, backup_fpath)
 
                 if not is_overflow and save_every != 0 and current_step % save_every == 0:
                     torch.save({'current_step': current_step,
                                 'state_dict': model.state_dict(),
                                 'optimizer': optimizer.state_dict(),
                                 'epoch': epoch,
-                                'learning_rate': learning_rate}, weights_fpath)
+                                'learning_rate': optimizer.param_groups[0]["lr"]}, weights_fpath)
 
                 step_eval = hparams.tts_eval_interval > 0 and current_step > 0 and current_step % hparams.tts_eval_interval == 0  # Every N steps
                 # if True:

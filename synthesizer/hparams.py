@@ -103,10 +103,10 @@ hparams = HParams(
     # clips the gradient norm to prevent explosion - set to None if not needed
     tts_clip_grad_norm=1.0,
     # Number of steps between model evaluation (sample generation)
-    tts_eval_interval=400,
+    tts_eval_interval=200,
     # Set to -1 to generate after completing epoch, or 0 to disable
 
-    tts_eval_num_samples=3,                   # Makes this number of samples
+    tts_eval_num_samples=1,                   # Makes this number of samples
 
     # Data Preprocessing
     max_mel_frames=900,
