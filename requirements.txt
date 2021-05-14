@@ -14,3 +14,4 @@ PyQt5
 multiprocess
 numba
 webrtcvad; platform_system != "Windows"
+torch
