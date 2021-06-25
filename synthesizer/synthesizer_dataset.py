@@ -71,6 +71,14 @@ def collate_synthesizer(batch, r, hparams):
     mel = [pad2d(x[1], max_spec_len, pad_value=mel_pad_value) for x in batch]
     mel = np.stack(mel)
 
+    # guied_attention_loss
+    gatts = [creat_guided_attention(x_len, max_x_len, spec_len//r, max_spec_len//r) for x_len, spec_len in zip(x_lens, spec_lens)]
+    gatts = np.stack(gatts)
+
+    # used for guied_attention_loss norm
+    gattsums = [x_len * spec_len//r for x_len, spec_len in zip(x_lens, spec_lens)]
+    gattsums = np.stack(gattsums)
+
     # Speaker embedding (SV2TTS)
     embeds = [x[2] for x in batch]
 
@@ -83,10 +91,21 @@ def collate_synthesizer(batch, r, hparams):
     mel = torch.tensor(mel)
     embeds = torch.tensor(embeds)
 
-    return chars, mel, embeds, indices
+    gatts = torch.tensor(gatts).float()
+    gattsums = torch.tensor(gattsums).float()
+
+    return chars, mel, embeds, gatts, gattsums, indices
+
 
 def pad1d(x, max_len, pad_value=0):
     return np.pad(x, (0, max_len - len(x)), mode="constant", constant_values=pad_value)
 
 def pad2d(x, max_len, pad_value=0):
     return np.pad(x, ((0, 0), (0, max_len - x.shape[-1])), mode="constant", constant_values=pad_value)
+
+def creat_guided_attention(x_len, max_x_len, att_spec_len, att_max_spec_len, g=0.2):
+    xv, yv = np.meshgrid(range(att_spec_len), range(x_len), indexing="ij")
+    gatt = yv / x_len - xv / att_spec_len
+    gatt = 1.0 - np.exp(-(gatt ** 2) / (2 * g ** 2))
+    gatt = np.pad(gatt, ((0, att_max_spec_len - att_spec_len), (0, max_x_len - x_len)), mode="constant")
+    return gatt

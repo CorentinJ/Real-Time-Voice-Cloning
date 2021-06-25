@@ -155,7 +155,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
         epochs = np.ceil(training_steps / steps_per_epoch).astype(np.int32)
 
         for epoch in range(1, epochs+1):
-            for i, (texts, mels, embeds, idx) in enumerate(data_loader, 1):
+            for i, (texts, mels, embeds, gatts, gattsums, idx) in enumerate(data_loader, 1):
                 start_time = time.time()
 
                 # Generate stop tokens for training
@@ -167,6 +167,8 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                 mels = mels.to(device)
                 embeds = embeds.to(device)
                 stop = stop.to(device)
+                gatts = gatts.to(device)
+                gattsums = gattsums.to(device)
 
                 # Forward pass
                 # Parallelize model onto GPUS using workaround due to python bug
@@ -180,8 +182,9 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                 m1_loss = F.mse_loss(m1_hat, mels) + F.l1_loss(m1_hat, mels)
                 m2_loss = F.mse_loss(m2_hat, mels)
                 stop_loss = F.binary_cross_entropy(stop_pred, stop)
+                gatt_loss = torch.mean(torch.sum(gatts * attention, (1, 2)) / gattsums)
 
-                loss = m1_loss + m2_loss + stop_loss
+                loss = m1_loss + m2_loss + stop_loss + gatt_loss
 
                 optimizer.zero_grad()
                 loss.backward()
