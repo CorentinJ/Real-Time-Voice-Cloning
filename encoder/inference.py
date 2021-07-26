@@ -1,3 +1,4 @@
+from tokenize import Double
 from encoder.params_data import *
 from encoder.model import SpeakerEncoder
 from encoder.audio import preprocess_wav   # We want to expose this function from here
@@ -7,6 +8,21 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+
+#debugging
+import torchsnooper
+
+## Added for AutoVC
+from librosa.filters import mel
+
+import os, sys
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+parentdir = os.path.dirname(parentdir)
+sys.path.append(parentdir)
+
+from autovc.utils import butter_highpass, pySTFT
+
 
 _model = None # type: SpeakerEncoder
 _device = None # type: torch.device
@@ -107,8 +123,35 @@ def compute_partial_slices(n_samples, partial_utterance_n_frames=partials_n_fram
     
     return wav_slices, mel_slices
 
+def process_autovc(wav):
+    device = torch.device(torch.cuda.current_device())
+    
+    mel_basis = mel(16000, 1024, fmin=90, fmax=7600, n_mels=80).T
+    min_level = np.exp(-100 / 20 * np.log(10))
 
-def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
+    b, a = butter_highpass(30, 16000, order=5)
+    # Unlike in Speechsplit we do not apply an Infinite Impulse Response (IIR) filter
+    # TODO: Might need to change that?
+    
+    # Create Mel from wav
+    D = pySTFT(wav).T
+    D_mel = np.dot(D, mel_basis)
+    D_db = 20 * np.log10(np.maximum(min_level, D_mel)) - 16
+    S = np.clip((D_db + 100) / 100, 0,1)
+
+    # Extract F0 (Frequency)
+    
+    # Might be able to use mel generated in embed_utterances (audio.wav_to_mel_spectogram)
+    melsp = S
+    
+    # len_crop = 256
+    # left = np.random.randint(0, tmp.shape[0]-len_crop)
+    # melsp = torch.from_numpy(tmp[np.newaxis, left:left+len_crop, :]).cuda()
+        
+    
+    return melsp
+
+def embed_utterance_old(wav, using_partials=True, return_partials=False, **kwargs):
     """
     Computes an embedding for a single utterance.
     
@@ -155,6 +198,91 @@ def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
     return embed
 
 
+def embed_utterance(wav, G, **kwargs):
+    """
+    Computes an embedding for a single utterance.
+    
+    # TODO: handle multiple wavs to benefit from batching on GPU
+    :param wav: a preprocessed (see audio.py) utterance waveform as a numpy array of float32
+    :param using_partials: REMOVED
+    :param return_partials: REMOVED
+    :param kwargs: additional arguments to compute_partial_splits()
+    :return: the embedding as a numpy array of float32 of shape (model_embedding_size,). If 
+    <return_partials> is True, the partial utterances as a numpy array of float32 of shape 
+    (n_partials, model_embedding_size) and the wav partials as a list of slices will also be 
+    returned. If <using_partials> is simultaneously set to False, both these values will be None 
+    instead.
+    """
+
+    # !REMOVED PARTIALS DUE TO INCOMPATIBILITY WITH AUTOVC
+    # Process the entire utterance if not using partials
+    # if not using_partials:
+    #     frames = audio.wav_to_mel_spectrogram(wav)
+    #     embed = embed_frames_batch(frames[None, ...])[0]
+    #     if return_partials:
+    #         return embed, None, None
+    #     return embed
+    
+    # Compute where to split the utterance into partials and pad if necessary
+    wave_slices, mel_slices = compute_partial_slices(len(wav), **kwargs)
+    max_wave_length = wave_slices[-1].stop
+    if max_wave_length >= len(wav):
+        wav = np.pad(wav, (0, max_wave_length - len(wav)), "constant")
+    
+    # Generate SpeechSplit on whole wav file
+    # TODO: Generate per splitted utterance?
+    mel_real_pad = process_autovc(wav)
+
+    # Split the utterance into partials
+    frames = audio.wav_to_mel_spectrogram(wav)
+    frames_batch = np.array([frames[s] for s in mel_slices])
+    partial_embeds = embed_frames_batch(frames_batch)
+    
+    # Compute the utterance embedding from the partial embeddings
+    raw_embed = np.mean(partial_embeds, axis=0)
+    embed_orig = raw_embed / np.linalg.norm(raw_embed, 2)
+
+    # Use GPU if available
+    use_cuda = torch.cuda.is_available()
+    device = torch.device('cuda:0' if use_cuda else 'cpu')
+
+    
+
+    # Crop Spectogram to len crop because
+    # Output of autovc encoder depends on length of mel
+
+    #Todo either fix or get len crop from hparams
+    tmp = mel_real_pad
+    len_crop = 512
+    if tmp.shape[0] <  len_crop:
+        len_pad =  len_crop - tmp.shape[0]
+        uttr = np.pad(tmp, ((0,len_pad),(0,0)), 'constant')
+    elif tmp.shape[0] >  len_crop:
+        left = np.random.randint(tmp.shape[0]- len_crop)
+        uttr = tmp[left:left+ len_crop, :]
+    else:
+        uttr = tmp
+    
+    
+    # crop = int((mel_real_pad.shape[0] / 16)) * 16
+    mel_real_pad = uttr
+    embed_orig = torch.from_numpy(np.stack(embed_orig, axis=0))
+    mel_real_pad = torch.from_numpy(np.stack(mel_real_pad, axis=0))
+
+    mel_real_pad = torch.unsqueeze( mel_real_pad.to(device), 0)
+    embed_orig = torch.unsqueeze(embed_orig.to(device), 0)
+    
+    embed = G(mel_real_pad.type(torch.cuda.FloatTensor), embed_orig, None)
+    
+    embed = embed.cpu().detach().numpy().flatten()
+    embed = np.concatenate((embed_orig.cpu().detach().numpy().flatten(), embed))
+    
+    # !REMOVED PARTIALS DUE TO INCOMPATIBILITY WITH AUTOVC
+    # if return_partials:
+    #     return embed, partial_embeds, wave_slices
+    return embed
+
+
 def embed_speaker(wavs, **kwargs):
     raise NotImplemented()
 
@@ -165,6 +293,10 @@ def plot_embedding_as_heatmap(embed, ax=None, title="", shape=None, color_range=
     
     if shape is None:
         height = int(np.sqrt(len(embed)))
+        # pad if shape is not devisible by height
+        if(len(embed) != height**2):
+            height += 1
+            embed = np.pad(embed, (0, (height**2 - len(embed))), 'constant', constant_values=(0,0))
         shape = (height, -1)
     embed = embed.reshape(shape)
     

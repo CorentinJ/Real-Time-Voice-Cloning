@@ -3,6 +3,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+from vocoder.display import save_to_tensorboardfig
 
 def split_title_line(title_text, max_words=5):
 	"""
@@ -38,7 +39,7 @@ def plot_alignment(alignment, path, title=None, split_title=False, max_len=None)
 	plt.close()
 
 
-def plot_spectrogram(pred_spectrogram, path, title=None, split_title=False, target_spectrogram=None, max_len=None, auto_aspect=False):
+def plot_spectrogram(pred_spectrogram, path, title=None, split_title=False, target_spectrogram=None, max_len=None, auto_aspect=False, writer=None, iteration=None):
 	if max_len is not None:
 		target_spectrogram = target_spectrogram[:max_len]
 		pred_spectrogram = pred_spectrogram[:max_len]
@@ -73,4 +74,6 @@ def plot_spectrogram(pred_spectrogram, path, title=None, split_title=False, targ
 
 	plt.tight_layout()
 	plt.savefig(path, format="png")
+	if(writer != None):
+		save_to_tensorboardfig(writer, fig, "Spectogram", iteration)
 	plt.close()

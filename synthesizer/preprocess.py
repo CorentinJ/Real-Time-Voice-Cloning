@@ -9,6 +9,17 @@ from tqdm import tqdm
 import numpy as np
 import librosa
 
+# SpeechSplit
+import os, sys
+from os import path
+
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+parentdir = os.path.dirname(parentdir)
+sys.path.append(parentdir)
+
+import torch
+from autovc.model_vc import Generator
 
 def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int,
                            skip_existing: bool, hparams, no_alignments: bool,
@@ -234,8 +245,18 @@ def embed_utterance(fpaths, encoder_model_fpath):
     # Compute the speaker embedding of the utterance
     wav_fpath, embed_fpath = fpaths
     wav = np.load(wav_fpath)
+
+    # Get Generator SpeechSplit
+    # TODO: Remove hardcoded path
+    use_cuda = torch.cuda.is_available()
+    device = torch.device('cuda:0' if use_cuda else 'cpu')
+    
+    G = Generator(16, 256, 512, 16).eval().to(device)
+    g_checkpoint = torch.load('../autovc/run/models/427000-G.ckpt', map_location=device)
+    G.load_state_dict(g_checkpoint['model'])
+
     wav = encoder.preprocess_wav(wav)
-    embed = encoder.embed_utterance(wav)
+    embed = encoder.embed_utterance(wav, G)
     np.save(embed_fpath, embed, allow_pickle=False)
     
  

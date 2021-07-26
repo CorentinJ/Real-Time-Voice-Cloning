@@ -12,6 +12,9 @@ import torch
 import librosa
 from audioread.exceptions import NoBackendError
 
+#autovc
+from autovc.model_vc import Generator
+
 # Use this directory structure for your datasets, or modify it to fit your needs
 recognized_datasets = [
     "LibriSpeech/dev-clean",
@@ -187,11 +190,20 @@ class Toolbox:
         # Compute the embedding
         if not encoder.is_loaded():
             self.init_encoder()
+
+        #autovc
+        use_cuda = torch.cuda.is_available()
+        device = torch.device('cuda:0' if use_cuda else 'cpu')
+        
+        G = Generator(16, 256, 512, 16).eval().to(device)
+        g_checkpoint = torch.load('../autovc/run/models/427000-G.ckpt', map_location=device)
+        G.load_state_dict(g_checkpoint['model'])
+        
         encoder_wav = encoder.preprocess_wav(wav)
-        embed, partial_embeds, _ = encoder.embed_utterance(encoder_wav, return_partials=True)
+        embed = encoder.embed_utterance(encoder_wav, G)
 
         # Add the utterance
-        utterance = Utterance(name, speaker_name, wav, spec, embed, partial_embeds, False)
+        utterance = Utterance(name, speaker_name, wav, spec, embed, False)
         self.utterances.add(utterance)
         self.ui.register_utterance(utterance)
 
@@ -308,12 +320,21 @@ class Toolbox:
         # TODO: this is problematic with different sampling rates, gotta fix it
         if not encoder.is_loaded():
             self.init_encoder()
+
+        # autovc
+        use_cuda = torch.cuda.is_available()
+        device = torch.device('cuda:0' if use_cuda else 'cpu')
+
+        G = Generator(16, 256, 512, 16).eval().to(device)
+        g_checkpoint = torch.load('../autovc/run/models/427000-G.ckpt', map_location=device)
+        G.load_state_dict(g_checkpoint['model'])
+
         encoder_wav = encoder.preprocess_wav(wav)
-        embed, partial_embeds, _ = encoder.embed_utterance(encoder_wav, return_partials=True)
-        
+        embed = encoder.embed_utterance(encoder_wav, G)
+                
         # Add the utterance
         name = speaker_name + "_gen_%05d" % np.random.randint(100000)
-        utterance = Utterance(name, speaker_name, wav, spec, embed, partial_embeds, True)
+        utterance = Utterance(name, speaker_name, wav, spec, embed, True)
         self.utterances.add(utterance)
         
         # Plot it

@@ -16,6 +16,7 @@ from pathlib import Path
 import sys
 import time
 
+from torch.utils.tensorboard import SummaryWriter
 
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
 
@@ -34,11 +35,17 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
     wav_dir = model_dir.joinpath("wavs")
     mel_output_dir = model_dir.joinpath("mel-spectrograms")
     meta_folder = model_dir.joinpath("metas")
+    tensorboard_folder = model_dir.joinpath("logs")
+
     model_dir.mkdir(exist_ok=True)
     plot_dir.mkdir(exist_ok=True)
     wav_dir.mkdir(exist_ok=True)
     mel_output_dir.mkdir(exist_ok=True)
     meta_folder.mkdir(exist_ok=True)
+    tensorboard_folder.mkdir(exist_ok=True)
+
+    
+    writer = SummaryWriter(tensorboard_folder)
     
     weights_fpath = model_dir.joinpath(run_id).with_suffix(".pt")
     metadata_fpath = syn_dir.joinpath("train.txt")
@@ -114,6 +121,9 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                              shuffle=True,
                              pin_memory=True)
 
+    
+    
+
     for i, session in enumerate(hparams.tts_schedule):
         current_step = model.get_step()
 
@@ -149,7 +159,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                                  num_workers=2,
                                  shuffle=True,
                                  pin_memory=True)
-
+        
         total_iters = len(dataset) 
         steps_per_epoch = np.ceil(total_iters / batch_size).astype(np.int32)
         epochs = np.ceil(training_steps / steps_per_epoch).astype(np.int32)
@@ -202,6 +212,15 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                 msg = f"| Epoch: {epoch}/{epochs} ({i}/{steps_per_epoch}) | Loss: {loss_window.average:#.4} | {1./time_window.average:#.2} steps/s | Step: {k}k | "
                 stream(msg)
 
+                log_loss = {}
+                log_loss['G/loss_id'] = loss.item()
+                log_loss['G/mel_loss'] = m1_loss.item()
+                log_loss['G/mel_loss_linear'] = m2_loss.item()
+                log_loss['G/loss_stop'] = stop_loss.item()
+                
+                for tag, value in log_loss.items():
+                    writer.add_scalar(tag, value, step)
+
                 # Backup or save model as appropriate
                 if backup_every != 0 and step % backup_every == 0 : 
                     backup_fpath = Path("{}/{}_{}k.pt".format(str(weights_fpath.parent), run_id, k))
@@ -235,7 +254,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                                        wav_dir=wav_dir,
                                        sample_num=sample_idx + 1,
                                        loss=loss,
-                                       hparams=hparams)
+                                       hparams=hparams, writer=writer)
 
                 # Break out of loop to update training schedule
                 if step >= max_step:
@@ -245,10 +264,10 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
             print("")
 
 def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
-               plot_dir, mel_output_dir, wav_dir, sample_num, loss, hparams):
+               plot_dir, mel_output_dir, wav_dir, sample_num, loss, hparams, writer):
     # Save some results for evaluation
     attention_path = str(plot_dir.joinpath("attention_step_{}_sample_{}".format(step, sample_num)))
-    save_attention(attention, attention_path)
+    save_attention(attention, attention_path, writer=writer, iteration=step)
 
     # save predicted mel spectrogram to disk (debug)
     mel_output_fpath = mel_output_dir.joinpath("mel-prediction-step-{}_sample_{}.npy".format(step, sample_num))
@@ -264,5 +283,5 @@ def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
     title_str = "{}, {}, step={}, loss={:.5f}".format("Tacotron", time_string(), step, loss)
     plot_spectrogram(mel_prediction, str(spec_fpath), title=title_str,
                      target_spectrogram=target_spectrogram,
-                     max_len=target_spectrogram.size // hparams.num_mels)
+                     max_len=target_spectrogram.size // hparams.num_mels, writer=writer, iteration=step)
     print("Input at step {}: {}".format(step, sequence_to_text(input_seq)))

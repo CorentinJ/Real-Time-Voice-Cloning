@@ -3,6 +3,7 @@ import time
 import numpy as np
 import sys
 
+import io
 
 def progbar(i, n, size=16):
     done = (i * size) // n
@@ -83,20 +84,35 @@ def time_since(started) :
     else :
         return f'{m}m {s}s'
 
+def save_to_tensorboardfig(writer, fig, title, iteration):
+    fig.set_dpi(128)
+    io_buf = io.BytesIO()
+    fig.savefig(io_buf, format='raw', dpi=128)
+    io_buf.seek(0)
 
-def save_attention(attn, path) :
+    img_arr = np.reshape(np.frombuffer(io_buf.getvalue(), dtype=np.uint8),
+                        newshape=(int(fig.bbox.bounds[3]), int(fig.bbox.bounds[2]), -1))
+    io_buf.close()
+    
+    writer.add_image(title, img_arr, iteration, dataformats='HWC')
+
+def save_attention(attn, path, iteration=None, writer=None) :
     fig = plt.figure(figsize=(12, 6))
     plt.imshow(attn.T, interpolation='nearest', aspect='auto')
     fig.savefig(f'{path}.png', bbox_inches='tight')
+    if(writer != None):
+        save_to_tensorboardfig(writer, fig, "attention-spect", iteration)
     plt.close(fig)
 
 
-def save_spectrogram(M, path, length=None) :
+def save_spectrogram(M, path, length=None, iteration=None, writer=None) :
     M = np.flip(M, axis=0)
     if length : M = M[:, :length]
     fig = plt.figure(figsize=(12, 6))
     plt.imshow(M, interpolation='nearest', aspect='auto')
     fig.savefig(f'{path}.png', bbox_inches='tight')
+    if(writer != None):
+        save_to_tensorboardfig(writer, fig, "attention-spect", iteration)
     plt.close(fig)
 
 
