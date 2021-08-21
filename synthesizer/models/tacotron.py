@@ -21,9 +21,21 @@ class HighwayNetwork(nn.Module):
         y = g * F.relu(x1) + (1. - g) * x
         return y
 
+class Reduce_Dimension(nn.Module):
+    def __init__(self, conv_size, conv_size_reduced, kernel, stride):
+        super().__init__()
+        self.conv_seq = nn.Sequential(
+            nn.Conv1d(conv_size, conv_size_reduced[0], kernel, stride),
+            nn.Conv1d(conv_size_reduced[0], conv_size_reduced[1], kernel, stride),
+            nn.Conv1d(conv_size_reduced[1], conv_size_reduced[2], kernel, stride)
+        )
+    
+    def forward(self, x):
+        
+        return self.conv_seq(x)
 
 class Encoder(nn.Module):
-    def __init__(self, embed_dims, num_chars, encoder_dims, K, num_highways, dropout):
+    def __init__(self, embed_dims, num_chars, encoder_dims, K, num_highways, dropout, speechsplit):
         super().__init__()
         prenet_dims = (encoder_dims, encoder_dims)
         cbhg_channels = encoder_dims
@@ -33,6 +45,7 @@ class Encoder(nn.Module):
         self.cbhg = CBHG(K=K, in_channels=cbhg_channels, channels=cbhg_channels,
                          proj_channels=[cbhg_channels, cbhg_channels],
                          num_highways=num_highways)
+        self.speechsplit = speechsplit
 
     def forward(self, x, speaker_embedding=None):
         x = self.embedding(x)
@@ -58,6 +71,19 @@ class Encoder(nn.Module):
             idx = 0
         else:
             idx = 1
+
+        if(self.speechsplit):
+            conv_size = speaker_embedding.shape[1]
+            conv_size_reduced = [2048, 1024, 512]
+            reduce = Reduce_Dimension(conv_size, conv_size_reduced, 1, 2)
+            #conv1d_emb = torch.nn.Conv1d(conv_size, conv_size_reduced, 1, 2)
+
+            # If cuda available transfer to GPU
+            if torch.cuda.is_available():
+                reduce.cuda()
+            
+            # Add extra dimension for 3d input
+            speaker_embedding = reduce(speaker_embedding.unsqueeze(2))
 
         # Start by making a copy of each speaker embedding to match the input text length
         # The output of this has size (batch_size, num_chars * tts_embed_dims)
@@ -328,7 +354,7 @@ class Decoder(nn.Module):
 class Tacotron(nn.Module):
     def __init__(self, embed_dims, num_chars, encoder_dims, decoder_dims, n_mels, 
                  fft_bins, postnet_dims, encoder_K, lstm_dims, postnet_K, num_highways,
-                 dropout, stop_threshold, speaker_embedding_size):
+                 dropout, stop_threshold, speaker_embedding_size, speechsplit):
         super().__init__()
         self.n_mels = n_mels
         self.lstm_dims = lstm_dims
@@ -336,7 +362,7 @@ class Tacotron(nn.Module):
         self.decoder_dims = decoder_dims
         self.speaker_embedding_size = speaker_embedding_size
         self.encoder = Encoder(embed_dims, num_chars, encoder_dims,
-                               encoder_K, num_highways, dropout)
+                               encoder_K, num_highways, dropout, speechsplit)
         self.encoder_proj = nn.Linear(encoder_dims + speaker_embedding_size, decoder_dims, bias=False)
         self.decoder = Decoder(n_mels, encoder_dims, decoder_dims, lstm_dims,
                                dropout, speaker_embedding_size)

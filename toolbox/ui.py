@@ -576,6 +576,16 @@ class UI(QDialog):
         layout.addWidget(self.vocode_button)
         gen_layout.addLayout(layout)
 
+        layout_seed1 = QGridLayout()
+        self.random_autovc_checkbox = QCheckBox("Use AutoVC:")
+        self.random_autovc_checkbox.setToolTip("When checked, autovc is used as speaker encoder.")
+        layout_seed1.addWidget(self.random_autovc_checkbox, 2, 2)
+
+        layout_seed2 = QGridLayout()
+        self.random_speechsplit_checkbox = QCheckBox("Use SpeechSplit:")
+        self.random_speechsplit_checkbox.setToolTip("When checked, speechsplit is used as speaker encoder.")
+        layout_seed2.addWidget(self.random_speechsplit_checkbox, 1, 1)
+
         layout_seed = QGridLayout()
         self.random_seed_checkbox = QCheckBox("Random seed:")
         self.random_seed_checkbox.setToolTip("When checked, makes the synthesizer and vocoder deterministic.")
@@ -588,6 +598,8 @@ class UI(QDialog):
             " This feature requires `webrtcvad` to be installed.")
         layout_seed.addWidget(self.trim_silences_checkbox, 0, 2, 1, 2)
         gen_layout.addLayout(layout_seed)
+        gen_layout.addLayout(layout_seed1)
+        gen_layout.addLayout(layout_seed2)
 
         self.loading_bar = QProgressBar()
         gen_layout.addWidget(self.loading_bar)

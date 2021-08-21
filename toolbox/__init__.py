@@ -13,7 +13,9 @@ import librosa
 from audioread.exceptions import NoBackendError
 
 #autovc
-from autovc.model_vc import Generator
+from autovc.model_vc import Generator as Generator_autovc
+from SpeechSplit.model import Generator_3_Encode as Generator_speechsplit
+from SpeechSplit.hparams import hparams as hparams_speechsplit
 
 # Use this directory structure for your datasets, or modify it to fit your needs
 recognized_datasets = [
@@ -194,13 +196,24 @@ class Toolbox:
         #autovc
         use_cuda = torch.cuda.is_available()
         device = torch.device('cuda:0' if use_cuda else 'cpu')
-        
-        G = Generator(16, 256, 512, 16).eval().to(device)
-        g_checkpoint = torch.load('../autovc/run/models/425000-G.ckpt', map_location=device)
-        G.load_state_dict(g_checkpoint['model'])
+        state = ""
+        if(self.ui.random_autovc_checkbox.isChecked()):
+            self.ui.log("Loading AutoVC model")
+            G = Generator_autovc(16, 256, 512, 16).eval().to(device)
+            g_checkpoint = torch.load('../autovc/run/models/425000-G.ckpt', map_location=device)
+            G.load_state_dict(g_checkpoint['model'])
+            state = "autovc"
+        elif(self.ui.random_speechsplit_checkbox.isChecked()):
+            self.ui.log("Loading SpeechSplit model")
+            G = Generator_speechsplit(hparams_speechsplit).eval().to(device)
+            g_checkpoint = torch.load('../SpeechSplit/assets/20000-G.ckpt', map_location=lambda storage, loc: storage)
+            G.load_state_dict(g_checkpoint['model'])
+            state = "speechsplit"
+        else:
+            G=None
         
         encoder_wav = encoder.preprocess_wav(wav)
-        embed = encoder.embed_utterance(encoder_wav, G)
+        embed = encoder.embed_utterance(encoder_wav, G=G, state=state)
 
         # Add the utterance
         utterance = Utterance(name, speaker_name, wav, spec, embed, False)
@@ -236,7 +249,8 @@ class Toolbox:
         texts = self.ui.text_prompt.toPlainText().split("\n")
         embed = self.ui.selected_utterance.embed
         embeds = [embed] * len(texts)
-        specs = self.synthesizer.synthesize_spectrograms(texts, embeds)
+        speechsplit = self.ui.random_speechsplit_checkbox.isChecked()
+        specs = self.synthesizer.synthesize_spectrograms(texts, embeds, speechsplit=speechsplit)
         breaks = [spec.shape[1] for spec in specs]
         spec = np.concatenate(specs, axis=1)
         
@@ -324,13 +338,24 @@ class Toolbox:
         # autovc
         use_cuda = torch.cuda.is_available()
         device = torch.device('cuda:0' if use_cuda else 'cpu')
-
-        G = Generator(16, 256, 512, 16).eval().to(device)
-        g_checkpoint = torch.load('../autovc/run/models/425000-G.ckpt', map_location=device)
-        G.load_state_dict(g_checkpoint['model'])
+        state = ""
+        if(self.ui.random_autovc_checkbox.isChecked()):
+            self.ui.log("Loading AutoVC model")
+            G = Generator_autovc(16, 256, 512, 16).eval().to(device)
+            g_checkpoint = torch.load('../autovc/run/models/425000-G.ckpt', map_location=device)
+            G.load_state_dict(g_checkpoint['model'])
+            state = "autovc"
+        elif(self.ui.random_speechsplit_checkbox.isChecked()):
+            self.ui.log("Loading SpeechSplit model")
+            G = Generator_speechsplit(hparams_speechsplit).eval().to(device)
+            g_checkpoint = torch.load('../SpeechSplit/assets/20000-G.ckpt', map_location=lambda storage, loc: storage)
+            G.load_state_dict(g_checkpoint['model'])
+            state = "speechsplit"
+        else:
+            G=None
 
         encoder_wav = encoder.preprocess_wav(wav)
-        embed = encoder.embed_utterance(encoder_wav, G)
+        embed = encoder.embed_utterance(encoder_wav, G=G, state=state)
                 
         # Add the utterance
         name = speaker_name + "_gen_%05d" % np.random.randint(100000)
@@ -357,7 +382,8 @@ class Toolbox:
         self.ui.log("Loading the synthesizer %s... " % model_fpath)
         self.ui.set_loading(1)
         start = timer()
-        self.synthesizer = Synthesizer(model_fpath)
+        speechsplit = self.ui.random_speechsplit_checkbox.isChecked()
+        self.synthesizer = Synthesizer(model_fpath, speechsplit)
         self.ui.log("Done (%dms)." % int(1000 * (timer() - start)), "append")
         self.ui.set_loading(0)
            

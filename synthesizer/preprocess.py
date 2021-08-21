@@ -19,7 +19,10 @@ parentdir = os.path.dirname(parentdir)
 sys.path.append(parentdir)
 
 import torch
-from autovc.model_vc import Generator
+from autovc.model_vc import Generator_autovc
+
+from SpeechSplit.model import Generator_3_Encode as Generator_speechsplit
+from SpeechSplit.hparams import hparams as hparams_speechsplit
 
 def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int,
                            skip_existing: bool, hparams, no_alignments: bool,
@@ -238,7 +241,7 @@ def process_utterance(wav: np.ndarray, text: str, out_dir: Path, basename: str,
     return wav_fpath.name, mel_fpath.name, "embed-%s.npy" % basename, len(wav), mel_frames, text
  
  
-def embed_utterance(fpaths, encoder_model_fpath):
+def embed_utterance(fpaths, encoder_model_fpath, state=""):
     if not encoder.is_loaded():
         encoder.load_model(encoder_model_fpath)
 
@@ -251,16 +254,22 @@ def embed_utterance(fpaths, encoder_model_fpath):
     use_cuda = torch.cuda.is_available()
     device = torch.device('cuda:0' if use_cuda else 'cpu')
     
-    G = Generator(16, 256, 512, 16).eval().to(device)
-    g_checkpoint = torch.load('../autovc/run/models/427000-G.ckpt', map_location=device)
-    G.load_state_dict(g_checkpoint['model'])
-
+    G = None
+    if(state == "autovc"):
+        G = Generator_autovc(16, 256, 512, 16).eval().to(device)
+        g_checkpoint = torch.load('../autovc/run/models/425000-G.ckpt', map_location=device)
+        G.load_state_dict(g_checkpoint['model'])
+    elif(state == "speechsplit"):
+        G = Generator_speechsplit(hparams_speechsplit).eval().to(device)
+        g_checkpoint = torch.load('../SpeechSplit/assets/20000-G.ckpt', map_location=device)
+        G.load_state_dict(g_checkpoint['model'])
+    
     wav = encoder.preprocess_wav(wav)
-    embed = encoder.embed_utterance(wav, G)
+    embed = encoder.embed_utterance(wav, G=G, state=state)
     np.save(embed_fpath, embed, allow_pickle=False)
     
  
-def create_embeddings(synthesizer_root: Path, encoder_model_fpath: Path, n_processes: int):
+def create_embeddings(synthesizer_root: Path, encoder_model_fpath: Path, n_processes: int, model_used : str):
     wav_dir = synthesizer_root.joinpath("audio")
     metadata_fpath = synthesizer_root.joinpath("train.txt")
     assert wav_dir.exists() and metadata_fpath.exists()
@@ -274,7 +283,7 @@ def create_embeddings(synthesizer_root: Path, encoder_model_fpath: Path, n_proce
         
     # TODO: improve on the multiprocessing, it's terrible. Disk I/O is the bottleneck here.
     # Embed the utterances in separate threads
-    func = partial(embed_utterance, encoder_model_fpath=encoder_model_fpath)
+    func = partial(embed_utterance, encoder_model_fpath=encoder_model_fpath, state=model_used)
     job = Pool(n_processes).imap(func, fpaths)
     list(tqdm(job, "Embedding", len(fpaths), unit="utterances"))
     

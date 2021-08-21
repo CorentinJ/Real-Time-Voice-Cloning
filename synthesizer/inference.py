@@ -15,7 +15,7 @@ class Synthesizer:
     sample_rate = hparams.sample_rate
     hparams = hparams
     
-    def __init__(self, model_fpath: Path, verbose=True):
+    def __init__(self, model_fpath: Path, verbose=True, speechsplit=False):
         """
         The model isn't instantiated and loaded in memory until needed or until load() is called.
         
@@ -24,7 +24,7 @@ class Synthesizer:
         """
         self.model_fpath = model_fpath
         self.verbose = verbose
- 
+        self.speechsplit = speechsplit
         # Check for GPU
         if torch.cuda.is_available():
             self.device = torch.device("cuda")
@@ -46,6 +46,11 @@ class Synthesizer:
         """
         Instantiates and loads the model given the weights file that was passed in the constructor.
         """
+        # TODO: remove hardcoding
+        if(self.speechsplit):
+            speaker_emb_size = 512
+        else:
+            speaker_emb_size = hparams.speaker_embedding_size
         self._model = Tacotron(embed_dims=hparams.tts_embed_dims,
                                num_chars=len(symbols),
                                encoder_dims=hparams.tts_encoder_dims,
@@ -59,7 +64,8 @@ class Synthesizer:
                                num_highways=hparams.tts_num_highways,
                                dropout=hparams.tts_dropout,
                                stop_threshold=hparams.tts_stop_threshold,
-                               speaker_embedding_size=hparams.speaker_embedding_size).to(self.device)
+                               speaker_embedding_size=speaker_emb_size,
+                               speechsplit=self.speechsplit).to(self.device)
 
         self._model.load(self.model_fpath)
         self._model.eval()
@@ -69,7 +75,7 @@ class Synthesizer:
 
     def synthesize_spectrograms(self, texts: List[str],
                                 embeddings: Union[np.ndarray, List[np.ndarray]],
-                                return_alignments=False):
+                                return_alignments=False, speechsplit=False):
         """
         Synthesizes mel spectrograms from texts and speaker embeddings.
 
@@ -81,6 +87,7 @@ class Synthesizer:
         :return: a list of N melspectrograms as numpy arrays of shape (80, Mi), where Mi is the 
         sequence length of spectrogram i, and possibly the alignments.
         """
+        self.speechsplit = speechsplit
         # Load the model on the first request.
         if not self.is_loaded():
             self.load()

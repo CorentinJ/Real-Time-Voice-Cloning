@@ -10,7 +10,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 
-def run_synthesis(in_dir, out_dir, model_dir, hparams):
+def run_synthesis(in_dir, out_dir, model_dir, hparams, speechsplit=False):
     # This generates ground truth-aligned mels for vocoder training
     synth_dir = Path(out_dir).joinpath("mels_gta")
     synth_dir.mkdir(exist_ok=True)
@@ -39,7 +39,8 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
                      num_highways=hparams.tts_num_highways,
                      dropout=0., # Use zero dropout for gta mels
                      stop_threshold=hparams.tts_stop_threshold,
-                     speaker_embedding_size=hparams.speaker_embedding_size).to(device)
+                     speaker_embedding_size=hparams.speaker_embedding_size,
+                     speechsplit=speechsplit).to(device)
 
     # Load the weights
     model_dir = Path(model_dir)
