@@ -196,7 +196,7 @@ class Toolbox:
         device = torch.device('cuda:0' if use_cuda else 'cpu')
         
         G = Generator(16, 256, 512, 16).eval().to(device)
-        g_checkpoint = torch.load('../autovc/run/models/427000-G.ckpt', map_location=device)
+        g_checkpoint = torch.load('../autovc/run/models/425000-G.ckpt', map_location=device)
         G.load_state_dict(g_checkpoint['model'])
         
         encoder_wav = encoder.preprocess_wav(wav)
@@ -326,7 +326,7 @@ class Toolbox:
         device = torch.device('cuda:0' if use_cuda else 'cpu')
 
         G = Generator(16, 256, 512, 16).eval().to(device)
-        g_checkpoint = torch.load('../autovc/run/models/427000-G.ckpt', map_location=device)
+        g_checkpoint = torch.load('../autovc/run/models/425000-G.ckpt', map_location=device)
         G.load_state_dict(g_checkpoint['model'])
 
         encoder_wav = encoder.preprocess_wav(wav)
