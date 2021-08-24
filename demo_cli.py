@@ -10,7 +10,6 @@ import soundfile as sf
 import librosa
 import argparse
 import torch
-import sys
 import os
 from audioread.exceptions import NoBackendError
 
