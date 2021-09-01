@@ -11,7 +11,8 @@ import vocoder.hparams as hp
 import numpy as np
 import time
 import torch
-
+#tomcattwo added line 15 per issue #669 and blue-fish/Real-Time-Voice-Cloning@89a9964 to fix Win10 pickle issue.
+import platform
 
 def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_truth: bool,
           save_every: int, backup_every: int, force_restart: bool):
@@ -74,12 +75,13 @@ def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_tr
     simple_table([('Batch size', hp.voc_batch_size),
                   ('LR', hp.voc_lr),
                   ('Sequence Len', hp.voc_seq_len)])
-    
+          
+    #tomcattwo edited line 84 below per issue #669 and blue-fish/Real-Time-Voice-Cloning@89a9964 to fix Win10 pickle issue.
     for epoch in range(1, 350):
         data_loader = DataLoader(dataset,
                                  collate_fn=collate_vocoder,
                                  batch_size=hp.voc_batch_size,
-                                 num_workers=2,
+                                 num_workers=2 if platform.system() != "Windows" else 0,
                                  shuffle=True,
                                  pin_memory=True)
         start = time.time()
