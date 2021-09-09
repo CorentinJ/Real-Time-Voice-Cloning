@@ -143,7 +143,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
 
         for p in optimizer.param_groups:
             p["lr"] = lr
-            
+
         data_loader = DataLoader(dataset,
                                  collate_fn=lambda batch: collate_synthesizer(batch, r, hparams),
                                  batch_size=batch_size,
