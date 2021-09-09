@@ -11,7 +11,6 @@ import vocoder.hparams as hp
 import numpy as np
 import time
 import torch
-#tomcattwo added line 15 per issue #669 and blue-fish/Real-Time-Voice-Cloning@89a9964 to fix Win10 pickle issue.
 import platform
 
 def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_truth: bool,
@@ -76,7 +75,6 @@ def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_tr
                   ('LR', hp.voc_lr),
                   ('Sequence Len', hp.voc_seq_len)])
           
-    #tomcattwo edited line 84 below per issue #669 and blue-fish/Real-Time-Voice-Cloning@89a9964 to fix Win10 pickle issue.
     for epoch in range(1, 350):
         data_loader = DataLoader(dataset,
                                  collate_fn=collate_vocoder,
