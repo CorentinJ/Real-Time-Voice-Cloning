@@ -74,7 +74,7 @@ def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_tr
     simple_table([('Batch size', hp.voc_batch_size),
                   ('LR', hp.voc_lr),
                   ('Sequence Len', hp.voc_seq_len)])
-          
+
     for epoch in range(1, 350):
         data_loader = DataLoader(dataset,
                                  collate_fn=collate_vocoder,
