@@ -81,7 +81,7 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
                 _, mels_out, _ = data_parallel_workaround(model, texts, mels, embeds)
             else:
                 _, mels_out, _, _ = model(texts, mels, embeds)
-    
+
             for j, k in enumerate(idx):
                 # Note: outputs mel-spectrogram files and target ones have same names, just different folders
                 mel_filename = Path(synth_dir).joinpath(dataset.metadata[k][1])
