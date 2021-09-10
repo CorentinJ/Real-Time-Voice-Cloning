@@ -385,7 +385,7 @@ def embed_utterance(wav, using_partials=True, return_partials=False, G=None, sta
     """
 
     if(state == "speechsplit"):
-        embed_utterance_speechsplit(wav, G, return_partials, **kwargs)
+        return embed_utterance_speechsplit(wav, G, return_partials, **kwargs)
     elif(state == "autovc"):
         return embed_utterance_autovc(wav, G, return_partials, **kwargs)
     else:

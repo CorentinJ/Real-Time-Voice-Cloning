@@ -36,17 +36,21 @@ colormap = np.array([
 ], dtype=np.float) / 255 
 
 default_text = \
-    "Welcome to the toolbox! To begin, load an utterance from your datasets or record one " \
-    "yourself.\nOnce its embedding has been created, you can synthesize any text written here.\n" \
-    "The synthesizer expects to generate " \
-    "outputs that are somewhere between 5 and 12 seconds.\nTo mark breaks, write a new line. " \
-    "Each line will be treated separately.\nThen, they are joined together to make the final " \
-    "spectrogram. Use the vocoder to generate audio.\nThe vocoder generates almost in constant " \
-    "time, so it will be more time efficient for longer inputs like this one.\nOn the left you " \
-    "have the embedding projections. Load or record more utterances to see them.\nIf you have " \
-    "at least 2 or 3 utterances from a same speaker, a cluster should form.\nSynthesized " \
-    "utterances are of the same color as the speaker whose voice was used, but they're " \
-    "represented with a cross."
+    "To be, or not to be; that is the question;\n" \
+    "Whether it is nobler in the mind to suffer\n" \
+    "The slings and arrows of outrageous fortune\n" \
+    "Or to take arms against a sea of troubles"
+    # "Welcome to the toolbox! To begin, load an utterance from your datasets or record one " \
+    # "yourself.\nOnce its embedding has been created, you can synthesize any text written here.\n" \
+    # "The synthesizer expects to generate " \
+    # "outputs that are somewhere between 5 and 12 seconds.\nTo mark breaks, write a new line. " \
+    # "Each line will be treated separately.\nThen, they are joined together to make the final " \
+    # "spectrogram. Use the vocoder to generate audio.\nThe vocoder generates almost in constant " \
+    # "time, so it will be more time efficient for longer inputs like this one.\nOn the left you " \
+    # "have the embedding projections. Load or record more utterances to see them.\nIf you have " \
+    # "at least 2 or 3 utterances from a same speaker, a cluster should form.\nSynthesized " \
+    # "utterances are of the same color as the speaker whose voice was used, but they're " \
+    # "represented with a cross."
 
    
 class UI(QDialog):
@@ -333,14 +337,29 @@ class UI(QDialog):
     @property
     def current_vocoder_fpath(self):
         return self.vocoder_box.itemData(self.vocoder_box.currentIndex())
+    
+    @property
+    def current_autoencoder_fpath(self):
+        return self.autoencoder_box.itemData(self.autoencoder_box.currentIndex())
 
-    def populate_models(self, encoder_models_dir: Path, synthesizer_models_dir: Path, 
+    def populate_models(self, encoder_models_dir: Path, autoencoder_model_dir : Path, synthesizer_models_dir: Path, 
                         vocoder_models_dir: Path):
         # Encoder
         encoder_fpaths = list(encoder_models_dir.glob("*.pt"))
         if len(encoder_fpaths) == 0:
             raise Exception("No encoder models found in %s" % encoder_models_dir)
         self.repopulate_box(self.encoder_box, [(f.stem, f) for f in encoder_fpaths])
+
+        # Autoencoders
+        autoencoder_autovc_fpaths = Path(autoencoder_model_dir, "autovc")
+        autoencoder_speechsplit_fpaths = Path(autoencoder_model_dir, "speechsplit")
+
+        autoencoder_autovc_fpaths = list(autoencoder_autovc_fpaths.glob("*.ckpt"))
+        autoencoder_speechsplit_fpaths = list(autoencoder_speechsplit_fpaths.glob("*.ckpt"))
+
+        autoenc_items = [("autovc-" + f.stem, f) for f in autoencoder_autovc_fpaths]
+        autoenc_items += [("speechsplit-" + f.stem, f) for f in autoencoder_speechsplit_fpaths]
+        self.repopulate_box(self.autoencoder_box, autoenc_items)
         
         # Synthesizer
         synthesizer_fpaths = list(synthesizer_models_dir.glob("**/*.pt"))
@@ -514,16 +533,19 @@ class UI(QDialog):
         self.encoder_box = QComboBox()
         browser_layout.addWidget(QLabel("<b>Encoder</b>"), i, 0)
         browser_layout.addWidget(self.encoder_box, i + 1, 0)
+        self.autoencoder_box = QComboBox()
+        browser_layout.addWidget(QLabel("<b>SpeechSplit/AutoVC</b>"), i, 1)
+        browser_layout.addWidget(self.autoencoder_box, i + 1, 1)
         self.synthesizer_box = QComboBox()
-        browser_layout.addWidget(QLabel("<b>Synthesizer</b>"), i, 1)
-        browser_layout.addWidget(self.synthesizer_box, i + 1, 1)
+        browser_layout.addWidget(QLabel("<b>Synthesizer</b>"), i, 2)
+        browser_layout.addWidget(self.synthesizer_box, i + 1, 2)
         self.vocoder_box = QComboBox()
-        browser_layout.addWidget(QLabel("<b>Vocoder</b>"), i, 2)
-        browser_layout.addWidget(self.vocoder_box, i + 1, 2)
+        browser_layout.addWidget(QLabel("<b>Vocoder</b>"), i, 3)
+        browser_layout.addWidget(self.vocoder_box, i + 1, 3)
         
         self.audio_out_devices_cb=QComboBox()
-        browser_layout.addWidget(QLabel("<b>Audio Output</b>"), i, 3)
-        browser_layout.addWidget(self.audio_out_devices_cb, i + 1, 3)
+        browser_layout.addWidget(QLabel("<b>Audio Output</b>"), i, 4)
+        browser_layout.addWidget(self.audio_out_devices_cb, i + 1, 4)
         i += 2
 
         #Replay & Save Audio
@@ -532,13 +554,13 @@ class UI(QDialog):
         self.waves_cb_model = QStringListModel()
         self.waves_cb.setModel(self.waves_cb_model)
         self.waves_cb.setToolTip("Select one of the last generated waves in this section for replaying or exporting")
-        browser_layout.addWidget(self.waves_cb, i, 1)
+        browser_layout.addWidget(self.waves_cb, i, 2)
         self.replay_wav_button = QPushButton("Replay")
         self.replay_wav_button.setToolTip("Replay last generated vocoder")
-        browser_layout.addWidget(self.replay_wav_button, i, 2)
+        browser_layout.addWidget(self.replay_wav_button, i, 3)
         self.export_wav_button = QPushButton("Export")
         self.export_wav_button.setToolTip("Save last generated vocoder audio in filesystem as a wav file")
-        browser_layout.addWidget(self.export_wav_button, i, 3)
+        browser_layout.addWidget(self.export_wav_button, i, 4)
         i += 1
 
 
@@ -576,15 +598,21 @@ class UI(QDialog):
         layout.addWidget(self.vocode_button)
         gen_layout.addLayout(layout)
 
+        layout_seed3 = QGridLayout()
+        self.orig_button = QPushButton("Use Original")
+        self.orig_button.setToolTip("When checked, GE2E is used as speaker encoder.")
+        self.orig_button.setEnabled(False)
+        layout_seed3.addWidget(self.orig_button, 3, 3)
+
         layout_seed1 = QGridLayout()
-        self.random_autovc_checkbox = QCheckBox("Use AutoVC:")
-        self.random_autovc_checkbox.setToolTip("When checked, autovc is used as speaker encoder.")
-        layout_seed1.addWidget(self.random_autovc_checkbox, 2, 2)
+        self.autovc_button = QPushButton("Use AutoVC")
+        self.autovc_button.setToolTip("When checked, autovc is used as speaker encoder.")
+        layout_seed1.addWidget(self.autovc_button, 2, 2)
 
         layout_seed2 = QGridLayout()
-        self.random_speechsplit_checkbox = QCheckBox("Use SpeechSplit:")
-        self.random_speechsplit_checkbox.setToolTip("When checked, speechsplit is used as speaker encoder.")
-        layout_seed2.addWidget(self.random_speechsplit_checkbox, 1, 1)
+        self.speechsplit_button = QPushButton("Use SpeechSplit")
+        self.speechsplit_button.setToolTip("When checked, speechsplit is used as speaker encoder.")
+        layout_seed2.addWidget(self.speechsplit_button, 1, 1)
 
         layout_seed = QGridLayout()
         self.random_seed_checkbox = QCheckBox("Random seed:")
@@ -600,6 +628,7 @@ class UI(QDialog):
         gen_layout.addLayout(layout_seed)
         gen_layout.addLayout(layout_seed1)
         gen_layout.addLayout(layout_seed2)
+        gen_layout.addLayout(layout_seed3)
 
         self.loading_bar = QProgressBar()
         gen_layout.addWidget(self.loading_bar)

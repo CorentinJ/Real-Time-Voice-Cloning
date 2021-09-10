@@ -15,7 +15,10 @@
 *.toc
 *.wav
 *.sh
+*.ckpt
+*.pt
 .vscode
-encoder/saved_models/*
-synthesizer/saved_models/*
-vocoder/saved_models/*
+/test_voices
+*/encoder/saved_models/*
+*/synthesizer/saved_models/*
+*/vocoder/saved_models/*

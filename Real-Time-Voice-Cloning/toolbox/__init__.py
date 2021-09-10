@@ -45,7 +45,7 @@ recognized_datasets = [
 MAX_WAVES = 15
 
 class Toolbox:
-    def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir, seed, no_mp3_support):
+    def __init__(self, datasets_root, enc_models_dir, autoencoders_models_dir, syn_models_dir, voc_models_dir, seed, no_mp3_support):
         if not no_mp3_support:
             try:
                 librosa.load("samples/6829_00000.mp3")
@@ -60,10 +60,12 @@ class Toolbox:
         self.current_generated = (None, None, None, None) # speaker_name, spec, breaks, wav
         
         self.synthesizer = None # type: Synthesizer
+        self.autoencoder = None
         self.current_wav = None
         self.waves_list = []
         self.waves_count = 0
         self.waves_namelist = []
+        self.state = "orig"
 
         # Check for webrtcvad (enables removal of silences in vocoder output)
         try:
@@ -74,7 +76,7 @@ class Toolbox:
 
         # Initialize the events and the interface
         self.ui = UI()
-        self.reset_ui(enc_models_dir, syn_models_dir, voc_models_dir, seed)
+        self.reset_ui(enc_models_dir, autoencoders_models_dir, syn_models_dir, voc_models_dir, seed)
         self.setup_events()
         self.ui.start()
 
@@ -99,6 +101,10 @@ class Toolbox:
         def func(): 
             self.synthesizer = None
         self.ui.synthesizer_box.currentIndexChanged.connect(func)
+        def func2(): 
+            self.autoencoder = None
+        self.ui.autoencoder_box.currentIndexChanged.connect(func2)
+
         self.ui.vocoder_box.currentIndexChanged.connect(self.init_vocoder)
         
         # Utterance selection
@@ -128,8 +134,39 @@ class Toolbox:
         self.ui.vocode_button.clicked.connect(self.vocode)
         self.ui.random_seed_checkbox.clicked.connect(self.update_seed_textbox)
 
+        self.ui.orig_button.clicked.connect(self.orig_button)
+        self.ui.speechsplit_button.clicked.connect(self.speechplit_button)
+        self.ui.autovc_button.clicked.connect(self.autovc_button)
+
         # UMAP legend
         self.ui.clear_button.clicked.connect(self.clear_utterances)
+
+    def orig_button(self):
+        self.set_encoder(0)
+    def speechplit_button(self):
+        self.set_encoder(1)
+    def autovc_button(self):
+        self.set_encoder(2)
+
+    def set_encoder(self, i):
+        if(i == 0):
+            self.state = "orig"
+            self.ui.orig_button.setEnabled(False)
+            self.ui.speechsplit_button.setEnabled(True)
+            self.ui.autovc_button.setEnabled(True)
+        elif(i == 1):
+            self.state = "speechsplit"
+            self.ui.orig_button.setEnabled(True)
+            self.ui.speechsplit_button.setEnabled(False)
+            self.ui.autovc_button.setEnabled(True)
+        elif(i == 2):
+            self.state = "autovc"
+            self.ui.orig_button.setEnabled(True)
+            self.ui.speechsplit_button.setEnabled(True)
+            self.ui.autovc_button.setEnabled(False)
+        
+        self.ui.log("Set encoder to: %s" % self.state)
+        self.clear_utterances()
 
     def set_current_wav(self, index):
         self.current_wav = self.waves_list[index]
@@ -140,9 +177,9 @@ class Toolbox:
     def replay_last_wav(self):
         self.ui.play(self.current_wav, Synthesizer.sample_rate)
 
-    def reset_ui(self, encoder_models_dir, synthesizer_models_dir, vocoder_models_dir, seed):
+    def reset_ui(self, encoder_models_dir, autoencoder_models_dir, synthesizer_models_dir, vocoder_models_dir, seed):
         self.ui.populate_browser(self.datasets_root, recognized_datasets, 0, True)
-        self.ui.populate_models(encoder_models_dir, synthesizer_models_dir, vocoder_models_dir)
+        self.ui.populate_models(encoder_models_dir, autoencoder_models_dir, synthesizer_models_dir, vocoder_models_dir)
         self.ui.populate_gen_options(seed, self.trim_silences)
         
     def load_from_browser(self, fpath=None):
@@ -196,24 +233,24 @@ class Toolbox:
         #autovc
         use_cuda = torch.cuda.is_available()
         device = torch.device('cuda:0' if use_cuda else 'cpu')
-        state = ""
-        if(self.ui.random_autovc_checkbox.isChecked()):
+        autoencoder_path = self.ui.current_autoencoder_fpath
+        
+        
+        if(self.state == "autovc"):
             self.ui.log("Loading AutoVC model")
             G = Generator_autovc(16, 256, 512, 16).eval().to(device)
-            g_checkpoint = torch.load('../autovc/run/models/425000-G.ckpt', map_location=device)
+            g_checkpoint = torch.load(autoencoder_path, map_location=device)
             G.load_state_dict(g_checkpoint['model'])
-            state = "autovc"
-        elif(self.ui.random_speechsplit_checkbox.isChecked()):
+        elif(self.state == "speechsplit"):
             self.ui.log("Loading SpeechSplit model")
             G = Generator_speechsplit(hparams_speechsplit).eval().to(device)
-            g_checkpoint = torch.load('../SpeechSplit/assets/20000-G.ckpt', map_location=lambda storage, loc: storage)
+            g_checkpoint = torch.load(autoencoder_path, map_location=lambda storage, loc: storage)
             G.load_state_dict(g_checkpoint['model'])
-            state = "speechsplit"
         else:
             G=None
         
         encoder_wav = encoder.preprocess_wav(wav)
-        embed = encoder.embed_utterance(encoder_wav, G=G, state=state)
+        embed = encoder.embed_utterance(encoder_wav, G=G, state=self.state)
 
         # Add the utterance
         utterance = Utterance(name, speaker_name, wav, spec, embed, False)
@@ -249,8 +286,8 @@ class Toolbox:
         texts = self.ui.text_prompt.toPlainText().split("\n")
         embed = self.ui.selected_utterance.embed
         embeds = [embed] * len(texts)
-        speechsplit = self.ui.random_speechsplit_checkbox.isChecked()
-        specs = self.synthesizer.synthesize_spectrograms(texts, embeds, speechsplit=speechsplit)
+
+        specs = self.synthesizer.synthesize_spectrograms(texts, embeds, state=self.state)
         breaks = [spec.shape[1] for spec in specs]
         spec = np.concatenate(specs, axis=1)
         
@@ -338,24 +375,21 @@ class Toolbox:
         # autovc
         use_cuda = torch.cuda.is_available()
         device = torch.device('cuda:0' if use_cuda else 'cpu')
-        state = ""
-        if(self.ui.random_autovc_checkbox.isChecked()):
+        if(self.state == "autovc"):
             self.ui.log("Loading AutoVC model")
             G = Generator_autovc(16, 256, 512, 16).eval().to(device)
             g_checkpoint = torch.load('../autovc/run/models/425000-G.ckpt', map_location=device)
             G.load_state_dict(g_checkpoint['model'])
-            state = "autovc"
-        elif(self.ui.random_speechsplit_checkbox.isChecked()):
+        elif(self.state == "speechsplit"):
             self.ui.log("Loading SpeechSplit model")
             G = Generator_speechsplit(hparams_speechsplit).eval().to(device)
             g_checkpoint = torch.load('../SpeechSplit/assets/20000-G.ckpt', map_location=lambda storage, loc: storage)
             G.load_state_dict(g_checkpoint['model'])
-            state = "speechsplit"
         else:
             G=None
 
         encoder_wav = encoder.preprocess_wav(wav)
-        embed = encoder.embed_utterance(encoder_wav, G=G, state=state)
+        embed = encoder.embed_utterance(encoder_wav, G=G, state=self.state)
                 
         # Add the utterance
         name = speaker_name + "_gen_%05d" % np.random.randint(100000)
@@ -382,8 +416,8 @@ class Toolbox:
         self.ui.log("Loading the synthesizer %s... " % model_fpath)
         self.ui.set_loading(1)
         start = timer()
-        speechsplit = self.ui.random_speechsplit_checkbox.isChecked()
-        self.synthesizer = Synthesizer(model_fpath, speechsplit)
+        
+        self.synthesizer = Synthesizer(model_fpath, state=self.state)
         self.ui.log("Done (%dms)." % int(1000 * (timer() - start)), "append")
         self.ui.set_loading(0)
            

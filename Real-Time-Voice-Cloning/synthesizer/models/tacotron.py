@@ -460,6 +460,8 @@ class Tacotron(nn.Module):
         # Need a <GO> Frame for start of decoder loop
         go_frame = torch.zeros(batch_size, self.n_mels, device=device)
 
+        print("\n\n", self.speaker_embedding_size, "\n\n")
+        
         # Need an initial context vector
         context_vec = torch.zeros(batch_size, self.encoder_dims + self.speaker_embedding_size, device=device)
 

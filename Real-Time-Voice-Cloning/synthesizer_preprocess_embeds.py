@@ -19,7 +19,7 @@ if __name__ == "__main__":
     parser.add_argument("-n", "--n_processes", type=int, default=4, help= \
         "Number of parallel processes. An encoder is created for each, so you may need to lower "
         "this value on GPUs with low memory. Set it to 1 if CUDA is unhappy.")
-    parser.add_argument("-model", "--m", type=str, default="", help= \
+    parser.add_argument("-model", "--model_used", type=str, default="", help= \
         "Model used during preprocessing "
         "Options: speechsplit, autovc, none")
     args = parser.parse_args()
