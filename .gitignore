@@ -15,6 +15,14 @@
 *.toc
 *.wav
 *.sh
-encoder/saved_models/*
-synthesizer/saved_models/*
-vocoder/saved_models/*
+*.ckpt
+*.pt
+*.pkl
+.vscode
+/test_voices
+*/encoder/saved_models/*
+*/synthesizer/saved_models/*
+*/vocoder/saved_models/*
+/autovc/spmel
+/autovc/run
+events.out.tfevents*
