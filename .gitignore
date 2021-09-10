@@ -17,12 +17,18 @@
 *.sh
 *.ckpt
 *.pt
+<<<<<<< HEAD
 *.pkl
+=======
+>>>>>>> 8908b3159db1bc080d9a5e19857726e19baac916
 .vscode
 /test_voices
 */encoder/saved_models/*
 */synthesizer/saved_models/*
 */vocoder/saved_models/*
+<<<<<<< HEAD
 /autovc/spmel
 /autovc/run
 events.out.tfevents*
+=======
+>>>>>>> 8908b3159db1bc080d9a5e19857726e19baac916

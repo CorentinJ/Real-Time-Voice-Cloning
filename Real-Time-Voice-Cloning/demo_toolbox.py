@@ -12,6 +12,13 @@ if __name__ == '__main__':
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     
+    #autovc settings
+    parser.add_argument('--dim_neck_autovc', type=int, default=16)
+    parser.add_argument('--dim_emb_autovc', type=int, default=256)
+    parser.add_argument('--dim_pre_autovc', type=int, default=512)
+    parser.add_argument('--freq_autovc', type=int, default=16)
+    #--
+
     parser.add_argument("-d", "--datasets_root", type=Path, help= \
         "Path to the directory containing your datasets. See toolbox/__init__.py for a list of "
         "supported datasets.", default=None)
@@ -41,5 +48,6 @@ if __name__ == '__main__':
     check_model_paths(encoder_path=args.enc_models_dir, synthesizer_path=args.syn_models_dir,
                       vocoder_path=args.voc_models_dir)
 
+    config = parser.parse_args()
     # Launch the toolbox
-    Toolbox(**vars(args))    
+    Toolbox(config)    

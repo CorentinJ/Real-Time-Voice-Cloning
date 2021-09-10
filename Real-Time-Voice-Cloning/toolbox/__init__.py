@@ -45,17 +45,17 @@ recognized_datasets = [
 MAX_WAVES = 15
 
 class Toolbox:
-    def __init__(self, datasets_root, enc_models_dir, autoencoders_models_dir, syn_models_dir, voc_models_dir, seed, no_mp3_support):
-        if not no_mp3_support:
+    def __init__(self, config):
+        if not config.no_mp3_support:
             try:
                 librosa.load("samples/6829_00000.mp3")
             except NoBackendError:
                 print("Librosa will be unable to open mp3 files if additional software is not installed.\n"
                   "Please install ffmpeg or add the '--no_mp3_support' option to proceed without support for mp3 files.")
                 exit(-1)
-        self.no_mp3_support = no_mp3_support
+        self.no_mp3_support = config.no_mp3_support
         sys.excepthook = self.excepthook
-        self.datasets_root = datasets_root
+        self.datasets_root = config.datasets_root
         self.utterances = set()
         self.current_generated = (None, None, None, None) # speaker_name, spec, breaks, wav
         
@@ -67,6 +67,11 @@ class Toolbox:
         self.waves_namelist = []
         self.state = "orig"
 
+        self.dim_neck_autovc  = config.dim_neck_autovc
+        self.dim_emb_autovc = config.dim_emb_autovc
+        self.dim_pre_autovc = config.dim_pre_autovc
+        self.freq_autovc  = config.freq_autovc
+
         # Check for webrtcvad (enables removal of silences in vocoder output)
         try:
             import webrtcvad
@@ -76,7 +81,7 @@ class Toolbox:
 
         # Initialize the events and the interface
         self.ui = UI()
-        self.reset_ui(enc_models_dir, autoencoders_models_dir, syn_models_dir, voc_models_dir, seed)
+        self.reset_ui(config.enc_models_dir, config.autoencoders_models_dir, config.syn_models_dir, config.voc_models_dir, config.seed)
         self.setup_events()
         self.ui.start()
 
@@ -238,7 +243,7 @@ class Toolbox:
         
         if(self.state == "autovc"):
             self.ui.log("Loading AutoVC model")
-            G = Generator_autovc(16, 256, 512, 16).eval().to(device)
+            G = Generator_autovc(self.dim_neck_autovc, self.dim_emb_autovc, self.dim_pre_autovc, self.freq_autovc).eval().to(device)
             g_checkpoint = torch.load(autoencoder_path, map_location=device)
             G.load_state_dict(g_checkpoint['model'])
         elif(self.state == "speechsplit"):
@@ -375,15 +380,17 @@ class Toolbox:
         # autovc
         use_cuda = torch.cuda.is_available()
         device = torch.device('cuda:0' if use_cuda else 'cpu')
+        autoencoder_path = self.ui.current_autoencoder_fpath
+        
         if(self.state == "autovc"):
             self.ui.log("Loading AutoVC model")
             G = Generator_autovc(16, 256, 512, 16).eval().to(device)
-            g_checkpoint = torch.load('../autovc/run/models/425000-G.ckpt', map_location=device)
+            g_checkpoint = torch.load(autoencoder_path, map_location=device)
             G.load_state_dict(g_checkpoint['model'])
         elif(self.state == "speechsplit"):
             self.ui.log("Loading SpeechSplit model")
             G = Generator_speechsplit(hparams_speechsplit).eval().to(device)
-            g_checkpoint = torch.load('../SpeechSplit/assets/20000-G.ckpt', map_location=lambda storage, loc: storage)
+            g_checkpoint = torch.load(autoencoder_path, map_location=lambda storage, loc: storage)
             G.load_state_dict(g_checkpoint['model'])
         else:
             G=None
