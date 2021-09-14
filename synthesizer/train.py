@@ -267,5 +267,3 @@ def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
                      target_spectrogram=target_spectrogram,
                      max_len=target_spectrogram.size // hparams.num_mels)
     print("Input at step {}: {}".format(step, sequence_to_text(input_seq)))
-
-    
