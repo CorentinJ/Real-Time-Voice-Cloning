@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     if args.cpu:
         # Hide GPUs from Pytorch to force CPU processing
-        os.environ["CUDA_VISIBLE_DEVICES"] = ""
+        os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
     if not args.no_mp3_support:
         try:
