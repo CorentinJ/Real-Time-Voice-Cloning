@@ -11,7 +11,7 @@ import vocoder.hparams as hp
 import numpy as np
 import time
 import torch
-
+import platform
 
 def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_truth: bool,
           save_every: int, backup_every: int, force_restart: bool):
@@ -79,7 +79,7 @@ def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_tr
         data_loader = DataLoader(dataset,
                                  collate_fn=collate_vocoder,
                                  batch_size=hp.voc_batch_size,
-                                 num_workers=2,
+                                 num_workers=2 if platform.system() != "Windows" else 0,
                                  shuffle=True,
                                  pin_memory=True)
         start = time.time()

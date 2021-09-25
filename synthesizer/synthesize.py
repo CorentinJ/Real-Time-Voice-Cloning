@@ -8,13 +8,13 @@ from synthesizer.utils.symbols import symbols
 import numpy as np
 from pathlib import Path
 from tqdm import tqdm
-
+import platform
 
 def run_synthesis(in_dir, out_dir, model_dir, hparams):
     # This generates ground truth-aligned mels for vocoder training
     synth_dir = Path(out_dir).joinpath("mels_gta")
     synth_dir.mkdir(exist_ok=True)
-    print(hparams_debug_string(hparams))
+    print(hparams_debug_string())
 
     # Check for GPU
     if torch.cuda.is_available():
@@ -62,9 +62,9 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
 
     dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
     data_loader = DataLoader(dataset,
-                             collate_fn=lambda batch: collate_synthesizer(batch, r),
+                             collate_fn=lambda batch: collate_synthesizer(batch, r, hparams),
                              batch_size=hparams.synthesis_batch_size,
-                             num_workers=2,
+                             num_workers=2 if platform.system() != "Windows" else 0,
                              shuffle=False,
                              pin_memory=True)
 
@@ -80,7 +80,7 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
             if device.type == "cuda" and torch.cuda.device_count() > 1:
                 _, mels_out, _ = data_parallel_workaround(model, texts, mels, embeds)
             else:
-                _, mels_out, _ = model(texts, mels, embeds)
+                _, mels_out, _, _ = model(texts, mels, embeds)
 
             for j, k in enumerate(idx):
                 # Note: outputs mel-spectrogram files and target ones have same names, just different folders

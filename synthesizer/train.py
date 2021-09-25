@@ -15,6 +15,7 @@ import numpy as np
 from pathlib import Path
 import sys
 import time
+import platform
 
 
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
@@ -146,7 +147,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
         data_loader = DataLoader(dataset,
                                  collate_fn=lambda batch: collate_synthesizer(batch, r, hparams),
                                  batch_size=batch_size,
-                                 num_workers=2,
+                                 num_workers=2 if platform.system() != "Windows" else 0,
                                  shuffle=True,
                                  pin_memory=True)
 
