@@ -20,6 +20,7 @@ SV2TTS is a three-stage deep learning framework that allows to create a numerica
 
 ## News
 **06/10/21**: Integrated to [Huggingface Spaces](https://huggingface.co/spaces) with [Gradio](https://github.com/gradio-app/gradio). See demo: [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/akhaliq/Real-Time-Voice-Cloning)
+
 **14/02/21**: This repo now runs on PyTorch instead of Tensorflow, thanks to the help of @bluefish. If you wish to run the tensorflow version instead, checkout commit `5425557`.
 
 **13/11/19**: I'm now working full time and I will not maintain this repo anymore. To anyone who reads this:
