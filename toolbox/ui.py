@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt, QStringListModel
 from PyQt5.QtWidgets import *
 from encoder.inference import plot_embedding_as_heatmap
@@ -16,7 +17,6 @@ import umap
 import sys
 from warnings import filterwarnings, warn
 filterwarnings("ignore")
-
 
 colormap = np.array([
     [0, 127, 70],
@@ -36,18 +36,8 @@ colormap = np.array([
 ], dtype=np.float) / 255 
 
 default_text = \
-    "Welcome to the toolbox! To begin, load an utterance from your datasets or record one " \
-    "yourself.\nOnce its embedding has been created, you can synthesize any text written here.\n" \
-    "The synthesizer expects to generate " \
-    "outputs that are somewhere between 5 and 12 seconds.\nTo mark breaks, write a new line. " \
-    "Each line will be treated separately.\nThen, they are joined together to make the final " \
-    "spectrogram. Use the vocoder to generate audio.\nThe vocoder generates almost in constant " \
-    "time, so it will be more time efficient for longer inputs like this one.\nOn the left you " \
-    "have the embedding projections. Load or record more utterances to see them.\nIf you have " \
-    "at least 2 or 3 utterances from a same speaker, a cluster should form.\nSynthesized " \
-    "utterances are of the same color as the speaker whose voice was used, but they're " \
-    "represented with a cross."
-
+    "Hello! We are Team ImPAWsters. To begin, load an utterance from your datasets or record one " \
+    "yourself.\nOnce it's embedding has been created, you can synthesize and vocode any text written here.\n" \
    
 class UI(QDialog):
     min_umap_points = 4
@@ -289,14 +279,14 @@ class UI(QDialog):
                        ("\n\t".join(recognized_datasets))
                 print(msg, file=sys.stderr)
                 
-                self.random_utterance_button.setDisabled(True)
-                self.random_speaker_button.setDisabled(True)
-                self.random_dataset_button.setDisabled(True)
-                self.utterance_box.setDisabled(True)
-                self.speaker_box.setDisabled(True)
-                self.dataset_box.setDisabled(True)
-                self.browser_load_button.setDisabled(True)
-                self.auto_next_checkbox.setDisabled(True)
+                self.random_utterance_button.setHidden(True)
+                self.random_speaker_button.setHidden(True)
+                self.random_dataset_button.setHidden(True)
+                self.utterance_box.setHidden(True)
+                self.speaker_box.setHidden(True)
+                self.dataset_box.setHidden(True)
+                self.browser_load_button.setHidden(True)
+                self.auto_next_checkbox.setHidden(True)
                 return 
             self.repopulate_box(self.dataset_box, datasets, random)
     
@@ -334,14 +324,14 @@ class UI(QDialog):
     def current_vocoder_fpath(self):
         return self.vocoder_box.itemData(self.vocoder_box.currentIndex())
 
-    def populate_models(self, encoder_models_dir: Path, synthesizer_models_dir: Path, 
+    def populate_models(self, encoder_models_dir: Path, synthesizer_models_dir: Path,
                         vocoder_models_dir: Path):
         # Encoder
         encoder_fpaths = list(encoder_models_dir.glob("*.pt"))
         if len(encoder_fpaths) == 0:
             raise Exception("No encoder models found in %s" % encoder_models_dir)
         self.repopulate_box(self.encoder_box, [(f.stem, f) for f in encoder_fpaths])
-        
+
         # Synthesizer
         synthesizer_fpaths = list(synthesizer_models_dir.glob("**/*.pt"))
         if len(synthesizer_fpaths) == 0:
@@ -429,9 +419,8 @@ class UI(QDialog):
         ## Initialize the application
         self.app = QApplication(sys.argv)
         super().__init__(None)
-        self.setWindowTitle("SV2TTS toolbox")
-        
-        
+        self.setWindowTitle("Hackathon 2021 - ImPAWsters")
+
         ## Main layouts
         # Root
         root_layout = QGridLayout()
@@ -468,13 +457,13 @@ class UI(QDialog):
         # Dataset, speaker and utterance selection
         i = 0
         self.dataset_box = QComboBox()
-        browser_layout.addWidget(QLabel("<b>Dataset</b>"), i, 0)
+        browser_layout.addWidget(QLabel("<b></b>"), i, 0)
         browser_layout.addWidget(self.dataset_box, i + 1, 0)
         self.speaker_box = QComboBox()
-        browser_layout.addWidget(QLabel("<b>Speaker</b>"), i, 1)
+        browser_layout.addWidget(QLabel("<b></b>"), i, 1)
         browser_layout.addWidget(self.speaker_box, i + 1, 1)
         self.utterance_box = QComboBox()
-        browser_layout.addWidget(QLabel("<b>Utterance</b>"), i, 2)
+        browser_layout.addWidget(QLabel("<b></b>"), i, 2)
         browser_layout.addWidget(self.utterance_box, i + 1, 2)
         self.browser_load_button = QPushButton("Load")
         browser_layout.addWidget(self.browser_load_button, i + 1, 3)
@@ -491,7 +480,7 @@ class UI(QDialog):
         self.auto_next_checkbox.setChecked(True)
         browser_layout.addWidget(self.auto_next_checkbox, i, 3)
         i += 1
-        
+
         # Utterance box
         browser_layout.addWidget(QLabel("<b>Use embedding from:</b>"), i, 0)
         self.utterance_history = QComboBox()
@@ -499,7 +488,7 @@ class UI(QDialog):
         i += 1
         
         # Random & next utterance buttons
-        self.browser_browse_button = QPushButton("Browse")
+        self.browser_browse_button = QPushButton("Browse Mac")
         browser_layout.addWidget(self.browser_browse_button, i, 0)
         self.record_button = QPushButton("Record")
         browser_layout.addWidget(self.record_button, i, 1)
@@ -508,7 +497,6 @@ class UI(QDialog):
         self.stop_button = QPushButton("Stop")
         browser_layout.addWidget(self.stop_button, i, 3)
         i += 1
-
 
         # Model and audio output selection
         self.encoder_box = QComboBox()
@@ -522,25 +510,24 @@ class UI(QDialog):
         browser_layout.addWidget(self.vocoder_box, i + 1, 2)
         
         self.audio_out_devices_cb=QComboBox()
-        browser_layout.addWidget(QLabel("<b>Audio Output</b>"), i, 3)
+        browser_layout.addWidget(QLabel("<b>Output device</b>"), i, 3)
         browser_layout.addWidget(self.audio_out_devices_cb, i + 1, 3)
         i += 2
 
         #Replay & Save Audio
-        browser_layout.addWidget(QLabel("<b>Toolbox Output:</b>"), i, 0)
+        browser_layout.addWidget(QLabel("<b>Cloned Output:</b>"), i, 0)
         self.waves_cb = QComboBox()
         self.waves_cb_model = QStringListModel()
         self.waves_cb.setModel(self.waves_cb_model)
         self.waves_cb.setToolTip("Select one of the last generated waves in this section for replaying or exporting")
         browser_layout.addWidget(self.waves_cb, i, 1)
-        self.replay_wav_button = QPushButton("Replay")
+        self.replay_wav_button = QPushButton("Play")
         self.replay_wav_button.setToolTip("Replay last generated vocoder")
         browser_layout.addWidget(self.replay_wav_button, i, 2)
         self.export_wav_button = QPushButton("Export")
         self.export_wav_button.setToolTip("Save last generated vocoder audio in filesystem as a wav file")
         browser_layout.addWidget(self.export_wav_button, i, 3)
         i += 1
-
 
         ## Embed & spectrograms
         vis_layout.addStretch()
@@ -564,16 +551,19 @@ class UI(QDialog):
         
         ## Generation
         self.text_prompt = QPlainTextEdit(default_text)
+        gen_layout.addWidget(QLabel("<b>Text to generate cloned voice output</b>"))
         gen_layout.addWidget(self.text_prompt, stretch=1)
         
-        self.generate_button = QPushButton("Synthesize and vocode")
+        self.generate_button = QPushButton("Synthesize and Vocode")
         gen_layout.addWidget(self.generate_button)
         
         layout = QHBoxLayout()
         self.synthesize_button = QPushButton("Synthesize only")
         layout.addWidget(self.synthesize_button)
+        self.synthesize_button.setHidden(True)
         self.vocode_button = QPushButton("Vocode only")
         layout.addWidget(self.vocode_button)
+        self.vocode_button.setHidden(True)
         gen_layout.addLayout(layout)
 
         layout_seed = QGridLayout()
