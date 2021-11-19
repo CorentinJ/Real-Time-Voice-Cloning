@@ -81,7 +81,7 @@ def collate_synthesizer(batch, r, hparams):
     # Convert all to tensor
     chars = torch.tensor(chars).long()
     mel = torch.tensor(mel)
-    embeds = torch.tensor(embeds)
+    embeds = torch.tensor(np.array(embeds))
 
     return chars, mel, embeds, indices
 
