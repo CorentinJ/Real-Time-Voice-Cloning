@@ -9,7 +9,7 @@
 ## Project description
 
 ``Real-Time-Voice-Cloning`` is a vocoder-based real-time implementation of the scientific work described in the paper
-"Transfer Learning from Speaker Verification to Multispeaker Text-To-Speech Synthesis" (SV2TTS). SV2TTS is a three-stage
+"Transfer Learning from Speaker Verification to Multispeaker Text-To-Speech Synthesis" (``SV2TTS``). ``SV2TTS`` is a three-stage
 Deep Learning Framework, allowing users to create numerical representations of human voices from just a few second long
 audio files and to train Text-to-Speech models capable of transfering voice characteristics to new texts.
 
@@ -17,10 +17,10 @@ audio files and to train Text-to-Speech models capable of transfering voice char
 
 | URL | Designation | Title | Implementation source |
 | --- | ----------- | ----- | --------------------- |
-|[**1806.04558**](https://arxiv.org/pdf/1806.04558.pdf) | **SV2TTS** | **Transfer Learning from Speaker Verification to Multispeaker Text-To-Speech Synthesis** | This repo |
+|[**1806.04558**](https://arxiv.org/pdf/1806.04558.pdf) | **SV2TTS** | **Transfer Learning from Speaker Verification to Multispeaker Text-To-Speech Synthesis** | This repository |
 |[1802.08435](https://arxiv.org/pdf/1802.08435.pdf) | WaveRNN (vocoder) | Efficient Neural Audio Synthesis | [fatchord/WaveRNN](https://github.com/fatchord/WaveRNN) |
 |[1703.10135](https://arxiv.org/pdf/1703.10135.pdf) | Tacotron (synthesizer) | Tacotron: Towards End-to-End Speech Synthesis | [fatchord/WaveRNN](https://github.com/fatchord/WaveRNN)
-|[1710.10467](https://arxiv.org/pdf/1710.10467.pdf) | GE2E (encoder)| Generalized End-To-End Loss for Speaker Verification | This repo |
+|[1710.10467](https://arxiv.org/pdf/1710.10467.pdf) | GE2E (encoder)| Generalized End-To-End Loss for Speaker Verification | This repository |
 
 ## License
 
@@ -31,7 +31,7 @@ This package is licensed under ``MIT``.
 ### Prerequesites
 
 - ``Python (3.6 or 3.6)``
-- ``PyTorch ($\ge$ 1.1.0)``
+- ``PyTorch (>= 1.1.0)``
 - ``ffmpeg``
 
 To install all dependencies, run ``pip install -r requirements.txt`` from the repository's root directory.
