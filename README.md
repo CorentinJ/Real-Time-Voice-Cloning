@@ -4,8 +4,6 @@
 ![GitHub](https://img.shields.io/github/license/CorentinJ/Real-Time-Voice-Cloning)
 *****
 
-# **Real-Time-Voice-Cloning**
-
 [![RTVC logo](rtvc.png)](https://arxiv.org/pdf/1806.04558.pdf)
 
 ## Project description
