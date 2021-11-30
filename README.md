@@ -28,13 +28,21 @@ This package is licensed under ``MIT``.
 
 ## Installation & Setup
 
-### Prerequesites
+### Main Prerequesites
 
 - ``Python (3.6 or 3.6)``
 - ``PyTorch (>= 1.1.0)``
 - ``ffmpeg``
 
-To install all dependencies, run ``pip install -r requirements.txt`` from the repository's root directory.
+To install all other dependencies, run ``pip install -r requirements.txt`` from the repository's root directory.
+
+### CUDA Information
+
+If you have a ``CUDA``-capable Graphics Card (``Nvidia``) that you want to use for training, preprocessing or accelearated file operations, you need to follow these steps:
+
+1. Make sure to install/update the cuda-toolkit in your environment (e.g. via ``pip`` or ``conda``).
+2. Check your CUDA version by terminal-typing either ``nvidia-smi`` or ``nvcc --version``.
+3. Download a ``PyTorch`` version that supports your CUDA version.
 
 ### Downloading pre-trained Models
 
