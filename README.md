@@ -34,7 +34,11 @@ This package is licensed under ``MIT``.
 - ``PyTorch (>= 1.1.0)``
 - ``ffmpeg``
 
-To install all other dependencies, run ``pip install -r requirements.txt`` from the repository's root directory.
+To install all other dependencies, run the following command from the repository's root directory.
+
+```python
+pip install -r requirements.txt
+```
 
 ### CUDA Information
 
