@@ -1,7 +1,11 @@
 *****
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/CorentinJ/Real-Time-Voice-Cloning)
 ![GitHub top language](https://img.shields.io/github/languages/top/CorentinJ/Real-Time-Voice-Cloning)
-![GitHub](https://img.shields.io/github/license/CorentinJ/Real-Time-Voice-Cloning)
+![GitHub](https://img.shields.io/github/issues/CorentinJ/Real-Time-Voice-Cloning)
+![GitHub](https://img.shields.io/github/issues-pr/CorentinJ/Real-Time-Voice-Cloning)
+![GitHub](https://img.shields.io/github/stars/CorentinJ/Real-Time-Voice-Cloning?style=social)
+![GitHub](https://img.shields.io/badge/License-MIT-yellow.svg)
+![GitHub](https://img.shields.io/github/languages/top/CorentinJ/Real-Time-Voice-Cloning)
 *****
 
 [![RTVC logo](rtvc.png)](https://arxiv.org/pdf/1806.04558.pdf)
