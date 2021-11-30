@@ -96,5 +96,6 @@ To watch an introductory **Video Demonstration** of the **Toolbox** and its main
 ## Source code & further information
 
 The source code is maintained at https://github.com/CorentinJ/Real-Time-Voice-Cloning  
-To check out [my scientific thesis](https://matheo.uliege.be/handle/2268.2/6801) if you are curious or looking for information not provided in detail here.  
+
+Check out [my scientific thesis](https://matheo.uliege.be/handle/2268.2/6801) if you are curious or looking for information not provided in detail here.  
 I especially recommend taking a look at the figures beyond the introductions.
