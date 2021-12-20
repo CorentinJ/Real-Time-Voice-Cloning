@@ -43,7 +43,7 @@ SV2TTS is a three-stage deep learning framework that allows to create a numerica
 * Run `pip install -r requirements.txt` to install the remaining necessary packages.
 
 ### 2. Download Pretrained Models
-Download the latest [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models).
+Download the latest [here](https://github.com/raccoonML/Real-Time-Voice-Cloning/releases/tag/RTVC-7).
 
 ### 3. (Optional) Test Configuration
 Before you download any dataset, you can begin by testing your configuration with:
