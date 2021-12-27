@@ -1,16 +1,17 @@
-from toolbox.ui import UI
-from encoder import inference as encoder
-from synthesizer.inference import Synthesizer
-from vocoder import inference as vocoder
+import sys
+import traceback
 from pathlib import Path
 from time import perf_counter as timer
-from toolbox.utterance import Utterance
+
 import numpy as np
-import traceback
-import sys
 import torch
-import librosa
-from audioread.exceptions import NoBackendError
+
+from encoder import inference as encoder
+from synthesizer.inference import Synthesizer
+from toolbox.ui import UI
+from toolbox.utterance import Utterance
+from vocoder import inference as vocoder
+
 
 # Use this directory structure for your datasets, or modify it to fit your needs
 recognized_datasets = [
@@ -39,8 +40,9 @@ recognized_datasets = [
 # Maximum of generated wavs to keep on memory
 MAX_WAVS = 15
 
+
 class Toolbox:
-    def __init__(self, datasets_root, models_dir, cpu, seed):
+    def __init__(self, datasets_root: Path, models_dir: Path, seed: int=None):
         sys.excepthook = self.excepthook
         self.datasets_root = datasets_root
         self.utterances = set()
@@ -61,7 +63,7 @@ class Toolbox:
 
         # Initialize the events and the interface
         self.ui = UI()
-        self.reset_ui(enc_models_dir, syn_models_dir, voc_models_dir, seed)
+        self.reset_ui(models_dir, seed)
         self.setup_events()
         self.ui.start()
 
@@ -127,9 +129,9 @@ class Toolbox:
     def replay_last_wav(self):
         self.ui.play(self.current_wav, Synthesizer.sample_rate)
 
-    def reset_ui(self, encoder_models_dir, synthesizer_models_dir, vocoder_models_dir, seed):
+    def reset_ui(self, models_dir: Path, seed: int=None):
         self.ui.populate_browser(self.datasets_root, recognized_datasets, 0, True)
-        self.ui.populate_models(encoder_models_dir, synthesizer_models_dir, vocoder_models_dir)
+        self.ui.populate_models(models_dir)
         self.ui.populate_gen_options(seed, self.trim_silences)
 
     def load_from_browser(self, fpath=None):
