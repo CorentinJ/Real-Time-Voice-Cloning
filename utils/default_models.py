@@ -8,7 +8,7 @@ from tqdm import tqdm
 default_models = {
     "encoder": ("https://drive.google.com/uc?export=download&id=1q8mEGwCkFy23KZsinbuvdKAQLqNKbYf1", 17090379),
     # Too large to put on google drive with a direct link...
-    "synthesizer": ("https://download1075.mediafire.com/qo9z9gv56uwg/02w4p210tuudu3u/pretrained.pt", 370554559),
+    "synthesizer": ("https://www.dropbox.com/s/r37koa6ho5prz7w/synthesizer.pt?dl=1", 370554559),
     "vocoder": ("https://drive.google.com/uc?export=download&id=1cf2NO6FtI0jDuy8AV3Xgn6leO6dHjIgu", 53845290),
 }
 
@@ -24,14 +24,14 @@ def download(url: str, target: Path, bar_pos=0):
     # Ensure the directory exists
     target.parent.mkdir(exist_ok=True, parents=True)
 
-    desc = f"Downloading {target}"
+    desc = f"Downloading {target.name}"
     with DownloadProgressBar(unit="B", unit_scale=True, miniters=1, desc=desc, position=bar_pos, leave=False) as t:
         urllib.request.urlretrieve(url, filename=target, reporthook=t.update_to)
 
 
 def ensure_default_models(models_dir: Path):
     # Define download tasks
-    threads = []
+    jobs = []
     for model_name, (url, size) in default_models.items():
         target_path = models_dir / "default" / f"{model_name}.pt"
         if target_path.exists():
@@ -40,10 +40,14 @@ def ensure_default_models(models_dir: Path):
             else:
                 continue
 
-        thread = Thread(target=download, args=(url, target_path, len(threads)))
+        thread = Thread(target=download, args=(url, target_path, len(jobs)))
         thread.start()
-        threads.append(thread)
+        jobs.append((thread, target_path, size))
 
     # Run and join threads
-    for thread in threads:
+    for thread, target_path, size in jobs:
         thread.join()
+
+        assert target_path.stat().st_size == size, \
+            f"Download for {target_path.name} failed. You may download models manually instead. Open an issue if the " \
+            f"problem is recurrent.\nhttps://drive.google.com/drive/folders/1fU6umc5uQAVR2udZdHX-lDgXYzTyqG_j"
