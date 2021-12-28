@@ -1,19 +1,23 @@
+import platform
+from functools import partial
+from pathlib import Path
+
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
-from synthesizer.hparams import hparams_debug_string
-from synthesizer.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
-from synthesizer.models.tacotron import Tacotron
-from synthesizer.utils.text import text_to_sequence
-from synthesizer.utils.symbols import symbols
-import numpy as np
-from pathlib import Path
 from tqdm import tqdm
-import platform
 
-def run_synthesis(in_dir, out_dir, model_dir, hparams):
+from synthesizer.hparams import hparams_debug_string
+from synthesizer.models.tacotron import Tacotron
+from synthesizer.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
+from synthesizer.utils import data_parallel_workaround
+from synthesizer.utils.symbols import symbols
+
+
+def run_synthesis(in_dir: Path, out_dir: Path, syn_model_fpath: Path, hparams):
     # This generates ground truth-aligned mels for vocoder training
-    synth_dir = Path(out_dir).joinpath("mels_gta")
-    synth_dir.mkdir(exist_ok=True)
+    synth_dir = out_dir / "mels_gta"
+    synth_dir.mkdir(exist_ok=True, parents=True)
     print(hparams_debug_string())
 
     # Check for GPU
@@ -42,10 +46,8 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
                      speaker_embedding_size=hparams.speaker_embedding_size).to(device)
 
     # Load the weights
-    model_dir = Path(model_dir)
-    model_fpath = model_dir.joinpath(model_dir.stem).with_suffix(".pt")
-    print("\nLoading weights at %s" % model_fpath)
-    model.load(model_fpath)
+    print("\nLoading weights at %s" % syn_model_fpath)
+    model.load(syn_model_fpath)
     print("Tacotron weights loaded from step %d" % model.step)
 
     # Synthesize using same reduction factor as the model is currently trained
@@ -55,26 +57,19 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
     model.eval()
 
     # Initialize the dataset
-    in_dir = Path(in_dir)
     metadata_fpath = in_dir.joinpath("train.txt")
     mel_dir = in_dir.joinpath("mels")
     embed_dir = in_dir.joinpath("embeds")
 
     dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
-    data_loader = DataLoader(dataset,
-                             collate_fn=lambda batch: collate_synthesizer(batch, r, hparams),
-                             batch_size=hparams.synthesis_batch_size,
-                             num_workers=2 if platform.system() != "Windows" else 0,
-                             shuffle=False,
-                             pin_memory=True)
+    collate_fn = partial(collate_synthesizer, r=r, hparams=hparams)
+    data_loader = DataLoader(dataset, hparams.synthesis_batch_size, collate_fn=collate_fn, num_workers=2)
 
     # Generate GTA mels
-    meta_out_fpath = Path(out_dir).joinpath("synthesized.txt")
-    with open(meta_out_fpath, "w") as file:
+    meta_out_fpath = out_dir / "synthesized.txt"
+    with meta_out_fpath.open("w") as file:
         for i, (texts, mels, embeds, idx) in tqdm(enumerate(data_loader), total=len(data_loader)):
-            texts = texts.to(device)
-            mels = mels.to(device)
-            embeds = embeds.to(device)
+            texts, mels, embeds = texts.to(device), mels.to(device), embeds.to(device)
 
             # Parallelize model onto GPUS using workaround due to python bug
             if device.type == "cuda" and torch.cuda.device_count() > 1:
