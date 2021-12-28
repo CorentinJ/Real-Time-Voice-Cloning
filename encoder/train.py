@@ -24,7 +24,7 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int,
         dataset,
         speakers_per_batch,
         utterances_per_speaker,
-        num_workers=0,
+        num_workers=4,
     )
 
     # Setup the device on which to run the forward pass and the loss. These can be different,
