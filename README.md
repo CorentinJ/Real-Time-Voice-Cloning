@@ -19,7 +19,7 @@ SV2TTS is a deep learning framework in three stages. In the first stage, one cre
 |[1710.10467](https://arxiv.org/pdf/1710.10467.pdf) | GE2E (encoder)| Generalized End-To-End Loss for Speaker Verification | This repo |
 
 ## News
-**28/12/21**: I've done a major maintenance update. Mostly, I've worked on making setup easier. Find new instructions in the section below.
+**28/12/21**: I've done a [major maintenance update](https://github.com/CorentinJ/Real-Time-Voice-Cloning/pull/961). Mostly, I've worked on making setup easier. Find new instructions in the section below.
 
 **14/02/21**: This repo now runs on PyTorch instead of Tensorflow, thanks to the help of @bluefish. If you wish to run the tensorflow version instead, checkout commit `5425557`.
 
