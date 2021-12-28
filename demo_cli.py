@@ -6,7 +6,6 @@ import librosa
 import numpy as np
 import soundfile as sf
 import torch
-from audioread.exceptions import NoBackendError
 
 from encoder import inference as encoder
 from encoder.params_model import model_embedding_size as speaker_embedding_size
