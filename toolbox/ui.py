@@ -333,20 +333,20 @@ class UI(QDialog):
 
     def populate_models(self, models_dir: Path):
         # Encoder
-        encoder_fpaths = list(models_dir.glob("*/encoder*.pt"))
+        encoder_fpaths = list(models_dir.glob("*/encoder.pt"))
         if len(encoder_fpaths) == 0:
             raise Exception("No encoder models found in %s" % models_dir)
-        self.repopulate_box(self.encoder_box, [(f.stem, f) for f in encoder_fpaths])
+        self.repopulate_box(self.encoder_box, [(f.parent.name, f) for f in encoder_fpaths])
 
         # Synthesizer
-        synthesizer_fpaths = list(models_dir.glob("*/synthesizer*.pt"))
+        synthesizer_fpaths = list(models_dir.glob("*/synthesizer.pt"))
         if len(synthesizer_fpaths) == 0:
             raise Exception("No synthesizer models found in %s" % models_dir)
-        self.repopulate_box(self.synthesizer_box, [(f.stem, f) for f in synthesizer_fpaths])
+        self.repopulate_box(self.synthesizer_box, [(f.parent.name, f) for f in synthesizer_fpaths])
 
         # Vocoder
-        vocoder_fpaths = list(models_dir.glob("*/vocoder*.pt"))
-        vocoder_items = [(f.stem, f) for f in vocoder_fpaths] + [("Griffin-Lim", None)]
+        vocoder_fpaths = list(models_dir.glob("*/vocoder.pt"))
+        vocoder_items = [(f.parent.name, f) for f in vocoder_fpaths] + [("Griffin-Lim", None)]
         self.repopulate_box(self.vocoder_box, vocoder_items)
 
     @property
