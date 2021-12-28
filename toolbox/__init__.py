@@ -1,16 +1,17 @@
-from toolbox.ui import UI
-from encoder import inference as encoder
-from synthesizer.inference import Synthesizer
-from vocoder import inference as vocoder
+import sys
+import traceback
 from pathlib import Path
 from time import perf_counter as timer
-from toolbox.utterance import Utterance
+
 import numpy as np
-import traceback
-import sys
 import torch
-import librosa
-from audioread.exceptions import NoBackendError
+
+from encoder import inference as encoder
+from synthesizer.inference import Synthesizer
+from toolbox.ui import UI
+from toolbox.utterance import Utterance
+from vocoder import inference as vocoder
+
 
 # Use this directory structure for your datasets, or modify it to fit your needs
 recognized_datasets = [
@@ -36,24 +37,17 @@ recognized_datasets = [
     "VCTK-Corpus/wav48",
 ]
 
-#Maximum of generated wavs to keep on memory
-MAX_WAVES = 15
+# Maximum of generated wavs to keep on memory
+MAX_WAVS = 15
+
 
 class Toolbox:
-    def __init__(self, datasets_root, enc_models_dir, syn_models_dir, voc_models_dir, seed, no_mp3_support):
-        if not no_mp3_support:
-            try:
-                librosa.load("samples/6829_00000.mp3")
-            except NoBackendError:
-                print("Librosa will be unable to open mp3 files if additional software is not installed.\n"
-                  "Please install ffmpeg or add the '--no_mp3_support' option to proceed without support for mp3 files.")
-                exit(-1)
-        self.no_mp3_support = no_mp3_support
+    def __init__(self, datasets_root: Path, models_dir: Path, seed: int=None):
         sys.excepthook = self.excepthook
         self.datasets_root = datasets_root
         self.utterances = set()
         self.current_generated = (None, None, None, None) # speaker_name, spec, breaks, wav
-        
+
         self.synthesizer = None # type: Synthesizer
         self.current_wav = None
         self.waves_list = []
@@ -69,14 +63,14 @@ class Toolbox:
 
         # Initialize the events and the interface
         self.ui = UI()
-        self.reset_ui(enc_models_dir, syn_models_dir, voc_models_dir, seed)
+        self.reset_ui(models_dir, seed)
         self.setup_events()
         self.ui.start()
 
     def excepthook(self, exc_type, exc_value, exc_tb):
         traceback.print_exception(exc_type, exc_value, exc_tb)
         self.ui.log("Exception: %s" % exc_value)
-        
+
     def setup_events(self):
         # Dataset, speaker and utterance selection
         self.ui.browser_load_button.clicked.connect(lambda: self.load_from_browser())
@@ -88,14 +82,14 @@ class Toolbox:
         self.ui.random_utterance_button.clicked.connect(random_func(2))
         self.ui.dataset_box.currentIndexChanged.connect(random_func(1))
         self.ui.speaker_box.currentIndexChanged.connect(random_func(2))
-        
+
         # Model selection
         self.ui.encoder_box.currentIndexChanged.connect(self.init_encoder)
-        def func(): 
+        def func():
             self.synthesizer = None
         self.ui.synthesizer_box.currentIndexChanged.connect(func)
         self.ui.vocoder_box.currentIndexChanged.connect(self.init_vocoder)
-        
+
         # Utterance selection
         func = lambda: self.load_from_browser(self.ui.browse_file())
         self.ui.browser_browse_button.clicked.connect(func)
@@ -135,11 +129,11 @@ class Toolbox:
     def replay_last_wav(self):
         self.ui.play(self.current_wav, Synthesizer.sample_rate)
 
-    def reset_ui(self, encoder_models_dir, synthesizer_models_dir, vocoder_models_dir, seed):
+    def reset_ui(self, models_dir: Path, seed: int=None):
         self.ui.populate_browser(self.datasets_root, recognized_datasets, 0, True)
-        self.ui.populate_models(encoder_models_dir, synthesizer_models_dir, vocoder_models_dir)
+        self.ui.populate_models(models_dir)
         self.ui.populate_gen_options(seed, self.trim_silences)
-        
+
     def load_from_browser(self, fpath=None):
         if fpath is None:
             fpath = Path(self.datasets_root,
@@ -148,19 +142,15 @@ class Toolbox:
                          self.ui.current_utterance_name)
             name = str(fpath.relative_to(self.datasets_root))
             speaker_name = self.ui.current_dataset_name + '_' + self.ui.current_speaker_name
-            
+
             # Select the next utterance
             if self.ui.auto_next_checkbox.isChecked():
                 self.ui.browser_select_next()
         elif fpath == "":
-            return 
+            return
         else:
             name = fpath.name
             speaker_name = fpath.parent.name
-
-        if fpath.suffix.lower() == ".mp3" and self.no_mp3_support:
-                self.ui.log("Error: No mp3 file argument was passed but an mp3 file was used")
-                return
 
         # Get the wav from the disk. We take the wav with the vocoder/synthesizer format for
         # playback, so as to have a fair comparison with the generated audio
@@ -168,17 +158,17 @@ class Toolbox:
         self.ui.log("Loaded %s" % name)
 
         self.add_real_utterance(wav, name, speaker_name)
-        
+
     def record(self):
         wav = self.ui.record_one(encoder.sampling_rate, 5)
         if wav is None:
-            return 
+            return
         self.ui.play(wav, encoder.sampling_rate)
 
         speaker_name = "user01"
         name = speaker_name + "_rec_%05d" % np.random.randint(100000)
         self.add_real_utterance(wav, name, speaker_name)
-        
+
     def add_real_utterance(self, wav, name, speaker_name):
         # Compute the mel spectrogram
         spec = Synthesizer.make_spectrogram(wav)
@@ -198,15 +188,15 @@ class Toolbox:
         # Plot it
         self.ui.draw_embed(embed, name, "current")
         self.ui.draw_umap_projections(self.utterances)
-        
+
     def clear_utterances(self):
         self.utterances.clear()
         self.ui.draw_umap_projections(self.utterances)
-        
+
     def synthesize(self):
         self.ui.log("Generating the mel spectrogram...")
         self.ui.set_loading(1)
-        
+
         # Update the synthesizer random seed
         if self.ui.random_seed_checkbox.isChecked():
             seed = int(self.ui.seed_textbox.text())
@@ -227,7 +217,7 @@ class Toolbox:
         specs = self.synthesizer.synthesize_spectrograms(texts, embeds)
         breaks = [spec.shape[1] for spec in specs]
         spec = np.concatenate(specs, axis=1)
-        
+
         self.ui.draw_spec(spec, "generated")
         self.current_generated = (self.ui.selected_utterance.speaker_name, spec, breaks, None)
         self.ui.set_loading(0)
@@ -264,7 +254,7 @@ class Toolbox:
             wav = Synthesizer.griffin_lim(spec)
         self.ui.set_loading(0)
         self.ui.log(" Done!", "append")
-        
+
         # Add breaks
         b_ends = np.cumsum(np.array(breaks) * Synthesizer.hparams.hop_size)
         b_starts = np.concatenate(([0], b_ends[:-1]))
@@ -286,7 +276,7 @@ class Toolbox:
 
         #Update waves combobox
         self.waves_count += 1
-        if self.waves_count > MAX_WAVES:
+        if self.waves_count > MAX_WAVS:
           self.waves_list.pop()
           self.waves_namelist.pop()
         self.waves_list.insert(0, wav)
@@ -299,7 +289,7 @@ class Toolbox:
 
         # Update current wav
         self.set_current_wav(0)
-        
+
         #Enable replay and save buttons:
         self.ui.replay_wav_button.setDisabled(False)
         self.ui.export_wav_button.setDisabled(False)
@@ -310,19 +300,19 @@ class Toolbox:
             self.init_encoder()
         encoder_wav = encoder.preprocess_wav(wav)
         embed, partial_embeds, _ = encoder.embed_utterance(encoder_wav, return_partials=True)
-        
+
         # Add the utterance
         name = speaker_name + "_gen_%05d" % np.random.randint(100000)
         utterance = Utterance(name, speaker_name, wav, spec, embed, partial_embeds, True)
         self.utterances.add(utterance)
-        
+
         # Plot it
         self.ui.draw_embed(embed, name, "generated")
         self.ui.draw_umap_projections(self.utterances)
-        
+
     def init_encoder(self):
         model_fpath = self.ui.current_encoder_fpath
-        
+
         self.ui.log("Loading the encoder %s... " % model_fpath)
         self.ui.set_loading(1)
         start = timer()
@@ -339,13 +329,13 @@ class Toolbox:
         self.synthesizer = Synthesizer(model_fpath)
         self.ui.log("Done (%dms)." % int(1000 * (timer() - start)), "append")
         self.ui.set_loading(0)
-           
+
     def init_vocoder(self):
         model_fpath = self.ui.current_vocoder_fpath
         # Case of Griffin-lim
         if model_fpath is None:
-            return 
-    
+            return
+
         self.ui.log("Loading the vocoder %s... " % model_fpath)
         self.ui.set_loading(1)
         start = timer()
@@ -354,4 +344,4 @@ class Toolbox:
         self.ui.set_loading(0)
 
     def update_seed_textbox(self):
-       self.ui.update_seed_textbox() 
+       self.ui.update_seed_textbox()

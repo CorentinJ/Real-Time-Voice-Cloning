@@ -1,7 +1,12 @@
+from datetime import datetime
+from functools import partial
+from pathlib import Path
+
 import torch
 import torch.nn.functional as F
 from torch import optim
 from torch.utils.data import DataLoader
+
 from synthesizer import audio
 from synthesizer.models.tacotron import Tacotron
 from synthesizer.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
@@ -10,24 +15,17 @@ from synthesizer.utils.plot import plot_spectrogram
 from synthesizer.utils.symbols import symbols
 from synthesizer.utils.text import sequence_to_text
 from vocoder.display import *
-from datetime import datetime
-import numpy as np
-from pathlib import Path
-import sys
-import time
-import platform
 
 
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
 
+
 def time_string():
     return datetime.now().strftime("%Y-%m-%d %H:%M")
 
-def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
-         backup_every: int, force_restart:bool, hparams):
 
-    syn_dir = Path(syn_dir)
-    models_dir = Path(models_dir)
+def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,  backup_every: int, force_restart: bool,
+          hparams):
     models_dir.mkdir(exist_ok=True)
 
     model_dir = models_dir.joinpath(run_id)
@@ -40,20 +38,18 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
     wav_dir.mkdir(exist_ok=True)
     mel_output_dir.mkdir(exist_ok=True)
     meta_folder.mkdir(exist_ok=True)
-    
-    weights_fpath = model_dir.joinpath(run_id).with_suffix(".pt")
+
+    weights_fpath = model_dir / f"synthesizer.pt"
     metadata_fpath = syn_dir.joinpath("train.txt")
-    
+
     print("Checkpoint path: {}".format(weights_fpath))
     print("Loading training data from: {}".format(metadata_fpath))
     print("Using model: Tacotron")
-    
-    # Book keeping
-    step = 0
+
+    # Bookkeeping
     time_window = ValueWindow(100)
     loss_window = ValueWindow(100)
-    
-    
+
     # From WaveRNN/train_tacotron.py
     if torch.cuda.is_available():
         device = torch.device("cuda")
@@ -104,16 +100,12 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
         print("\nLoading weights at %s" % weights_fpath)
         model.load(weights_fpath, optimizer)
         print("Tacotron weights loaded from step %d" % model.step)
-    
+
     # Initialize the dataset
     metadata_fpath = syn_dir.joinpath("train.txt")
     mel_dir = syn_dir.joinpath("mels")
     embed_dir = syn_dir.joinpath("embeds")
     dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
-    test_loader = DataLoader(dataset,
-                             batch_size=1,
-                             shuffle=True,
-                             pin_memory=True)
 
     for i, session in enumerate(hparams.tts_schedule):
         current_step = model.get_step()
@@ -144,14 +136,10 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
         for p in optimizer.param_groups:
             p["lr"] = lr
 
-        data_loader = DataLoader(dataset,
-                                 collate_fn=lambda batch: collate_synthesizer(batch, r, hparams),
-                                 batch_size=batch_size,
-                                 num_workers=2 if platform.system() != "Windows" else 0,
-                                 shuffle=True,
-                                 pin_memory=True)
+        collate_fn = partial(collate_synthesizer, r=r, hparams=hparams)
+        data_loader = DataLoader(dataset, batch_size, shuffle=True, num_workers=2, collate_fn=collate_fn)
 
-        total_iters = len(dataset) 
+        total_iters = len(dataset)
         steps_per_epoch = np.ceil(total_iters / batch_size).astype(np.int32)
         epochs = np.ceil(training_steps / steps_per_epoch).astype(np.int32)
 
@@ -172,8 +160,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                 # Forward pass
                 # Parallelize model onto GPUS using workaround due to python bug
                 if device.type == "cuda" and torch.cuda.device_count() > 1:
-                    m1_hat, m2_hat, attention, stop_pred = data_parallel_workaround(model, texts,
-                                                                                    mels, embeds)
+                    m1_hat, m2_hat, attention, stop_pred = data_parallel_workaround(model, texts, mels, embeds)
                 else:
                     m1_hat, m2_hat, attention, stop_pred = model(texts, mels, embeds)
 
@@ -200,15 +187,16 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
                 step = model.get_step()
                 k = step // 1000
 
-                msg = f"| Epoch: {epoch}/{epochs} ({i}/{steps_per_epoch}) | Loss: {loss_window.average:#.4} | {1./time_window.average:#.2} steps/s | Step: {k}k | "
+                msg = f"| Epoch: {epoch}/{epochs} ({i}/{steps_per_epoch}) | Loss: {loss_window.average:#.4} | " \
+                      f"{1./time_window.average:#.2} steps/s | Step: {k}k | "
                 stream(msg)
 
                 # Backup or save model as appropriate
-                if backup_every != 0 and step % backup_every == 0 : 
-                    backup_fpath = Path("{}/{}_{}k.pt".format(str(weights_fpath.parent), run_id, k))
+                if backup_every != 0 and step % backup_every == 0 :
+                    backup_fpath = weights_fpath.parent / f"synthesizer_{k:06d}.pt"
                     model.save(backup_fpath, optimizer)
 
-                if save_every != 0 and step % save_every == 0 : 
+                if save_every != 0 and step % save_every == 0 :
                     # Must save latest optimizer state to ensure that resuming training
                     # doesn't produce artifacts
                     model.save(weights_fpath, optimizer)
@@ -244,6 +232,7 @@ def train(run_id: str, syn_dir: str, models_dir: str, save_every: int,
 
             # Add line break after every epoch
             print("")
+
 
 def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
                plot_dir, mel_output_dir, wav_dir, sample_num, loss, hparams):

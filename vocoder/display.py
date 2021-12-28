@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import time
 import numpy as np
 import sys
@@ -84,14 +83,18 @@ def time_since(started) :
         return f'{m}m {s}s'
 
 
-def save_attention(attn, path) :
+def save_attention(attn, path):
+    import matplotlib.pyplot as plt
+
     fig = plt.figure(figsize=(12, 6))
     plt.imshow(attn.T, interpolation='nearest', aspect='auto')
     fig.savefig(f'{path}.png', bbox_inches='tight')
     plt.close(fig)
 
 
-def save_spectrogram(M, path, length=None) :
+def save_spectrogram(M, path, length=None):
+    import matplotlib.pyplot as plt
+
     M = np.flip(M, axis=0)
     if length : M = M[:, :length]
     fig = plt.figure(figsize=(12, 6))
@@ -100,7 +103,9 @@ def save_spectrogram(M, path, length=None) :
     plt.close(fig)
 
 
-def plot(array) : 
+def plot(array):
+    import matplotlib.pyplot as plt
+
     fig = plt.figure(figsize=(30, 5))
     ax = fig.add_subplot(111)
     ax.xaxis.label.set_color('grey')
@@ -112,7 +117,9 @@ def plot(array) :
     plt.plot(array)
 
 
-def plot_spec(M) :
+def plot_spec(M):
+    import matplotlib.pyplot as plt
+
     M = np.flip(M, axis=0)
     plt.figure(figsize=(18,4))
     plt.imshow(M, interpolation='nearest', aspect='auto')

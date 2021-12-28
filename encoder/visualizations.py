@@ -1,11 +1,12 @@
-from encoder.data_objects.speaker_verification_dataset import SpeakerVerificationDataset
 from datetime import datetime
 from time import perf_counter as timer
-import matplotlib.pyplot as plt
+
 import numpy as np
-# import webbrowser
-import visdom
 import umap
+import visdom
+
+from encoder.data_objects.speaker_verification_dataset import SpeakerVerificationDataset
+
 
 colormap = np.array([
     [76, 255, 0],
@@ -21,7 +22,7 @@ colormap = np.array([
     [33, 0, 127],
     [0, 0, 0],
     [183, 183, 183],
-], dtype=np.float) / 255 
+], dtype=np.float) / 255
 
 
 class Visualizations:
@@ -33,19 +34,19 @@ class Visualizations:
         self.losses = []
         self.eers = []
         print("Updating the visualizations every %d steps." % update_every)
-        
+
         # If visdom is disabled TODO: use a better paradigm for that
-        self.disabled = disabled    
+        self.disabled = disabled
         if self.disabled:
-            return 
-        
+            return
+
         # Set the environment name
         now = str(datetime.now().strftime("%d-%m %Hh%M"))
         if env_name is None:
             self.env_name = now
         else:
             self.env_name = "%s (%s)" % (env_name, now)
-        
+
         # Connect to visdom and open the corresponding window in the browser
         try:
             self.vis = visdom.Visdom(server, env=self.env_name, raise_exceptions=True)
@@ -53,7 +54,7 @@ class Visualizations:
             raise Exception("No visdom server detected. Run the command \"visdom\" in your CLI to "
                             "start it.")
         # webbrowser.open("http://localhost:8097/env/" + self.env_name)
-        
+
         # Create the windows
         self.loss_win = None
         self.eer_win = None
@@ -61,10 +62,10 @@ class Visualizations:
         self.implementation_win = None
         self.projection_win = None
         self.implementation_string = ""
-        
+
     def log_params(self):
         if self.disabled:
-            return 
+            return
         from encoder import params_data
         from encoder import params_model
         param_string = "<b>Model parameters</b>:<br>"
@@ -76,26 +77,26 @@ class Visualizations:
             value = getattr(params_data, param_name)
             param_string += "\t%s: %s<br>" % (param_name, value)
         self.vis.text(param_string, opts={"title": "Parameters"})
-        
+
     def log_dataset(self, dataset: SpeakerVerificationDataset):
         if self.disabled:
-            return 
+            return
         dataset_string = ""
         dataset_string += "<b>Speakers</b>: %s\n" % len(dataset.speakers)
         dataset_string += "\n" + dataset.get_logs()
         dataset_string = dataset_string.replace("\n", "<br>")
         self.vis.text(dataset_string, opts={"title": "Dataset"})
-        
+
     def log_implementation(self, params):
         if self.disabled:
-            return 
+            return
         implementation_string = ""
         for param, value in params.items():
             implementation_string += "<b>%s</b>: %s\n" % (param, value)
             implementation_string = implementation_string.replace("\n", "<br>")
         self.implementation_string = implementation_string
         self.implementation_win = self.vis.text(
-            implementation_string, 
+            implementation_string,
             opts={"title": "Training implementation"}
         )
 
@@ -107,7 +108,7 @@ class Visualizations:
         self.losses.append(loss)
         self.eers.append(eer)
         print(".", end="")
-        
+
         # Update the plots every <update_every> steps
         if step % self.update_every != 0:
             return
@@ -142,7 +143,7 @@ class Visualizations:
             )
             if self.implementation_win is not None:
                 self.vis.text(
-                    self.implementation_string + ("<b>%s</b>" % time_string), 
+                    self.implementation_string + ("<b>%s</b>" % time_string),
                     win=self.implementation_win,
                     opts={"title": "Training implementation"},
                 )
@@ -151,16 +152,17 @@ class Visualizations:
         self.losses.clear()
         self.eers.clear()
         self.step_times.clear()
-        
-    def draw_projections(self, embeds, utterances_per_speaker, step, out_fpath=None,
-                         max_speakers=10):
+
+    def draw_projections(self, embeds, utterances_per_speaker, step, out_fpath=None, max_speakers=10):
+        import matplotlib.pyplot as plt
+
         max_speakers = min(max_speakers, len(colormap))
         embeds = embeds[:max_speakers * utterances_per_speaker]
-        
+
         n_speakers = len(embeds) // utterances_per_speaker
         ground_truth = np.repeat(np.arange(n_speakers), utterances_per_speaker)
         colors = [colormap[i] for i in ground_truth]
-        
+
         reducer = umap.UMAP()
         projected = reducer.fit_transform(embeds)
         plt.scatter(projected[:, 0], projected[:, 1], c=colors)
@@ -171,8 +173,7 @@ class Visualizations:
         if out_fpath is not None:
             plt.savefig(out_fpath)
         plt.clf()
-        
+
     def save(self):
         if not self.disabled:
             self.vis.save([self.env_name])
-        
