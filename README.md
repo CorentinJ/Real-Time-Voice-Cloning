@@ -21,9 +21,9 @@ SV2TTS is a deep learning framework in three stages. In the first stage, one cre
 ## News
 **28/12/21**: I've done a [major maintenance update](https://github.com/CorentinJ/Real-Time-Voice-Cloning/pull/961). Mostly, I've worked on making setup easier. Find new instructions in the section below.
 
-**14/02/21**: This repo now runs on PyTorch instead of Tensorflow, thanks to the help of @bluefish. If you wish to run the tensorflow version instead, checkout commit `5425557`.
+**14/02/21**: This repo now runs on PyTorch instead of Tensorflow, thanks to the help of @bluefish.
 
-**13/11/19**: I'm now working full time and I will not maintain this repo anymore. To anyone who reads this:
+**13/11/19**: I'm now working full time and I will rarely maintain this repo anymore. To anyone who reads this:
 - **If you just want to clone your voice (and not someone else's):** I recommend our free plan on [Resemble.AI](https://www.resemble.ai/). You will get a better voice quality and less prosody errors.
 - **If this is not your case:** proceed with this repository, but you might end up being disappointed by the results. If you're planning to work on a serious project, my strong advice: find another TTS repo. Go [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/issues/364) for more info.
 
