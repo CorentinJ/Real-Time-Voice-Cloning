@@ -1,6 +1,7 @@
 import urllib.request
 from pathlib import Path
 from threading import Thread
+from urllib.error import HTTPError
 
 from tqdm import tqdm
 
@@ -26,7 +27,10 @@ def download(url: str, target: Path, bar_pos=0):
 
     desc = f"Downloading {target.name}"
     with DownloadProgressBar(unit="B", unit_scale=True, miniters=1, desc=desc, position=bar_pos, leave=False) as t:
-        urllib.request.urlretrieve(url, filename=target, reporthook=t.update_to)
+        try:
+            urllib.request.urlretrieve(url, filename=target, reporthook=t.update_to)
+        except HTTPError:
+            return
 
 
 def ensure_default_models(models_dir: Path):
@@ -48,6 +52,6 @@ def ensure_default_models(models_dir: Path):
     for thread, target_path, size in jobs:
         thread.join()
 
-        assert target_path.stat().st_size == size, \
-            f"Download for {target_path.name} failed. You may download models manually instead. Open an issue if the " \
-            f"problem is recurrent.\nhttps://drive.google.com/drive/folders/1fU6umc5uQAVR2udZdHX-lDgXYzTyqG_j"
+        assert target_path.exists() and target_path.stat().st_size == size, \
+            f"Download for {target_path.name} failed. You may download models manually instead.\n" \
+            f"https://drive.google.com/drive/folders/1fU6umc5uQAVR2udZdHX-lDgXYzTyqG_j"
