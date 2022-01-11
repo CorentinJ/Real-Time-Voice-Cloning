@@ -19,7 +19,7 @@ SV2TTS is a deep learning framework in three stages. In the first stage, one cre
 |[1710.10467](https://arxiv.org/pdf/1710.10467.pdf) | GE2E (encoder)| Generalized End-To-End Loss for Speaker Verification | This repo |
 
 ## News
-**10/01/22**: I recommend checking out [CoquiTTS](https://github.com/coqui-ai/tts). It's a good and up-to-date TTS repository targeted for the ML community.
+**10/01/22**: I recommend checking out [CoquiTTS](https://github.com/coqui-ai/tts). It's a good and up-to-date TTS repository targeted for the ML community. It can also do voice cloning and more, such as cross-language cloning or voice conversion.
 
 **28/12/21**: I've done a [major maintenance update](https://github.com/CorentinJ/Real-Time-Voice-Cloning/pull/961). Mostly, I've worked on making setup easier. Find new instructions in the section below.
 
