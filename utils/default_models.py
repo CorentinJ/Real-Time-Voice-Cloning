@@ -46,7 +46,7 @@ def ensure_default_models(models_dir: Path):
         thread = Thread(target=download, args=(url, target_path, len(jobs)))
         thread.start()
         jobs.append((thread, target_path, size))
-Updated link of synthesizer to original drive file
+
     # Run and join threads
     for thread, target_path, size in jobs:
         thread.join()
