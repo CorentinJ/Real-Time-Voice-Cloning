@@ -1,5 +1,5 @@
 {
-    "name": "coqui TTS DevEnvironment",
+    "name": "Real-Time-Voice-Cloning DevEnvironment",
     "build": {
       "dockerfile": "Dockerfile",
       "args": {
