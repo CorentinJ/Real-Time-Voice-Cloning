@@ -1,8 +1,7 @@
 FROM nvcr.io/nvidia/pytorch:21.08-py3
 
-LABEL "coqui"="TTS"
 LABEL version="1.0"
-LABEL description="coqui TTS DevEnvironment"
+LABEL description="Real-Time-Voice-Cloning DevEnvironment"
 
 # Ensure this docker file is built by VScode.
 # Manual / user build of this Dockerfile is NOT supported.
