@@ -18,10 +18,6 @@ RUN apt-get update \
 RUN apt-get install -y zsh \
 && sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-# will throw error if not installed https://github.com/NVIDIA/NeMo/issues/841
-#RUN pip install llvmlite --ignore-installed
-
-#RUN pip install TTS
 
 RUN apt-get install -y libportaudio2
 
