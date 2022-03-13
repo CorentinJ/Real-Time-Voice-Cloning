@@ -20,4 +20,5 @@ RUN apt-get install -y zsh \
 
 RUN apt-get install -y libportaudio2
 
-RUN git clone https://github.com/CorentinJ/Real-Time-Voice-Cloning.git
+# not necessary
+#RUN git clone https://github.com/CorentinJ/Real-Time-Voice-Cloning.git
