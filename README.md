@@ -42,6 +42,13 @@ Then you can process this dataset using:
 python synthesizer_preprocess_audio.py datasets_root --datasets_name LibriTTS --subfolders train-clean-100 --no_alignments
 ```
 More info [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/issues/437#issuecomment-666099538).
+###4.1 Using the open_stt datasets(russian lang)
+If you use the datasets from [here](https://github.com/snakers4/open_stt), you can use the following command to preprocess it for the synthesizer training:
+```
+python rus_opus_preprocess.py -d <dataset_root>
+```
+and then go back to step 4.
+This will just rename the folders and convert the opuses to wavs.
 ### 5. Launch the Toolbox
 You can then try the toolbox (not tested in this fork):
 
