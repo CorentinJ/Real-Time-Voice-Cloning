@@ -9,7 +9,7 @@ class SynthesizerDataset(Dataset):
     def __init__(self, metadata_fpath: Path, mel_dir: Path, embed_dir: Path, hparams):
         print("Using inputs from:\n\t%s\n\t%s\n\t%s" % (metadata_fpath, mel_dir, embed_dir))
         
-        with metadata_fpath.open("r") as metadata_file:
+        with metadata_fpath.open("r", encoding="utf8") as metadata_file:
             metadata = [line.split("|") for line in metadata_file]
         
         mel_fnames = [x[1] for x in metadata if int(x[4])]

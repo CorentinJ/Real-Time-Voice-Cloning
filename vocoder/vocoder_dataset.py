@@ -10,7 +10,7 @@ class VocoderDataset(Dataset):
     def __init__(self, metadata_fpath: Path, mel_dir: Path, wav_dir: Path):
         print("Using inputs from:\n\t%s\n\t%s\n\t%s" % (metadata_fpath, mel_dir, wav_dir))
         
-        with metadata_fpath.open("r") as metadata_file:
+        with metadata_fpath.open("r", encoding="utf8") as metadata_file:
             metadata = [line.split("|") for line in metadata_file]
         
         gta_fnames = [x[1] for x in metadata if int(x[4])]

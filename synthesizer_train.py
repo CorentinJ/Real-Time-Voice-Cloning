@@ -17,7 +17,7 @@ if __name__ == "__main__":
         "the wavs and the embeds.")
     parser.add_argument("-m", "--models_dir", type=Path, default="saved_models", help=\
         "Path to the output directory that will contain the saved model weights and the logs.")
-    parser.add_argument("-s", "--save_every", type=int, default=1000, help= \
+    parser.add_argument("-s", "--save_every", type=int, default=10, help= \
         "Number of steps between updates of the model on the disk. Set to 0 to never save the "
         "model.")
     parser.add_argument("-b", "--backup_every", type=int, default=25000, help= \

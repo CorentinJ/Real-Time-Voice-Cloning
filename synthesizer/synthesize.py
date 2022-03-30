@@ -67,7 +67,7 @@ def run_synthesis(in_dir: Path, out_dir: Path, syn_model_fpath: Path, hparams):
 
     # Generate GTA mels
     meta_out_fpath = out_dir / "synthesized.txt"
-    with meta_out_fpath.open("w") as file:
+    with meta_out_fpath.open("w", encoding="utf8") as file:
         for i, (texts, mels, embeds, idx) in tqdm(enumerate(data_loader), total=len(data_loader)):
             texts, mels, embeds = texts.to(device), mels.to(device), embeds.to(device)
 
