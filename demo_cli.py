@@ -9,7 +9,8 @@ import torch
 
 from encoder import inference as encoder
 from encoder.params_model import model_embedding_size as speaker_embedding_size
-from synthesizer.inference import Synthesizer
+# from synthesizer.inference import Synthesizer
+from synthesizer.models.tacotron.inference import Synthesizer
 from utils.argutils import print_args
 from utils.default_models import ensure_default_models
 from vocoder import inference as vocoder
@@ -28,6 +29,9 @@ if __name__ == '__main__':
     parser.add_argument("-v", "--voc_model_fpath", type=Path,
                         default="saved_models/default/vocoder.pt",
                         help="Path to a saved vocoder")
+    parser.add_argument("-b", "--beta_options", action=argparse.BooleanOptionalAction,
+                        default=True,
+                        help="Enables beta fork options, such as Tacotron 2 support")
     parser.add_argument("--cpu", action="store_true", help=\
         "If True, processing is done on CPU, even when a GPU is available.")
     parser.add_argument("--no_sound", action="store_true", help=\

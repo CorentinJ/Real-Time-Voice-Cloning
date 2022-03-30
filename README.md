@@ -6,6 +6,7 @@ Multispeaker Text-To-Speech Synthesis](https://arxiv.org/pdf/1806.04558.pdf) (SV
 * Added russian language support (+guide how to add other languages)
 * Code reworks 
 * gui thing may not work because I don't even have the compute to test it
+* Tacotron 2 support (beta feature, currently in development)
 
 ## Setup
 

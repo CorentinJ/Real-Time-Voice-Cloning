@@ -7,7 +7,7 @@ import numpy as np
 import torch
 
 from encoder import inference as encoder
-from synthesizer.inference import Synthesizer
+from synthesizer.models.tacotron.inference import Synthesizer
 from toolbox.ui import UI
 from toolbox.utterance import Utterance
 from vocoder import inference as vocoder
