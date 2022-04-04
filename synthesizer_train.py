@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from synthesizer.hparams import hparams
-from synthesizer.train import train
+from synthesizer.models.tacotron.hparams import hparams
+from synthesizer.models.tacotron.train import train
 from utils.argutils import print_args
 import argparse
 
