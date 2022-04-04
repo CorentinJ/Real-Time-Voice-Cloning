@@ -16,7 +16,7 @@ class DataConfig(object):
 
 class ModelConfig(object):
     with open(DataConfig.graphemes_path, encoding="utf8") as f:
-        print(f)
+        # print(f)
         graphemes_size = len(json.load(f))
 
     with open(DataConfig.phonemes_path) as f:

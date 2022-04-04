@@ -8,7 +8,7 @@ _symbol_to_id = {s: i for i, s in enumerate(symbols)}
 _id_to_symbol = {i: s for i, s in enumerate(symbols)}
 
 # Regular expression matching text enclosed in curly braces:
-_curly_re = re.compile(r"(.*?)\{(.+?)\}(.*)")
+# _curly_re = re.compile(r"(.*?)\{(.+?)\}(.*)")
 
 
 def text_to_sequence(text, cleaner_names):
@@ -19,22 +19,29 @@ def text_to_sequence(text, cleaner_names):
 
       Args:
         text: string to convert to a sequence
-        cleaner_names: names of the cleaner functions to run the text through
+        cleaner_names: names of the cleaner functions to run the text through (haha)
 
       Returns:
         List of integers corresponding to the symbols in the text
     """
     sequence = []
 
+    for symbol in text:
+        if symbol in symbols:
+            iid = _symbol_to_id[symbol]
+            if iid != 1:
+                sequence.append(_symbol_to_id[symbol])
+        elif not "eos" in symbol:  #just in case
+            print(symbol, " :met unknown symbol")
     # Check for curly braces and treat their contents as ARPAbet:
-    while len(text):
-        m = _curly_re.match(text)
-        if not m:
-            sequence += _symbols_to_sequence(_clean_text(text, cleaner_names))
-            break
-        sequence += _symbols_to_sequence(_clean_text(m.group(1), cleaner_names))
-        sequence += _arpabet_to_sequence(m.group(2))
-        text = m.group(3)
+    # while len(text):
+    #     m = _curly_re.match(text)
+    #     if not m:
+    #         sequence += _symbols_to_sequence(_clean_text(text, cleaner_names))
+    #         break
+    #     sequence += _symbols_to_sequence(_clean_text(m.group(1), cleaner_names))
+    #     sequence += _arpabet_to_sequence(m.group(2))
+    #     text = m.group(3)
 
     # Append EOS token
     sequence.append(_symbol_to_id["~"])

@@ -79,7 +79,7 @@ class G2P(object):
             plt.savefig(f'attention/{DataConfig.language}/{word}.png')
 
         return phonemes
-
+g2p = G2P()
 def g2p_main(word):
-    g2p = G2P()
+    word = "".join(s if s in "abcdefghijklmnopqrstuvwxyz" else "" for s in word)
     return g2p(word, False)

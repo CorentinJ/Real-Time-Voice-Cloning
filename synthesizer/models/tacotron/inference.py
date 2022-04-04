@@ -86,7 +86,7 @@ class Synthesizer:
             self.load()
 
         # Preprocess text inputs
-        inputs = [text_to_sequence(text.strip(), hparams.tts_cleaner_names) for text in texts]
+        inputs = [text_to_sequence(text, hparams.tts_cleaner_names) for text in texts]
         print("inputs: ", inputs)
         if not isinstance(embeddings, list):
             embeddings = [embeddings]

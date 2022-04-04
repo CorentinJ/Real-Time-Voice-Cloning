@@ -2,7 +2,8 @@ import torch
 from torch.utils.data import Dataset
 import numpy as np
 from pathlib import Path
-from synthesizer.utils.text import text_to_sequence
+from synthesizer.models.tacotron.utils.text import text_to_sequence
+from synthesizer.models.tacotron.utils.g2p import g2p_main
 
 
 class SynthesizerDataset(Dataset):
@@ -31,12 +32,15 @@ class SynthesizerDataset(Dataset):
 
         mel_path, embed_path = self.samples_fpaths[index]
         mel = np.load(mel_path).T.astype(np.float32)
-        
+
         # Load the embed
         embed = np.load(embed_path)
 
         # Get the text and clean it
-        text = text_to_sequence(self.samples_texts[index], self.hparams.tts_cleaner_names)
+        _text = [text_to_sequence(g2p_main(txt.lower()), self.hparams.tts_cleaner_names) for txt in self.samples_texts[index]]
+        text=[]
+        for t in _text:
+            text+=t
         
         # Convert the list returned by text_to_sequence to a numpy array
         text = np.asarray(text).astype(np.int32)
