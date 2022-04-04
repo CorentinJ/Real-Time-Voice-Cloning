@@ -1,5 +1,5 @@
 from multiprocessing.pool import Pool
-from synthesizer import audio
+from synthesizer.models.tacotron import audio
 from functools import partial
 from itertools import chain
 from encoder import inference as encoder
@@ -251,7 +251,6 @@ def create_embeddings(synthesizer_root: Path, encoder_model_fpath: Path, n_proce
         metadata = [line.split("|") for line in metadata_file]
         fpaths = [(wav_dir.joinpath(m[0]), embed_dir.joinpath(m[2])) for m in metadata]
 
-    # TODO: improve on the multiprocessing, it's terrible. Disk I/O is the bottleneck here.
     # Embed the utterances in separate threads
     func = partial(embed_utterance, encoder_model_fpath=encoder_model_fpath)
     job = Pool(n_processes).imap(func, fpaths)

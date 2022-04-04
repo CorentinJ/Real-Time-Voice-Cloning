@@ -9,11 +9,11 @@ import torch
 
 from encoder import inference as encoder
 from encoder.params_model import model_embedding_size as speaker_embedding_size
-# from synthesizer.inference import Synthesizer
 from synthesizer.models.tacotron.inference import Synthesizer
 from utils.argutils import print_args
 from utils.default_models import ensure_default_models
 from vocoder import inference as vocoder
+from synthesizer.models.tacotron.utils.g2p import g2p_main
 
 
 if __name__ == '__main__':
@@ -24,7 +24,7 @@ if __name__ == '__main__':
                         default="saved_models/default/encoder.pt",
                         help="Path to a saved encoder")
     parser.add_argument("-s", "--syn_model_fpath", type=Path,
-                        default="saved_models/default/synthesizer.pt",
+                        default="saved_models/rusmodel/synthesizer.pt",
                         help="Path to a saved synthesizer")
     parser.add_argument("-v", "--voc_model_fpath", type=Path,
                         default="saved_models/default/vocoder.pt",
@@ -68,6 +68,8 @@ if __name__ == '__main__':
     ensure_default_models(Path("saved_models"))
     encoder.load_model(args.enc_model_fpath)
     synthesizer = Synthesizer(args.syn_model_fpath)
+    # else:
+    #     synthesizer = Synthesizer(args.syn_model_fpath)
     vocoder.load_model(args.voc_model_fpath)
 
 
@@ -155,9 +157,11 @@ if __name__ == '__main__':
             if args.seed is not None:
                 torch.manual_seed(args.seed)
                 synthesizer = Synthesizer(args.syn_model_fpath)
+                # else:
+                #     synthesizer = Synthesizer(args.syn_model_fpath)
 
             # The synthesizer works in batch, so you need to put your data in a list or numpy array
-            texts = [text]
+            texts = [g2p_main(word.lower()) for word in text.split(" ")]
             embeds = [embed]
             # If you know what the attention layer alignments are, you can retrieve them here by
             # passing return_alignments=True

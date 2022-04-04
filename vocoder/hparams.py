@@ -1,6 +1,6 @@
-from synthesizer.hparams import hparams as _syn_hp
+from synthesizer.models.tacotron.hparams import hparams
 
-
+_syn_hp = hparams
 # Audio settings------------------------------------------------------------------------
 # Match the values of the synthesizer
 sample_rate = _syn_hp.sample_rate

@@ -1,5 +1,5 @@
-from synthesizer.utils.symbols import symbols
-from synthesizer.utils import cleaners
+from synthesizer.models.tacotron.utils.symbols import symbols
+from synthesizer.models.tacotron.utils import cleaners
 import re
 
 
