@@ -81,5 +81,5 @@ class G2P(object):
         return phonemes
 g2p = G2P()
 def g2p_main(word):
-    word = "".join(s if s in "abcdefghijklmnopqrstuvwxyz" else "" for s in word)
+    word = "".join(s if s in "абвгдеёжзийклмнопрстуфхцчшщъыьэюя" else "" for s in word)
     return g2p(word, False)

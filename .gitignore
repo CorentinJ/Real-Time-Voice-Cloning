@@ -51,3 +51,6 @@ vocoder/saved_models/*
 /synthesizer/models/tacotron/utils/g2p/attention/FA/پایتورچ.png
 /synthesizer/models/tacotron/utils/g2p/attention/FA/پایتون.png
 /synthesizer/models/tacotron/utils/g2p/attention/FA/کرگدن.png
+/saved_models/rusmodel3/synthesizer.pt
+/saved_models/rusmodel4/metas/CharacterEmbeddings.tsv
+/saved_models/rusmodel4/synthesizer.pt

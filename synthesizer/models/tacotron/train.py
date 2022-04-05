@@ -1,3 +1,4 @@
+import random
 from datetime import datetime
 from functools import partial
 from pathlib import Path
@@ -152,6 +153,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,  backup
                 for j, k in enumerate(idx):
                     stop[j, :int(dataset.metadata[k][4])-1] = 0
 
+                # print("t:", texts.shape)
+                # print("t s:", texts[random.randint(1, 4)][:10])
                 texts = texts.to(device)
                 mels = mels.to(device)
                 embeds = embeds.to(device)

@@ -35,11 +35,14 @@ class Encoder(nn.Module):
                          num_highways=num_highways)
 
     def forward(self, x, speaker_embedding=None):
+        # print("xbb: ", x.shape)
         x = self.embedding(x)
         x = self.pre_net(x)
         x.transpose_(1, 2)
         x = self.cbhg(x)
         if speaker_embedding is not None:
+            # print("se: ", speaker_embedding.shape)
+            # print("xba: ", x.shape)
             x = self.add_speaker_embedding(x, speaker_embedding)
         return x
 
@@ -51,6 +54,8 @@ class Encoder(nn.Module):
         # This concats the speaker embedding for each char in the encoder output
 
         # Save the dimensions as human-readable names
+        print(x.shape)
+        # print("se: ", speaker_embedding.shape)
         batch_size = x.size()[0]
         num_chars = x.size()[1]
 
@@ -62,9 +67,11 @@ class Encoder(nn.Module):
         # Start by making a copy of each speaker embedding to match the input text length
         # The output of this has size (batch_size, num_chars * tts_embed_dims)
         speaker_embedding_size = speaker_embedding.size()[idx]
+        print(speaker_embedding.shape, num_chars, idx)
         e = speaker_embedding.repeat_interleave(num_chars, dim=idx)
-
+        # print(e.shape)
         # Reshape it and transpose
+
         e = e.reshape(batch_size, speaker_embedding_size, num_chars)
         e = e.transpose(1, 2)
 
@@ -439,6 +446,8 @@ class Tacotron(nn.Module):
 
         # SV2TTS: Run the encoder with the speaker embedding
         # The projection avoids unnecessary matmuls in the decoder loop
+        # print("se: ", speaker_embedding.shape)
+        # print("x: ", x.shape)
         encoder_seq = self.encoder(x, speaker_embedding)
         encoder_seq_proj = self.encoder_proj(encoder_seq)
 

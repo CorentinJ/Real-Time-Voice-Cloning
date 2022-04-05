@@ -24,7 +24,7 @@ if __name__ == '__main__':
                         default="saved_models/default/encoder.pt",
                         help="Path to a saved encoder")
     parser.add_argument("-s", "--syn_model_fpath", type=Path,
-                        default="saved_models/rusmodel/synthesizer.pt",
+                        default="saved_models/rusmodel3/synthesizer.pt",
                         help="Path to a saved synthesizer")
     parser.add_argument("-v", "--voc_model_fpath", type=Path,
                         default="saved_models/default/vocoder.pt",
@@ -94,8 +94,8 @@ if __name__ == '__main__':
     embed /= np.linalg.norm(embed)
     # The synthesizer can handle multiple inputs with batching. Let's create another embedding to
     # illustrate that
-    embeds = [embed, np.zeros(speaker_embedding_size)]
-    texts = ["test 1", "test 2"]
+    embeds = [embed]
+    texts = [["t", "e", "s", "t"], ["t", "e", "s", "t", "l", "o", "l"]]
     print("\tTesting the synthesizer... (loading the model will output a lot of text)")
     mels = synthesizer.synthesize_spectrograms(texts, embeds)
 
@@ -125,92 +125,94 @@ if __name__ == '__main__':
     print("Interactive generation loop")
     num_generated = 0
     while True:
-        try:
-            # Get the reference audio filepath
-            message = "Reference voice: enter an audio filepath of a voice to be cloned (mp3, " \
-                      "wav, m4a, flac, ...):\n"
-            in_fpath = Path(input(message).replace("\"", "").replace("\'", ""))
+        # try:
+        # Get the reference audio filepath
+        message = "Reference voice: enter an audio filepath of a voice to be cloned (mp3, " \
+                  "wav, m4a, flac, ...):\n"
+        in_fpath = Path(input(message).replace("\"", "").replace("\'", ""))
 
-            ## Computing the embedding
-            # First, we load the wav using the function that the speaker encoder provides. This is
-            # important: there is preprocessing that must be applied.
+        ## Computing the embedding
+        # First, we load the wav using the function that the speaker encoder provides. This is
+        # important: there is preprocessing that must be applied.
 
-            # The following two methods are equivalent:
-            # - Directly load from the filepath:
-            preprocessed_wav = encoder.preprocess_wav(in_fpath)
-            # - If the wav is already loaded:
-            original_wav, sampling_rate = librosa.load(str(in_fpath))
-            preprocessed_wav = encoder.preprocess_wav(original_wav, sampling_rate)
-            print("Loaded file succesfully")
+        # The following two methods are equivalent:
+        # - Directly load from the filepath:
+        preprocessed_wav = encoder.preprocess_wav(in_fpath)
+        # - If the wav is already loaded:
+        original_wav, sampling_rate = librosa.load(str(in_fpath))
+        preprocessed_wav = encoder.preprocess_wav(original_wav, sampling_rate)
+        print("Loaded file succesfully")
 
-            # Then we derive the embedding. There are many functions and parameters that the
-            # speaker encoder interfaces. These are mostly for in-depth research. You will typically
-            # only use this function (with its default parameters):
-            embed = encoder.embed_utterance(preprocessed_wav)
-            print("Created the embedding")
-
-
-            ## Generating the spectrogram
-            text = input("Write a sentence (+-20 words) to be synthesized:\n")
-
-            # If seed is specified, reset torch seed and force synthesizer reload
-            if args.seed is not None:
-                torch.manual_seed(args.seed)
-                synthesizer = Synthesizer(args.syn_model_fpath)
-                # else:
-                #     synthesizer = Synthesizer(args.syn_model_fpath)
-
-            # The synthesizer works in batch, so you need to put your data in a list or numpy array
-            texts = [g2p_main(word.lower()) for word in text.split(" ")]
-            embeds = [embed]
-            # If you know what the attention layer alignments are, you can retrieve them here by
-            # passing return_alignments=True
-            specs = synthesizer.synthesize_spectrograms(texts, embeds)
-            spec = specs[0]
-            print("Created the mel spectrogram")
+        # Then we derive the embedding. There are many functions and parameters that the
+        # speaker encoder interfaces. These are mostly for in-depth research. You will typically
+        # only use this function (with its default parameters):
+        embed = encoder.embed_utterance(preprocessed_wav)
+        print("Created the embedding")
 
 
-            ## Generating the waveform
-            print("Synthesizing the waveform:")
+        ## Generating the spectrogram
+        text = input("Write a sentence (+-20 words) to be synthesized:\n")
 
-            # If seed is specified, reset torch seed and reload vocoder
-            if args.seed is not None:
-                torch.manual_seed(args.seed)
-                vocoder.load_model(args.voc_model_fpath)
+        # If seed is specified, reset torch seed and force synthesizer reload
+        if args.seed is not None:
+            torch.manual_seed(args.seed)
+            synthesizer = Synthesizer(args.syn_model_fpath)
+            # else:
+            #     synthesizer = Synthesizer(args.syn_model_fpath)
 
-            # Synthesizing the waveform is fairly straightforward. Remember that the longer the
-            # spectrogram, the more time-efficient the vocoder.
-            generated_wav = vocoder.infer_waveform(spec)
-
-
-            ## Post-generation
-            # There's a bug with sounddevice that makes the audio cut one second earlier, so we
-            # pad it.
-            generated_wav = np.pad(generated_wav, (0, synthesizer.sample_rate), mode="constant")
-
-            # Trim excess silences to compensate for gaps in spectrograms (issue #53)
-            generated_wav = encoder.preprocess_wav(generated_wav)
-
-            # Play the audio (non-blocking)
-            if not args.no_sound:
-                import sounddevice as sd
-                try:
-                    sd.stop()
-                    sd.play(generated_wav, synthesizer.sample_rate)
-                except sd.PortAudioError as e:
-                    print("\nCaught exception: %s" % repr(e))
-                    print("Continuing without audio playback. Suppress this message with the \"--no_sound\" flag.\n")
-                except:
-                    raise
-
-            # Save it on the disk
-            filename = "demo_output_%02d.wav" % num_generated
-            print(generated_wav.dtype)
-            sf.write(filename, generated_wav.astype(np.float32), synthesizer.sample_rate)
-            num_generated += 1
-            print("\nSaved output as %s\n\n" % filename)
+        # The synthesizer works in batch, so you need to put your data in a list or numpy array
+        #before: texts = [text]   # ["cdab"]
+        texts = [g2p_main(word.lower()) for word in text.split(" ")]  # [["c", "d"], ["a", "b"], ...]
+        print(texts)
+        embeds = [embed]
+        # If you know what the attention layer alignments are, you can retrieve them here by
+        # passing return_alignments=True
+        specs = synthesizer.synthesize_spectrograms(texts, embeds)
+        spec = specs[0]
+        print("Created the mel spectrogram")
 
 
-        except Exception as e:
-            print("Caught exception: %s" % repr(e))
-            print("Restarting\n")
+        ## Generating the waveform
+        print("Synthesizing the waveform:")
+
+        # If seed is specified, reset torch seed and reload vocoder
+        if args.seed is not None:
+            torch.manual_seed(args.seed)
+            vocoder.load_model(args.voc_model_fpath)
+
+        # Synthesizing the waveform is fairly straightforward. Remember that the longer the
+        # spectrogram, the more time-efficient the vocoder.
+        generated_wav = vocoder.infer_waveform(spec)
+
+
+        ## Post-generation
+        # There's a bug with sounddevice that makes the audio cut one second earlier, so we
+        # pad it.
+        generated_wav = np.pad(generated_wav, (0, synthesizer.sample_rate), mode="constant")
+
+        # Trim excess silences to compensate for gaps in spectrograms (issue #53)
+        generated_wav = encoder.preprocess_wav(generated_wav)
+
+        # Play the audio (non-blocking)
+        if not args.no_sound:
+            import sounddevice as sd
+            try:
+                sd.stop()
+                sd.play(generated_wav, synthesizer.sample_rate)
+            except sd.PortAudioError as e:
+                print("\nCaught exception: %s" % repr(e))
+                print("Continuing without audio playback. Suppress this message with the \"--no_sound\" flag.\n")
+            except:
+                raise
+
+        # Save it on the disk
+        filename = "demo_output_%02d.wav" % num_generated
+        print(generated_wav.dtype)
+        sf.write(filename, generated_wav.astype(np.float32), synthesizer.sample_rate)
+        num_generated += 1
+        print("\nSaved output as %s\n\n" % filename)
+
+
+        # except Exception as e:
+        #     print("Caught exception: %s" % repr(e))
+        #     print("Restarting\n")
