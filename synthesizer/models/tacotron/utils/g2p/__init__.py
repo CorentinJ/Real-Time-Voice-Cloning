@@ -30,18 +30,18 @@ class G2P(object):
         self.encoder_model = Encoder(
             ModelConfig.graphemes_size,
             ModelConfig.hidden_size
-        )
+        ).to(TestConfig.device)
         load_model(TestConfig.encoder_model_path, self.encoder_model)
 
         self.decoder_model = Decoder(
             ModelConfig.phonemes_size,
             ModelConfig.hidden_size
-        )
+        ).to(TestConfig.device)
         load_model(TestConfig.decoder_model_path, self.decoder_model)
 
-    def __call__(self, word, visualize):
+    def __call__(self, word):
         x = [0] + [self.ds.g2idx[ch] for ch in word] + [1]
-        x = torch.tensor(x).long().unsqueeze(1)
+        x = torch.tensor(x).long().unsqueeze(1).to(TestConfig.device)
         with torch.no_grad():
             enc = self.encoder_model(x)
 
@@ -55,6 +55,7 @@ class G2P(object):
         t = 0
         while True:
             with torch.no_grad():
+                # print(x.device, enc.device, hidden.device)
                 out, hidden, att_weight = self.decoder_model(
                     x,
                     enc,
@@ -70,16 +71,9 @@ class G2P(object):
             if max_index.item() == 1:
                 break
 
-        if visualize:
-            att_weights = torch.cat(att_weights).squeeze(1).numpy().T
-            y, x = att_weights.shape
-            plt.imshow(att_weights, cmap='gray')
-            plt.yticks(range(y), ['<sos>'] + list(word) + ['<eos>'])
-            plt.xticks(range(x), phonemes)
-            plt.savefig(f'attention/{DataConfig.language}/{word}.png')
-
         return phonemes
 g2p = G2P()
-def g2p_main(word):
-    word = "".join(s if s in "абвгдеёжзийклмнопрстуфхцчшщъыьэюя" else "" for s in word)
-    return g2p(word, False)
+def g2p_main(sentence):
+    words = ["".join(s if s in "абвгдеёжзийклмнопрстуфхцчшщъыьэюя" else "" for s in word) for word in sentence.split(" ")]
+    ids = [g2p(word) for word in words]
+    return [item for sublist in ids for item in sublist]

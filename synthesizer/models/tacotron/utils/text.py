@@ -1,14 +1,10 @@
 from synthesizer.models.tacotron.utils.symbols import symbols
 from synthesizer.models.tacotron.utils import cleaners
-import re
-
 
 # Mappings from symbol to numeric ID and vice versa:
 _symbol_to_id = {s: i for i, s in enumerate(symbols)}
 _id_to_symbol = {i: s for i, s in enumerate(symbols)}
 
-# Regular expression matching text enclosed in curly braces:
-# _curly_re = re.compile(r"(.*?)\{(.+?)\}(.*)")
 
 
 def text_to_sequence(text):
@@ -18,32 +14,14 @@ def text_to_sequence(text):
       in it. For example, "Turn left on {HH AW1 S T AH0 N} Street."
 
       Args:
-        text: string to convert to a sequence
+        text: array of one- or two-char strings resembling the
+        syllables, for ex: ['o0', 'b', 'r', 'y1', 'j', '<eos>', 'vj', 'e0', 'ch', 'e0', 'r']
 
       Returns:
         List of integers corresponding to the symbols in the text
     """
-    sequence = []
-
-    for symbol in text:
-        if symbol in symbols:
-            iid = _symbol_to_id[symbol]
-            if iid != 1:
-                sequence.append(_symbol_to_id[symbol])
-        elif not "eos" in symbol:  #just in case
-            print(symbol, " :met unknown symbol")
-    # Check for curly braces and treat their contents as ARPAbet:
-    # while len(text):
-    #     m = _curly_re.match(text)
-    #     if not m:
-    #         sequence += _symbols_to_sequence(_clean_text(text, cleaner_names))
-    #         break
-    #     sequence += _symbols_to_sequence(_clean_text(m.group(1), cleaner_names))
-    #     sequence += _arpabet_to_sequence(m.group(2))
-    #     text = m.group(3)
-
-    # Append EOS token
-    sequence.append(_symbol_to_id["~"])
+    sequence = [_symbol_to_id[symbol] for symbol in text if symbol in symbols ]
+    sequence.append(_symbol_to_id["<eos>"])     # Append EOS token
     return sequence
 
 
@@ -67,15 +45,3 @@ def _clean_text(text, cleaner_names):
             raise Exception("Unknown cleaner: %s" % name)
         text = cleaner(text)
     return text
-
-
-def _symbols_to_sequence(symbols):
-    return [_symbol_to_id[s] for s in symbols if _should_keep_symbol(s)]
-
-
-def _arpabet_to_sequence(text):
-    return _symbols_to_sequence(["@" + s for s in text.split()])
-
-
-def _should_keep_symbol(s):
-    return s in _symbol_to_id and s not in ("_", "~")

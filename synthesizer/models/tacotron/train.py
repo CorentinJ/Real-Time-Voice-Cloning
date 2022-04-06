@@ -1,4 +1,3 @@
-import random
 from datetime import datetime
 from functools import partial
 from pathlib import Path
@@ -25,8 +24,12 @@ def time_string():
     return datetime.now().strftime("%Y-%m-%d %H:%M")
 
 
-def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,  backup_every: int, force_restart: bool,
-          hparams):
+def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_every: int, force_restart: bool,
+          hparams, debug=False):
+
+    if debug:
+        start_time = time.time()
+        use_time = time.time()
     models_dir.mkdir(exist_ok=True)
 
     model_dir = models_dir.joinpath(run_id)
@@ -46,6 +49,9 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,  backup
     print("Checkpoint path: {}".format(weights_fpath))
     print("Loading training data from: {}".format(metadata_fpath))
     print("Using model: Tacotron")
+    if debug:
+        print("Init time: {}, elapsed: {}, point 1".format(start_time, time.time()-start_time))
+        use_time = time.time()
 
     # Bookkeeping
     time_window = ValueWindow(100)
@@ -63,6 +69,9 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,  backup
         device = torch.device("cpu")
     print("Using device:", device)
 
+    if debug:
+        print("Init time: {}, elapsed: {}, point 2".format(use_time, time.time()-use_time))
+        use_time = time.time()
     # Instantiate Tacotron Model
     print("\nInitialising Tacotron Model...\n")
     model = Tacotron(embed_dims=hparams.tts_embed_dims,
@@ -82,7 +91,9 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,  backup
 
     # Initialize the optimizer
     optimizer = optim.Adam(model.parameters())
-
+    if debug:
+        print("Init time: {}, elapsed: {}, point 3".format(use_time, time.time()-use_time))
+        use_time = time.time()
     # Load the weights
     if force_restart or not weights_fpath.exists():
         print("\nStarting the training of Tacotron from scratch\n")
@@ -101,13 +112,20 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,  backup
         print("\nLoading weights at %s" % weights_fpath)
         model.load(weights_fpath, optimizer)
         print("Tacotron weights loaded from step %d" % model.step)
-
+    if debug:
+        print("Init time: {}, elapsed: {}, point 4".format(use_time, time.time()-use_time))
+        start_time = time.time()
+        use_time = time.time()
     # Initialize the dataset
     metadata_fpath = syn_dir.joinpath("train.txt")
     mel_dir = syn_dir.joinpath("mels")
     embed_dir = syn_dir.joinpath("embeds")
     dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
-
+    if debug:
+        print("Init time: {}, elapsed: {}, point 5".format(use_time, time.time()-use_time))
+        use_time = time.time()
+        start_time = time.time()
+        print("Training sequence start")
     for i, session in enumerate(hparams.tts_schedule):
         current_step = model.get_step()
 
@@ -125,7 +143,9 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,  backup
             else:
                 # There is a following session, go to it
                 continue
-
+        if debug:
+            print("Training point 1", time.time() - use_time)
+            use_time = time.time()
         model.r = r
 
         # Begin the training
@@ -143,11 +163,15 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,  backup
         total_iters = len(dataset)
         steps_per_epoch = np.ceil(total_iters / batch_size).astype(np.int32)
         epochs = np.ceil(training_steps / steps_per_epoch).astype(np.int32)
+        if debug:
+            print("Training point 2", time.time() - use_time)
+            use_time = time.time()
 
         for epoch in range(1, epochs+1):
             for i, (texts, mels, embeds, idx) in enumerate(data_loader, 1):
-                start_time = time.time()
-
+                if debug:
+                    print("Training point 2.1", time.time() - use_time)
+                    use_time = time.time()
                 # Generate stop tokens for training
                 stop = torch.ones(mels.shape[0], mels.shape[2])
                 for j, k in enumerate(idx):
@@ -159,14 +183,18 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,  backup
                 mels = mels.to(device)
                 embeds = embeds.to(device)
                 stop = stop.to(device)
-
+                if debug:
+                    print("Training point 2.2", time.time() - use_time)
+                    use_time = time.time()
                 # Forward pass
                 # Parallelize model onto GPUS using workaround due to python bug
                 if device.type == "cuda" and torch.cuda.device_count() > 1:
                     m1_hat, m2_hat, attention, stop_pred = data_parallel_workaround(model, texts, mels, embeds)
                 else:
                     m1_hat, m2_hat, attention, stop_pred = model(texts, mels, embeds)
-
+                if debug:
+                    print("Training point 2.3", time.time() - use_time)
+                    use_time = time.time()
                 # Backward pass
                 m1_loss = F.mse_loss(m1_hat, mels) + F.l1_loss(m1_hat, mels)
                 m2_loss = F.mse_loss(m2_hat, mels)
@@ -232,9 +260,10 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,  backup
                 # Break out of loop to update training schedule
                 if step >= max_step:
                     break
-
+                print("step time: ", time.time() - start_time)
             # Add line break after every epoch
             print("")
+
 
 
 def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,

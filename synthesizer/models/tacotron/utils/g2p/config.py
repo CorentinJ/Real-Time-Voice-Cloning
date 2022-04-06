@@ -34,6 +34,7 @@ class TrainConfig(object):
 
 
 class TestConfig(object):
+    # device = cpu
     device = cpu
     encoder_model_path = f'synthesizer/models/tacotron/utils/g2p/models/{DataConfig.language}/encoder_e{TrainConfig.epochs:02}.pth'
     decoder_model_path = f'synthesizer/models/tacotron/utils/g2p/models/{DataConfig.language}/decoder_e{TrainConfig.epochs:02}.pth'

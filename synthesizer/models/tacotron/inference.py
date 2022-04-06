@@ -4,13 +4,14 @@ from synthesizer.models.tacotron.hparams import hparams
 from synthesizer.models.tacotron.tacotron import Tacotron
 from synthesizer.models.tacotron.utils.symbols import symbols
 from synthesizer.models.tacotron.utils.text import text_to_sequence
-from vocoder.display import simple_table
+# from vocoder.display import simple_table
 from pathlib import Path
 from typing import Union, List
 import numpy as np
 import librosa
 
 
+# noinspection SpellCheckingInspection
 class Synthesizer:
     sample_rate = hparams.sample_rate
     hparams = hparams
@@ -67,7 +68,7 @@ class Synthesizer:
         if self.verbose:
             print("Loaded synthesizer \"%s\" trained to step %d" % (self.model_fpath.name, self._model.state_dict()["step"]))
 
-    def synthesize_spectrograms(self, texts: List[str],
+    def synthesize_spectrograms(self, texts,
                                 embeddings: Union[np.ndarray, List[np.ndarray]],
                                 return_alignments=False):
         """
@@ -86,15 +87,9 @@ class Synthesizer:
             self.load()
 
         # Preprocess text inputs
-        _inputs = [text_to_sequence(text) for text in texts]
-        inputs = []
-        print("i:", _inputs)
-        print("t:", texts)
-        for _i in _inputs:
-            print(_i)
-            inputs+=_i
-        inputs = [inputs]
-        print("inputs: ", inputs)
+        _inputs = [text_to_sequence(text)[:-1] for text in texts]
+        inputs = [[item for sublist in _inputs for item in sublist]]
+        # print("inputs: ", inputs)
         if not isinstance(embeddings, list):
             embeddings = [embeddings]
 
@@ -105,6 +100,7 @@ class Synthesizer:
                              for i in range(0, len(embeddings), hparams.synthesis_batch_size)]
 
         specs = []
+        alignments=None
         for i, batch in enumerate(batched_inputs, 1):
             if self.verbose:
                 print(f"\n| Generating {i}/{len(batched_inputs)}")

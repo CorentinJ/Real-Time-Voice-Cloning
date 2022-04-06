@@ -1,10 +1,11 @@
 
 _pad        = "_"
-_eos        = "~"
+_eos        = "<eos>"
 _characters = 'abcdefghijklmnopqrstuvwxyz!\'\"(),-.:;? '
 
 # Prepend "@" to ARPAbet symbols to ensure uniqueness (some are the same as uppercase letters):
-_arpabet = ['aa',
+_arpabet = [
+ 'aa',
  'aa0',
  'aa1',
  'aa2',
