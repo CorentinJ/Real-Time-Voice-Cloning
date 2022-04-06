@@ -28,7 +28,8 @@ class SynthesizerDataset(Dataset):
     def __getitem__(self, index):  
         # Sometimes index may be a list of 2 (not sure why this happens)
         # If that is the case, return a single item corresponding to first element in index
-        print("started")
+        if self.debug:
+            print("started")
         if index is list:
             index = index[0]
             print("what the fuck honestly")

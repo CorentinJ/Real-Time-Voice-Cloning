@@ -50,8 +50,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     print("Loading training data from: {}".format(metadata_fpath))
     print("Using model: Tacotron")
     if debug:
-        print("Init time: {}, elapsed: {}, point 1".format(start_time, time.time()-start_time))
         use_time = time.time()
+        print("Init time: {}, elapsed: {}, point 1".format(use_time, time.time()-start_time))
 
     # Bookkeeping
     time_window = ValueWindow(100)
@@ -114,7 +114,6 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         print("Tacotron weights loaded from step %d" % model.step)
     if debug:
         print("Init time: {}, elapsed: {}, point 4".format(use_time, time.time()-use_time))
-        start_time = time.time()
         use_time = time.time()
     # Initialize the dataset
     metadata_fpath = syn_dir.joinpath("train.txt")
@@ -124,7 +123,6 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     if debug:
         print("Init time: {}, elapsed: {}, point 5".format(use_time, time.time()-use_time))
         use_time = time.time()
-        start_time = time.time()
         print("Training sequence start")
     for i, session in enumerate(hparams.tts_schedule):
         current_step = model.get_step()
@@ -169,6 +167,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
 
         for epoch in range(1, epochs+1):
             for i, (texts, mels, embeds, idx) in enumerate(data_loader, 1):
+                start_time = time.time()
                 if debug:
                     print("Training point 2.1", time.time() - use_time)
                     use_time = time.time()
