@@ -167,6 +167,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
 
         for epoch in range(1, epochs+1):
             for i, (texts, mels, embeds, idx) in enumerate(data_loader, 1):
+                # print(texts, texts[0])
                 start_time = time.time()
                 if debug:
                     print("Training point 2.1", time.time() - use_time)

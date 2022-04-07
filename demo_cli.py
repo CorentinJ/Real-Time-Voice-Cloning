@@ -24,14 +24,14 @@ if __name__ == '__main__':
                         default="saved_models/default/encoder.pt",
                         help="Path to a saved encoder")
     parser.add_argument("-s", "--syn_model_fpath", type=Path,
-                        default="saved_models/rusmodel3/synthesizer.pt",
+                        default="saved_models/rusmodel4/synthesizer.pt",
                         help="Path to a saved synthesizer")
     parser.add_argument("-v", "--voc_model_fpath", type=Path,
                         default="saved_models/default/vocoder.pt",
                         help="Path to a saved vocoder")
-    parser.add_argument("-b", "--beta_options", action=argparse.BooleanOptionalAction,
-                        default=True,
-                        help="Enables beta fork options, such as Tacotron 2 support")
+    # parser.add_argument("-b", "--beta_options", action=argparse.BooleanOptionalAction,
+    #                     default=True,
+    #                     help="Enables beta options, such as nothing")
     parser.add_argument("--cpu", action="store_true", help=\
         "If True, processing is done on CPU, even when a GPU is available.")
     parser.add_argument("--no_sound", action="store_true", help=\

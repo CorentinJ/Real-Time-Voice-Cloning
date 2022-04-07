@@ -1,5 +1,5 @@
-from synthesizer.preprocess import preprocess_dataset
-from synthesizer.hparams import hparams
+from synthesizer.models.tacotron.preprocess import preprocess_dataset
+from synthesizer.models.tacotron.hparams import hparams
 from utils.argutils import print_args
 from pathlib import Path
 import argparse
