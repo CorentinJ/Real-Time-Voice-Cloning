@@ -96,7 +96,7 @@ if __name__ == '__main__':
     # illustrate that
     embeds = [embed]
     texts = [["t", "e", "s", "t"], ["t", "e", "s", "t", "l", "o", "l"]]
-    print("\tTesting the synthesizer... (loading the model will output a lot of text)")
+    print("\tTesting the synthesizer... ")
     mels = synthesizer.synthesize_spectrograms(texts, embeds)
 
     # The vocoder synthesizes one waveform at a time, but it's more efficient for long ones. We
