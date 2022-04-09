@@ -88,9 +88,8 @@ class Synthesizer:
 
         # Preprocess text inputs
         _inputs = [text_to_sequence(text)[:-1] for text in texts]
-        print(_inputs)
+        # print(_inputs)
         inputs = [[item for sublist in _inputs for item in sublist]]
-        print(inputs)
         # print("inputs: ", inputs)
         if not isinstance(embeddings, list):
             embeddings = [embeddings]
