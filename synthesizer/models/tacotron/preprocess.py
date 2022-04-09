@@ -53,11 +53,16 @@ def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int, ski
 
 def preprocess_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hparams, no_alignments: bool):
     metadata = []
+    # try:
+    #    [_ for _ in speaker_dir.glob("*")]
+    # except Exception as e:
+    #     print("ffs, ", e)
+    #     return []
     for book_dir in speaker_dir.glob("*"):
         if no_alignments:
             # Gather the utterance audios and texts
             # LibriTTS uses .wav but we will include extensions for compatibility with other datasets
-            extensions = ["*.wav", "*.flac", "*.mp3"]
+            extensions = ["*.wav", "*.flac", "*.mp3", "*.opus"]
             for extension in extensions:
                 wav_fpaths = book_dir.glob(extension)
 
@@ -81,15 +86,19 @@ def preprocess_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hparams,
                         if not text_fpath.exists():
                             print(text_fpath)
                             # exit()
-                    with text_fpath.open("r", encoding="utf8") as text_file:
-                        try:
-                            text = "".join([line for line in text_file])
-                        except Exception as e:
-                            print(e)
-                            print(text_fpath)
-                            text = ""
-                        text = text.replace("\"", "")
-                        text = text.strip()
+                    try:
+                        with text_fpath.open("r", encoding="utf8") as text_file:
+                            try:
+                                text = "".join([line for line in text_file])
+                            except Exception as e:
+                                print("\n err:", e)
+                                print(text_fpath)
+                                continue
+                            text = text.replace("\"", "")
+                            text = text.strip()
+                    except Exception as e1:
+                        print("\n err:", e1)
+                        continue
 
                     # Process the utterance
                     metadata.append(process_utterance(wav, text, out_dir, str(wav_fpath.with_suffix("").name),

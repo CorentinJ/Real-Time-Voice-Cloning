@@ -6,7 +6,7 @@ Multispeaker Text-To-Speech Synthesis](https://arxiv.org/pdf/1806.04558.pdf) (SV
 * Added russian language support (+guide how to add other languages)
 * Code reworks 
 * gui thing may not work because I don't even have the compute to test it
-* Tacotron 2 support (beta feature, currently in development)
+* Theoretically, the model is bilingual, it can process both english and russian words, you will just need the dataset
 
 ## Setup
 
@@ -50,6 +50,9 @@ python rus_opus_preprocess.py -d <dataset_root>
 ```
 and then go back to step 4.
 This will just rename the folders and convert the opuses to wavs.
+I also tweaked the original processor to detect the opus files so you can just pust the dataset to
+LibriTTS/train-clean-100/
+folder and skip converting to wavs.
 ### 5. Launch the Toolbox
 You can then try the toolbox (not tested in this fork):
 

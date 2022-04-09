@@ -10,6 +10,7 @@ from functools import partial
 
 parser = argparse.ArgumentParser(description='Dataset args')
 parser.add_argument("-d", "--dataset_path", type=str, help="Path to your root dataset folder")
+parser.add_argument("-m", "--multiproc", type=bool, help="Use multiprocessing?", default=True)  # speed up 2x-4x
 
 test_run = False
 
@@ -39,13 +40,19 @@ def ffmpeg_convert(dspath, dir1, dir2, filei):
 def convert_opuses(dspath):
     times = []
     for dir1 in os.listdir(dspath):
-        tim = time.time()
-        for dir2 in os.listdir(dspath+dir1):
-            pool = Pool()
-            pool.map(partial(ffmpeg_convert, dspath, dir1, dir2), enumerate(os.listdir(dspath+dir1+"\\"+dir2)))
-        times.append(time.time() - tim)
-        print("time per dir {}: ".format(str(dir1)), datetime.timedelta(seconds=round(time.time() - tim, 2)))
-    print("overall time: ", datetime.timedelta(seconds=round(sum(times), 2)))
+        if dir1 == "speaker-014" or dir1 == "speaker-015":
+            tim = time.time()
+            for dir2 in os.listdir(dspath+dir1):
+                if args.multiproc:
+                    pool = Pool()
+                    pool.map(partial(ffmpeg_convert, dspath, dir1, dir2), enumerate(os.listdir(dspath+dir1+"\\"+dir2)))
+                else:
+                    for i, qdir in enumerate(os.listdir(dspath+dir1+"\\"+dir2)):
+                        ffmpeg_convert(dspath, dir1, dir2, (i, qdir))
+
+            times.append(time.time() - tim)
+            print("time per dir {}: ".format(str(dir1)), datetime.timedelta(seconds=round(time.time() - tim)))
+    print("overall time: ", datetime.timedelta(seconds=round(sum(times))))
 
 def rename_secondary_dir(insecdir):
     j=0
