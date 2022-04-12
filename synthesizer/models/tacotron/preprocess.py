@@ -53,15 +53,10 @@ def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int, ski
 
 def preprocess_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hparams, no_alignments: bool):
     metadata = []
-    # try:
-    #    [_ for _ in speaker_dir.glob("*")]
-    # except Exception as e:
-    #     print("ffs, ", e)
-    #     return []
     for book_dir in speaker_dir.glob("*"):
         if no_alignments:
             # Gather the utterance audios and texts
-            # LibriTTS uses .wav but we will include extensions for compatibility with other datasets
+            # LibriTTS uses .wav, but we will include extensions for compatibility with other datasets
             extensions = ["*.wav", "*.flac", "*.mp3", "*.opus"]
             for extension in extensions:
                 wav_fpaths = book_dir.glob(extension)

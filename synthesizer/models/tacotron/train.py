@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import partial
 from pathlib import Path
 
@@ -16,12 +16,18 @@ from synthesizer.models.tacotron.utils.symbols import symbols
 from synthesizer.models.tacotron.utils.text import sequence_to_text
 from vocoder.display import *
 
+# ah yes, the speed up
+torch.autograd.set_detect_anomaly(False)
+torch.autograd.profiler.profile(False)
+torch.autograd.profiler.emit_nvtx(False)
+
 
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
 
 
 def time_string():
     return datetime.now().strftime("%Y-%m-%d %H:%M")
+
 
 
 def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_every: int, force_restart: bool,
@@ -60,6 +66,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     # From WaveRNN/train_tacotron.py
     if torch.cuda.is_available():
         device = torch.device("cuda")
+        from torch.cuda.amp import autocast
 
         for session in hparams.tts_schedule:
             _, _, _, batch_size = session
@@ -67,7 +74,9 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 raise ValueError("`batch_size` must be evenly divisible by n_gpus!")
     else:
         device = torch.device("cpu")
+        from torch.cpu.amp import autocast
     print("Using device:", device)
+
 
     if debug:
         print("Init time: {}, elapsed: {}, point 2".format(use_time, time.time()-use_time))
@@ -97,7 +106,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     # Load the weights
     if force_restart or not weights_fpath.exists():
         print("\nStarting the training of Tacotron from scratch\n")
-        model.save(weights_fpath)
+        model.save(weights_fpath, optimizer)
 
         # Embeddings metadata
         char_embedding_fpath = meta_folder.joinpath("CharacterEmbeddings.tsv")
@@ -156,7 +165,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
             p["lr"] = lr
 
         collate_fn = partial(collate_synthesizer, r=r, hparams=hparams)
-        data_loader = DataLoader(dataset, batch_size, shuffle=True, num_workers=2, collate_fn=collate_fn)
+        data_loader = DataLoader(dataset, batch_size, shuffle=True, num_workers=4, collate_fn=collate_fn,
+                                 pin_memory=True)
 
         total_iters = len(dataset)
         steps_per_epoch = np.ceil(total_iters / batch_size).astype(np.int32)
@@ -164,7 +174,6 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         if debug:
             print("Training point 2", time.time() - use_time)
             use_time = time.time()
-
         for epoch in range(1, epochs+1):
             for i, (texts, mels, embeds, idx) in enumerate(data_loader, 1):
                 # print(texts, texts[0])
@@ -173,7 +182,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                     print("Training point 2.1", time.time() - use_time)
                     use_time = time.time()
                 # Generate stop tokens for training
-                stop = torch.ones(mels.shape[0], mels.shape[2])
+                stop = torch.ones(mels.shape[0], mels.shape[2], device=device)
                 for j, k in enumerate(idx):
                     stop[j, :int(dataset.metadata[k][4])-1] = 0
 
@@ -182,7 +191,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 texts = texts.to(device)
                 mels = mels.to(device)
                 embeds = embeds.to(device)
-                stop = stop.to(device)
+                # stop = stop.to(device)
                 if debug:
                     print("Training point 2.2", time.time() - use_time)
                     use_time = time.time()
@@ -198,12 +207,13 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 # Backward pass
                 m1_loss = F.mse_loss(m1_hat, mels) + F.l1_loss(m1_hat, mels)
                 m2_loss = F.mse_loss(m2_hat, mels)
-                stop_loss = F.binary_cross_entropy(stop_pred, stop)
+                stop_loss = F.binary_cross_entropy(stop_pred, stop)  #?
 
                 loss = m1_loss + m2_loss + stop_loss
 
-                optimizer.zero_grad()
+                optimizer.zero_grad(set_to_none=True)
                 loss.backward()
+                # loss.backward()
 
                 if hparams.tts_clip_grad_norm is not None:
                     grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), hparams.tts_clip_grad_norm)
@@ -219,7 +229,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 k = step // 1000
 
                 msg = f"| Epoch: {epoch}/{epochs} ({i}/{steps_per_epoch}) | Loss: {loss_window.average:#.4} | " \
-                      f"{1./time_window.average:#.2} steps/s | Step: {k}k | "
+                      f"{1./time_window.average:#.2} steps/s | Step: {k}k "
                 stream(msg)
 
                 # Backup or save model as appropriate
@@ -260,7 +270,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 # Break out of loop to update training schedule
                 if step >= max_step:
                     break
-                print("step time: ", time.time() - start_time)
+                print(" step time: ",  round(time.time() - start_time, 2))
             # Add line break after every epoch
             print("")
 

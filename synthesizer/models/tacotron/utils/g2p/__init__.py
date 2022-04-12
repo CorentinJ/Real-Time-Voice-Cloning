@@ -2,6 +2,8 @@ from .data import PersianLexicon
 from .model import Encoder, Decoder
 from .config import DataConfigEn, DataConfigRu, ModelConfigEn, ModelConfigRu, TestConfigEn, TestConfigRu
 
+from alphabet_detector import AlphabetDetector
+
 import torch
 
 
@@ -78,11 +80,21 @@ class G2P(object):
         return phonemes
 ru_g2p = G2P(lang="ru")
 en_g2p = G2P(lang="en")
+ad = AlphabetDetector()
 
 def g2p_all(word):
-    ourg2p = en_g2p if word[0] in "abcdefghijklmnopqrstuvwxyz" else ru_g2p
-    word = word.upper() if word[0] in "abcdefghijklmnopqrstuvwxyz" else word
-    return ourg2p(word)
+    if ad.is_latin(word):
+        ourg2p = en_g2p
+        word = word.upper()
+    else:  #elif ad.is_cyrillic(word):
+        ourg2p = ru_g2p
+    try:
+        res = ourg2p(word)
+    except Exception as e:
+        print(e)
+        print(word)
+        res = ourg2p("o")  # just so its not blank
+    return res
 
 def s2ids(sentence):
     words = ["".join(s if s in "абвгдеёжзийклмнопрстуфхцчшщъыьэюяabcdefghijklmnopqrstuvwxyz" else "" for s in word)
