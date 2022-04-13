@@ -31,7 +31,7 @@ def time_string():
 
 
 def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_every: int, force_restart: bool,
-          hparams, debug=False):
+          hparams, use_amp, debug=False):
 
     if debug:
         start_time = time.time()
@@ -133,6 +133,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         print("Init time: {}, elapsed: {}, point 5".format(use_time, time.time()-use_time))
         use_time = time.time()
         print("Training sequence start")
+
+    scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
     for i, session in enumerate(hparams.tts_schedule):
         current_step = model.get_step()
 
@@ -197,10 +199,13 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                     use_time = time.time()
                 # Forward pass
                 # Parallelize model onto GPUS using workaround due to python bug
-                if device.type == "cuda" and torch.cuda.device_count() > 1:
-                    m1_hat, m2_hat, attention, stop_pred = data_parallel_workaround(model, texts, mels, embeds)
-                else:
-                    m1_hat, m2_hat, attention, stop_pred = model(texts, mels, embeds)
+                # print(use_amp, bool(use_amp))
+                use_amp = bool(use_amp)
+                with autocast(enabled=use_amp):
+                    if device.type == "cuda" and torch.cuda.device_count() > 1:
+                        m1_hat, m2_hat, attention, stop_pred = data_parallel_workaround(model, texts, mels, embeds)
+                    else:
+                        m1_hat, m2_hat, attention, stop_pred = model(texts, mels, embeds)
                 if debug:
                     print("Training point 2.3", time.time() - use_time)
                     use_time = time.time()
@@ -212,15 +217,22 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 loss = m1_loss + m2_loss + stop_loss
 
                 optimizer.zero_grad(set_to_none=True)
-                loss.backward()
+
                 # loss.backward()
+                scaler.scale(loss).backward()
+                scaler.unscale_(optimizer)
 
                 if hparams.tts_clip_grad_norm is not None:
                     grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), hparams.tts_clip_grad_norm)
                     if np.isnan(grad_norm.cpu()):
                         print("grad_norm was NaN!")
 
-                optimizer.step()
+
+                # optimizer.step()
+
+                scaler.step(optimizer)
+                scaler.update()
+
 
                 time_window.append(time.time() - start_time)
                 loss_window.append(loss.item())
@@ -270,7 +282,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 # Break out of loop to update training schedule
                 if step >= max_step:
                     break
-                print(" step time: ",  round(time.time() - start_time, 2))
+                print(" step time: ",  round(time.time() - start_time, 2), "s")
             # Add line break after every epoch
             print("")
 
@@ -297,4 +309,4 @@ def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
     plot_spectrogram(mel_prediction, str(spec_fpath), title=title_str,
                      target_spectrogram=target_spectrogram,
                      max_len=target_spectrogram.size // hparams.num_mels)
-    print("Input at step {}: {}".format(step, sequence_to_text(input_seq)))
+    print("\nInput at step {}: {}".format(step, sequence_to_text(input_seq)))

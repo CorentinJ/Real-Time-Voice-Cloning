@@ -90,10 +90,16 @@ def g2p_all(word):
         ourg2p = ru_g2p
     try:
         res = ourg2p(word)
-    except Exception as e:
+    except Exception as e:  #weird shit, inspecting it rn
         print(e)
         print(word)
-        res = ourg2p("o")  # just so its not blank
+        try:
+            res = ru_g2p("".join(s if s in "абвгдеёжзийклмнопрстуфхцчшщъыьэюя" else "" for s in word))
+        except Exception as e1:
+            print(e1)
+            res = ourg2p("о")  # just so its not blank
+            print("err_word: ", word)
+            print("ourg2p: ", ourg2p)
     return res
 
 def s2ids(sentence):

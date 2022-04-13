@@ -25,6 +25,8 @@ if __name__ == "__main__":
         "model.")
     parser.add_argument("-f", "--force_restart", action="store_true", help= \
         "Do not load any saved model and restart from scratch.")
+    parser.add_argument("--use_amp", action="store_true", help= \
+        "Use Pytorch amp.")
     parser.add_argument("--hparams", default="", help=\
         "Hyperparameter overrides as a comma-separated list of name=value pairs")
     args = parser.parse_args()

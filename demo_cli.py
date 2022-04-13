@@ -24,7 +24,7 @@ if __name__ == '__main__':
                         default="saved_models/default/encoder.pt",
                         help="Path to a saved encoder")
     parser.add_argument("-s", "--syn_model_fpath", type=Path,
-                        default="saved_models/rusmodel4/synthesizer.pt",
+                        default="saved_models/rusmodelamp/synthesizer.pt",
                         help="Path to a saved synthesizer")
     parser.add_argument("-v", "--voc_model_fpath", type=Path,
                         default="saved_models/default/vocoder.pt",
