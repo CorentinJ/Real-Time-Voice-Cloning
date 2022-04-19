@@ -26,6 +26,8 @@ if __name__ == "__main__":
         "Do not load any saved model and restart from scratch.")
     parser.add_argument("--use_amp", action="store_true", help= \
         "Use Pytorch amp.")
+    parser.add_argument("--multi_gpu", action="store_true", help= \
+        "Use Multigpu")
     parser.add_argument("--hparams", default="", help= \
         "Hyperparameter overrides as a comma-separated list of name=value pairs")
     args = parser.parse_args()

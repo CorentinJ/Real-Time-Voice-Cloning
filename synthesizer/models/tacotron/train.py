@@ -30,7 +30,7 @@ def time_string():
 
 
 def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_every: int, force_restart: bool,
-          hparams, use_amp, debug=False):
+          hparams, use_amp, multi_gpu, debug=False):
     if debug:
         start_time = time.time()
         use_time = time.time()
@@ -71,7 +71,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
             _, _, _, batch_size = session
             if batch_size % torch.cuda.device_count() != 0:
                 raise ValueError("`batch_size` must be evenly divisible by n_gpus!")
-        if torch.cuda.device_count() > 1:
+        if torch.cuda.device_count() > 1 and multi_gpu:
             print("Using devices:", [torch.cuda.get_device_name(i) for i in range(torch.cuda.device_count())])
         else:
             print("Using device:", torch.cuda.get_device_name(dev_index))
@@ -85,6 +85,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         use_time = time.time()
     # Instantiate Tacotron Model
     print("\nInitialising Tacotron Model...\n")
+
     model = Tacotron(embed_dims=hparams.tts_embed_dims,
                      num_chars=len(symbols),
                      encoder_dims=hparams.tts_encoder_dims,
