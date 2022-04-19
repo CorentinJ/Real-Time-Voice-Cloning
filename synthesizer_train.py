@@ -30,6 +30,8 @@ if __name__ == "__main__":
         "Use Multigpu")
     parser.add_argument("--hparams", default="", help= \
         "Hyperparameter overrides as a comma-separated list of name=value pairs")
+    parser.add_argument("--log_file", type=str, default="log.txt", help= \
+        "Log filename")
     args = parser.parse_args()
     print_args(args, parser)
 

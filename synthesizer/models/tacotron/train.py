@@ -1,11 +1,14 @@
+import torch
+
+import torch.nn.functional as F
+import dllogger as DLLogger
+
+from torch import optim, nn
+from torch.utils.data import DataLoader
 from datetime import datetime, timedelta
 from functools import partial
 from pathlib import Path
-
-import torch
-import torch.nn.functional as F
-from torch import optim, nn
-from torch.utils.data import DataLoader
+from dllogger import StdOutBackend, JSONStreamBackend, Verbosity
 
 from synthesizer.models.tacotron import audio
 from synthesizer.models.tacotron.tacotron import Tacotron
@@ -16,7 +19,9 @@ from synthesizer.models.tacotron.utils.symbols import symbols
 from synthesizer.models.tacotron.utils.text import sequence_to_text
 from vocoder.display import *
 
-# ah yes, the speed up
+
+
+# ah yes, the speed u
 torch.autograd.set_detect_anomaly(False)
 torch.autograd.profiler.profile(False)
 torch.autograd.profiler.emit_nvtx(False)
@@ -30,7 +35,7 @@ def time_string():
 
 
 def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_every: int, force_restart: bool,
-          hparams, use_amp, multi_gpu, debug=False):
+          hparams, use_amp, multi_gpu, log_file, debug=False):
     if debug:
         start_time = time.time()
         use_time = time.time()
@@ -181,8 +186,12 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         if debug:
             print("Training point 2", time.time() - use_time)
             use_time = time.time()
+        DLLogger.init(backends=[JSONStreamBackend(Verbosity.DEFAULT, log_file),
+                                StdOutBackend(Verbosity.VERBOSE)])
+        dt_len = len(data_loader)
         for epoch in range(1, epochs + 1):
             for i, (texts, mels, embeds, idx) in enumerate(data_loader, 1):
+                torch.cuda.synchronize()
                 # print(texts, texts[0])
                 start_time = time.time()
                 if debug:
@@ -240,9 +249,14 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 step = model.get_step()
                 k = step // 1000
 
-                msg = f"| Epoch: {epoch}/{epochs} ({i}/{steps_per_epoch}) | Loss: {loss_window.average:#.4} | " \
-                      f"{1. / time_window.average:#.2} steps/s | Step: {k}k "
-                stream(msg)
+                msg = {
+                    "Loss:": f"{loss_window.average:#.4}",
+                    "steps/s": f"{1. / time_window.average:#.2}",
+                    "Step:": str(k)+"k",
+                    "step time: ": str(round(time.time() - start_time, 2)) + "s"
+                }
+                DLLogger.log(step=(epoch, str(i) + "/" + str(dt_len)), data=msg)
+                # stream(msg)
 
                 # Backup or save model as appropriate
                 if backup_every != 0 and step % backup_every == 0:
@@ -282,9 +296,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 # Break out of loop to update training schedule
                 if step >= max_step:
                     break
-                print(" step time: ", round(time.time() - start_time, 2), "s")
             # Add line break after every epoch
-            print("")
 
 
 def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
