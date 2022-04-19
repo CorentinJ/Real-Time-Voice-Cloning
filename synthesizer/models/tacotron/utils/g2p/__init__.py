@@ -11,7 +11,7 @@ def load_model(model_path, model, lang):
     model.load_state_dict(torch.load(
         model_path,
         map_location=lambda storage,
-        loc: storage
+                            loc: storage
     ))
     model.to(TestConfigEn.device if lang == "en" else TestConfigRu.device)
     model.eval()
@@ -78,34 +78,39 @@ class G2P(object):
                 break
 
         return phonemes
+
+
 ru_g2p = G2P(lang="ru")
 en_g2p = G2P(lang="en")
 ad = AlphabetDetector()
 
+
 def g2p_all(word):
+    word = word[:9]
     if ad.is_latin(word):
         ourg2p = en_g2p
         word = word.upper()
-    else:  #elif ad.is_cyrillic(word):
+    else:  # elif ad.is_cyrillic(word):
         ourg2p = ru_g2p
     try:
         res = ourg2p(word)
-    except Exception as e:  #weird shit, inspecting it rn
-        print(e)
-        print(word)
+    except:  #
         try:
             res = ru_g2p("".join(s if s in "абвгдеёжзийклмнопрстуфхцчшщъыьэюя" else "" for s in word))
+            print("fixed the word '", word, "'")
         except Exception as e1:
-            print(e1)
+            print("err: ", e1)
             res = ourg2p("о")  # just so its not blank
-            print("err_word: ", word)
+            print("err_word2: ", word)
             print("ourg2p: ", ourg2p)
     return res
+
 
 def s2ids(sentence):
     words = ["".join(s if s in "абвгдеёжзийклмнопрстуфхцчшщъыьэюяabcdefghijklmnopqrstuvwxyz" else "" for s in word)
              for word in sentence.split(" ")]
     return [g2p_all(word) for word in words]
+
 
 def g2p_main(sentence):
     ids = s2ids(sentence)

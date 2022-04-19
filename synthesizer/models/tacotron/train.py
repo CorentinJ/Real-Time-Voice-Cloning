@@ -4,13 +4,13 @@ from pathlib import Path
 
 import torch
 import torch.nn.functional as F
-from torch import optim
+from torch import optim, nn
 from torch.utils.data import DataLoader
 
 from synthesizer.models.tacotron import audio
 from synthesizer.models.tacotron.tacotron import Tacotron
 from synthesizer.models.tacotron.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
-from synthesizer.models.tacotron.utils import ValueWindow, data_parallel_workaround
+from synthesizer.models.tacotron.utils import ValueWindow
 from synthesizer.models.tacotron.utils.plot import plot_spectrogram
 from synthesizer.models.tacotron.utils.symbols import symbols
 from synthesizer.models.tacotron.utils.text import sequence_to_text
@@ -29,10 +29,8 @@ def time_string():
     return datetime.now().strftime("%Y-%m-%d %H:%M")
 
 
-
 def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_every: int, force_restart: bool,
           hparams, use_amp, debug=False):
-
     if debug:
         start_time = time.time()
         use_time = time.time()
@@ -57,7 +55,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     print("Using model: Tacotron")
     if debug:
         use_time = time.time()
-        print("Init time: {}, elapsed: {}, point 1".format(use_time, time.time()-start_time))
+        print("Init time: {}, elapsed: {}, point 1".format(use_time, time.time() - start_time))
 
     # Bookkeeping
     time_window = ValueWindow(100)
@@ -65,21 +63,25 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
 
     # From WaveRNN/train_tacotron.py
     if torch.cuda.is_available():
-        device = torch.device("cuda")
+        dev_index = 0  # useful for multigpu
+        device = torch.device(dev_index)
         from torch.cuda.amp import autocast
 
         for session in hparams.tts_schedule:
             _, _, _, batch_size = session
             if batch_size % torch.cuda.device_count() != 0:
                 raise ValueError("`batch_size` must be evenly divisible by n_gpus!")
+        if torch.cuda.device_count() > 1:
+            print("Using devices:", [torch.cuda.get_device_name(i) for i in range(torch.cuda.device_count())])
+        else:
+            print("Using device:", torch.cuda.get_device_name(dev_index))
     else:
         device = torch.device("cpu")
         from torch.cpu.amp import autocast
-    print("Using device:", device)
-
+        print("Using device:", device)
 
     if debug:
-        print("Init time: {}, elapsed: {}, point 2".format(use_time, time.time()-use_time))
+        print("Init time: {}, elapsed: {}, point 2".format(use_time, time.time() - use_time))
         use_time = time.time()
     # Instantiate Tacotron Model
     print("\nInitialising Tacotron Model...\n")
@@ -101,7 +103,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     # Initialize the optimizer
     optimizer = optim.Adam(model.parameters())
     if debug:
-        print("Init time: {}, elapsed: {}, point 3".format(use_time, time.time()-use_time))
+        print("Init time: {}, elapsed: {}, point 3".format(use_time, time.time() - use_time))
         use_time = time.time()
     # Load the weights
     if force_restart or not weights_fpath.exists():
@@ -122,7 +124,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         model.load(weights_fpath, optimizer)
         print("Tacotron weights loaded from step %d" % model.step)
     if debug:
-        print("Init time: {}, elapsed: {}, point 4".format(use_time, time.time()-use_time))
+        print("Init time: {}, elapsed: {}, point 4".format(use_time, time.time() - use_time))
         use_time = time.time()
     # Initialize the dataset
     metadata_fpath = syn_dir.joinpath("train.txt")
@@ -130,11 +132,13 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     embed_dir = syn_dir.joinpath("embeds")
     dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
     if debug:
-        print("Init time: {}, elapsed: {}, point 5".format(use_time, time.time()-use_time))
+        print("Init time: {}, elapsed: {}, point 5".format(use_time, time.time() - use_time))
         use_time = time.time()
         print("Training sequence start")
 
     scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
+    # if torch.cuda.device_count() > 1:
+    #     model = nn.DataParallel(model)
     for i, session in enumerate(hparams.tts_schedule):
         current_step = model.get_step()
 
@@ -176,7 +180,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         if debug:
             print("Training point 2", time.time() - use_time)
             use_time = time.time()
-        for epoch in range(1, epochs+1):
+        for epoch in range(1, epochs + 1):
             for i, (texts, mels, embeds, idx) in enumerate(data_loader, 1):
                 # print(texts, texts[0])
                 start_time = time.time()
@@ -186,7 +190,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 # Generate stop tokens for training
                 stop = torch.ones(mels.shape[0], mels.shape[2], device=device)
                 for j, k in enumerate(idx):
-                    stop[j, :int(dataset.metadata[k][4])-1] = 0
+                    stop[j, :int(dataset.metadata[k][4]) - 1] = 0
 
                 # print("t:", texts.shape)
                 # print("t s:", texts[random.randint(1, 4)][:10])
@@ -202,17 +206,14 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 # print(use_amp, bool(use_amp))
                 use_amp = bool(use_amp)
                 with autocast(enabled=use_amp):
-                    if device.type == "cuda" and torch.cuda.device_count() > 1:
-                        m1_hat, m2_hat, attention, stop_pred = data_parallel_workaround(model, texts, mels, embeds)
-                    else:
-                        m1_hat, m2_hat, attention, stop_pred = model(texts, mels, embeds)
+                    m1_hat, m2_hat, attention, stop_pred = model(texts, mels, embeds)
                 if debug:
                     print("Training point 2.3", time.time() - use_time)
                     use_time = time.time()
                 # Backward pass
                 m1_loss = F.mse_loss(m1_hat, mels) + F.l1_loss(m1_hat, mels)
                 m2_loss = F.mse_loss(m2_hat, mels)
-                stop_loss = F.binary_cross_entropy(stop_pred, stop)  #?
+                stop_loss = F.binary_cross_entropy(stop_pred, stop)  # ?
 
                 loss = m1_loss + m2_loss + stop_loss
 
@@ -227,12 +228,10 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                     if np.isnan(grad_norm.cpu()):
                         print("grad_norm was NaN!")
 
-
                 # optimizer.step()
 
                 scaler.step(optimizer)
                 scaler.update()
-
 
                 time_window.append(time.time() - start_time)
                 loss_window.append(loss.item())
@@ -241,15 +240,15 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 k = step // 1000
 
                 msg = f"| Epoch: {epoch}/{epochs} ({i}/{steps_per_epoch}) | Loss: {loss_window.average:#.4} | " \
-                      f"{1./time_window.average:#.2} steps/s | Step: {k}k "
+                      f"{1. / time_window.average:#.2} steps/s | Step: {k}k "
                 stream(msg)
 
                 # Backup or save model as appropriate
-                if backup_every != 0 and step % backup_every == 0 :
+                if backup_every != 0 and step % backup_every == 0:
                     backup_fpath = weights_fpath.parent / f"synthesizer_{k:06d}.pt"
                     model.save(backup_fpath, optimizer)
 
-                if save_every != 0 and step % save_every == 0 :
+                if save_every != 0 and step % save_every == 0:
                     # Must save latest optimizer state to ensure that resuming training
                     # doesn't produce artifacts
                     model.save(weights_fpath, optimizer)
@@ -282,10 +281,9 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 # Break out of loop to update training schedule
                 if step >= max_step:
                     break
-                print(" step time: ",  round(time.time() - start_time, 2), "s")
+                print(" step time: ", round(time.time() - start_time, 2), "s")
             # Add line break after every epoch
             print("")
-
 
 
 def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
