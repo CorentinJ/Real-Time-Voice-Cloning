@@ -22,11 +22,13 @@ if __name__ == "__main__":
     parser.add_argument("-b", "--backup_every", type=int, default=25000, help= \
         "Number of steps between backups of the model. Set to 0 to never make backups of the "
         "model.")
-    parser.add_argument("-f", "--force_restart", action="store_true", help= \
+    parser.add_argument("-p", "--print_every", type=int, default=10, help=\
+        "Print every N")
+    parser.add_argument("-f", "--force_restart", action="store_true", help=\
         "Do not load any saved model and restart from scratch.")
-    parser.add_argument("--use_amp", action="store_true", help= \
+    parser.add_argument("--use_amp", action="store_true", help=\
         "Use Pytorch amp.")
-    parser.add_argument("--multi_gpu", action="store_true", help= \
+    parser.add_argument("--multi_gpu", action="store_true", help=\
         "Use Multigpu")
     parser.add_argument("--hparams", default="", help= \
         "Hyperparameter overrides as a comma-separated list of name=value pairs")

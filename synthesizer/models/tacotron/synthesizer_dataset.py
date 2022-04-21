@@ -28,30 +28,17 @@ class SynthesizerDataset(Dataset):
     def __getitem__(self, index):  
         # Sometimes index may be a list of 2 (not sure why this happens)
         # If that is the case, return a single item corresponding to first element in index
-        if self.debug:
-            print("started")
         if index is list:
             index = index[0]
             print("what the fuck honestly")
-        if self.debug:
-            print("1")
         mel_path, embed_path = self.samples_fpaths[index]
         mel = np.load(mel_path).T.astype(np.float32)
-        if self.debug:
-            print("2")
         # Load the embed
         embed = np.load(embed_path)
-        if self.debug:
-            print("3")
         # Get the text and (not) clean it
         text = text_to_sequence(g2p_main(self.samples_texts[index].lower()))[:-1]
-        if self.debug:
-            print("4")
-        # print(text)
         # Convert the list returned by text_to_sequence to a numpy array
         text = np.asarray(text).astype(np.int32)
-        if self.debug:
-            print("5")
 
         return text, mel.astype(np.float32), embed.astype(np.float32), index
 

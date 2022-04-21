@@ -162,7 +162,8 @@ if __name__ == '__main__':
 
             # The synthesizer works in batch, so you need to put your data in a list or numpy array
             #before: texts = [text]   # ["cdab"]
-            texts = g2p_main(text.lower())  # [["c", "d"], ["a", "b"], ...]
+            texts = g2p_main(text.lower())   # [["c", "d"], ["a", "b"], ...]
+            # texts = texts + ["_________________________________________________"]
             print(texts)
             embeds = [embed]
             # If you know what the attention layer alignments are, you can retrieve them here by
