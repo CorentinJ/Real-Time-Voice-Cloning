@@ -1,4 +1,3 @@
-import os
 # os.chdir("synthesizer/models/tacotron/utils/g2p")
 
 import torch
@@ -7,9 +6,9 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from synthesizer.models.tacotron.utils.g2p.data import PersianLexicon, collate_fn
-from synthesizer.models.tacotron.utils.g2p.model import Encoder, Decoder
-from synthesizer.models.tacotron.utils.g2p.config import DataConfig, ModelConfig, TrainConfig
+from synthesizer.g2p import PersianLexicon, collate_fn
+from synthesizer.g2p import Encoder, Decoder
+from synthesizer.g2p import DataConfig, ModelConfig, TrainConfig
 
 # data prep
 ds = PersianLexicon(

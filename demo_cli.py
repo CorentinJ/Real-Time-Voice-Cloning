@@ -13,7 +13,7 @@ from synthesizer.models.tacotron.inference import Synthesizer
 from utils.argutils import print_args
 from utils.default_models import ensure_default_models
 from vocoder import inference as vocoder
-from synthesizer.models.tacotron.utils.g2p import g2p_main
+from synthesizer.g2p import g2p_main
 
 
 if __name__ == '__main__':

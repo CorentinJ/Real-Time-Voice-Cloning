@@ -10,9 +10,9 @@ from functools import partial
 from pathlib import Path
 from dllogger import StdOutBackend, JSONStreamBackend, Verbosity
 
-from synthesizer.models.tacotron import audio
-from synthesizer.models.tacotron.tacotron import Tacotron
-from synthesizer.models.tacotron.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
+from synthesizer.models.tacotron_tweaked import audio
+from synthesizer.models.tacotron_tweaked.tacotron import Tacotron
+from synthesizer.models.tacotron_tweaked.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
 from synthesizer.utils import ValueWindow
 from synthesizer.utils.plot import plot_spectrogram
 from synthesizer.utils import symbols
