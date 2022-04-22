@@ -3,7 +3,6 @@ import torch
 import torch.nn.functional as F
 import dllogger as DLLogger
 
-
 from torch import optim
 from torch.utils.data import DataLoader
 from datetime import datetime
@@ -36,9 +35,11 @@ def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
 def time_string():
     return datetime.now().strftime("%Y-%m-%d %H:%M")
 
+
 class Struct:
     def __init__(self, **entries):
         self.__dict__.update(entries)
+
 
 def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_every: int, force_restart: bool,
           hparams, use_amp, multi_gpu, log_file, print_every, lr, wd, batch_size, gradinit_bsize,
@@ -113,8 +114,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                          not ('bias' in p[0] or 'scale' in p[0] or 'autoinit' in p[0])]
 
     optimizer = optim.SGD(
-        [{'params': parameters_bias, 'lr': lr/ 10.},
-         {'params': parameters_scale, 'lr':lr / 10.},
+        [{'params': parameters_bias, 'lr': lr / 10.},
+         {'params': parameters_scale, 'lr': lr / 10.},
          {'params': parameters_others}],
         lr=lr * batch_size / 128.,
         momentum=0.9,
@@ -156,6 +157,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         print("Training sequence start")
 
     gradinit_bsize = int(batch_size / 2) if gradinit_bsize < 0 else int(gradinit_bsize / 2)
+    print(f"gradinit_bsize: {gradinit_bsize}")
     scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
     # if torch.cuda.device_count() > 1:
     #     model = nn.DataParallel(model)
@@ -166,13 +168,11 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
 
         training_steps = max_step - current_step
         collate_fn = partial(collate_synthesizer, r=r, hparams=hparams)
-        gradinit_trainloader = DataLoader(
-            dataset,
-            batch_size=gradinit_bsize,
-            shuffle=True, num_workers=4,
-            pin_memory=True)
+        gradinit_trainloader = DataLoader(dataset, gradinit_bsize, shuffle=True, num_workers=4, collate_fn=collate_fn,
+                                          pin_memory=True)
 
-        gradinit(model, gradinit_trainloader, Struct(**args))
+        model = gradinit(model, gradinit_trainloader, dataset, device, Struct(**args))
+        # torch.save(model, "tempmodel")  # juts in case
         sgdr = CosineAnnealingLR(optimizer, n_epoch * len(gradinit_trainloader), eta_min=0, last_epoch=-1)
 
         # Do we need to change to the next session?

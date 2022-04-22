@@ -23,6 +23,7 @@ from vocoder.display import *
 torch.autograd.set_detect_anomaly(False)
 torch.autograd.profiler.profile(False)
 torch.autograd.profiler.emit_nvtx(False)
+torch.backends.cudnn.benchmark = True
 
 
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()

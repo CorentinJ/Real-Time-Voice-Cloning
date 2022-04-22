@@ -5,6 +5,8 @@ from synthesizer.models.tacotron_tweaked.models.modules import Scale, Bias
 import numpy as np
 import os
 
+import torch.nn.functional as F
+
 
 def get_ordered_params(net):
     param_list = []
@@ -126,15 +128,28 @@ def get_scale_stats(model, optimizer):
 
 def get_batch(data_iter, data_loader):
     try:
-        inputs, targets = next(data_iter)
+        texts, mels, embeds, idx = next(data_iter)
     except:
         data_iter = iter(data_loader)
-        inputs, targets = next(data_iter)
-    inputs, targets = inputs.cuda(), targets.cuda()
-    return data_iter, inputs, targets
+        texts, mels, embeds, idx = next(data_iter)
+    return data_iter, texts, mels, embeds, idx
 
 
-def gradinit(net, dataloader, args):
+def pad1d(x, max_len, pad_value=0):
+    return np.pad(x, (0, max_len - len(x)), mode="constant", constant_values=pad_value)
+
+
+def pad2d(x, max_len, pad_value=0):
+    return torch.tensor(np.pad(x, ((0, 0), (0, max_len - x.shape[-1])), mode="constant", constant_values=pad_value))
+
+
+def pad3d(x_arg, x_dest):
+    x = torch.zeros_like(x_dest)
+    x[:, :, :x_arg.shape[-1]] = x_arg[:, :]
+    return x
+
+
+def gradinit(net, dataloader, dataset, device, args):
     if args.gradinit_resume:
         print("Resuming GradInit model from {}".format(args.gradinit_resume))
         sdict = torch.load(args.gradinit_resume)
@@ -150,15 +165,12 @@ def gradinit(net, dataloader, args):
     weight_params = [p for n, p in net.named_parameters() if 'weight' in n]
 
     optimizer = RescaleAdam([{'params': weight_params, 'min_scale': args.gradinit_min_scale, 'lr': args.gradinit_lr},
-                                      {'params': bias_params, 'min_scale': 0, 'lr': args.gradinit_lr}],
-                                     grad_clip=args.gradinit_grad_clip)
+                             {'params': bias_params, 'min_scale': 0, 'lr': args.gradinit_lr}],
+                            grad_clip=args.gradinit_grad_clip)
 
-    criterion = nn.CrossEntropyLoss()
+    net.eval()  # This further shuts down dropout, if any.
 
-    net.eval() # This further shuts down dropout, if any.
-
-    set_bn_modes(net) # Should be called after net.eval()
-
+    set_bn_modes(net)  # Should be called after net.eval()
 
     total_loss, total_l0, total_l1, total_residual, total_gnorm = 0, 0, 0, 0, 0
     total_sums, total_sums_gnorm = 0, 0
@@ -168,21 +180,44 @@ def gradinit(net, dataloader, args):
     data_iter = iter(dataloader)
     # get all the parameters by order
     params_list = get_ordered_params(net)
+    net.train()
     while True:
         eta = args.gradinit_eta
 
         # continue
         # get the first half of the minibatch
-        data_iter, init_inputs_0, init_targets_0 = get_batch(data_iter, dataloader)
+        data_iter, texts0, mels0, embeds0, idx0 = get_batch(data_iter, dataloader)
 
         # Get the second half of the data.
-        data_iter, init_inputs_1, init_targets_1 = get_batch(data_iter, dataloader)
+        data_iter, texts1, mels1, embeds1, idx1 = get_batch(data_iter, dataloader)
 
-        init_inputs = torch.cat([init_inputs_0, init_inputs_1])
-        init_targets = torch.cat([init_targets_0, init_targets_1])
+        # print(texts0.shape,
+        #       mels0.shape,
+        #       embeds0.shape)
+        # print(texts1.shape,
+        #       mels1.shape,
+        #       embeds1.shape)
+        #
+        # something like if len > else
+        init_inputs = torch.cat([texts0, pad2d(texts1, texts0.shape[-1])] if texts0.shape[-1] > texts1.shape[-1]
+                                else [texts1, pad2d(texts0, texts1.shape[-1])]).to(device)
+        init_mels = torch.cat([mels0, pad3d(mels1, mels0)] if mels0.shape[-1] > mels1.shape[-1]
+                              else [mels1, pad3d(mels0, mels1)]).to(device)
+        init_embeds = torch.cat([embeds0, embeds1]).to(device)
+        init_idx = idx0 + idx1
+
+        stop = torch.ones(init_mels.shape[0], init_mels.shape[2], device=device)
+        for j, k in enumerate(init_idx):
+            stop[j, :int(dataset.metadata[k][4]) - 1] = 0
+
         # compute the gradient and take one step
-        outputs = net(init_inputs)
-        init_loss = criterion(outputs, init_targets)
+        # outputs = net(init_inputs)
+        m1_hat, m2_hat, attention, stop_pred = net(init_inputs, init_mels, init_embeds)
+        m1_loss = F.mse_loss(m1_hat, init_mels) + F.l1_loss(m1_hat, init_mels)
+        m2_loss = F.mse_loss(m2_hat, init_mels)
+        stop_loss = F.binary_cross_entropy(stop_pred, stop)  # ?
+
+        init_loss = m1_loss + m2_loss + stop_loss
 
         all_grads = torch.autograd.grad(init_loss, params_list, create_graph=True)
 
@@ -214,18 +249,31 @@ def gradinit(net, dataloader, args):
 
             total_l0 += init_loss.item()
 
-            data_iter, inputs_2, targets_2 = get_batch(data_iter, dataloader)
-            if args.batch_no_overlap:
-                # sample a new batch for the half
-                data_iter, init_inputs_0, init_targets_0 = get_batch(data_iter, dataloader)
-            updated_inputs = torch.cat([init_inputs_0, inputs_2])
-            updated_targets = torch.cat([init_targets_0, targets_2])
+            data_iter, texts2, mels2, embeds2, idx2 = get_batch(data_iter, dataloader)
+
+            updated_inputs = torch.cat([texts0, pad2d(texts2, texts0.shape[-1])] if texts0.shape[-1] > texts2.shape[-1]
+                                       else [texts2, pad2d(texts0, texts2.shape[-1])]).to(device)
+            updated_mels = torch.cat([mels0, pad3d(mels2, mels0)] if mels0.shape[-1] > mels2.shape[-1]
+                                     else [mels2, pad3d(mels0, mels2)]).to(device)
+            updated_embeds = torch.cat([embeds0, embeds2]).to(device)
+            updated_idx = idx0 + idx2
+
+            stop = torch.ones(updated_mels.shape[0], updated_mels.shape[2], device=device)
+            for j, k in enumerate(updated_idx):
+                stop[j, :int(dataset.metadata[k][4]) - 1] = 0
 
             # compute loss using the updated network
             # net_top.opt_mode(True)
-            updated_outputs = net(updated_inputs)
+            m1_hat, m2_hat, attention, stop_pred = net(updated_inputs, updated_mels, updated_embeds)
             # net_top.opt_mode(False)
-            updated_loss = criterion(updated_outputs, updated_targets)
+            m1_loss = F.mse_loss(m1_hat, updated_mels) + \
+                      F.l1_loss(m1_hat, updated_mels)
+            m2_loss = F.mse_loss(m2_hat, updated_mels)
+            stop_loss = F.binary_cross_entropy(stop_pred, stop)  # ?
+
+            updated_loss = m1_loss + \
+                           m2_loss + \
+                           stop_loss
 
             # If eta is larger, we should expect obj_loss to be even smaller.
             obj_loss = updated_loss / eta
@@ -242,7 +290,8 @@ def gradinit(net, dataloader, args):
         total_iters += 1
         if (total_sums_gnorm > 0 and total_sums_gnorm % 10 == 0) or total_iters == args.gradinit_iters:
             stat_dict = get_scale_stats(net, optimizer)
-            print_str = "Iter {}, obj iters {}, eta {:.3e}, constraint count {} loss: {:.3e} ({:.3e}), init loss: {:.3e} ({:.3e}), update loss {:.3e} ({:.3e}), " \
+            print_str = "Iter {}, obj iters {}, eta {:.3e}, constraint count {} loss: {:.3e} ({:.3e}), init loss: " \
+                        "{:.3e} ({:.3e}), update loss {:.3e} ({:.3e}), " \
                         "total gnorm: {:.3e} ({:.3e})\t".format(
                 total_sums_gnorm, total_sums, eta, cs_count,
                 float(obj_loss), total_loss / total_sums if total_sums > 0 else -1,
@@ -258,42 +307,38 @@ def gradinit(net, dataloader, args):
             break
 
     recover_bn_modes(net)
-    if not os.path.exists('chks'):
-        os.makedirs('chks')
-    torch.save(net.state_dict(), 'chks/{}_init.pth'.format(args.expname))
+    return net
 
 
 def gradient_quotient(loss, params, eps=1e-5):
     grad = torch.autograd.grad(loss, params, create_graph=True)
-    prod = torch.autograd.grad(sum([(g**2).sum() / 2 for g in grad]), params,
-                             create_graph=True)
+    prod = torch.autograd.grad(sum([(g ** 2).sum() / 2 for g in grad]), params,
+                               create_graph=True)
     out = sum([((g - p) / (g + eps * (2 * (g >= 0).float() - 1).detach())
-               - 1).abs().sum() for g, p in zip(grad, prod)])
+                - 1).abs().sum() for g, p in zip(grad, prod)])
 
-    gnorm = sum([(g**2).sum().item() for g in grad])
+    gnorm = sum([(g ** 2).sum().item() for g in grad])
     return out / sum([p.data.numel() for p in params]), gnorm
 
 
 def metainit(net, dataloader, args, experiment=None):
-
     if args.gradinit_resume:
         print("Resuming metainit model from {}".format(args.gradinit_resume))
         sdict = torch.load(args.gradinit_resume)
         net.load_state_dict(sdict)
         return
 
-    if isinstance(net, torch.nn.DataParallel):
-        net_top = net.module
-    else:
-        net_top = net
+    # if isinstance(net, torch.nn.DataParallel):
+    #     net_top = net.module
+    # else:
+    #     net_top = net
 
     bias_params = [p for n, p in net.named_parameters() if 'bias' in n]
     weight_params = [p for n, p in net.named_parameters() if 'weight' in n]
 
-
     optimizer = RescaleAdam([{'params': weight_params, 'min_scale': args.gradinit_min_scale, 'lr': args.gradinit_lr},
-                                      {'params': bias_params, 'min_scale': 0, 'lr': args.gradinit_lr}],
-                                     grad_clip=args.gradinit_grad_clip)
+                             {'params': bias_params, 'min_scale': 0, 'lr': args.gradinit_lr}],
+                            grad_clip=args.gradinit_grad_clip)
 
     criterion = nn.CrossEntropyLoss()
 
@@ -339,5 +384,3 @@ def metainit(net, dataloader, args, experiment=None):
     if not os.path.exists('chks'):
         os.makedirs('chks')
     torch.save(net.state_dict(), 'chks/{}_init.pth'.format(args.expname))
-
-
