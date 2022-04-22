@@ -15,7 +15,7 @@ from synthesizer.models.tacotron.tacotron import Tacotron
 from synthesizer.models.tacotron.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
 from synthesizer.utils import ValueWindow
 from synthesizer.utils.plot import plot_spectrogram
-from synthesizer.utils import symbols
+from synthesizer.utils.symbols import symbols
 from synthesizer.utils.text import sequence_to_text
 from vocoder.display import *
 
@@ -33,7 +33,7 @@ def time_string():
 
 
 def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_every: int, force_restart: bool,
-          hparams, use_amp, multi_gpu, log_file, print_every, debug=False):
+          hparams, use_amp, multi_gpu, log_file, print_every, debug=False, *args, **kwargs):
     if debug:
         start_time = time.time()
         use_time = time.time()

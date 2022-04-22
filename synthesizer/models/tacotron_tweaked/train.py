@@ -3,6 +3,7 @@ import torch
 import torch.nn.functional as F
 import dllogger as DLLogger
 
+
 from torch import optim
 from torch.utils.data import DataLoader
 from datetime import datetime
@@ -15,14 +16,18 @@ from synthesizer.models.tacotron_tweaked.tacotron import Tacotron
 from synthesizer.models.tacotron_tweaked.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
 from synthesizer.utils import ValueWindow
 from synthesizer.utils.plot import plot_spectrogram
-from synthesizer.utils import symbols
+from synthesizer.utils.symbols import symbols
 from synthesizer.utils.text import sequence_to_text
 from vocoder.display import *
+
+from synthesizer.models.tacotron_tweaked.gradinit_utils import gradinit
+from torch.optim.lr_scheduler import CosineAnnealingLR
 
 # ah yes, the speed up
 torch.autograd.set_detect_anomaly(False)
 torch.autograd.profiler.profile(False)
 torch.autograd.profiler.emit_nvtx(False)
+torch.backends.cudnn.benchmark = True
 
 
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
@@ -31,9 +36,13 @@ def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
 def time_string():
     return datetime.now().strftime("%Y-%m-%d %H:%M")
 
+class Struct:
+    def __init__(self, **entries):
+        self.__dict__.update(entries)
 
 def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_every: int, force_restart: bool,
-          hparams, use_amp, multi_gpu, log_file, print_every, debug=False):
+          hparams, use_amp, multi_gpu, log_file, print_every, lr, wd, batch_size, gradinit_bsize,
+          n_epoch, debug=False, **args):
     if debug:
         start_time = time.time()
         use_time = time.time()
@@ -60,20 +69,13 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         use_time = time.time()
         print("Init time: {}, elapsed: {}, point 1".format(use_time, time.time() - start_time))
 
-    # Bookkeeping
     time_window = ValueWindow(100)
     loss_window = ValueWindow(100)
 
-    # From WaveRNN/train_tacotron.py
     if torch.cuda.is_available():
         dev_index = 0  # useful for multigpu
         device = torch.device(dev_index)
         from torch.cuda.amp import autocast
-
-        for session in hparams.tts_schedule:
-            _, _, _, batch_size = session
-            if batch_size % torch.cuda.device_count() != 0:
-                raise ValueError("`batch_size` must be evenly divisible by n_gpus!")
         if torch.cuda.device_count() > 1 and multi_gpu:
             print("Using devices:", [torch.cuda.get_device_name(i) for i in range(torch.cuda.device_count())])
         else:
@@ -86,9 +88,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     if debug:
         print("Init time: {}, elapsed: {}, point 2".format(use_time, time.time() - use_time))
         use_time = time.time()
-    # Instantiate Tacotron Model
-    print("\nInitialising Tacotron Model...\n")
 
+    print("\nInitialising Tacotron Tweaked Model...\n")
     model = Tacotron(embed_dims=hparams.tts_embed_dims,
                      num_chars=len(symbols),
                      encoder_dims=hparams.tts_encoder_dims,
@@ -104,8 +105,21 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                      stop_threshold=hparams.tts_stop_threshold,
                      speaker_embedding_size=hparams.speaker_embedding_size).to(device)
 
-    # Initialize the optimizer
-    optimizer = optim.Adam(model.parameters())
+    # Initialize the optimizer and model
+    # https://github.com/zhuchen03/gradinit/blob/master/train_cifar.py
+    parameters_bias = [p[1] for p in model.named_parameters() if 'bias' in p[0]]
+    parameters_scale = [p[1] for p in model.named_parameters() if 'scale' in p[0]]
+    parameters_others = [p[1] for p in model.named_parameters() if
+                         not ('bias' in p[0] or 'scale' in p[0] or 'autoinit' in p[0])]
+
+    optimizer = optim.SGD(
+        [{'params': parameters_bias, 'lr': lr/ 10.},
+         {'params': parameters_scale, 'lr':lr / 10.},
+         {'params': parameters_others}],
+        lr=lr * batch_size / 128.,
+        momentum=0.9,
+        weight_decay=wd)
+
     if debug:
         print("Init time: {}, elapsed: {}, point 3".format(use_time, time.time() - use_time))
         use_time = time.time()
@@ -135,20 +149,31 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     mel_dir = syn_dir.joinpath("mels")
     embed_dir = syn_dir.joinpath("embeds")
     dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
+
     if debug:
         print("Init time: {}, elapsed: {}, point 5".format(use_time, time.time() - use_time))
         use_time = time.time()
         print("Training sequence start")
 
+    gradinit_bsize = int(batch_size / 2) if gradinit_bsize < 0 else int(gradinit_bsize / 2)
     scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
     # if torch.cuda.device_count() > 1:
     #     model = nn.DataParallel(model)
     for i, session in enumerate(hparams.tts_schedule):
         current_step = model.get_step()
 
-        r, lr, max_step, batch_size = session
+        r, _, max_step, batch_size = session
 
         training_steps = max_step - current_step
+        collate_fn = partial(collate_synthesizer, r=r, hparams=hparams)
+        gradinit_trainloader = DataLoader(
+            dataset,
+            batch_size=gradinit_bsize,
+            shuffle=True, num_workers=4,
+            pin_memory=True)
+
+        gradinit(model, gradinit_trainloader, Struct(**args))
+        sgdr = CosineAnnealingLR(optimizer, n_epoch * len(gradinit_trainloader), eta_min=0, last_epoch=-1)
 
         # Do we need to change to the next session?
         if current_step >= max_step:
@@ -171,10 +196,6 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                       ("Learning Rate", lr),
                       ("Outputs/Step (r)", model.r)])
 
-        for p in optimizer.param_groups:
-            p["lr"] = lr
-
-        collate_fn = partial(collate_synthesizer, r=r, hparams=hparams)
         data_loader = DataLoader(dataset, batch_size, shuffle=True, num_workers=4, collate_fn=collate_fn,
                                  pin_memory=True)
 
@@ -242,6 +263,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
 
                 scaler.step(optimizer)
                 scaler.update()
+                sgdr.step()
 
                 time_window.append(time.time() - start_time)
                 loss_window.append(loss.item())

@@ -26,14 +26,45 @@ if __name__ == "__main__":
         "Do not load any saved model and restart from scratch.")
     parser.add_argument("--use_amp", action="store_true", help=\
         "Use Pytorch amp.")
+    parser.add_argument("--use_tweaked", action="store_true", help=\
+        "Use Tweaked")
     parser.add_argument("--multi_gpu", action="store_true", help=\
         "Use Multigpu")
-    parser.add_argument("--use_tweaked", action="store_true", help=\
-        "Use tweaked tacotron")
     parser.add_argument("--hparams", default="", help= \
         "Hyperparameter overrides as a comma-separated list of name=value pairs")
     parser.add_argument("--log_file", type=str, default="log.txt", help= \
         "Log filename")
+    parser.add_argument('--lr', default=0.1, type=float,
+                        help='base learning rate (default=0.1)')
+    parser.add_argument('--wd', default=1e-4, type=float,
+                        help='weight decay (default=1e-4)')
+    parser.add_argument('--gradinit_lr', default=1e-3, type=float,
+                        help='The learning rate of GradInit.')
+    parser.add_argument('--gradinit_iters', default=390, type=int,
+                        help='Total number of iterations for GradInit.')
+    parser.add_argument('--batch_size', default=16, type=int,
+                        help='Batch size')
+    parser.add_argument('--gradinit-alg', default='sgd', type=str,
+                        help='The target optimization algorithm, deciding the direction of the first gradient step.')
+    parser.add_argument('--gradinit-eta', default=0.1, type=float,
+                        help='The eta in GradInit.')
+    parser.add_argument('--gradinit-min-scale', default=0.01, type=float,
+                        help='The lower bound of the scaling factors.')
+    parser.add_argument('--gradinit-grad-clip', default=1, type=float,
+                        help='Gradient clipping (per dimension) for GradInit.')
+    parser.add_argument('--gradinit-gamma', default=float('inf'), type=float,
+                        help='The gradient norm constraint.')
+    parser.add_argument('--gradinit-normalize-grad', default=False, action='store_true',
+                        help='Whether to normalize the gradient for the algorithm A.')
+    parser.add_argument('--gradinit-resume', default='', type=str,
+                        help='Path to the gradinit or metainit initializations.')
+    parser.add_argument('--gradinit-bsize', default=16, type=int,
+                        help='Batch size for GradInit.')
+    parser.add_argument('--batch-no-overlap', default=False, action='store_true',
+                        help=r'Whether to make \tilde{S} and S different.')
+    parser.add_argument('--n_epoch', default=200, type=int,
+                        help='total number of epochs')
+
     args = parser.parse_args()
     print_args(args, parser)
 
