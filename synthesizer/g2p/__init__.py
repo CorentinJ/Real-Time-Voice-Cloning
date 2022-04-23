@@ -85,11 +85,20 @@ en_g2p = G2P(lang="en")
 ad = AlphabetDetector()
 
 
+def normalize_repetitions(word):
+    chars = [""]
+    for ch in word:
+        if chars[-1] != ch:
+            chars.append(ch)
+    return "".join(chars)
+
+
 def g2p_all(word):
     word = word[:9]
     if ad.is_latin(word):
         ourg2p = en_g2p
         word = word.upper()
+        word = normalize_repetitions(word)  # because of some words like чшшшшш
     else:  # elif ad.is_cyrillic(word):
         ourg2p = ru_g2p
     try:

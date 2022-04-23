@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import nni
+
 from utils.argutils import print_args
 import argparse
 
@@ -24,11 +26,11 @@ if __name__ == "__main__":
         "Print every N")
     parser.add_argument("-f", "--force_restart", action="store_true", help= \
         "Do not load any saved model and restart from scratch.")
-    parser.add_argument("--use_amp", action="store_true", help=\
+    parser.add_argument("--use_amp", action="store_true", help= \
         "Use Pytorch amp.")
-    parser.add_argument("--use_tweaked", action="store_true", help=\
+    parser.add_argument("--use_tweaked", action="store_true", help= \
         "Use Tweaked")
-    parser.add_argument("--multi_gpu", action="store_true", help=\
+    parser.add_argument("--multi_gpu", action="store_true", help= \
         "Use Multigpu")
     parser.add_argument("--hparams", default="", help= \
         "Hyperparameter overrides as a comma-separated list of name=value pairs")
@@ -40,7 +42,7 @@ if __name__ == "__main__":
                         help='weight decay (default=1e-4)')
     parser.add_argument('--gradinit_lr', default=1e-3, type=float,
                         help='The learning rate of GradInit.')
-    parser.add_argument('--gradinit_iters', default=390, type=int,
+    parser.add_argument('--gradinit_iters', default=390, type=int,  # 390
                         help='Total number of iterations for GradInit.')
     parser.add_argument('--batch_size', default=16, type=int,
                         help='Batch size')
@@ -62,6 +64,8 @@ if __name__ == "__main__":
                         help='Batch size for GradInit.')
     parser.add_argument('--batch-no-overlap', default=False, action='store_true',
                         help=r'Whether to make \tilde{S} and S different.')
+    parser.add_argument('--perf_limit', default=False, action='store_true',
+                        help="Whether to limit the dataloader")
     parser.add_argument('--n_epoch', default=200, type=int,
                         help='total number of epochs')
 
@@ -76,6 +80,7 @@ if __name__ == "__main__":
         from synthesizer.models.tacotron.train import train
 
     args.hparams = hparams.parse(args.hparams)
+    # args.hparams.update(nni.get_next_parameter())
 
     # Run the training
     train(**vars(args))

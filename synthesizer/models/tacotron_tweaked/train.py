@@ -1,3 +1,4 @@
+import nni
 import torch
 
 import torch.nn.functional as F
@@ -43,7 +44,7 @@ class Struct:
 
 def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_every: int, force_restart: bool,
           hparams, use_amp, multi_gpu, log_file, print_every, lr, wd, batch_size, gradinit_bsize,
-          n_epoch, debug=False, **args):
+          n_epoch, perf_limit, debug=False, **args):
     if debug:
         start_time = time.time()
         use_time = time.time()
@@ -73,7 +74,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     time_window = ValueWindow(100)
     loss_window = ValueWindow(100)
 
-    if torch.cuda.is_available():
+    if torch.cuda.is_available() or True:
         dev_index = 0  # useful for multigpu
         device = torch.device(dev_index)
         from torch.cuda.amp import autocast
@@ -127,6 +128,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     # Load the weights
     if force_restart or not weights_fpath.exists():
         print("\nStarting the training of Tacotron from scratch\n")
+        gradinit_do = True
         model.save(weights_fpath, optimizer)
 
         # Embeddings metadata
@@ -142,6 +144,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         print("\nLoading weights at %s" % weights_fpath)
         model.load(weights_fpath, optimizer)
         print("Tacotron weights loaded from step %d" % model.step)
+        gradinit_do = False
+    print("using gradinit" if gradinit_do else "not using gradinit")
     if debug:
         print("Init time: {}, elapsed: {}, point 4".format(use_time, time.time() - use_time))
         use_time = time.time()
@@ -157,10 +161,12 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         print("Training sequence start")
 
     gradinit_bsize = int(batch_size / 2) if gradinit_bsize < 0 else int(gradinit_bsize / 2)
-    print(f"gradinit_bsize: {gradinit_bsize}")
+    print(f"gradinit_bsize: {gradinit_bsize} ")  # twice as small as arg bsize because it will be multiplied in gradinit
     scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
     # if torch.cuda.device_count() > 1:
     #     model = nn.DataParallel(model)
+    DLLogger.init(backends=[JSONStreamBackend(Verbosity.DEFAULT, log_file),
+                            StdOutBackend(Verbosity.VERBOSE)])
     for i, session in enumerate(hparams.tts_schedule):
         current_step = model.get_step()
 
@@ -170,9 +176,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         collate_fn = partial(collate_synthesizer, r=r, hparams=hparams)
         gradinit_trainloader = DataLoader(dataset, gradinit_bsize, shuffle=True, num_workers=4, collate_fn=collate_fn,
                                           pin_memory=True)
-
-        model = gradinit(model, gradinit_trainloader, dataset, device, Struct(**args))
-        # torch.save(model, "tempmodel")  # juts in case
+        if gradinit_do:
+            model = gradinit(model, gradinit_trainloader, dataset, device, Struct(**args))
         sgdr = CosineAnnealingLR(optimizer, n_epoch * len(gradinit_trainloader), eta_min=0, last_epoch=-1)
 
         # Do we need to change to the next session?
@@ -205,12 +210,12 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         if debug:
             print("Training point 2", time.time() - use_time)
             use_time = time.time()
-        DLLogger.init(backends=[JSONStreamBackend(Verbosity.DEFAULT, log_file),
-                                StdOutBackend(Verbosity.VERBOSE)])
         dt_len = len(data_loader)
         print("Printing every", print_every, "steps")
         for epoch in range(1, epochs + 1):
             for i, (texts, mels, embeds, idx) in enumerate(data_loader, 1):
+                if perf_limit and i >= 500:  # leave this to me, should be 500
+                    break
                 # print(texts)
                 torch.cuda.synchronize()
                 # print(texts, texts[0])
@@ -318,7 +323,29 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 # Break out of loop to update training schedule
                 if step >= max_step:
                     break
-            # Add line break after every epoch
+
+
+def test(model, device, data_loader, dataset):
+    losses = []
+    for i, (texts, mels, embeds, idx) in enumerate(data_loader, 1):
+        if i == 5:
+            break
+        stop = torch.ones(mels.shape[0], mels.shape[2], device=device)
+        mels = mels.to(device)
+        for j, k in enumerate(idx):
+            stop[j, :int(dataset.metadata[k][4]) - 1] = 0
+        with torch.no_grad():
+            m1_hat, m2_hat, attention, stop_pred = model(texts.to(device), mels, embeds.to(device))
+        m1_loss = F.mse_loss(m1_hat, mels) + F.l1_loss(m1_hat, mels)
+        m2_loss = F.mse_loss(m2_hat, mels)
+        stop_loss = F.binary_cross_entropy(stop_pred, stop)  # ?
+
+        losses.append(float(m1_loss + m2_loss + stop_loss))
+    return round(1 - avg(losses), 2)
+
+
+def avg(x):
+    return sum(x) / len(x)
 
 
 def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
