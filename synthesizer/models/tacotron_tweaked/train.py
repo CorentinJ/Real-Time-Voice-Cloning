@@ -49,7 +49,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         start_time = time.time()
         use_time = time.time()
     models_dir.mkdir(exist_ok=True)
-
+    torch.cuda.empty_cache()
     model_dir = models_dir.joinpath(run_id)
     plot_dir = model_dir.joinpath("plots")
     wav_dir = model_dir.joinpath("wavs")

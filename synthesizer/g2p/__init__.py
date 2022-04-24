@@ -1,10 +1,13 @@
-from .data import PersianLexicon
-from .model import Encoder, Decoder
-from .config import DataConfigEn, DataConfigRu, ModelConfigEn, ModelConfigRu, TestConfigEn, TestConfigRu
-
+import torch
 from alphabet_detector import AlphabetDetector
 
-import torch
+from contextlib import contextmanager
+import threading
+import _thread
+
+from .config import DataConfigEn, DataConfigRu, ModelConfigEn, ModelConfigRu, TestConfigEn, TestConfigRu
+from .data import PersianLexicon
+from .model import Encoder, Decoder
 
 
 def load_model(model_path, model, lang):
@@ -93,8 +96,26 @@ def normalize_repetitions(word):
     return "".join(chars)
 
 
+class TimeoutException(Exception):
+    def __init__(self, msg=''):
+        self.msg = msg
+
+
+@contextmanager
+def time_limit(seconds, msg=''):
+    timer = threading.Timer(seconds, lambda: _thread.interrupt_main())
+    timer.start()
+    try:
+        yield
+    except KeyboardInterrupt:
+        raise TimeoutException("Timed out for operation {}".format(msg))
+    finally:
+        # if the action ends in specified time, timer is canceled
+        timer.cancel()
+
+
 def g2p_all(word):
-    word = word[:9]
+    word = word[:8]
     if ad.is_latin(word):
         ourg2p = en_g2p
         word = word.upper()
@@ -102,11 +123,15 @@ def g2p_all(word):
     else:  # elif ad.is_cyrillic(word):
         ourg2p = ru_g2p
     try:
-        res = ourg2p(word)
-    except:  #
+        with time_limit(2):
+            res = ourg2p(word)
+    except TimeoutException:
+        print(f"{word}", "timed out")
+        res = ourg2p(word[:5])  # guaranteed
+    except Exception as e:  #
         try:
             res = ru_g2p("".join(s if s in "абвгдеёжзийклмнопрстуфхцчшщъыьэюя" else "" for s in word))
-            print("fixed the word '", word, "'")
+            print("fixed the word '" + word + "'")
         except Exception as e1:
             print("err: ", e1)
             res = ourg2p("о")  # just so its not blank

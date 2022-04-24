@@ -43,9 +43,9 @@ hparams = HParams(
 
     # Tacotron Text-to-Speech (TTS)
     tts_embed_dims=512,  # Embedding dimension for the graphemes/phoneme inputs
-    tts_encoder_dims=384,
-    tts_decoder_dims=256,
-    tts_postnet_dims=768,
+    tts_encoder_dims=256,
+    tts_decoder_dims=128,
+    tts_postnet_dims=512,
     tts_encoder_K=5,
     tts_lstm_dims=1024,
     tts_postnet_K=5,
