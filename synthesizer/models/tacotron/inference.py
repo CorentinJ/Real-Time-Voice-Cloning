@@ -2,7 +2,7 @@ import torch
 from synthesizer.models.tacotron import audio
 from synthesizer.models.tacotron.hparams import hparams
 from synthesizer.models.tacotron.tacotron import Tacotron
-from synthesizer.utils import symbols
+from synthesizer.utils.symbols import symbols
 from synthesizer.utils.text import text_to_sequence
 # from vocoder.display import simple_table
 from pathlib import Path
