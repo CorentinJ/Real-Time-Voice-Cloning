@@ -11,7 +11,6 @@ from encoder import inference as encoder
 from encoder.params_model import model_embedding_size as speaker_embedding_size
 from synthesizer.models.tacotron.inference import Synthesizer
 from utils.argutils import print_args
-from utils.default_models import ensure_default_models
 from vocoder import inference as vocoder
 from synthesizer.g2p import g2p_main
 
@@ -65,7 +64,6 @@ if __name__ == '__main__':
 
     ## Load the models one by one.
     print("Preparing the encoder, the synthesizer and the vocoder...")
-    ensure_default_models(Path("saved_models"))
     encoder.load_model(args.enc_model_fpath)
     synthesizer = Synthesizer(args.syn_model_fpath)
     # else:

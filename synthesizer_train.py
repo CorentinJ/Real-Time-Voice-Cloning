@@ -42,7 +42,7 @@ if __name__ == "__main__":
                         help='weight decay (default=1e-4)')
     parser.add_argument('--gradinit_lr', default=1e-3, type=float,
                         help='The learning rate of GradInit.')
-    parser.add_argument('--gradinit_iters', default=390, type=int,  # 390
+    parser.add_argument('--gradinit_iters', default=390, type=int,
                         help='Total number of iterations for GradInit.')
     parser.add_argument('--batch_size', default=16, type=int,
                         help='Batch size')

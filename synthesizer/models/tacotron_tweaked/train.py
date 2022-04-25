@@ -253,22 +253,24 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
 
                 loss = m1_loss + m2_loss + stop_loss
 
-                optimizer.zero_grad(set_to_none=True)
-
                 # loss.backward()
-                scaler.scale(loss).backward()
-                scaler.unscale_(optimizer)
+                if loss < 2:  # fsr it becomes inf sometimes
+                    optimizer.zero_grad(set_to_none=True)
+                    scaler.scale(loss).backward()
+                    scaler.unscale_(optimizer)
 
-                if hparams.tts_clip_grad_norm is not None:
-                    grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), hparams.tts_clip_grad_norm)
-                    if np.isnan(grad_norm.cpu()):
-                        print("grad_norm was NaN!")
+                    if hparams.tts_clip_grad_norm is not None:
+                        grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), hparams.tts_clip_grad_norm)
+                        if np.isnan(grad_norm.cpu()):
+                            print("grad_norm was NaN!")
 
-                # optimizer.step()
+                    # optimizer.step()
 
-                scaler.step(optimizer)
-                scaler.update()
-                sgdr.step()
+                    scaler.step(optimizer)
+                    scaler.update()
+                    sgdr.step()
+                else:
+                    print(f"loss is {loss} fsr")
 
                 time_window.append(time.time() - start_time)
                 loss_window.append(loss.item())
@@ -293,6 +295,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                     # Must save latest optimizer state to ensure that resuming training
                     # doesn't produce artifacts
                     model.save(weights_fpath, optimizer)
+                    print("saved..")
                     DLLogger.flush()
 
                 # Evaluate model to generate samples
