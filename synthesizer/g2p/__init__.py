@@ -1,9 +1,9 @@
 import torch
-from alphabet_detector import AlphabetDetector
-
-from contextlib import contextmanager
 import threading
 import _thread
+
+from alphabet_detector import AlphabetDetector
+from contextlib import contextmanager
 
 from .config import DataConfigEn, DataConfigRu, ModelConfigEn, ModelConfigRu, TestConfigEn, TestConfigRu
 from .data import PersianLexicon
@@ -114,7 +114,7 @@ def time_limit(seconds, msg=''):
         timer.cancel()
 
 
-def g2p_all(word):
+def g2p_all(word, dl_logger):
     word = word[:8]
     if ad.is_latin(word):
         ourg2p = en_g2p
@@ -126,26 +126,47 @@ def g2p_all(word):
         with time_limit(2):
             res = ourg2p(word)
     except TimeoutException:
-        print(f"{word}", "timed out")
-        res = ourg2p(word[:5])  # guaranteed
-    except Exception as e:  #
-        try:
-            res = ru_g2p("".join(s if s in "абвгдеёжзийклмнопрстуфхцчшщъыьэюя" else "" for s in word))
-            print("fixed the word '" + word + "'")
-        except Exception as e1:
-            print("err: ", e1)
-            res = ourg2p("о")  # just so its not blank
-            print("err_word2: ", word)
-            print("ourg2p: ", ourg2p)
+        dl_logger.log("WARNING", data={
+            "timed out": word
+        })
+        res = ourg2p(word[:3])  # will do for some noises
+    except Exception:  #
+        res = ru_g2p("".join(s if s in "абвгдеёжзийклмнопрстуфхцчшщъыьэюя" else "" for s in word))
+        dl_logger.log("WARNING", data={
+            "fixed the word": word
+        })
     return res
 
 
-def s2ids(sentence):
+def s2ids(sentence, dl_logger):
     words = ["".join(s if s in "абвгдеёжзийклмнопрстуфхцчшщъыьэюяabcdefghijklmnopqrstuvwxyz" else "" for s in word)
              for word in sentence.split(" ")]
-    return [g2p_all(word) for word in words]
+    return [g2p_all(word, dl_logger) for word in words]
+
+
+class ShortLogger:
+    def __init__(self):
+        pass
+
+    def log(self, *args, **kwargs):
+        print(args, kwargs)
+
+
+inited = False
 
 
 def g2p_main(sentence):
-    ids = s2ids(sentence)
+    if not inited:
+        init()
+    ids = s2ids(sentence, dl_logger)
     return [item for sublist in ids for item in sublist]
+
+
+def init(dl_logger_=None):
+    global dl_logger, inited
+    if dl_logger_ is None:
+        dl_logger = ShortLogger()
+    else:
+        dl_logger = dl_logger_
+    inited = True
+

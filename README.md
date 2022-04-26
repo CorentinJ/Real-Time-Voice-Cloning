@@ -43,7 +43,7 @@ Then you can process this dataset using:
 python synthesizer_preprocess_audio.py datasets_root --datasets_name LibriTTS --subfolders train-clean-100 --no_alignments
 ```
 More info [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/issues/437#issuecomment-666099538).
-###4.1 Using the open_stt datasets(russian lang)
+### 4.1 Using the open_stt datasets(russian lang)
 If you use the datasets from [here](https://github.com/snakers4/open_stt), you can use the following command to preprocess it for the synthesizer training:
 ```
 python rus_opus_preprocess.py -d <dataset_root>
@@ -53,11 +53,21 @@ This will just rename the folders and convert the opuses to wavs.
 I also tweaked the original processor to detect the opus files so you can just pust the dataset to
 LibriTTS/train-clean-100/
 folder and skip converting to wavs.
+### 4.2 Training
+The fork currently support two versions of synthesizers: the vanilla Tacotron2 or the tweaked version, which has better attention understanding and better generalization, but is yet unstable in training and takes longer to generalize.
+Example vanilla synthesizer train command:
+```
+synthesizer_train.py rusmodel SV2TTS\synthesizer
+```
+Example tweaked synthesizer train command:
+```
+synthesizer_train.py rusmodeltweaked SV2TTS\synthesizer --use_tweaked 
+```
 ### 5. Launch the Toolbox
 You can then try the toolbox (not tested in this fork):
 
 `python demo_toolbox.py -d <datasets_root>`  
 or  
-`python demo_toolbox.py`  
+`python demo_toolbox.py` 
 
 depending on whether you downloaded any datasets. If you are running an X-server or if you have the error `Aborted (core dumped)`, see [this issue](https://github.com/CorentinJ/Real-Time-Voice-Cloning/issues/11#issuecomment-504733590).

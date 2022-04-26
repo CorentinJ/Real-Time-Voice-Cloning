@@ -2,14 +2,14 @@ import nni
 import torch
 
 import torch.nn.functional as F
-import dllogger as DLLogger
+# import dllogger as DLLogger
 
 from torch import optim
 from torch.utils.data import DataLoader
 from datetime import datetime
 from functools import partial
 from pathlib import Path
-from dllogger import StdOutBackend, JSONStreamBackend, Verbosity
+from dllogger import StdOutBackend, JSONStreamBackend, Verbosity, Logger
 
 from synthesizer.models.tacotron_tweaked import audio
 from synthesizer.models.tacotron_tweaked.tacotron import Tacotron
@@ -22,6 +22,9 @@ from vocoder.display import *
 
 from synthesizer.models.tacotron_tweaked.gradinit_utils import gradinit
 from torch.optim.lr_scheduler import CosineAnnealingLR
+
+from synthesizer.g2p import init
+
 
 # ah yes, the speed up
 torch.autograd.set_detect_anomaly(False)
@@ -146,6 +149,9 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         print("Tacotron weights loaded from step %d" % model.step)
         gradinit_do = False
     print("using gradinit" if gradinit_do else "not using gradinit")
+    dl_logger = Logger(backends=[JSONStreamBackend(Verbosity.DEFAULT, log_file),
+                                 StdOutBackend(Verbosity.VERBOSE)])
+    init(dl_logger_=dl_logger)
     if debug:
         print("Init time: {}, elapsed: {}, point 4".format(use_time, time.time() - use_time))
         use_time = time.time()
@@ -165,8 +171,6 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
     # if torch.cuda.device_count() > 1:
     #     model = nn.DataParallel(model)
-    DLLogger.init(backends=[JSONStreamBackend(Verbosity.DEFAULT, log_file),
-                            StdOutBackend(Verbosity.VERBOSE)])
     for i, session in enumerate(hparams.tts_schedule):
         current_step = model.get_step()
 
@@ -279,13 +283,13 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 k = step // 1000
 
                 msg = {
-                    "Loss:": f"{loss_window.average:#.4}",
+                    "Loss": f"{loss_window.average:#.4}",
                     "steps/s": f"{1. / time_window.average:#.2}",
-                    "Step:": step,
-                    "One step time: ": str(round(time.time() - start_time, 2)) + "s"
+                    "Step": step,
+                    "One step time": str(round(time.time() - start_time, 2)) + "s"
                 }
                 if i % print_every == 0:
-                    DLLogger.log(step=(epoch, str(i) + "/" + str(dt_len)), data=msg)
+                    dl_logger.log(step=(epoch, str(i) + "/" + str(dt_len)), data=msg)
                 # Backup or save model as appropriate
                 if backup_every != 0 and step % backup_every == 0:
                     backup_fpath = weights_fpath.parent / f"synthesizer_{k:06d}.pt"
@@ -295,8 +299,10 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                     # Must save latest optimizer state to ensure that resuming training
                     # doesn't produce artifacts
                     model.save(weights_fpath, optimizer)
-                    print("saved..")
-                    DLLogger.flush()
+                    dl_logger.log("INFO", data={
+                        "status": "saved.."
+                    })
+                    dl_logger.flush()
 
                 # Evaluate model to generate samples
                 epoch_eval = hparams.tts_eval_interval == -1 and i == steps_per_epoch  # If epoch is done
