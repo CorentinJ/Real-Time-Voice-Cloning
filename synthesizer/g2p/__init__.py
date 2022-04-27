@@ -165,7 +165,11 @@ def g2p_main(sentence):
 def init(dl_logger_=None):
     global dl_logger, inited
     if dl_logger_ is None:
-        dl_logger = ShortLogger()
+        try:
+            from synthesizer.models.tacotron_tweaked.train import dl_logger
+        except Exception as e:
+            print(e)
+            dl_logger = ShortLogger()
     else:
         dl_logger = dl_logger_
     inited = True

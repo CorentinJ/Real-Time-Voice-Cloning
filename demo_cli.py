@@ -14,7 +14,6 @@ from utils.argutils import print_args
 from vocoder import inference as vocoder
 from synthesizer.g2p import g2p_main
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -23,7 +22,7 @@ if __name__ == '__main__':
                         default="saved_models/default/encoder.pt",
                         help="Path to a saved encoder")
     parser.add_argument("-s", "--syn_model_fpath", type=Path,
-                        default="saved_models/rusmodelamp/synthesizer.pt",
+                        default="saved_models/rusmodeltweaked/synthesizer.pt",
                         help="Path to a saved synthesizer")
     parser.add_argument("-v", "--voc_model_fpath", type=Path,
                         default="saved_models/default/vocoder.pt",
@@ -31,12 +30,11 @@ if __name__ == '__main__':
     # parser.add_argument("-b", "--beta_options", action=argparse.BooleanOptionalAction,
     #                     default=True,
     #                     help="Enables beta options, such as nothing")
-    parser.add_argument("--cpu", action="store_true", help=\
-        "If True, processing is done on CPU, even when a GPU is available.")
-    parser.add_argument("--no_sound", action="store_true", help=\
-        "If True, audio won't be played.")
-    parser.add_argument("--seed", type=int, default=None, help=\
-        "Optional random number seed value to make toolbox deterministic.")
+    parser.add_argument("--cpu", action="store_true", help="If True, processing is done on CPU, even when a GPU is "
+                                                           "available.")
+    parser.add_argument("--no_sound", action="store_true", help= "If True, audio won't be played.")
+    parser.add_argument("--seed", type=int, default=None, help="Optional random number seed value to make toolbox "
+                                                               "deterministic.")
     args = parser.parse_args()
     arg_dict = vars(args)
     print_args(args, parser)
@@ -52,13 +50,13 @@ if __name__ == '__main__':
         gpu_properties = torch.cuda.get_device_properties(device_id)
         ## Print some environment information (for debugging purposes)
         print("Found %d GPUs available. Using GPU %d (%s) of compute capability %d.%d with "
-            "%.1fGb total memory.\n" %
-            (torch.cuda.device_count(),
-            device_id,
-            gpu_properties.name,
-            gpu_properties.major,
-            gpu_properties.minor,
-            gpu_properties.total_memory / 1e9))
+              "%.1fGb total memory.\n" %
+              (torch.cuda.device_count(),
+               device_id,
+               gpu_properties.name,
+               gpu_properties.major,
+               gpu_properties.minor,
+               gpu_properties.total_memory / 1e9))
     else:
         print("Using CPU for inference.\n")
 
@@ -69,7 +67,6 @@ if __name__ == '__main__':
     # else:
     #     synthesizer = Synthesizer(args.syn_model_fpath)
     vocoder.load_model(args.voc_model_fpath)
-
 
     ## Run a test
     print("Testing your configuration with small inputs.")
@@ -114,7 +111,6 @@ if __name__ == '__main__':
 
     print("All test passed! You can now synthesize speech.\n\n")
 
-
     ## Interactive speech generation
     print("This is a GUI-less example of interface to SV2TTS. The purpose of this script is to "
           "show how you can interface this project easily with your own. See the source code for "
@@ -124,7 +120,7 @@ if __name__ == '__main__':
     num_generated = 0
     while True:
         try:
-        # Get the reference audio filepath
+            # Get the reference audio filepath
             message = "Reference voice: enter an audio filepath of a voice to be cloned (mp3, " \
                       "wav, m4a, flac, ...):\n"
             in_fpath = Path(input(message).replace("\"", "").replace("\'", ""))
@@ -147,7 +143,6 @@ if __name__ == '__main__':
             embed = encoder.embed_utterance(preprocessed_wav)
             print("Created the embedding")
 
-
             ## Generating the spectrogram
             text = input("Write a sentence (+-20 words) to be synthesized:\n")
 
@@ -159,8 +154,8 @@ if __name__ == '__main__':
                 #     synthesizer = Synthesizer(args.syn_model_fpath)
 
             # The synthesizer works in batch, so you need to put your data in a list or numpy array
-            #before: texts = [text]   # ["cdab"]
-            texts = g2p_main(text.lower())   # [["c", "d"], ["a", "b"], ...]
+            # before: texts = [text]   # ["cdab"]
+            texts = g2p_main(text.lower())  # [["c", "d"], ["a", "b"], ...]
             # texts = texts + ["_________________________________________________"]
             print(texts)
             embeds = [embed]
@@ -169,7 +164,6 @@ if __name__ == '__main__':
             specs = synthesizer.synthesize_spectrograms(texts, embeds)
             spec = specs[0]
             print("Created the mel spectrogram")
-
 
             ## Generating the waveform
             print("Synthesizing the waveform:")
@@ -183,7 +177,6 @@ if __name__ == '__main__':
             # spectrogram, the more time-efficient the vocoder.
             generated_wav = vocoder.infer_waveform(spec)
 
-
             ## Post-generation
             # There's a bug with sounddevice that makes the audio cut one second earlier, so we
             # pad it.
@@ -195,6 +188,7 @@ if __name__ == '__main__':
             # Play the audio (non-blocking)
             if not args.no_sound:
                 import sounddevice as sd
+
                 try:
                     sd.stop()
                     sd.play(generated_wav, synthesizer.sample_rate)

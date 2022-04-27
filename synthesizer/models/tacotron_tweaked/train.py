@@ -2,8 +2,6 @@ import nni
 import torch
 
 import torch.nn.functional as F
-# import dllogger as DLLogger
-
 from torch import optim
 from torch.utils.data import DataLoader
 from datetime import datetime
@@ -32,6 +30,9 @@ torch.autograd.profiler.profile(False)
 torch.autograd.profiler.emit_nvtx(False)
 torch.backends.cudnn.benchmark = True
 
+dl_logger = Logger(backends=[JSONStreamBackend(Verbosity.DEFAULT, 'log.txt'),
+                                 StdOutBackend(Verbosity.VERBOSE)])
+
 
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
 
@@ -46,7 +47,7 @@ class Struct:
 
 
 def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_every: int, force_restart: bool,
-          hparams, use_amp, multi_gpu, log_file, print_every, lr, wd, batch_size, gradinit_bsize,
+          hparams, use_amp, multi_gpu, print_every, wd, batch_size, gradinit_bsize,
           n_epoch, perf_limit, debug=False, **args):
     if debug:
         start_time = time.time()
@@ -117,40 +118,12 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     parameters_others = [p[1] for p in model.named_parameters() if
                          not ('bias' in p[0] or 'scale' in p[0] or 'autoinit' in p[0])]
 
-    optimizer = optim.SGD(
-        [{'params': parameters_bias, 'lr': lr / 10.},
-         {'params': parameters_scale, 'lr': lr / 10.},
-         {'params': parameters_others}],
-        lr=lr * batch_size / 128.,
-        momentum=0.9,
-        weight_decay=wd)
-
     if debug:
         print("Init time: {}, elapsed: {}, point 3".format(use_time, time.time() - use_time))
         use_time = time.time()
     # Load the weights
-    if force_restart or not weights_fpath.exists():
-        print("\nStarting the training of Tacotron from scratch\n")
-        gradinit_do = True
-        model.save(weights_fpath, optimizer)
 
-        # Embeddings metadata
-        char_embedding_fpath = meta_folder.joinpath("CharacterEmbeddings.tsv")
-        with open(char_embedding_fpath, "w", encoding="utf-8") as f:
-            for symbol in symbols:
-                if symbol == " ":
-                    symbol = "\\s"  # For visual purposes, swap space with \s
-
-                f.write("{}\n".format(symbol))
-
-    else:
-        print("\nLoading weights at %s" % weights_fpath)
-        model.load(weights_fpath, optimizer)
-        print("Tacotron weights loaded from step %d" % model.step)
-        gradinit_do = False
-    print("using gradinit" if gradinit_do else "not using gradinit")
-    dl_logger = Logger(backends=[JSONStreamBackend(Verbosity.DEFAULT, log_file),
-                                 StdOutBackend(Verbosity.VERBOSE)])
+    global dl_logger
     init(dl_logger_=dl_logger)
     if debug:
         print("Init time: {}, elapsed: {}, point 4".format(use_time, time.time() - use_time))
@@ -161,20 +134,41 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     embed_dir = syn_dir.joinpath("embeds")
     dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
 
-    if debug:
-        print("Init time: {}, elapsed: {}, point 5".format(use_time, time.time() - use_time))
-        use_time = time.time()
-        print("Training sequence start")
-
     gradinit_bsize = int(batch_size / 2) if gradinit_bsize < 0 else int(gradinit_bsize / 2)
-    print(f"gradinit_bsize: {gradinit_bsize} ")  # twice as small as arg bsize because it will be multiplied in gradinit
     scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
     # if torch.cuda.device_count() > 1:
     #     model = nn.DataParallel(model)
     for i, session in enumerate(hparams.tts_schedule):
-        current_step = model.get_step()
+        r, lr, max_step, batch_size = session
+        if force_restart or not weights_fpath.exists():
+            print("\nStarting the training of Tacotron from scratch\n")
+            gradinit_do = True
+            model.save(weights_fpath, optimizer)
 
-        r, _, max_step, batch_size = session
+            # Embeddings metadata
+            char_embedding_fpath = meta_folder.joinpath("CharacterEmbeddings.tsv")
+            with open(char_embedding_fpath, "w", encoding="utf-8") as f:
+                for symbol in symbols:
+                    if symbol == " ":
+                        symbol = "\\s"  # For visual purposes, swap space with \s
+
+                    f.write("{}\n".format(symbol))
+
+        else:
+            print("\nLoading weights at %s" % weights_fpath)
+            model.load(weights_fpath, optimizer)
+            print("Tacotron weights loaded from step %d" % model.step)
+            gradinit_do = False
+        print("using gradinit" if gradinit_do else "not using gradinit")
+        optimizer = optim.SGD(
+            [{'params': parameters_bias, 'lr': lr / 10.},
+             {'params': parameters_scale, 'lr': lr / 10.},
+             {'params': parameters_others}],
+            lr=lr * batch_size / 128.,
+            momentum=0.9,
+            weight_decay=wd)
+
+        current_step = model.get_step()
 
         training_steps = max_step - current_step
         collate_fn = partial(collate_synthesizer, r=r, hparams=hparams)
@@ -253,7 +247,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 # Backward pass
                 m1_loss = F.mse_loss(m1_hat, mels) + F.l1_loss(m1_hat, mels)
                 m2_loss = F.mse_loss(m2_hat, mels)
-                stop_loss = F.binary_cross_entropy(stop_pred, stop)  # ?
+                stop_loss = F.binary_cross_entropy(stop_pred, stop)
 
                 loss = m1_loss + m2_loss + stop_loss
 

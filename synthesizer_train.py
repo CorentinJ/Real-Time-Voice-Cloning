@@ -32,12 +32,8 @@ if __name__ == "__main__":
         "Use Tweaked")
     parser.add_argument("--multi_gpu", action="store_true", help= \
         "Use Multigpu")
-    parser.add_argument("--hparams", default="", help= \
-        "Hyperparameter overrides as a comma-separated list of name=value pairs")
-    parser.add_argument("--log_file", type=str, default="log.txt", help= \
-        "Log filename")
-    parser.add_argument('--lr', default=0.1, type=float,
-                        help='base learning rate (default=0.1)')
+    parser.add_argument("--hparams", default="", help="Hyperparameter overrides as a comma-separated list of "
+                                                      "name=value pairs")
     parser.add_argument('--wd', default=1e-4, type=float,
                         help='weight decay (default=1e-4)')
     parser.add_argument('--gradinit_lr', default=1e-3, type=float,
