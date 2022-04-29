@@ -243,7 +243,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
             loss = m1_loss + m2_loss + stop_loss
 
             # loss.backward()
-            if loss < 25:  # loss limit, in case it goes inf
+            if loss < loss_window.average+0.15 and len(loss_window) > 20 or loss < 25 and len(loss_window) < 20:  #
+                # loss limit
                 optimizer.zero_grad(set_to_none=True)
                 scaler.scale(loss).backward()
                 scaler.unscale_(optimizer)
@@ -259,7 +260,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 scaler.update()
                 sgdr.step()
             else:
-                print(f"loss is {loss} fsr")
+                print(f"loss is {loss}, higher then avg, which is {loss_window.average+0.15}")
 
             time_window.append(time.time() - start_time)
             loss_window.append(loss.item())

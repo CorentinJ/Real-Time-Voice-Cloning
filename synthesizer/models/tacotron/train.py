@@ -34,7 +34,7 @@ def time_string():
 
 
 def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_every: int, force_restart: bool,
-          hparams, use_amp, multi_gpu, log_file, print_every, debug=False, *args, **kwargs):
+          hparams, use_amp, multi_gpu, print_every, debug=False, *args, **kwargs):
     if debug:
         start_time = time.time()
         use_time = time.time()
@@ -144,6 +144,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
     # if torch.cuda.device_count() > 1:
     #     model = nn.DataParallel(model)
+    DLLogger.init(backends=[JSONStreamBackend(Verbosity.DEFAULT, 'log.txt'),
+                            StdOutBackend(Verbosity.VERBOSE)])
     for i, session in enumerate(hparams.tts_schedule):
         current_step = model.get_step()
 
@@ -185,8 +187,6 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         if debug:
             print("Training point 2", time.time() - use_time)
             use_time = time.time()
-        DLLogger.init(backends=[JSONStreamBackend(Verbosity.DEFAULT, log_file),
-                                StdOutBackend(Verbosity.VERBOSE)])
         dt_len = len(data_loader)
         print("Printing every", print_every, "steps")
         for epoch in range(1, epochs + 1):
