@@ -15,6 +15,13 @@ class HParams(object):
     def __repr__(self):
         return pprint.pformat(self.__dict__)
 
+    def get_max(self, x):
+        for _, _, max_step, _ in self.tts_schedule:
+            if x < max_step:
+                return max_step
+        print("you are overtraining man")
+        return x * 2
+
     def parse(self, string):
         # Overrides hparams from a comma-separated string of name=value pairs
         if len(string) > 0:
@@ -64,6 +71,15 @@ hparams = HParams(
                   (2, 1e-4, 160_000, 12),  # r = reduction factor (# of mel frames
                   (2, 3e-5, 320_000, 12),  # synthesized for each decoder iteration)
                   (2, 1e-5, 640_000, 12)],  # lr = learning rate
+
+    tts_schedule_dict={
+        20_000: (2, 1e-3, 20_000, 12),  # Progressive training schedule
+        40_000: (2, 5e-4, 40_000, 12),  # (r, lr, step, batch_size)
+        80_000: (2, 2e-4, 80_000, 12),  #
+        160_000: (2, 1e-4, 160_000, 12),  # r = reduction factor (# of mel frames
+        320_000: (2, 3e-5, 320_000, 12),  # synthesized for each decoder iteration)
+        640_000: (2, 1e-5, 640_000, 12)
+    },
 
     tts_clip_grad_norm=1.0,  # clips the gradient norm to prevent explosion - set to None if not needed
     tts_eval_interval=500,  # Number of steps between model evaluation (sample generation)
