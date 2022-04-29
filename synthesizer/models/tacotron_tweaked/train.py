@@ -243,7 +243,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
             loss = m1_loss + m2_loss + stop_loss
 
             # loss.backward()
-            if loss < 2:  # fsr it becomes inf sometimes
+            if loss < 25:  # loss limit, in case it goes inf
                 optimizer.zero_grad(set_to_none=True)
                 scaler.scale(loss).backward()
                 scaler.unscale_(optimizer)
