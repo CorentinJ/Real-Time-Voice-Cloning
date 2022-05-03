@@ -22,6 +22,7 @@ from synthesizer.models.tacotron_tweaked.gradinit_utils import gradinit
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
 from synthesizer.g2p import init
+from adabelief_pytorch import AdaBelief
 
 
 # ah yes, the speed up
@@ -136,10 +137,12 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
 
     gradinit_bsize = int(batch_size / 2) if gradinit_bsize < 0 else int(gradinit_bsize / 2)
     scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
+    optimizer = AdaBelief(model.parameters(), lr=1e-3, eps=1e-16, betas=(0.9, 0.999), weight_decouple=True,
+                          rectify=False)
     if force_restart or not weights_fpath.exists():
         print("\nStarting the training of Tacotron from scratch\n")
         gradinit_do = True
-        model.save(weights_fpath, None)
+        model.save(weights_fpath, optimizer)
 
         # Embeddings metadata
         char_embedding_fpath = meta_folder.joinpath("CharacterEmbeddings.tsv")
@@ -152,17 +155,10 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
 
     else:
         print("\nLoading weights at %s" % weights_fpath)
-        model.load(weights_fpath, None)
+        model.load(weights_fpath, optimizer)
         print("Tacotron weights loaded from step %d" % model.step)
         gradinit_do = False
     r, lr, max_step, batch_size = hparams.tts_schedule_dict[hparams.get_max(model.step)]
-    optimizer = optim.SGD(
-        [{'params': parameters_bias, 'lr': lr / 10.},
-         {'params': parameters_scale, 'lr': lr / 10.},
-         {'params': parameters_others}],
-        lr=lr * batch_size / 128.,
-        momentum=0.9,
-        weight_decay=wd)
     if force_restart or not weights_fpath.exists():
         model.save(weights_fpath, optimizer)
     else:
@@ -177,7 +173,6 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                                       pin_memory=True)
     if gradinit_do:
         model = gradinit(model, gradinit_trainloader, dataset, device, Struct(**args))
-    sgdr = CosineAnnealingLR(optimizer, n_epoch * len(gradinit_trainloader), eta_min=0, last_epoch=-1)
 
     if debug:
         print("Training point 1", time.time() - use_time)
@@ -243,24 +238,23 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
             loss = m1_loss + m2_loss + stop_loss
 
             # loss.backward()
-            if loss < loss_window.average+0.15 and len(loss_window) > 20 or loss < 25 and len(loss_window) < 20:  #
-                # loss limit
-                optimizer.zero_grad(set_to_none=True)
-                scaler.scale(loss).backward()
-                scaler.unscale_(optimizer)
+            # if loss < loss_window.average+0.15 and len(loss_window) > 20 or loss < 25 and len(loss_window) < 20:  #
+            # loss limit
+            optimizer.zero_grad(set_to_none=True)
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
 
-                if hparams.tts_clip_grad_norm is not None:
-                    grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), hparams.tts_clip_grad_norm)
-                    if np.isnan(grad_norm.cpu()):
-                        print("grad_norm was NaN!")
+            if hparams.tts_clip_grad_norm is not None:
+                grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), hparams.tts_clip_grad_norm)
+                if np.isnan(grad_norm.cpu()):
+                    print("grad_norm was NaN!")
 
-                # optimizer.step()
+            # optimizer.step()
 
-                scaler.step(optimizer)
-                scaler.update()
-                sgdr.step()
-            else:
-                print(f"loss is {loss}, higher then avg, which is {loss_window.average+0.15}")
+            scaler.step(optimizer)
+            scaler.update()
+            # else:
+            #     print(f"loss is {loss}, higher then avg, which is {loss_window.average+0.15}")
 
             time_window.append(time.time() - start_time)
             loss_window.append(loss.item())

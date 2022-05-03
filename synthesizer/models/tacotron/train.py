@@ -19,6 +19,8 @@ from synthesizer.utils.symbols import symbols
 from synthesizer.utils.text import sequence_to_text
 from vocoder.display import *
 
+from adabelief_pytorch import AdaBelief
+
 # ah yes, the speed up
 torch.autograd.set_detect_anomaly(False)
 torch.autograd.profiler.profile(False)
@@ -106,7 +108,9 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                      speaker_embedding_size=hparams.speaker_embedding_size).to(device)
 
     # Initialize the optimizer
-    optimizer = optim.Adam(model.parameters())
+    # optimizer = optim.Adam(model.parameters())
+    optimizer = AdaBelief(model.parameters(), lr=1e-3, eps=1e-16, betas=(0.9, 0.999), weight_decouple=True,
+                          rectify=False)
     if debug:
         print("Init time: {}, elapsed: {}, point 3".format(use_time, time.time() - use_time))
         use_time = time.time()
@@ -140,8 +144,6 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         print("Init time: {}, elapsed: {}, point 5".format(use_time, time.time() - use_time))
         use_time = time.time()
         print("Training sequence start")
-
-    scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
     # if torch.cuda.device_count() > 1:
     #     model = nn.DataParallel(model)
     DLLogger.init(backends=[JSONStreamBackend(Verbosity.DEFAULT, 'log.txt'),
@@ -150,6 +152,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         current_step = model.get_step()
 
         r, lr, max_step, batch_size = session
+        optimizer = AdaBelief(model.parameters(), lr=lr, eps=1e-16, betas=(0.9, 0.999), weight_decouple=True,
+                              rectify=False)
 
         training_steps = max_step - current_step
 
@@ -230,19 +234,14 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
 
                 optimizer.zero_grad(set_to_none=True)
 
-                # loss.backward()
-                scaler.scale(loss).backward()
-                scaler.unscale_(optimizer)
+                loss.backward()
 
                 if hparams.tts_clip_grad_norm is not None:
                     grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), hparams.tts_clip_grad_norm)
                     if np.isnan(grad_norm.cpu()):
                         print("grad_norm was NaN!")
 
-                # optimizer.step()
-
-                scaler.step(optimizer)
-                scaler.update()
+                optimizer.step()
 
                 time_window.append(time.time() - start_time)
                 loss_window.append(loss.item())
@@ -267,6 +266,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                     # Must save latest optimizer state to ensure that resuming training
                     # doesn't produce artifacts
                     model.save(weights_fpath, optimizer)
+                    print("saved..")
                     DLLogger.flush()
 
                 # Evaluate model to generate samples
