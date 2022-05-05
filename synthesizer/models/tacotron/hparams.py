@@ -50,7 +50,7 @@ hparams = HParams(
     tts_lstm_dims=1024,
     tts_postnet_K=5,
     tts_num_highways=4,
-    tts_dropout=0.5,
+    tts_dropout=0.4,
     tts_cleaner_names=["english_cleaners"],
     tts_stop_threshold=-3.4,  # Value below which audio generation ends.
     # For example, for a range of [-4, 4], this
@@ -58,12 +58,12 @@ hparams = HParams(
     # frame that has all values < -3.4
 
     # Tacotron Training
-    tts_schedule=[(2, 1e-3, 20_000, 12),  # Progressive training schedule
-                  (2, 5e-4, 40_000, 12),  # (r, lr, step, batch_size)
-                  (2, 2e-4, 80_000, 12),  #
-                  (2, 1e-4, 160_000, 12),  # r = reduction factor (# of mel frames
-                  (2, 3e-5, 320_000, 12),  # synthesized for each decoder iteration)
-                  (2, 1e-5, 640_000, 12)],  # lr = learning rate
+    tts_schedule=[(2, 1e-3, 15_000, 12),  # Progressive training schedule
+                  (2, 5e-4, 35_000, 12),  # (r, lr, step, batch_size)
+                  (2, 2e-4, 75_000, 10),  #
+                  (2, 1e-4, 140_000, 10),  # r = reduction factor (# of mel frames
+                  (2, 3e-5, 280_000, 10),  # synthesized for each decoder iteration)
+                  (2, 1e-5, 560_000, 10)],  # lr = learning rate
 
     tts_clip_grad_norm=1.0,  # clips the gradient norm to prevent explosion - set to None if not needed
     tts_eval_interval=500,  # Number of steps between model evaluation (sample generation)
@@ -91,7 +91,7 @@ hparams = HParams(
     #               and [0, max_abs_value] if False
     trim_silence=True,  # Use with sample_rate of 16000 for best results
 
-    ### SV2TTS
+    # SV2TTS
     speaker_embedding_size=256,  # Dimension for the speaker embedding
     silence_min_duration_split=0.4,  # Duration in seconds of a silence for an utterance to be split
     utterance_min_duration=1.6,  # Duration in seconds below which utterances are discarded

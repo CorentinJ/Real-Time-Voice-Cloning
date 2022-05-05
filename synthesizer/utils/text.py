@@ -26,4 +26,5 @@ def text_to_sequence(text):
 def sequence_to_text(sequence):
     """Converts a sequence of IDs back to a string"""
     # print(sequence)
-    return "".join([_id_to_symbol[symbol] for symbol in sequence]).replace("<eos>", " ").strip().capitalize().replace("_", "")
+    return "".join([_id_to_symbol[symbol] for symbol in sequence])\
+        .replace("<eos>", " ").strip().capitalize().replace("_", "")

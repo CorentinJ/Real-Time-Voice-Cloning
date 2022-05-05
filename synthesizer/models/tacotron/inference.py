@@ -66,7 +66,8 @@ class Synthesizer:
         self._model.eval()
 
         if self.verbose:
-            print("Loaded synthesizer \"%s\" trained to step %d" % (self.model_fpath.name, self._model.state_dict()["step"]))
+            print("Loaded synthesizer \"%s\" trained to step %d" % (
+            self.model_fpath.name, self._model.state_dict()["step"]))
 
     def synthesize_spectrograms(self, texts,
                                 embeddings: Union[np.ndarray, List[np.ndarray]],
@@ -86,22 +87,20 @@ class Synthesizer:
         if not self.is_loaded():
             self.load()
 
-        # Preprocess text inputs
-        _inputs = [text_to_sequence(text)[:-1] for text in texts]
-        # print(_inputs)
-        inputs = [[item for sublist in _inputs for item in sublist]]
-        # print("inputs: ", inputs)
+        texts = [item for sublist in texts for item in sublist]
+        inputs = text_to_sequence(texts)
+
         if not isinstance(embeddings, list):
             embeddings = [embeddings]
 
         # Batch inputs
-        batched_inputs = [inputs[i:i+hparams.synthesis_batch_size]
-                             for i in range(0, len(inputs), hparams.synthesis_batch_size)]
-        batched_embeds = [embeddings[i:i+hparams.synthesis_batch_size]
-                             for i in range(0, len(embeddings), hparams.synthesis_batch_size)]
+        batched_inputs = [inputs[i:i + hparams.synthesis_batch_size]
+                          for i in range(0, len(inputs), hparams.synthesis_batch_size)]
+        batched_embeds = [embeddings[i:i + hparams.synthesis_batch_size]
+                          for i in range(0, len(embeddings), hparams.synthesis_batch_size)]
 
         specs = []
-        alignments=None
+        alignments = None
         for i, batch in enumerate(batched_inputs, 1):
             if self.verbose:
                 print(f"\n| Generating {i}/{len(batched_inputs)}")
@@ -113,7 +112,7 @@ class Synthesizer:
             chars = np.stack(chars)
 
             # Stack speaker embeddings into 2D array for batch processing
-            speaker_embeds = np.stack(batched_embeds[i-1])
+            speaker_embeds = np.stack(batched_embeds[i - 1])
 
             # Convert to tensor
             chars = torch.tensor(chars).long().to(self.device)

@@ -1,3 +1,5 @@
+import re
+
 import torch
 import threading
 import _thread
@@ -115,7 +117,6 @@ def time_limit(seconds, msg=''):
 
 
 def g2p_all(word, dl_logger):
-    word = word[:8]
     if ad.is_latin(word):
         ourg2p = en_g2p
         word = word.upper()
@@ -131,7 +132,8 @@ def g2p_all(word, dl_logger):
         })
         res = ourg2p(word[:3])  # will do for some noises
     except Exception:  #
-        res = ru_g2p("".join(s if s in "абвгдеёжзийклмнопрстуфхцчшщъыьэюя" else "" for s in word))
+        syms = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя!.,:-" if ourg2p == ru_g2p else "abcdefghijklmnopqrstuvwxyz!.,:-"
+        res = ourg2p("".join(s if s in syms else "" for s in word))
         dl_logger.log("WARNING", data={
             "fixed the word": word
         })
@@ -139,9 +141,9 @@ def g2p_all(word, dl_logger):
 
 
 def s2ids(sentence, dl_logger):
-    words = ["".join(s if s in "абвгдеёжзийклмнопрстуфхцчшщъыьэюяabcdefghijklmnopqrstuvwxyz" else "" for s in word)
-             for word in sentence.split(" ")]
-    return [g2p_all(word, dl_logger) for word in words]
+    words = ["".join(s if s in "абвгдеёжзийклмнопрстуфхцчшщъыьэюяabcdefghijklmnopqrstuvwxyz!.,:-" else "" for s in word)
+             for word in re.split(regexPattern, sentence)]
+    return [g2p_all(word, dl_logger) if word not in delims else word for word in words]
 
 
 class ShortLogger:
@@ -163,7 +165,9 @@ def g2p_main(sentence):
 
 
 def init(dl_logger_=None):
-    global dl_logger, inited
+    global dl_logger, inited, delims, regexPattern
+    delims = [",", ".", " ", "!", ":", "-"]
+    regexPattern = '|'.join('(?={})'.format(re.escape(delim)) for delim in delims)
     if dl_logger_ is None:
         try:
             from synthesizer.models.tacotron_tweaked.train import dl_logger

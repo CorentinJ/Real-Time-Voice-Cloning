@@ -143,7 +143,7 @@ if __name__ == '__main__':
             embed = encoder.embed_utterance(preprocessed_wav)
             print("Created the embedding")
 
-            ## Generating the spectrogram
+            # Generating the spectrogram
             text = input("Write a sentence (+-20 words) to be synthesized:\n")
 
             # If seed is specified, reset torch seed and force synthesizer reload
