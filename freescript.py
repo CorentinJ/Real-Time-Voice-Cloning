@@ -12,7 +12,7 @@ from tqdm import tqdm
 if __name__ == '__main__':
     dataroot = "D:/datasets/golos/train_opus/"
     with open(dataroot + 'manifest.jsonl') as f:
-        for i, line in enumerate(tqdm(f, total=1000000)):
+        for i, line in enumerate(tqdm(f, total=1103799)):
             k = i // 10000 % 10
             filepath, textpath, text = json.loads(line)["audio_filepath"], \
                                        json.loads(line)["audio_filepath"].replace("opus", "txt"), \

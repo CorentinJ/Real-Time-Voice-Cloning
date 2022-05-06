@@ -16,6 +16,7 @@ def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int, ski
     dataset_root = datasets_root.joinpath(datasets_name)
     input_dirs = [dataset_root.joinpath(subfolder.strip()) for subfolder in subfolders.split(",")]
     print("\n    ".join(map(str, ["Using data from:"] + input_dirs)))
+    # print([(input_dir.exists(), input_dir) for input_dir in input_dirs])
     assert all(input_dir.exists() for input_dir in input_dirs)
 
     # Create the output directories for each output file type
@@ -31,7 +32,7 @@ def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int, ski
     func = partial(preprocess_speaker, out_dir=out_dir, skip_existing=skip_existing,
                    hparams=hparams, no_alignments=no_alignments)
     job = Pool(n_processes).imap(func, speaker_dirs)
-    for speaker_metadata in tqdm(job, datasets_name, len(speaker_dirs), unit="speakers"):
+    for speaker_metadata in tqdm(job):
         for metadatum in speaker_metadata:
             metadata_file.write("|".join(str(x) for x in metadatum) + "\n")
     metadata_file.close()
@@ -53,7 +54,8 @@ def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int, ski
 
 def preprocess_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hparams, no_alignments: bool):
     metadata = []
-    for book_dir in speaker_dir.glob("*"):
+    for book_dir in (pbar := tqdm(speaker_dir.glob("*"), total=len(list(speaker_dir.glob("*"))) )):
+        pbar.set_description(f"in dir {book_dir} in {speaker_dir}")
         if no_alignments:
             # Gather the utterance audios and texts
             # LibriTTS uses .wav, but we will include extensions for compatibility with other datasets
@@ -66,7 +68,7 @@ def preprocess_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hparams,
                     try:
                         wav, _ = librosa.load(str(wav_fpath), sr=hparams.sample_rate)
                     except Exception as e:
-                        print(e)
+                        print(f"failed with {e} at file {str(wav_fpath)}")
                         continue
 
                     if hparams.rescale:
@@ -212,7 +214,6 @@ def process_utterance(wav: np.ndarray, text: str, out_dir: Path, basename: str,
     #   without extra padding. This means that you won't have an exact relation between the length
     #   of the wav and of the mel spectrogram. See the vocoder data loader.
 
-
     # Skip existing utterances if needed
     mel_fpath = out_dir.joinpath("mels", "mel-%s.npy" % basename)
     wav_fpath = out_dir.joinpath("audio", "audio-%s.npy" % basename)
@@ -271,4 +272,3 @@ def create_embeddings(synthesizer_root: Path, encoder_model_fpath: Path, n_proce
     func = partial(embed_utterance, encoder_model_fpath=encoder_model_fpath)
     job = Pool(n_processes).imap(func, fpaths)
     list(tqdm(job, "Embedding", len(fpaths), unit="utterances"))
-
