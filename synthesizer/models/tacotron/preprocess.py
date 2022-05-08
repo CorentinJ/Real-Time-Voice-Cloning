@@ -8,6 +8,7 @@ from utils import logmmse
 from tqdm import tqdm
 import numpy as np
 import librosa
+from datetime import datetime
 
 
 def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int, skip_existing: bool, hparams,
@@ -32,7 +33,7 @@ def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int, ski
     func = partial(preprocess_speaker, out_dir=out_dir, skip_existing=skip_existing,
                    hparams=hparams, no_alignments=no_alignments)
     job = Pool(n_processes).imap(func, speaker_dirs)
-    for speaker_metadata in tqdm(job):
+    for speaker_metadata in job:
         for metadatum in speaker_metadata:
             metadata_file.write("|".join(str(x) for x in metadatum) + "\n")
     metadata_file.close()
@@ -54,8 +55,9 @@ def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int, ski
 
 def preprocess_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hparams, no_alignments: bool):
     metadata = []
-    for book_dir in (pbar := tqdm(speaker_dir.glob("*"), total=len(list(speaker_dir.glob("*"))) )):
-        pbar.set_description(f"in dir {book_dir} in {speaker_dir}")
+    for book_dir in (pbar := tqdm(speaker_dir.glob("*"), total=len(list(speaker_dir.glob("*"))))):
+        tim = datetime.now().strftime("%H:%M:%S")
+        pbar.set_description(f"dir: {str(book_dir)[-2:]} time: {tim}")
         if no_alignments:
             # Gather the utterance audios and texts
             # LibriTTS uses .wav, but we will include extensions for compatibility with other datasets
