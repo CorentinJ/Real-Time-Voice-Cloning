@@ -37,7 +37,7 @@ class Encoder(nn.Module):
     def forward(self, x, speaker_embedding=None):
         # print("xbb: ", x.shape)
         x = self.embedding(x)
-        x = self.pre_net(x)
+        x = self.pre_net(x)  #
         x.transpose_(1, 2)
         x = self.cbhg(x)
         if speaker_embedding is not None:
@@ -162,7 +162,8 @@ class CBHG(nn.Module):
         x = x.transpose(1, 2)
         if self.highway_mismatch is True:
             x = self.pre_highway(x)
-        for h in self.highways: x = h(x)
+        for h in self.highways:
+            x = h(x)
 
         # And then the RNN
         x, _ = self.rnn(x)
@@ -171,7 +172,8 @@ class CBHG(nn.Module):
     def _flatten_parameters(self):
         """Calls `flatten_parameters` on all the rnns used by the WaveRNN. Used
         to improve efficiency and avoid PyTorch yelling at us."""
-        [m.flatten_parameters() for m in self._to_flatten]
+        for m in self._to_flatten:
+            self._to_flatten[self._to_flatten.index(m)].flatten_parameters()
 
 
 class PreNet(nn.Module):
@@ -423,17 +425,18 @@ class Tacotron(nn.Module):
 
     def generate(self, x, speaker_embedding=None, steps=2000):
         self.eval()
+
         device = next(self.parameters()).device  # use same device as parameters
 
         batch_size, _ = x.size()
 
-        # Need to initialise all hidden states and pack into tuple for tidyness
+        # Initialise all hidden states and pack into tuple for tidyness
         attn_hidden = torch.zeros(batch_size, self.decoder_dims, device=device)
         rnn1_hidden = torch.zeros(batch_size, self.lstm_dims, device=device)
         rnn2_hidden = torch.zeros(batch_size, self.lstm_dims, device=device)
         hidden_states = (attn_hidden, rnn1_hidden, rnn2_hidden)
 
-        # Need to initialise all lstm cell states and pack into tuple for tidyness
+        # Initialise all lstm cell states and pack into tuple for tidyness
         rnn1_cell = torch.zeros(batch_size, self.lstm_dims, device=device)
         rnn2_cell = torch.zeros(batch_size, self.lstm_dims, device=device)
         cell_states = (rnn1_cell, rnn2_cell)
