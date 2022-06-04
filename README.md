@@ -8,7 +8,8 @@ Multispeaker Text-To-Speech Synthesis](https://arxiv.org/pdf/1806.04558.pdf) (SV
 * gui thing may not work because I don't even have the compute to test it
 * Theoretically, the model is bilingual, it can process both english and russian words, you will just need the dataset
 
-## Setup
+### Setup
+### 0. delete everything from the directory, clone it from sratch.
 
 ### 1. Install Requirements
 1. Both Windows and Linux are supported. A GPU is not required on machine level, but without it it will take ages to train anything.
@@ -17,9 +18,13 @@ Multispeaker Text-To-Speech Synthesis](https://arxiv.org/pdf/1806.04558.pdf) (SV
 4. Install the remaining requirements with `pip install -r requirements.txt`
 
 ### 2. Download Pretrained Models
-Download a synthesizer [here]([https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models](https://drive.google.com/file/d/1qtGH8JzoY_v3h1v_zQyTSWiAW4bWYXsU/view?usp=sharing)). and vocoder + encoder from original repo [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models)
-Put them to saved_models\rusmodeltweaked or whatever you specify in an argument
-
+Download a synthesizer [here](https://drive.google.com/file/d/1qtGH8JzoY_v3h1v_zQyTSWiAW4bWYXsU/view?usp=sharing), vocoder + encoder from original repo [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models) and put them under saved_models/default/.<br/>
+The scructure should be:<br/>
+```
+saved_models/default/synthesizer.pt
+saved_models/default/vocoder.pt
+saved_models/default/encoder.pt
+```
 ### 4. (Optional) Download Datasets
 For playing with the toolbox alone, I only recommend downloading [`LibriSpeech/train-clean-100`](https://www.openslr.org/resources/12/train-clean-100.tar.gz). Extract the contents as `<datasets_root>/LibriSpeech/train-clean-100` where `<datasets_root>` is a directory of your choosing. Other datasets are supported in the toolbox, see [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Training#datasets). You're free not to download any dataset, but then you will need your own data as audio files or you will have to record it with the toolbox. For other language dataset construction, see below.
 ### 4. Other languages dataset
@@ -63,11 +68,7 @@ Example tweaked synthesizer train command:
 ```
 synthesizer_train.py rusmodeltweaked SV2TTS\synthesizer --use_tweaked 
 ```
-### 5. Launch the Toolbox
-You can then try the toolbox (not tested in this fork):
-
-`python demo_toolbox.py -d <datasets_root>`  
-or  
-`python demo_toolbox.py` 
-
-depending on whether you downloaded any datasets. If you are running an X-server or if you have the error `Aborted (core dumped)`, see [this issue](https://github.com/CorentinJ/Real-Time-Voice-Cloning/issues/11#issuecomment-504733590).
+### 5 Run the demo
+```
+python demo_cli.py 
+```
