@@ -9,15 +9,15 @@ from tqdm import tqdm
 import numpy as np
 import librosa
 from datetime import datetime
+# from pydub import AudioSegment
 
 
 def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int, skip_existing: bool, hparams,
                        no_alignments: bool, datasets_name: str, subfolders: str):
-    # Gather the input directories
     dataset_root = datasets_root.joinpath(datasets_name)
     input_dirs = [dataset_root.joinpath(subfolder.strip()) for subfolder in subfolders.split(",")]
     print("\n    ".join(map(str, ["Using data from:"] + input_dirs)))
-    # print([(input_dir.exists(), input_dir) for input_dir in input_dirs])
+
     assert all(input_dir.exists() for input_dir in input_dirs)
 
     # Create the output directories for each output file type
@@ -55,9 +55,11 @@ def preprocess_dataset(datasets_root: Path, out_dir: Path, n_processes: int, ski
 
 def preprocess_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hparams, no_alignments: bool):
     metadata = []
-    for book_dir in (pbar := tqdm(speaker_dir.glob("*"), total=len(list(speaker_dir.glob("*"))))):
+    # for book_dir in (pbar := tqdm(speaker_dir.glob("*"), total=len(list(speaker_dir.glob("*"))))):
+    pbar = tqdm(speaker_dir.glob("*"), total=len(list(speaker_dir.glob("*"))))
+    for book_dir in pbar:
         tim = datetime.now().strftime("%H:%M:%S")
-        pbar.set_description(f"dir: {str(book_dir)[-2:]} time: {tim}")
+        pbar.set_description(f"dir: {str(book_dir)[-6:]} time: {tim}")
         if no_alignments:
             # Gather the utterance audios and texts
             # LibriTTS uses .wav, but we will include extensions for compatibility with other datasets
@@ -74,17 +76,23 @@ def preprocess_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hparams,
                         continue
 
                     if hparams.rescale:
-                        wav = wav / np.abs(wav).max() * hparams.rescaling_max
+                        try:
+                            wav = wav / np.abs(wav).max() * hparams.rescaling_max
+                        except:
+                            continue
 
                     # Get the corresponding text
                     # Check for .txt (for compatibility with other datasets)
                     text_fpath = wav_fpath.with_suffix(".txt")
-                    if not text_fpath.exists():
-                        # Check for .normalized.txt (LibriTTS)
-                        text_fpath = wav_fpath.with_suffix(".normalized.txt")
+                    try:
                         if not text_fpath.exists():
-                            print(text_fpath)
-                            # exit()
+                            # Check for .normalized.txt (LibriTTS)
+                            text_fpath = wav_fpath.with_suffix(".normalized.txt")
+                            if not text_fpath.exists():
+                                print(text_fpath)
+                                # exit()
+                    except:
+                        continue
                     try:
                         with text_fpath.open("r", encoding="utf8") as text_file:
                             try:
@@ -185,26 +193,12 @@ def split_on_silences(wav_fpath, words, end_times, hparams):
     wavs = [wav[segment_time[0]:segment_time[1]] for segment_time in segment_times]
     texts = [" ".join(words[start + 1:end]).replace("  ", " ") for start, end in segments]
 
-    # # DEBUG: play the audio segments (run with -n=1)
-    # import sounddevice as sd
-    # if len(wavs) > 1:
-    #     print("This sentence was split in %d segments:" % len(wavs))
-    # else:
-    #     print("There are no silences long enough for this sentence to be split:")
-    # for wav, text in zip(wavs, texts):
-    #     # Pad the waveform with 1 second of silence because sounddevice tends to cut them early
-    #     # when playing them. You shouldn't need to do that in your parsers.
-    #     wav = np.concatenate((wav, [0] * 16000))
-    #     print("\t%s" % text)
-    #     sd.play(wav, 16000, blocking=True)
-    # print("")
-
     return wavs, texts
 
 
 def process_utterance(wav: np.ndarray, text: str, out_dir: Path, basename: str,
                       skip_existing: bool, hparams):
-    ## FOR REFERENCE:
+    # FOR REFERENCE:
     # For you not to lose your head if you ever wish to change things here or implement your own
     # synthesizer.
     # - Both the audios and the mel spectrograms are saved as numpy arrays
@@ -239,8 +233,8 @@ def process_utterance(wav: np.ndarray, text: str, out_dir: Path, basename: str,
         return None
 
     # Write the spectrogram, embed and audio to disk
-    np.save(mel_fpath, mel_spectrogram.T, allow_pickle=False)
-    np.save(wav_fpath, wav, allow_pickle=False)
+    np.save(str(mel_fpath), mel_spectrogram.T, allow_pickle=False)
+    np.save(str(wav_fpath), wav, allow_pickle=False)
 
     # Return a tuple describing this training example
     return wav_fpath.name, mel_fpath.name, "embed-%s.npy" % basename, len(wav), mel_frames, text

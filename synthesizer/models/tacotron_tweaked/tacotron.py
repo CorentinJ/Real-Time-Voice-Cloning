@@ -1,10 +1,7 @@
-import os
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from pathlib import Path
-from typing import Union
 
 
 class HighwayNetwork(nn.Module):
@@ -35,14 +32,11 @@ class Encoder(nn.Module):
                          num_highways=num_highways)
 
     def forward(self, x, speaker_embedding=None):
-        # print("xbb: ", x.shape)
         x = self.embedding(x)
         x = self.pre_net(x)  #
         x.transpose_(1, 2)
         x = self.cbhg(x)
         if speaker_embedding is not None:
-            # print("se: ", speaker_embedding.shape)
-            # print("xba: ", x.shape)
             x = self.add_speaker_embedding(x, speaker_embedding)
         return x
 
@@ -449,13 +443,11 @@ class Tacotron(nn.Module):
 
         # SV2TTS: Run the encoder with the speaker embedding
         # The projection avoids unnecessary matmuls in the decoder loop
-        # print("se: ", speaker_embedding.shape)
-        # print("x: ", x.shape)
         encoder_seq = self.encoder(x, speaker_embedding)
         encoder_seq_proj = self.encoder_proj(encoder_seq)
 
         # Need a couple of lists for outputs
-        mel_outputs, attn_scores, stop_outputs = [], [], []
+        mel_outputs, attn_scores = [], []
 
         # Run the decoder loop
         for t in range(0, steps, self.r):
@@ -465,9 +457,9 @@ class Tacotron(nn.Module):
                              hidden_states, cell_states, context_vec, t, x)
             mel_outputs.append(mel_frames)
             attn_scores.append(scores)
-            stop_outputs.extend([stop_tokens] * self.r)
             # Stop the loop when all stop tokens in batch exceed threshold
-            if (stop_tokens > 0.5).all() and t > 10: break
+            if (stop_tokens > 0.5).all() and t > 10:
+                break
 
         # Concat the mel outputs into sequence
         mel_outputs = torch.cat(mel_outputs, dim=2)
@@ -480,7 +472,6 @@ class Tacotron(nn.Module):
 
         # For easy visualisation
         attn_scores = torch.cat(attn_scores, 1)
-        stop_outputs = torch.cat(stop_outputs, 1)
 
         self.train()
 

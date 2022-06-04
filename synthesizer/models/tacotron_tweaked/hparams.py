@@ -87,18 +87,18 @@ hparams = HParams(
 
     tts_eval_num_samples=1,  # Makes this number of samples
 
-    ### Data Preprocessing
+    # Data Preprocessing
     max_mel_frames=900,
     rescale=True,
     rescaling_max=0.9,
     synthesis_batch_size=16,  # For vocoder preprocessing and inference.
 
-    ### Mel Visualization and Griffin-Lim
+    # Mel Visualization and Griffin-Lim
     signal_normalization=True,
     power=1.5,
     griffin_lim_iters=60,
 
-    ### Audio processing options
+    # Audio processing options
     fmax=7600,  # Should not exceed (sample_rate // 2)
     allow_clipping_in_normalization=True,  # Used when signal_normalization = True
     clip_mels_length=True,  # If true, discards samples exceeding max_mel_frames
@@ -107,7 +107,7 @@ hparams = HParams(
     #               and [0, max_abs_value] if False
     trim_silence=True,  # Use with sample_rate of 16000 for best results
 
-    ### SV2TTS
+    # SV2TTS
     speaker_embedding_size=256,  # Dimension for the speaker embedding
     silence_min_duration_split=0.4,  # Duration in seconds of a silence for an utterance to be split
     utterance_min_duration=1.6,  # Duration in seconds below which utterances are discarded

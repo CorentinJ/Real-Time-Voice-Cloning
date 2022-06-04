@@ -130,7 +130,7 @@ def g2p_all(word, dl_logger):
         dl_logger.log("WARNING", data={
             "timed out": word
         })
-        res = ourg2p(word[:3])  # will do for some noises
+        res = ourg2p(word[:2])  # will do for some noises
     except Exception:  #
         syms = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя!.,:-" if ourg2p == ru_g2p else "abcdefghijklmnopqrstuvwxyz!.,:-"
         res = ourg2p("".join(s if s in syms else "" for s in word))

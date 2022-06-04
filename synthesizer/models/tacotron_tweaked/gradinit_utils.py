@@ -6,6 +6,7 @@ import numpy as np
 import os
 
 import torch.nn.functional as F
+from torch.profiler import profile, record_function, ProfilerActivity
 
 
 def get_ordered_params(net):
@@ -160,7 +161,7 @@ def gradinit(net, dataloader, dataset, device, args):
     #     net_top = net.module
     # else:
     #     net_top = net
-
+    device=torch.device(0)
     bias_params = [p for n, p in net.named_parameters() if 'bias' in n]
     weight_params = [p for n, p in net.named_parameters() if 'weight' in n]
 
@@ -204,6 +205,7 @@ def gradinit(net, dataloader, dataset, device, args):
         init_mels = torch.cat([mels0, pad3d(mels1, mels0)] if mels0.shape[-1] > mels1.shape[-1]
                               else [mels1, pad3d(mels0, mels1)]).to(device)
         init_embeds = torch.cat([embeds0, embeds1]).to(device)
+        net = net.to(device)
         init_idx = idx0 + idx1
 
         stop = torch.ones(init_mels.shape[0], init_mels.shape[2], device=device)
@@ -213,6 +215,7 @@ def gradinit(net, dataloader, dataset, device, args):
         # compute the gradient and take one step
         # outputs = net(init_inputs)
         m1_hat, m2_hat, attention, stop_pred = net(init_inputs, init_mels, init_embeds)
+
         m1_loss = F.mse_loss(m1_hat, init_mels) + F.l1_loss(m1_hat, init_mels)
         m2_loss = F.mse_loss(m2_hat, init_mels)
         stop_loss = F.binary_cross_entropy(stop_pred, stop)  # ?
@@ -292,12 +295,14 @@ def gradinit(net, dataloader, dataset, device, args):
             stat_dict = get_scale_stats(net, optimizer)
             print_str = "Iter {}, obj iters {}, eta {:.3e}, constraint count {} loss: {:.3e} ({:.3e}), init loss: " \
                         "{:.3e} ({:.3e}), update loss {:.3e} ({:.3e}), " \
-                        "total gnorm: {:.3e} ({:.3e})\t".format(
-                total_sums_gnorm, total_sums, eta, cs_count,
-                float(obj_loss), total_loss / total_sums if total_sums > 0 else -1,
-                float(init_loss), total_l0 / total_sums if total_sums > 0 else -1,
-                float(updated_loss), total_l1 / total_sums if total_sums > 0 else -1,
-                float(gnorm), total_gnorm / total_sums_gnorm)
+                        "total gnorm: {:.3e} ({:.3e})\t".format(total_sums_gnorm, total_sums, eta, cs_count,
+                                                                float(obj_loss),
+                                                                total_loss / total_sums if total_sums > 0 else -1,
+                                                                float(init_loss),
+                                                                total_l0 / total_sums if total_sums > 0 else -1,
+                                                                float(updated_loss),
+                                                                total_l1 / total_sums if total_sums > 0 else -1,
+                                                                float(gnorm), total_gnorm / total_sums_gnorm)
 
             for key, val in stat_dict.items():
                 print_str += "{}: {:.2e}\t".format(key, val)

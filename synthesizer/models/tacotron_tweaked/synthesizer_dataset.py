@@ -23,7 +23,6 @@ class SynthesizerDataset(Dataset):
         self.hparams = hparams
         self.debug = False  # hardcoded but if you can't code you don't need debug..right?
 
-
         print("Found %d samples" % len(self.samples_fpaths))
 
     def __getitem__(self, index):

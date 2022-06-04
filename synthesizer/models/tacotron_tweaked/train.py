@@ -1,29 +1,23 @@
-import nni
-import torch
-
-import torch.nn.functional as F
-from torch import optim
-from torch.utils.data import DataLoader
 from datetime import datetime
 from functools import partial
 from pathlib import Path
-from dllogger import StdOutBackend, JSONStreamBackend, Verbosity, Logger
 
+import torch
+import torch.nn.functional as F
+from adabelief_pytorch import AdaBelief
+from dllogger import StdOutBackend, JSONStreamBackend, Verbosity, Logger
+from torch.utils.data import DataLoader
+
+from synthesizer.g2p import init
 from synthesizer.models.tacotron_tweaked import audio
-from synthesizer.models.tacotron_tweaked.tacotron import Tacotron
+from synthesizer.models.tacotron_tweaked.gradinit_utils import gradinit
 from synthesizer.models.tacotron_tweaked.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
+from synthesizer.models.tacotron_tweaked.tacotron import Tacotron
 from synthesizer.utils import ValueWindow
 from synthesizer.utils.plot import plot_spectrogram
 from synthesizer.utils.symbols import symbols
 from synthesizer.utils.text import sequence_to_text
 from vocoder.display import *
-
-from synthesizer.models.tacotron_tweaked.gradinit_utils import gradinit
-from torch.optim.lr_scheduler import CosineAnnealingLR
-
-from synthesizer.g2p import init
-from adabelief_pytorch import AdaBelief
-
 
 # ah yes, the speed up
 torch.autograd.set_detect_anomaly(False)
@@ -163,7 +157,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         model.save(weights_fpath, optimizer)
     else:
         model.load(weights_fpath, optimizer)
-    print("using gradinit" if gradinit_do else "not using gradinit")
+    print("Using gradinit" if gradinit_do else "not using gradinit")
 
     current_step = model.get_step()
 
@@ -212,8 +206,6 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
             for j, k in enumerate(idx):
                 stop[j, :int(dataset.metadata[k][4]) - 1] = 0
 
-            # print("t:", texts.shape)
-            # print("t s:", texts[random.randint(1, 4)][:10])
             texts = texts.to(device)
             mels = mels.to(device)
             embeds = embeds.to(device)
