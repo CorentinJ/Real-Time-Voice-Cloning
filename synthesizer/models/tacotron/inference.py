@@ -106,6 +106,7 @@ class Synthesizer:
                 print(f"\n| Generating {i}/{len(batched_inputs)}")
 
             # Pad texts so they are all the same length
+            print(batch)
             text_lens = [len(text) for text in batch]
             max_text_len = max(text_lens)
             chars = [pad1d(text, max_text_len) for text in batch]
