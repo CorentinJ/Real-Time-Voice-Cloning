@@ -72,3 +72,7 @@ synthesizer_train.py rusmodeltweaked SV2TTS\synthesizer --use_tweaked
 ```
 python demo_cli.py 
 ```
+if cpu only:
+```
+python demo_cli.py --cpu
+```
