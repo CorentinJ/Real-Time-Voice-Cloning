@@ -15,7 +15,8 @@ Multispeaker Text-To-Speech Synthesis](https://arxiv.org/pdf/1806.04558.pdf) (SV
 1. Both Windows and Linux are supported. A GPU is not required on machine level, but without it it will take ages to train anything.
 2. Install [ffmpeg](https://ffmpeg.org/download.html#get-packages). This is necessary for reading audio files.
 3. Install [PyTorch](https://pytorch.org/get-started/locally/). Pick the latest stable version, your operating system, your package manager (pip by default) and finally pick any of the proposed CUDA versions if you have a GPU, otherwise pick CPU. Run the given command.
-4. Install the remaining requirements with `pip install -r requirements.txt`
+4. Install nvidia-pyindex by running `pip install nvidia-pyindex`
+5. Install the remaining requirements with `pip install -r requirements.txt`
 
 ### 2. Download Pretrained Models
 Download a synthesizer [here](https://drive.google.com/file/d/1qtGH8JzoY_v3h1v_zQyTSWiAW4bWYXsU/view?usp=sharing), vocoder + encoder from original repo [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models) and put them under saved_models/default/.<br/>

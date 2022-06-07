@@ -11,7 +11,8 @@ from torch.utils.data import DataLoader
 from synthesizer.g2p import init
 from synthesizer.models.tacotron_tweaked import audio
 from synthesizer.models.tacotron_tweaked.gradinit_utils import gradinit
-from synthesizer.models.tacotron_tweaked.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
+from synthesizer.models.tacotron_tweaked.synthesizer_dataset import SynthesizerDataset, JITSynthesizerDataset, \
+    collate_synthesizer
 from synthesizer.models.tacotron_tweaked.tacotron import Tacotron
 from synthesizer.utils import ValueWindow
 from synthesizer.utils.plot import plot_spectrogram
@@ -43,7 +44,7 @@ class Struct:
 
 def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_every: int, force_restart: bool,
           hparams, use_amp, multi_gpu, print_every, wd, batch_size, gradinit_bsize,
-          n_epoch, perf_limit, debug=False, **args):
+          n_epoch, perf_limit, use_JIT=False, debug=False, **args):
     if debug:
         start_time = time.time()
         use_time = time.time()
@@ -127,11 +128,14 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     metadata_fpath = syn_dir.joinpath("train.txt")
     mel_dir = syn_dir.joinpath("mels")
     embed_dir = syn_dir.joinpath("embeds")
-    dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
+    if use_JIT:
+        dataset = JITSynthesizerDataset()  # for now, args are modified in the class itself
+    else:
+        dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
 
     gradinit_bsize = int(batch_size / 2) if gradinit_bsize < 0 else int(gradinit_bsize / 2)
     scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
-    optimizer = AdaBelief(model.parameters(), lr=1e-3, eps=1e-16, betas=(0.9, 0.999), weight_decouple=True,
+    optimizer = AdaBelief(model.parameters(), lr=2e-4, eps=1e-16, betas=(0.9, 0.999), weight_decouple=True,
                           rectify=False)
     if force_restart or not weights_fpath.exists():
         print("\nStarting the training of Tacotron from scratch\n")
@@ -163,9 +167,9 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
 
     training_steps = max_step - current_step
     collate_fn = partial(collate_synthesizer, r=r, hparams=hparams)
-    gradinit_trainloader = DataLoader(dataset, gradinit_bsize, shuffle=True, num_workers=4, collate_fn=collate_fn,
-                                      pin_memory=True)
     if gradinit_do:
+        gradinit_trainloader = DataLoader(dataset, gradinit_bsize, shuffle=True, num_workers=4, collate_fn=collate_fn,
+                                          pin_memory=True)
         model = gradinit(model, gradinit_trainloader, dataset, device, Struct(**args))
 
     if debug:
@@ -203,8 +207,12 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 use_time = time.time()
             # Generate stop tokens for training
             stop = torch.ones(mels.shape[0], mels.shape[2], device=device)
-            for j, k in enumerate(idx):
-                stop[j, :int(dataset.metadata[k][4]) - 1] = 0
+            if use_JIT:
+                for j, k in enumerate(idx):
+                    stop[j, :int(len(mels[j])) - 1] = 0
+            else:
+                for j, k in enumerate(idx):
+                    stop[j, :int(dataset.metadata[k][4]) - 1] = 0
 
             texts = texts.to(device)
             mels = mels.to(device)

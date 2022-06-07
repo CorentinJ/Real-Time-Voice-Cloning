@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import nni
-
 from utils.argutils import print_args
 import argparse
 

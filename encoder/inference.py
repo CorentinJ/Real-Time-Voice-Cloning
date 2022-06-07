@@ -1,14 +1,14 @@
 from encoder.params_data import *
 from encoder.model import SpeakerEncoder
-from encoder.audio import preprocess_wav   # We want to expose this function from here
+from encoder.audio import preprocess_wav  # We want to expose this function from here
 from matplotlib import cm
 from encoder import audio
 from pathlib import Path
 import numpy as np
 import torch
 
-_model = None # type: SpeakerEncoder
-_device = None # type: torch.device
+_model = None  # type: SpeakerEncoder
+_device = None  # type: torch.device
 
 
 def load_model(weights_fpath: Path, device=None):
@@ -33,13 +33,14 @@ def load_model(weights_fpath: Path, device=None):
     _model.load_state_dict(checkpoint["model_state"])
     _model.eval()
     print("Loaded encoder \"%s\" trained to step %d" % (weights_fpath.name, checkpoint["step"]))
+    return _model
 
 
 def is_loaded():
     return _model is not None
 
 
-def embed_frames_batch(frames_batch):
+def embed_frames_batch(frames_batch, model):
     """
     Computes embeddings for a batch of mel spectrogram.
 
@@ -47,9 +48,11 @@ def embed_frames_batch(frames_batch):
     (batch_size, n_frames, n_channels)
     :return: the embeddings as a numpy array of float32 of shape (batch_size, model_embedding_size)
     """
-    if _model is None:
+    global _model
+    if _model is None and model is None:
         raise Exception("Model was not loaded. Call load_model() before inference.")
-
+    if model is not None:
+        _model = model
     frames = torch.from_numpy(frames_batch).to(_device)
     embed = _model.forward(frames).detach().cpu().numpy()
     return embed
@@ -107,7 +110,7 @@ def compute_partial_slices(n_samples, partial_utterance_n_frames=partials_n_fram
     return wav_slices, mel_slices
 
 
-def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
+def embed_utterance(wav, using_partials=True, return_partials=False, model=None, **kwargs):
     """
     Computes an embedding for a single utterance.
 
@@ -129,7 +132,7 @@ def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
     # Process the entire utterance if not using partials
     if not using_partials:
         frames = audio.wav_to_mel_spectrogram(wav)
-        embed = embed_frames_batch(frames[None, ...])[0]
+        embed = embed_frames_batch(frames[None, ...], model)[0]
         if return_partials:
             return embed, None, None
         return embed
@@ -143,7 +146,7 @@ def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
     # Split the utterance into partials
     frames = audio.wav_to_mel_spectrogram(wav)
     frames_batch = np.array([frames[s] for s in mel_slices])
-    partial_embeds = embed_frames_batch(frames_batch)
+    partial_embeds = embed_frames_batch(frames_batch, model)
 
     # Compute the utterance embedding from the partial embeddings
     raw_embed = np.mean(partial_embeds, axis=0)

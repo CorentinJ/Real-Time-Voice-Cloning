@@ -1,9 +1,15 @@
+from itertools import chain
+
+import librosa
 import torch
 from torch.utils.data import Dataset
 import numpy as np
 from pathlib import Path
 from synthesizer.utils.text import text_to_sequence
 from synthesizer.g2p import g2p_main
+from synthesizer.models.tacotron.hparams import hparams
+from encoder import inference as encoder
+from synthesizer.models.tacotron import audio
 
 
 class SynthesizerDataset(Dataset):
@@ -26,11 +32,6 @@ class SynthesizerDataset(Dataset):
         print("Found %d samples" % len(self.samples_fpaths))
 
     def __getitem__(self, index):
-        # Sometimes index may be a list of 2 (not sure why this happens)
-        # If that is the case, return a single item corresponding to first element in index
-        if index is list:
-            index = index[0]
-            print("what the fuck honestly")
         mel_path, embed_path = self.samples_fpaths[index]
         mel = np.load(mel_path).T.astype(np.float32)
         # Load the embed
@@ -40,10 +41,56 @@ class SynthesizerDataset(Dataset):
         # Convert the list returned by text_to_sequence to a numpy array
         text = np.asarray(text).astype(np.int32)
 
-        return text, mel.astype(np.float32), embed.astype(np.float32), index
+        return text, mel, embed.astype(np.float32), index
 
     def __len__(self):
         return len(self.samples_fpaths)
+
+
+class JITSynthesizerDataset(Dataset):
+    # Experimental feature
+    def __init__(self):
+        datasets_name = "LibriTTS"
+        datasets_root = Path("datasets\\golos\\train_opus")  # your path here
+        subfolders = "train-clean-100"
+        dataset_root = datasets_root.joinpath(datasets_name)
+        input_dirs = [dataset_root.joinpath(subfolder.strip()) for subfolder in subfolders.split(",")]
+        speaker_dirs = list(chain.from_iterable(input_dir.glob("*") for input_dir in input_dirs))
+        print("loading wav_fpaths..")
+        self.wav_fpaths = flat([[book_dir.glob("*.opus") for book_dir in x.glob("*")] for x in speaker_dirs])
+        self.wav_fpaths = flat([[y for y in x] for x in self.wav_fpaths])
+        self.model = encoder.load_model(Path("saved_models/default/encoder.pt")).cpu()
+        print("fpaths loaded, length is", len(self.wav_fpaths))
+
+    def __getitem__(self, index):
+        wav, _ = librosa.load(str(self.wav_fpaths[index]), sr=hparams.sample_rate)
+        if hparams.rescale:
+            wav = wav / np.abs(wav).max() * hparams.rescaling_max
+
+        text_fpath = self.wav_fpaths[index].with_suffix(".txt")
+        with text_fpath.open("r", encoding="utf8") as text_file:
+            text = "".join([line for line in text_file])
+        text = text.replace("\"", "")
+        text = text.strip()
+        text = text_to_sequence(g2p_main(text.lower()))[:-1]
+        # Convert the list returned by text_to_sequence to a numpy array
+        text = np.asarray(text).astype(np.int32)
+        wav = encoder.preprocess_wav(wav, normalize=False, trim_silence=True)
+        mel_spectrogram = audio.melspectrogram(wav, hparams).T.T.astype(np.float32)
+        embedded_utterance = encoder.embed_utterance(wav, model=self.model).astype(np.float32)
+        # print(text, mel_spectrogram.T.astype(np.float32).shape, embedded_utterance.shape, index)
+        return text, mel_spectrogram, embedded_utterance, index
+
+    def __len__(self):
+        return len(self.wav_fpaths)
+
+
+def pad1d(x, max_len, pad_value=0):
+    return np.pad(x, (0, max_len - len(x)), mode="constant", constant_values=pad_value)
+
+
+def pad2d(x, max_len, pad_value=0):
+    return np.pad(x, ((0, 0), (0, max_len - x.shape[-1])), mode="constant", constant_values=pad_value)
 
 
 def collate_synthesizer(batch, r, hparams):
@@ -84,9 +131,5 @@ def collate_synthesizer(batch, r, hparams):
     return chars, mel, embeds, indices
 
 
-def pad1d(x, max_len, pad_value=0):
-    return np.pad(x, (0, max_len - len(x)), mode="constant", constant_values=pad_value)
-
-
-def pad2d(x, max_len, pad_value=0):
-    return np.pad(x, ((0, 0), (0, max_len - x.shape[-1])), mode="constant", constant_values=pad_value)
+def flat(xss):
+    return [x for xs in xss for x in xs]
