@@ -92,11 +92,11 @@ class WaveRNN(nn.Module):
         super().__init__()
         self.mode = mode
         self.pad = pad
-        if self.mode == 'RAW' :
+        if self.mode == 'RAW':
             self.n_classes = 2 ** bits
-        elif self.mode == 'MOL' :
+        elif self.mode == 'MOL':
             self.n_classes = 30
-        else :
+        else:
             RuntimeError("Unknown model mode value - ", self.mode)
 
         self.rnn_dims = rnn_dims
@@ -219,7 +219,7 @@ class WaveRNN(nn.Module):
                     else:
                         x = sample.transpose(0, 1)
 
-                elif self.mode == 'RAW' :
+                elif self.mode == 'RAW':
                     posterior = F.softmax(logits, dim=1)
                     distrib = torch.distributions.Categorical(posterior)
 
@@ -236,7 +236,7 @@ class WaveRNN(nn.Module):
         output = torch.stack(output).transpose(0, 1)
         output = output.cpu().numpy()
         output = output.astype(np.float64)
-        
+
         if batched:
             output = self.xfade_and_unfold(output, target, overlap)
         else:
@@ -251,15 +251,14 @@ class WaveRNN(nn.Module):
         fade_out = np.linspace(1, 0, 20 * self.hop_length)
         output = output[:wave_len]
         output[-20 * self.hop_length:] *= fade_out
-        
+
         self.train()
 
         return output
 
-
     def gen_display(self, i, seq_len, b_size, gen_rate):
         pbar = progbar(i, seq_len)
-        msg = f'| {pbar} {i*b_size}/{seq_len*b_size} | Batch Size: {b_size} | Gen Rate: {gen_rate:.1f}kHz | '
+        msg = f'| {pbar} {i * b_size}/{seq_len * b_size} | Batch Size: {b_size} | Gen Rate: {gen_rate:.1f}kHz | '
         stream(msg)
 
     def get_gru_cell(self, gru):
@@ -401,18 +400,18 @@ class WaveRNN(nn.Module):
 
         return unfolded
 
-    def get_step(self) :
+    def get_step(self):
         return self.step.data.item()
 
-    def checkpoint(self, model_dir, optimizer) :
+    def checkpoint(self, model_dir, optimizer):
         k_steps = self.get_step() // 1000
         self.save(model_dir.joinpath("checkpoint_%dk_steps.pt" % k_steps), optimizer)
 
-    def log(self, path, msg) :
+    def log(self, path, msg):
         with open(path, 'a') as f:
             print(msg, file=f)
 
-    def load(self, path, optimizer) :
+    def load(self, path, optimizer):
         checkpoint = torch.load(path)
         if "optimizer_state" in checkpoint:
             self.load_state_dict(checkpoint["model_state"])
@@ -421,7 +420,7 @@ class WaveRNN(nn.Module):
             # Backwards compatibility
             self.load_state_dict(checkpoint)
 
-    def save(self, path, optimizer) :
+    def save(self, path, optimizer):
         torch.save({
             "model_state": self.state_dict(),
             "optimizer_state": optimizer.state_dict(),
@@ -430,5 +429,5 @@ class WaveRNN(nn.Module):
     def num_params(self, print_out=True):
         parameters = filter(lambda p: p.requires_grad, self.parameters())
         parameters = sum([np.prod(p.size()) for p in parameters]) / 1_000_000
-        if print_out :
+        if print_out:
             print('Trainable Parameters: %.3fM' % parameters)

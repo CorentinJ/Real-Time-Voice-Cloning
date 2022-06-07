@@ -9,7 +9,7 @@ from tqdm import tqdm
 from synthesizer.models.tacotron_tweaked.hparams import hparams_debug_string
 from synthesizer.models.tacotron_tweaked.tacotron import Tacotron
 from synthesizer.models.tacotron_tweaked.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
-from synthesizer.utils import symbols
+from synthesizer.utils.symbols import symbols
 
 
 def run_synthesis(in_dir: Path, out_dir: Path, syn_model_fpath: Path, hparams):

@@ -27,7 +27,7 @@ torch.autograd.profiler.emit_nvtx(False)
 torch.backends.cudnn.benchmark = True
 
 dl_logger = Logger(backends=[JSONStreamBackend(Verbosity.DEFAULT, 'log.txt'),
-                                 StdOutBackend(Verbosity.VERBOSE)])
+                             StdOutBackend(Verbosity.VERBOSE)])
 
 
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
@@ -135,8 +135,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
 
     gradinit_bsize = int(batch_size / 2) if gradinit_bsize < 0 else int(gradinit_bsize / 2)
     scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
-    optimizer = AdaBelief(model.parameters(), lr=2e-4, eps=1e-16, betas=(0.9, 0.999), weight_decouple=True,
-                          rectify=False)
+    optimizer = AdaBelief(model.parameters(), lr=1e-3, eps=1e-16, betas=(0.9, 0.999), weight_decouple=True,
+                          rectify=True)
     if force_restart or not weights_fpath.exists():
         print("\nStarting the training of Tacotron from scratch\n")
         gradinit_do = True
