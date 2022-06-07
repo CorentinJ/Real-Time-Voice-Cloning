@@ -5,7 +5,6 @@ Multispeaker Text-To-Speech Synthesis](https://arxiv.org/pdf/1806.04558.pdf) (SV
 * Cleaned tensorflow requirement, by rewriting hparams stuff
 * Added russian language support (+guide how to add other languages)
 * Code reworks 
-* gui thing may not work because I don't even have the compute to test it
 * Theoretically, the model is bilingual, it can process both english and russian words, you will just need the dataset
 
 ### Setup
@@ -72,4 +71,8 @@ synthesizer_train.py rusmodeltweaked SV2TTS\synthesizer --use_tweaked
 ### 5 Run the demo
 ```
 python demo_cli.py 
+```
+if cpu only:
+```
+python demo_cli.py --cpu
 ```
