@@ -45,7 +45,10 @@ class SynthesizerDataset(Dataset):
         # Load the embed
         embed = np.load(embed_path)
         # Get the text and (not) clean it
+        # с моим заказом возникли проблемы
+        # ['s', '<eos>', 'm', 'o0', 'i1', 'm', '<eos>', 'z', 'a0', 'k', 'a1', 'z', 'o0', 'm', '<eos>', 'v', 'o1', 'z',  'nj', 'i0', 'k', 'lj', 'i0', '<eos>', 'p', 'r', 'o0', 'b', 'lj', 'e1', 'm', 'y0', '<eos>']
         text = text_to_sequence(g2p_main(self.samples_texts[index].lower()))[:-1]
+        print(text)
         # Convert the list returned by text_to_sequence to a numpy array
         text = np.asarray(text).astype(np.int32)
 

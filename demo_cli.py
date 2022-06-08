@@ -48,7 +48,7 @@ if __name__ == '__main__':
     if torch.cuda.is_available():
         device_id = torch.cuda.current_device()
         gpu_properties = torch.cuda.get_device_properties(device_id)
-        ## Print some environment information (for debugging purposes)
+        # Print some environment information (for debugging purposes)
         print("Found %d GPUs available. Using GPU %d (%s) of compute capability %d.%d with "
               "%.1fGb total memory.\n" %
               (torch.cuda.device_count(),
@@ -60,7 +60,7 @@ if __name__ == '__main__':
     else:
         print("Using CPU for inference.\n")
 
-    ## Load the models one by one.
+    # Load the models one by one.
     print("Preparing the encoder, the synthesizer and the vocoder...")
     encoder.load_model(args.enc_model_fpath)
     synthesizer = Synthesizer(args.syn_model_fpath)
@@ -68,7 +68,7 @@ if __name__ == '__main__':
     #     synthesizer = Synthesizer(args.syn_model_fpath)
     vocoder.load_model(args.voc_model_fpath)
 
-    ## Run a test
+    # Run a test
     print("Testing your configuration with small inputs.")
     # Forward an audio waveform of zeroes that lasts 1 second. Notice how we can get the encoder's
     # sampling rate, which may differ.
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     # The synthesizer can handle multiple inputs with batching. Let's create another embedding to
     # illustrate that
     embeds = [embed]
-    texts = [["t", "e", "s", "t"], ["t", "e", "s", "t", "l", "o", "l"]]
+    texts = g2p_main("тестовый текст")
     print("\tTesting the synthesizer... ")
     mels = synthesizer.synthesize_spectrograms(texts, embeds)
 
@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
     print("All test passed! You can now synthesize speech.\n\n")
 
-    ## Interactive speech generation
+    # Interactive speech generation
     print("This is a GUI-less example of interface to SV2TTS. The purpose of this script is to "
           "show how you can interface this project easily with your own. See the source code for "
           "an explanation of what is happening.\n")
@@ -125,7 +125,7 @@ if __name__ == '__main__':
                       "wav, m4a, flac, ...):\n"
             in_fpath = Path(input(message).replace("\"", "").replace("\'", ""))
 
-            ## Computing the embedding
+            # Computing the embedding
             # First, we load the wav using the function that the speaker encoder provides. This is
             # important: there is preprocessing that must be applied.
 
@@ -155,17 +155,17 @@ if __name__ == '__main__':
 
             # The synthesizer works in batch, so you need to put your data in a list or numpy array
             # before: texts = [text]   # ["cdab"]
-            texts = g2p_main(text.lower())  # [["c", "d"], ["a", "b"], ...]
+            text = g2p_main(text.lower())  # [["c", "d"], ["a", "b"], ...]
             # texts = texts + ["_________________________________________________"]
-            print(texts)
+            print(text)
             embeds = [embed]
             # If you know what the attention layer alignments are, you can retrieve them here by
             # passing return_alignments=True
-            specs = synthesizer.synthesize_spectrograms(texts, embeds)
+            specs = synthesizer.synthesize_spectrograms(text, embeds)
             spec = specs[0]
             print("Created the mel spectrogram")
 
-            ## Generating the waveform
+            # Generating the waveform
             print("Synthesizing the waveform:")
 
             # If seed is specified, reset torch seed and reload vocoder
@@ -177,7 +177,7 @@ if __name__ == '__main__':
             # spectrogram, the more time-efficient the vocoder.
             generated_wav = vocoder.infer_waveform(spec)
 
-            ## Post-generation
+            # Post-generation
             # There's a bug with sounddevice that makes the audio cut one second earlier, so we
             # pad it.
             generated_wav = np.pad(generated_wav, (0, synthesizer.sample_rate), mode="constant")

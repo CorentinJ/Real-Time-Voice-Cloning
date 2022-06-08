@@ -227,6 +227,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
             use_amp = bool(use_amp)
             with autocast(enabled=use_amp):
                 m1_hat, m2_hat, attention, stop_pred = model(texts, mels, embeds)
+                # >>texts.shape
+                # torch.Size([12, 82])
             if debug:
                 print("Training point 2.3", time.time() - use_time)
                 use_time = time.time()
