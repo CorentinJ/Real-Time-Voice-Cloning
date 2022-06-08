@@ -33,7 +33,15 @@ class SynthesizerDataset(Dataset):
 
     def __getitem__(self, index):
         mel_path, embed_path = self.samples_fpaths[index]
-        mel = np.load(mel_path).T.astype(np.float32)
+        try:
+
+            mel = np.load(mel_path, allow_pickle=True).T.astype(np.float32)
+        except:
+            try:
+                mel = np.load(str(mel_path), allow_pickle=True).T.astype(np.float32)
+            except:
+                mel_path, embed_path = self.samples_fpaths[index+1]
+                mel = np.load(mel_path, allow_pickle=True).T.astype(np.float32)
         # Load the embed
         embed = np.load(embed_path)
         # Get the text and (not) clean it
