@@ -225,6 +225,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
             # Parallelize model onto GPUS using workaround due to python bug
             # print(use_amp, bool(use_amp))
             use_amp = bool(use_amp)
+            # print(texts.shape)
             with autocast(enabled=use_amp):
                 m1_hat, m2_hat, attention, stop_pred = model(texts, mels, embeds)
                 # >>texts.shape

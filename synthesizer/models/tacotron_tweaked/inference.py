@@ -97,11 +97,12 @@ class Synthesizer:
                           for i in range(0, len(embeddings), hparams.synthesis_batch_size)]
 
         specs = []
-        batch = torch.tensor(inputs).unsqueeze(0)#.repeat((hparams.synthesis_batch_size, 1))
-        batch = torch.tensor(pad2d(batch, 82)).to(self.device)
+        batch = inputs[:-1]
+        batch = torch.tensor(batch).unsqueeze(0).to(self.device)
+        # print(batch)
         speaker_embeds = np.stack(batched_embeds[0])
         speaker_embeddings = torch.tensor(speaker_embeds).float().to(self.device)
-        print(batch.shape)
+        # print(batch.shape)
         # Inference
         _, mels, alignments = self._model.generate(batch, speaker_embeddings)
         mels = mels.detach().cpu().numpy()
