@@ -90,9 +90,8 @@ if __name__ == '__main__':
     # The synthesizer can handle multiple inputs with batching. Let's create another embedding to
     # illustrate that
     embeds = [embed]
-    texts = g2p_main("тестовый текст")
     print("\tTesting the synthesizer... ")
-    mels = synthesizer.synthesize_spectrograms(texts, embeds)
+    mels = synthesizer.synthesize_spectrograms("тестовый текст", embeds)
 
     # The vocoder synthesizes one waveform at a time, but it's more efficient for long ones. We
     # can concatenate the mel spectrograms to a single one.
@@ -153,10 +152,6 @@ if __name__ == '__main__':
                 # else:
                 #     synthesizer = Synthesizer(args.syn_model_fpath)
 
-            # The synthesizer works in batch, so you need to put your data in a list or numpy array
-            # before: texts = [text]   # ["cdab"]
-            text = g2p_main(text.lower())  # [["c", "d"], ["a", "b"], ...]
-            # texts = texts + ["_________________________________________________"]
             print(text)
             embeds = [embed]
             # If you know what the attention layer alignments are, you can retrieve them here by

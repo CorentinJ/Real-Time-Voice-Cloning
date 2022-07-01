@@ -75,7 +75,6 @@ if __name__ == "__main__":
         from synthesizer.models.tacotron.train import train
 
     args.hparams = hparams.parse(args.hparams)
-    # args.hparams.update(nni.get_next_parameter())
 
     # Run the training
     train(**vars(args))

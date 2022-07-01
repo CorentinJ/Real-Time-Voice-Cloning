@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 from synthesizer.g2p import init
 from synthesizer.models.tacotron import audio
 from synthesizer.models.tacotron.gradinit_utils import gradinit
-from synthesizer.models.tacotron.synthesizer_dataset import SynthesizerDataset, JITSynthesizerDataset, \
+from synthesizer.models.tacotron.synthesizer_dataset import SynthesizerDataset, \
     collate_synthesizer
 from synthesizer.models.tacotron.tacotron import Tacotron
 from synthesizer.utils import ValueWindow
