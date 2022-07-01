@@ -29,7 +29,6 @@ if __name__ == "__main__":
     parser.add_argument("-f", "--force_restart", action="store_true", help="Do not load any saved model and restart "
                                                                            "from scratch.")
     parser.add_argument("--use_amp", action="store_true", help="Use Pytorch amp.")
-    parser.add_argument("--use_tweaked", action="store_true", help="Use Tweaked")
     parser.add_argument("--multi_gpu", action="store_true", help="Use Multigpu")
     parser.add_argument("--hparams", default="", help="Hyperparameter overrides as a comma-separated list of "
                                                       "name=value pairs")
@@ -67,12 +66,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print_args(args, parser)
 
-    if args.use_tweaked:
-        from synthesizer.models.tacotron.hparams import hparams
-        from synthesizer.models.tacotron.train import train
-    else:
-        from synthesizer.models.tacotron.hparams import hparams
-        from synthesizer.models.tacotron.train import train
+    from synthesizer.models.tacotron.hparams import hparams
+    from synthesizer.models.tacotron.train import train
 
     args.hparams = hparams.parse(args.hparams)
 

@@ -18,7 +18,7 @@ Multispeaker Text-To-Speech Synthesis](https://arxiv.org/pdf/1806.04558.pdf) (SV
 5. Install the remaining requirements with `pip install -r requirements.txt`
 
 ### 2. Download Pretrained Models
-Download a synthesizer [here](https://drive.google.com/file/d/1qtGH8JzoY_v3h1v_zQyTSWiAW4bWYXsU/view?usp=sharing), vocoder + encoder from original repo [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models) and put them under saved_models/default/.<br/>
+Synthesizer model download available by request, vocoder + encoder download from original repo [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models) and put them under saved_models/default/.<br/>
 The scructure should be:<br/>
 ```
 saved_models/default/synthesizer.pt
@@ -60,15 +60,11 @@ LibriTTS/train-clean-100/
 folder and skip converting to wavs.
 ### 4.2 Training
 The fork currently support two versions of synthesizers: the vanilla Tacotron2 or the tweaked version, which has different attention understanding and better generalization, but is yet unstable in training and takes longer to generalize.
-Example vanilla synthesizer train command:
+</br>Example vanilla synthesizer train command:
 ```
 synthesizer_train.py rusmodel SV2TTS\synthesizer
 ```
-Example tweaked synthesizer train command:
-```
-synthesizer_train.py rusmodeltweaked SV2TTS\synthesizer --use_tweaked 
-```
-### 5 Run the demo
+### 5. Run the demo
 ```
 python demo_cli.py 
 ```
