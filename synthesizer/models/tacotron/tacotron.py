@@ -496,6 +496,7 @@ class Tacotron(nn.Module):
         # Use device of model params as location for loaded state
         device = next(self.parameters()).device
         checkpoint = torch.load(str(path), map_location=device)
+
         self.load_state_dict(checkpoint["model_state"])
 
         if "optimizer_state" in checkpoint and optimizer is not None:

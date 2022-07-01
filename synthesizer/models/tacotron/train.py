@@ -24,7 +24,7 @@ from vocoder.display import *
 torch.autograd.set_detect_anomaly(False)
 torch.autograd.profiler.profile(False)
 torch.autograd.profiler.emit_nvtx(False)
-torch.backends.cudnn.benchmark = True
+torch.backends.cudnn.benchmark = False
 
 dl_logger = Logger(backends=[JSONStreamBackend(Verbosity.DEFAULT, 'log.txt'),
                              StdOutBackend(Verbosity.VERBOSE)])
@@ -107,31 +107,14 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                      stop_threshold=hparams.tts_stop_threshold,
                      speaker_embedding_size=hparams.speaker_embedding_size).to(device)
 
-    # Initialize the optimizer and model
-    # https://github.com/zhuchen03/gradinit/blob/master/train_cifar.py
-    parameters_bias = [p[1] for p in model.named_parameters() if 'bias' in p[0]]
-    parameters_scale = [p[1] for p in model.named_parameters() if 'scale' in p[0]]
-    parameters_others = [p[1] for p in model.named_parameters() if
-                         not ('bias' in p[0] or 'scale' in p[0] or 'autoinit' in p[0])]
-
-    if debug:
-        print("Init time: {}, elapsed: {}, point 3".format(use_time, time.time() - use_time))
-        use_time = time.time()
-    # Load the weights
 
     global dl_logger
     init(dl_logger_=dl_logger)
-    if debug:
-        print("Init time: {}, elapsed: {}, point 4".format(use_time, time.time() - use_time))
-        use_time = time.time()
     # Initialize the dataset
     metadata_fpath = syn_dir.joinpath("train.txt")
     mel_dir = syn_dir.joinpath("mels")
     embed_dir = syn_dir.joinpath("embeds")
-    if use_JIT:
-        dataset = JITSynthesizerDataset()  # for now, args are modified in the class itself
-    else:
-        dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
+    dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
 
     gradinit_bsize = int(batch_size / 2) if gradinit_bsize < 0 else int(gradinit_bsize / 2)
     scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
@@ -172,9 +155,6 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                                           pin_memory=True)
         model = gradinit(model, gradinit_trainloader, dataset, device, Struct(**args))
 
-    if debug:
-        print("Training point 1", time.time() - use_time)
-        use_time = time.time()
     model.r = r
 
     # Begin the training
@@ -240,9 +220,6 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
 
             loss = m1_loss + m2_loss + stop_loss
 
-            # loss.backward()
-            # if loss < loss_window.average+0.15 and len(loss_window) > 20 or loss < 25 and len(loss_window) < 20:  #
-            # loss limit
             optimizer.zero_grad(set_to_none=True)
             scaler.scale(loss).backward()
             scaler.unscale_(optimizer)
