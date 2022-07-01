@@ -2,8 +2,8 @@ import argparse
 import os
 from pathlib import Path
 
-from synthesizer.models.tacotron_tweaked.hparams import hparams
-from synthesizer.models.tacotron_tweaked.synthesize import run_synthesis
+from synthesizer.models.tacotron.hparams import hparams
+from synthesizer.models.tacotron.synthesize import run_synthesis
 from utils.argutils import print_args
 
 if __name__ == "__main__":

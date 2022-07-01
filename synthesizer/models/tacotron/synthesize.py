@@ -9,7 +9,7 @@ from tqdm import tqdm
 from synthesizer.models.tacotron.hparams import hparams_debug_string
 from synthesizer.models.tacotron.tacotron import Tacotron
 from synthesizer.models.tacotron.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
-from synthesizer.utils import symbols
+from synthesizer.utils.symbols import symbols
 
 
 def run_synthesis(in_dir: Path, out_dir: Path, syn_model_fpath: Path, hparams):
@@ -68,8 +68,6 @@ def run_synthesis(in_dir: Path, out_dir: Path, syn_model_fpath: Path, hparams):
     with meta_out_fpath.open("w", encoding="utf8") as file:
         for i, (texts, mels, embeds, idx) in tqdm(enumerate(data_loader), total=len(data_loader)):
             texts, mels, embeds = texts.to(device), mels.to(device), embeds.to(device)
-
-            # Parallelize model onto GPUS using workaround due to python bug
             _, mels_out, _, _ = model(texts, mels, embeds)
 
             for j, k in enumerate(idx):

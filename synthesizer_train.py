@@ -68,8 +68,8 @@ if __name__ == "__main__":
     print_args(args, parser)
 
     if args.use_tweaked:
-        from synthesizer.models.tacotron_tweaked.hparams import hparams
-        from synthesizer.models.tacotron_tweaked.train import train
+        from synthesizer.models.tacotron.hparams import hparams
+        from synthesizer.models.tacotron.train import train
     else:
         from synthesizer.models.tacotron.hparams import hparams
         from synthesizer.models.tacotron.train import train

@@ -15,6 +15,13 @@ class HParams(object):
     def __repr__(self):
         return pprint.pformat(self.__dict__)
 
+    def get_max(self, x):
+        for _, _, max_step, _ in self.tts_schedule:
+            if x < max_step:
+                return max_step
+        print("you are overtraining man")
+        return x * 2
+
     def parse(self, string):
         # Overrides hparams from a comma-separated string of name=value pairs
         if len(string) > 0:
@@ -50,7 +57,7 @@ hparams = HParams(
     tts_lstm_dims=1024,
     tts_postnet_K=5,
     tts_num_highways=4,
-    tts_dropout=0.4,
+    tts_dropout=0.5,
     tts_cleaner_names=["english_cleaners"],
     tts_stop_threshold=-3.4,  # Value below which audio generation ends.
     # For example, for a range of [-4, 4], this
@@ -58,12 +65,21 @@ hparams = HParams(
     # frame that has all values < -3.4
 
     # Tacotron Training
-    tts_schedule=[(2, 1e-3, 15_000, 12),  # Progressive training schedule
-                  (2, 5e-4, 35_000, 12),  # (r, lr, step, batch_size)
-                  (2, 2e-4, 75_000, 10),  #
-                  (2, 1e-4, 140_000, 10),  # r = reduction factor (# of mel frames
-                  (2, 3e-5, 280_000, 10),  # synthesized for each decoder iteration)
-                  (2, 1e-5, 560_000, 10)],  # lr = learning rate
+    tts_schedule=[(2, 1e-3, 20_000, 12),  # Progressive training schedule
+                  (2, 5e-4, 40_000, 10),  # (r, lr, step, batch_size)
+                  (2, 2e-4, 80_000, 12),  #
+                  (2, 1e-4, 160_000, 12),  # r = reduction factor (# of mel frames
+                  (2, 3e-5, 320_000, 12),  # synthesized for each decoder iteration)
+                  (2, 1e-5, 640_000, 12)],  # lr = learning rate
+
+    tts_schedule_dict={
+        20_000: (2, 1e-2, 20_000, 12),  # Progressive training schedule
+        40_000: (2, 5e-3, 40_000, 12),  # (r, lr, step, batch_size)
+        80_000: (2, 2e-3, 80_000, 12),  #
+        160_000: (2, 1e-3, 160_000, 12),  # r = reduction factor (# of mel frames
+        320_000: (2, 3e-4, 320_000, 12),  # synthesized for each decoder iteration
+        640_000: (2, 1e-4, 640_000, 12)
+    },
 
     tts_clip_grad_norm=1.0,  # clips the gradient norm to prevent explosion - set to None if not needed
     tts_eval_interval=500,  # Number of steps between model evaluation (sample generation)

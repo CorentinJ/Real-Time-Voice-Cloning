@@ -1,16 +1,12 @@
-import os
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from pathlib import Path
-from typing import Union
 
 
 class HighwayNetwork(nn.Module):
     def __init__(self, size):
         super().__init__()
-
         self.W1 = nn.Linear(size, size)
         self.W2 = nn.Linear(size, size)
         self.W1.bias.data.fill_(0.)
@@ -26,8 +22,8 @@ class HighwayNetwork(nn.Module):
 class Encoder(nn.Module):
     def __init__(self, embed_dims, num_chars, encoder_dims, K, num_highways, dropout):
         super().__init__()
-        cbhg_channels = encoder_dims
         prenet_dims = (encoder_dims, encoder_dims)
+        cbhg_channels = encoder_dims
         self.embedding = nn.Embedding(num_chars, embed_dims)
         self.pre_net = PreNet(embed_dims, fc1_dims=prenet_dims[0], fc2_dims=prenet_dims[1],
                               dropout=dropout)
@@ -36,14 +32,11 @@ class Encoder(nn.Module):
                          num_highways=num_highways)
 
     def forward(self, x, speaker_embedding=None):
-        # print("xbb: ", x.shape)
         x = self.embedding(x)
-        x = self.pre_net(x)
+        x = self.pre_net(x)  #
         x.transpose_(1, 2)
         x = self.cbhg(x)
         if speaker_embedding is not None:
-            # print("se: ", speaker_embedding.shape)
-            # print("xba: ", x.shape)
             x = self.add_speaker_embedding(x, speaker_embedding)
         return x
 
@@ -163,7 +156,8 @@ class CBHG(nn.Module):
         x = x.transpose(1, 2)
         if self.highway_mismatch is True:
             x = self.pre_highway(x)
-        for h in self.highways: x = h(x)
+        for h in self.highways:
+            x = h(x)
 
         # And then the RNN
         x, _ = self.rnn(x)
@@ -172,7 +166,8 @@ class CBHG(nn.Module):
     def _flatten_parameters(self):
         """Calls `flatten_parameters` on all the rnns used by the WaveRNN. Used
         to improve efficiency and avoid PyTorch yelling at us."""
-        [m.flatten_parameters() for m in self._to_flatten]
+        for m in self._to_flatten:
+            self._to_flatten[self._to_flatten.index(m)].flatten_parameters()
 
 
 class PreNet(nn.Module):
@@ -370,7 +365,7 @@ class Tacotron(nn.Module):
         device = next(self.parameters()).device  # use same device as parameters
 
         self.step += 1
-        batch_size, _, steps = m.size()
+        batch_size, _, steps = m.shape
 
         # Initialise all hidden states and pack into tuple
         attn_hidden = torch.zeros(batch_size, self.decoder_dims, device=device)
@@ -424,17 +419,18 @@ class Tacotron(nn.Module):
 
     def generate(self, x, speaker_embedding=None, steps=2000):
         self.eval()
+
         device = next(self.parameters()).device  # use same device as parameters
 
         batch_size, _ = x.size()
 
-        # Need to initialise all hidden states and pack into tuple for tidyness
+        # Initialise all hidden states and pack into tuple for tidyness
         attn_hidden = torch.zeros(batch_size, self.decoder_dims, device=device)
         rnn1_hidden = torch.zeros(batch_size, self.lstm_dims, device=device)
         rnn2_hidden = torch.zeros(batch_size, self.lstm_dims, device=device)
         hidden_states = (attn_hidden, rnn1_hidden, rnn2_hidden)
 
-        # Need to initialise all lstm cell states and pack into tuple for tidyness
+        # Initialise all lstm cell states and pack into tuple for tidyness
         rnn1_cell = torch.zeros(batch_size, self.lstm_dims, device=device)
         rnn2_cell = torch.zeros(batch_size, self.lstm_dims, device=device)
         cell_states = (rnn1_cell, rnn2_cell)
@@ -447,13 +443,11 @@ class Tacotron(nn.Module):
 
         # SV2TTS: Run the encoder with the speaker embedding
         # The projection avoids unnecessary matmuls in the decoder loop
-        # print("se: ", speaker_embedding.shape)
-        # print("x: ", x.shape)
         encoder_seq = self.encoder(x, speaker_embedding)
         encoder_seq_proj = self.encoder_proj(encoder_seq)
 
         # Need a couple of lists for outputs
-        mel_outputs, attn_scores, stop_outputs = [], [], []
+        mel_outputs, attn_scores = [], []
 
         # Run the decoder loop
         for t in range(0, steps, self.r):
@@ -463,9 +457,9 @@ class Tacotron(nn.Module):
                              hidden_states, cell_states, context_vec, t, x)
             mel_outputs.append(mel_frames)
             attn_scores.append(scores)
-            stop_outputs.extend([stop_tokens] * self.r)
             # Stop the loop when all stop tokens in batch exceed threshold
-            if (stop_tokens > 0.5).all() and t > 10: break
+            if (stop_tokens > 0.5).all() and t > 10:
+                break
 
         # Concat the mel outputs into sequence
         mel_outputs = torch.cat(mel_outputs, dim=2)
@@ -478,7 +472,6 @@ class Tacotron(nn.Module):
 
         # For easy visualisation
         attn_scores = torch.cat(attn_scores, 1)
-        stop_outputs = torch.cat(stop_outputs, 1)
 
         self.train()
 

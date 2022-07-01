@@ -1,7 +1,7 @@
 import torch
 from torch import nn
-from synthesizer.models.tacotron_tweaked.gradinit_optimizers import RescaleAdam
-from synthesizer.models.tacotron_tweaked.models.modules import Scale, Bias
+from synthesizer.models.tacotron.gradinit_optimizers import RescaleAdam
+from synthesizer.models.tacotron.models.modules import Scale, Bias
 import numpy as np
 import os
 

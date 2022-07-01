@@ -1,4 +1,5 @@
 from synthesizer.utils.symbols import symbols
+from synthesizer.g2p import g2p_main
 
 # Mappings from symbol to numeric ID and vice versa:
 _symbol_to_id = {s: i for i, s in enumerate(symbols)}
@@ -18,8 +19,8 @@ def text_to_sequence(text):
       Returns:
         List of integers corresponding to the symbols in the text
     """
+    text = g2p_main(text)
     sequence = [_symbol_to_id[symbol] for symbol in text if symbol in symbols]
-    sequence.append(_symbol_to_id["<eos>"])  # Append EOS token
     return sequence
 
 

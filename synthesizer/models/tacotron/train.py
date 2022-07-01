@@ -1,17 +1,18 @@
-import dllogger as DLLogger
-import torch
-import torch.nn.functional as F
-
-from adabelief_pytorch import AdaBelief
-from dllogger import StdOutBackend, JSONStreamBackend, Verbosity
-from torch.utils.data import DataLoader
 from datetime import datetime
 from functools import partial
 from pathlib import Path
-from torch.utils.tensorboard import SummaryWriter
 
+import torch
+import torch.nn.functional as F
+from adabelief_pytorch import AdaBelief
+from dllogger import StdOutBackend, JSONStreamBackend, Verbosity, Logger
+from torch.utils.data import DataLoader
+
+from synthesizer.g2p import init
 from synthesizer.models.tacotron import audio
-from synthesizer.models.tacotron.synthesizer_dataset import SynthesizerDataset, collate_synthesizer
+from synthesizer.models.tacotron.gradinit_utils import gradinit
+from synthesizer.models.tacotron.synthesizer_dataset import SynthesizerDataset, JITSynthesizerDataset, \
+    collate_synthesizer
 from synthesizer.models.tacotron.tacotron import Tacotron
 from synthesizer.utils import ValueWindow
 from synthesizer.utils.plot import plot_spectrogram
@@ -23,7 +24,10 @@ from vocoder.display import *
 torch.autograd.set_detect_anomaly(False)
 torch.autograd.profiler.profile(False)
 torch.autograd.profiler.emit_nvtx(False)
-torch.backends.cudnn.benchmark = False
+torch.backends.cudnn.benchmark = True
+
+dl_logger = Logger(backends=[JSONStreamBackend(Verbosity.DEFAULT, 'log.txt'),
+                             StdOutBackend(Verbosity.VERBOSE)])
 
 
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
@@ -33,14 +37,19 @@ def time_string():
     return datetime.now().strftime("%Y-%m-%d %H:%M")
 
 
+class Struct:
+    def __init__(self, **entries):
+        self.__dict__.update(entries)
+
+
 def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_every: int, force_restart: bool,
-          hparams, use_amp, multi_gpu, print_every, debug=False, *args, **kwargs):
-    writer = SummaryWriter(run_id)
+          hparams, use_amp, multi_gpu, print_every, wd, batch_size, gradinit_bsize,
+          n_epoch, perf_limit, use_JIT=False, debug=False, **args):
     if debug:
         start_time = time.time()
         use_time = time.time()
     models_dir.mkdir(exist_ok=True)
-
+    torch.cuda.empty_cache()
     model_dir = models_dir.joinpath(run_id)
     plot_dir = model_dir.joinpath("plots")
     wav_dir = model_dir.joinpath("wavs")
@@ -62,20 +71,13 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         use_time = time.time()
         print("Init time: {}, elapsed: {}, point 1".format(use_time, time.time() - start_time))
 
-    # Bookkeeping
     time_window = ValueWindow(100)
     loss_window = ValueWindow(100)
 
-    # From WaveRNN/train_tacotron.py
-    if torch.cuda.is_available():
+    if torch.cuda.is_available() or True:
         dev_index = 0  # useful for multigpu
         device = torch.device(dev_index)
         from torch.cuda.amp import autocast
-
-        for session in hparams.tts_schedule:
-            _, _, _, batch_size = session
-            if batch_size % torch.cuda.device_count() != 0:
-                raise ValueError("`batch_size` must be evenly divisible by n_gpus!")
         if torch.cuda.device_count() > 1 and multi_gpu:
             print("Using devices:", [torch.cuda.get_device_name(i) for i in range(torch.cuda.device_count())])
         else:
@@ -88,9 +90,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     if debug:
         print("Init time: {}, elapsed: {}, point 2".format(use_time, time.time() - use_time))
         use_time = time.time()
-    # Instantiate Tacotron Model
-    print("\nInitialising Tacotron Model...\n")
 
+    print("\nInitialising Tacotron Tweaked Model...\n")
     model = Tacotron(embed_dims=hparams.tts_embed_dims,
                      num_chars=len(symbols),
                      encoder_dims=hparams.tts_encoder_dims,
@@ -106,12 +107,39 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                      stop_threshold=hparams.tts_stop_threshold,
                      speaker_embedding_size=hparams.speaker_embedding_size).to(device)
 
-    r, lr, max_step, batch_size = 2, 1e-3, 640_000, 12  # schedule already included in optimizer
-    optimizer = AdaBelief(model.parameters(), lr=lr, eps=1e-12, betas=(0.9, 0.999), weight_decouple=True,
-                          rectify=True, fixed_decay=False, amsgrad=False, print_change_log=False)
+    # Initialize the optimizer and model
+    # https://github.com/zhuchen03/gradinit/blob/master/train_cifar.py
+    parameters_bias = [p[1] for p in model.named_parameters() if 'bias' in p[0]]
+    parameters_scale = [p[1] for p in model.named_parameters() if 'scale' in p[0]]
+    parameters_others = [p[1] for p in model.named_parameters() if
+                         not ('bias' in p[0] or 'scale' in p[0] or 'autoinit' in p[0])]
 
+    if debug:
+        print("Init time: {}, elapsed: {}, point 3".format(use_time, time.time() - use_time))
+        use_time = time.time()
+    # Load the weights
+
+    global dl_logger
+    init(dl_logger_=dl_logger)
+    if debug:
+        print("Init time: {}, elapsed: {}, point 4".format(use_time, time.time() - use_time))
+        use_time = time.time()
+    # Initialize the dataset
+    metadata_fpath = syn_dir.joinpath("train.txt")
+    mel_dir = syn_dir.joinpath("mels")
+    embed_dir = syn_dir.joinpath("embeds")
+    if use_JIT:
+        dataset = JITSynthesizerDataset()  # for now, args are modified in the class itself
+    else:
+        dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
+
+    gradinit_bsize = int(batch_size / 2) if gradinit_bsize < 0 else int(gradinit_bsize / 2)
+    scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
+    optimizer = AdaBelief(model.parameters(), lr=1e-3, eps=1e-16, betas=(0.9, 0.999), weight_decouple=True,
+                          rectify=True)
     if force_restart or not weights_fpath.exists():
         print("\nStarting the training of Tacotron from scratch\n")
+        gradinit_do = True
         model.save(weights_fpath, optimizer)
 
         # Embeddings metadata
@@ -127,17 +155,23 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         print("\nLoading weights at %s" % weights_fpath)
         model.load(weights_fpath, optimizer)
         print("Tacotron weights loaded from step %d" % model.step)
+        gradinit_do = False
+    r, lr, max_step, batch_size = hparams.tts_schedule_dict[hparams.get_max(model.step)]
+    if force_restart or not weights_fpath.exists():
+        model.save(weights_fpath, optimizer)
+    else:
+        model.load(weights_fpath, optimizer)
+    print("Using gradinit" if gradinit_do else "not using gradinit")
 
-    metadata_fpath = syn_dir.joinpath("train.txt")
-    mel_dir = syn_dir.joinpath("mels")
-    embed_dir = syn_dir.joinpath("embeds")
-    dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
-
-    DLLogger.init(backends=[JSONStreamBackend(Verbosity.DEFAULT, 'log.txt'),
-                            StdOutBackend(Verbosity.VERBOSE)])
     current_step = model.get_step()
 
     training_steps = max_step - current_step
+    collate_fn = partial(collate_synthesizer, r=r, hparams=hparams)
+    if gradinit_do:
+        gradinit_trainloader = DataLoader(dataset, gradinit_bsize, shuffle=True, num_workers=4, collate_fn=collate_fn,
+                                          pin_memory=True)
+        model = gradinit(model, gradinit_trainloader, dataset, device, Struct(**args))
+
     if debug:
         print("Training point 1", time.time() - use_time)
         use_time = time.time()
@@ -149,10 +183,6 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                   ("Learning Rate", lr),
                   ("Outputs/Step (r)", model.r)])
 
-    for p in optimizer.param_groups:
-        p["lr"] = lr
-
-    collate_fn = partial(collate_synthesizer, r=r, hparams=hparams)
     data_loader = DataLoader(dataset, batch_size, shuffle=True, num_workers=4, collate_fn=collate_fn,
                              pin_memory=True)
 
@@ -166,6 +196,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     print("Printing every", print_every, "steps")
     for epoch in range(1, epochs + 1):
         for i, (texts, mels, embeds, idx) in enumerate(data_loader, 1):
+            if perf_limit and i >= 500:  # leave this to me, should be 500
+                break
             # print(texts)
             torch.cuda.synchronize()
             # print(texts, texts[0])
@@ -175,33 +207,57 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 use_time = time.time()
             # Generate stop tokens for training
             stop = torch.ones(mels.shape[0], mels.shape[2], device=device)
-            for j, k in enumerate(idx):
-                stop[j, :int(dataset.metadata[k][4]) - 1] = 0
+            if use_JIT:
+                for j, k in enumerate(idx):
+                    stop[j, :int(len(mels[j])) - 1] = 0
+            else:
+                for j, k in enumerate(idx):
+                    stop[j, :int(dataset.metadata[k][4]) - 1] = 0
 
             texts = texts.to(device)
             mels = mels.to(device)
             embeds = embeds.to(device)
+            # stop = stop.to(device)
+            if debug:
+                print("Training point 2.2", time.time() - use_time)
+                use_time = time.time()
+            # Forward pass
+            # Parallelize model onto GPUS using workaround due to python bug
+            # print(use_amp, bool(use_amp))
             use_amp = bool(use_amp)
+            # print(texts.shape)
             with autocast(enabled=use_amp):
                 m1_hat, m2_hat, attention, stop_pred = model(texts, mels, embeds)
-
+                # >>texts.shape
+                # torch.Size([12, 82])
+            if debug:
+                print("Training point 2.3", time.time() - use_time)
+                use_time = time.time()
             # Backward pass
             m1_loss = F.mse_loss(m1_hat, mels) + F.l1_loss(m1_hat, mels)
             m2_loss = F.mse_loss(m2_hat, mels)
-            stop_loss = F.binary_cross_entropy(stop_pred, stop)  # ?
+            stop_loss = F.binary_cross_entropy(stop_pred, stop)
 
             loss = m1_loss + m2_loss + stop_loss
 
+            # loss.backward()
+            # if loss < loss_window.average+0.15 and len(loss_window) > 20 or loss < 25 and len(loss_window) < 20:  #
+            # loss limit
             optimizer.zero_grad(set_to_none=True)
-
-            loss.backward()
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
 
             if hparams.tts_clip_grad_norm is not None:
                 grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), hparams.tts_clip_grad_norm)
                 if np.isnan(grad_norm.cpu()):
                     print("grad_norm was NaN!")
 
-            optimizer.step()
+            # optimizer.step()
+
+            scaler.step(optimizer)
+            scaler.update()
+            # else:
+            #     print(f"loss is {loss}, higher then avg, which is {loss_window.average+0.15}")
 
             time_window.append(time.time() - start_time)
             loss_window.append(loss.item())
@@ -210,32 +266,35 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
             k = step // 1000
 
             msg = {
-                "Loss:": f"{loss_window.average:#.4}",
+                "Loss": f"{loss_window.average:#.4}",
                 "steps/s": f"{1. / time_window.average:#.2}",
-                "Step:": step,
-                "One step time: ": str(round(time.time() - start_time, 2)) + "s"
+                "Step": step,
+                "One step time": str(round(time.time() - start_time, 2)) + "s"
             }
             if i % print_every == 0:
-                DLLogger.log(step=(epoch, str(i) + "/" + str(dt_len)), data=msg)
+                dl_logger.log(step=(epoch, str(i) + "/" + str(dt_len)), data=msg)
             # Backup or save model as appropriate
             if backup_every != 0 and step % backup_every == 0:
                 backup_fpath = weights_fpath.parent / f"synthesizer_{k:06d}.pt"
                 model.save(backup_fpath, optimizer)
 
             if save_every != 0 and step % save_every == 0:
-                writer.add_scalar('Loss/train', loss_window.average, step)
-                writer.add_scalar('Step time', round(time.time() - start_time, 2), step)
+                # Must save latest optimizer state to ensure that resuming training
+                # doesn't produce artifacts
                 model.save(weights_fpath, optimizer)
-                print("wrote scalars and saved..")
-                DLLogger.flush()
+                dl_logger.log("INFO", data={
+                    "status": "saved.."
+                })
+                dl_logger.flush()
 
             # Evaluate model to generate samples
             epoch_eval = hparams.tts_eval_interval == -1 and i == steps_per_epoch  # If epoch is done
             step_eval = hparams.tts_eval_interval > 0 and step % hparams.tts_eval_interval == 0  # Every N steps
             if epoch_eval or step_eval:
                 for sample_idx in range(hparams.tts_eval_num_samples):
-
+                    # At most, generate samples equal to number in the batch
                     if sample_idx + 1 <= len(texts):
+                        # Remove padding from mels using frame length in metadata
                         mel_length = int(dataset.metadata[idx[sample_idx]][4])
                         mel_prediction = np_now(m2_hat[sample_idx]).T[:mel_length]
                         target_spectrogram = np_now(mels[sample_idx]).T[:mel_length]
@@ -252,6 +311,33 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                                    sample_num=sample_idx + 1,
                                    loss=loss,
                                    hparams=hparams)
+
+            # Break out of loop to update training schedule
+            if step >= max_step:
+                break
+
+
+def test(model, device, data_loader, dataset):
+    losses = []
+    for i, (texts, mels, embeds, idx) in enumerate(data_loader, 1):
+        if i == 5:
+            break
+        stop = torch.ones(mels.shape[0], mels.shape[2], device=device)
+        mels = mels.to(device)
+        for j, k in enumerate(idx):
+            stop[j, :int(dataset.metadata[k][4]) - 1] = 0
+        with torch.no_grad():
+            m1_hat, m2_hat, attention, stop_pred = model(texts.to(device), mels, embeds.to(device))
+        m1_loss = F.mse_loss(m1_hat, mels) + F.l1_loss(m1_hat, mels)
+        m2_loss = F.mse_loss(m2_hat, mels)
+        stop_loss = F.binary_cross_entropy(stop_pred, stop)  # ?
+
+        losses.append(float(m1_loss + m2_loss + stop_loss))
+    return round(1 - avg(losses), 2)
+
+
+def avg(x):
+    return sum(x) / len(x)
 
 
 def eval_model(attention, mel_prediction, target_spectrogram, input_seq, step,
