@@ -1,12 +1,12 @@
-import torch
-from torch import nn
-from synthesizer.models.tacotron.gradinit_optimizers import RescaleAdam
-from synthesizer.models.tacotron.models.modules import Scale, Bias
-import numpy as np
 import os
 
+import numpy as np
+import torch
 import torch.nn.functional as F
-from torch.profiler import profile, record_function, ProfilerActivity
+from torch import nn
+
+from synthesizer.models.tacotron.gradinit_optimizers import RescaleAdam
+from synthesizer.models.tacotron.models.modules import Scale, Bias
 
 
 def get_ordered_params(net):
@@ -150,7 +150,7 @@ def pad3d(x_arg, x_dest):
     return x
 
 
-def gradinit(net, dataloader, dataset, device, args):
+def gradinit(net, dataloader, dataset, args):
     if args.gradinit_resume:
         print("Resuming GradInit model from {}".format(args.gradinit_resume))
         sdict = torch.load(args.gradinit_resume)
@@ -161,7 +161,7 @@ def gradinit(net, dataloader, dataset, device, args):
     #     net_top = net.module
     # else:
     #     net_top = net
-    device=torch.device(0)
+    device = torch.device(0)
     bias_params = [p for n, p in net.named_parameters() if 'bias' in n]
     weight_params = [p for n, p in net.named_parameters() if 'weight' in n]
 
@@ -192,14 +192,6 @@ def gradinit(net, dataloader, dataset, device, args):
         # Get the second half of the data.
         data_iter, texts1, mels1, embeds1, idx1 = get_batch(data_iter, dataloader)
 
-        # print(texts0.shape,
-        #       mels0.shape,
-        #       embeds0.shape)
-        # print(texts1.shape,
-        #       mels1.shape,
-        #       embeds1.shape)
-        #
-        # something like if len > else
         init_inputs = torch.cat([texts0, pad2d(texts1, texts0.shape[-1])] if texts0.shape[-1] > texts1.shape[-1]
                                 else [texts1, pad2d(texts0, texts1.shape[-1])]).to(device)
         init_mels = torch.cat([mels0, pad3d(mels1, mels0)] if mels0.shape[-1] > mels1.shape[-1]
@@ -293,16 +285,16 @@ def gradinit(net, dataloader, dataset, device, args):
         total_iters += 1
         if (total_sums_gnorm > 0 and total_sums_gnorm % 10 == 0) or total_iters == args.gradinit_iters:
             stat_dict = get_scale_stats(net, optimizer)
-            print_str = "Iter {}, obj iters {}, eta {:.3e}, constraint count {} loss: {:.3e} ({:.3e}), init loss: " \
-                        "{:.3e} ({:.3e}), update loss {:.3e} ({:.3e}), " \
-                        "total gnorm: {:.3e} ({:.3e})\t".format(total_sums_gnorm, total_sums, eta, cs_count,
-                                                                float(obj_loss),
-                                                                total_loss / total_sums if total_sums > 0 else -1,
-                                                                float(init_loss),
-                                                                total_l0 / total_sums if total_sums > 0 else -1,
-                                                                float(updated_loss),
-                                                                total_l1 / total_sums if total_sums > 0 else -1,
-                                                                float(gnorm), total_gnorm / total_sums_gnorm)
+            print_str = "Iter {}, obj iters {}, eta {}, constraint count {} loss: {} ({}), init loss: " \
+                        "{} ({}), update loss {} ({}), " \
+                        "total gnorm: {} ({})\t".format(total_sums_gnorm, total_sums, eta, cs_count,
+                                                        round(float(obj_loss), 3),
+                                                        round(total_loss / total_sums if total_sums > 0 else -1, 3),
+                                                        round(float(init_loss), 3),
+                                                        round(total_l0 / total_sums if total_sums > 0 else -1, 3),
+                                                        round(float(updated_loss), 3),
+                                                        round(total_l1 / total_sums if total_sums > 0 else -1, 3),
+                                                        float(gnorm), total_gnorm / total_sums_gnorm)
 
             for key, val in stat_dict.items():
                 print_str += "{}: {:.2e}\t".format(key, val)
@@ -324,68 +316,3 @@ def gradient_quotient(loss, params, eps=1e-5):
 
     gnorm = sum([(g ** 2).sum().item() for g in grad])
     return out / sum([p.data.numel() for p in params]), gnorm
-
-
-def metainit(net, dataloader, args, experiment=None):
-    if args.gradinit_resume:
-        print("Resuming metainit model from {}".format(args.gradinit_resume))
-        sdict = torch.load(args.gradinit_resume)
-        net.load_state_dict(sdict)
-        return
-
-    # if isinstance(net, torch.nn.DataParallel):
-    #     net_top = net.module
-    # else:
-    #     net_top = net
-
-    bias_params = [p for n, p in net.named_parameters() if 'bias' in n]
-    weight_params = [p for n, p in net.named_parameters() if 'weight' in n]
-
-    optimizer = RescaleAdam([{'params': weight_params, 'min_scale': args.gradinit_min_scale, 'lr': args.gradinit_lr},
-                             {'params': bias_params, 'min_scale': 0, 'lr': args.gradinit_lr}],
-                            grad_clip=args.gradinit_grad_clip)
-
-    criterion = nn.CrossEntropyLoss()
-
-    set_bn_modes(net)
-    net.eval()
-    # get all the parameters by order
-    params_list = get_ordered_params(net)
-
-    total_gq_loss = 0
-    total_gnorm = 0
-    for ite, (inputs, targets) in enumerate(dataloader):
-        optimizer.zero_grad()
-
-        inputs, targets = inputs.cuda(), targets.cuda()
-        outputs = net(inputs)
-        loss = criterion(outputs, targets)
-
-        gq, gnorm = gradient_quotient(loss, params_list, eps=1e-5)
-        gq.backward()
-
-        total_gq_loss += gq.item()
-        total_gnorm += gnorm
-        optimizer.step()
-
-        if ite % 10 == 0 or ite == args.gradinit_iters - 1 or ite == len(dataloader) - 1:
-            stat_dict = get_scale_stats(net, optimizer)
-            print_str = "Iter {}, gq {:.3e} ({:.3e}), gnorm {:.3e} ({:.3e}), loss {:.3e}\t".format(
-                ite, gnorm, total_gnorm / (ite + 1), gq.item(), total_gq_loss / (ite + 1), loss.item())
-
-            if experiment is not None:
-                experiment.log_metric("gq", gq.item(), ite)
-                experiment.log_metric("init_loss", loss.item(), ite)
-                experiment.log_metric("gnorm", gnorm, ite)
-                for key, val in stat_dict.items():
-                    experiment.log_metric(key, val, ite)
-            # torch.save(net.state_dict(), 'chks/{}_init.pth'.format(args.expname))
-
-            for key, val in stat_dict.items():
-                print_str += "{}: {:.2e}\t".format(key, val)
-            print(print_str)
-
-    recover_bn_modes(net)
-    if not os.path.exists('chks'):
-        os.makedirs('chks')
-    torch.save(net.state_dict(), 'chks/{}_init.pth'.format(args.expname))

@@ -41,9 +41,8 @@ class SynthesizerDataset(Dataset):
         embed = np.load(embed_path)
 
         text = text_to_sequence(self.samples_texts[index].lower())
+        text = torch.tensor(text, dtype=torch.int)
         # Convert the list returned by text_to_sequence to a numpy array
-        text = np.asarray(text).astype(np.int32)
-
         return text, mel, embed.astype(np.float32), index
 
     def __len__(self):

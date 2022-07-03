@@ -54,7 +54,7 @@ if __name__ == "__main__":
                         help='Whether to normalize the gradient for the algorithm A.')
     parser.add_argument('--gradinit-resume', default='', type=str,
                         help='Path to the gradinit or metainit initializations.')
-    parser.add_argument('--gradinit-bsize', default=6, type=int,
+    parser.add_argument('--gradinit-bsize', default=8, type=int,
                         help='Batch size for GradInit.')
     parser.add_argument('--batch-no-overlap', default=False, action='store_true',
                         help=r'Whether to make \tilde{S} and S different.')

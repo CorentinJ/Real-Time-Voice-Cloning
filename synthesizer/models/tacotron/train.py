@@ -43,8 +43,8 @@ class Struct:
 
 
 def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_every: int, force_restart: bool,
-          hparams, use_amp, multi_gpu, print_every, wd, batch_size, gradinit_bsize,
-          n_epoch, perf_limit, use_JIT=False, debug=False, **args):
+          hparams, use_amp, multi_gpu, print_every, batch_size, gradinit_bsize,
+          n_epoch, perf_limit, debug=False, **args):
     if debug:
         start_time = time.time()
         use_time = time.time()
@@ -87,10 +87,6 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         from torch.cpu.amp import autocast
         print("Using device:", device)
 
-    if debug:
-        print("Init time: {}, elapsed: {}, point 2".format(use_time, time.time() - use_time))
-        use_time = time.time()
-
     print("\nInitialising Tacotron Tweaked Model...\n")
     model = Tacotron(embed_dims=hparams.tts_embed_dims,
                      num_chars=len(symbols),
@@ -106,7 +102,6 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                      dropout=hparams.tts_dropout,
                      stop_threshold=hparams.tts_stop_threshold,
                      speaker_embedding_size=hparams.speaker_embedding_size).to(device)
-
 
     global dl_logger
     init(dl_logger_=dl_logger)
@@ -153,7 +148,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     if gradinit_do:
         gradinit_trainloader = DataLoader(dataset, gradinit_bsize, shuffle=True, num_workers=4, collate_fn=collate_fn,
                                           pin_memory=True)
-        model = gradinit(model, gradinit_trainloader, dataset, device, Struct(**args))
+        model = gradinit(model, gradinit_trainloader, dataset, Struct(**args))
 
     model.r = r
 
@@ -169,51 +164,28 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
     total_iters = len(dataset)
     steps_per_epoch = np.ceil(total_iters / batch_size).astype(np.int32)
     epochs = np.ceil(training_steps / steps_per_epoch).astype(np.int32)
-    if debug:
-        print("Training point 2", time.time() - use_time)
-        use_time = time.time()
     dt_len = len(data_loader)
     print("Printing every", print_every, "steps")
     for epoch in range(1, epochs + 1):
         for i, (texts, mels, embeds, idx) in enumerate(data_loader, 1):
             if perf_limit and i >= 500:  # leave this to me, should be 500
                 break
-            # print(texts)
-            torch.cuda.synchronize()
-            # print(texts, texts[0])
+
             start_time = time.time()
-            if debug:
-                print("Training point 2.1", time.time() - use_time)
-                use_time = time.time()
             # Generate stop tokens for training
             stop = torch.ones(mels.shape[0], mels.shape[2], device=device)
-            if use_JIT:
-                for j, k in enumerate(idx):
-                    stop[j, :int(len(mels[j])) - 1] = 0
-            else:
-                for j, k in enumerate(idx):
-                    stop[j, :int(dataset.metadata[k][4]) - 1] = 0
+            for j, k in enumerate(idx):
+                stop[j, :int(len(mels[j])) - 1] = 0
 
             texts = texts.to(device)
             mels = mels.to(device)
             embeds = embeds.to(device)
-            # stop = stop.to(device)
-            if debug:
-                print("Training point 2.2", time.time() - use_time)
-                use_time = time.time()
-            # Forward pass
-            # Parallelize model onto GPUS using workaround due to python bug
-            # print(use_amp, bool(use_amp))
+
             use_amp = bool(use_amp)
-            # print(texts.shape)
+
             with autocast(enabled=use_amp):
                 m1_hat, m2_hat, attention, stop_pred = model(texts, mels, embeds)
-                # >>texts.shape
-                # torch.Size([12, 82])
-            if debug:
-                print("Training point 2.3", time.time() - use_time)
-                use_time = time.time()
-            # Backward pass
+
             m1_loss = F.mse_loss(m1_hat, mels) + F.l1_loss(m1_hat, mels)
             m2_loss = F.mse_loss(m2_hat, mels)
             stop_loss = F.binary_cross_entropy(stop_pred, stop)
@@ -229,12 +201,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 if np.isnan(grad_norm.cpu()):
                     print("grad_norm was NaN!")
 
-            # optimizer.step()
-
             scaler.step(optimizer)
             scaler.update()
-            # else:
-            #     print(f"loss is {loss}, higher then avg, which is {loss_window.average+0.15}")
 
             time_window.append(time.time() - start_time)
             loss_window.append(loss.item())
@@ -256,8 +224,6 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
                 model.save(backup_fpath, optimizer)
 
             if save_every != 0 and step % save_every == 0:
-                # Must save latest optimizer state to ensure that resuming training
-                # doesn't produce artifacts
                 model.save(weights_fpath, optimizer)
                 dl_logger.log("INFO", data={
                     "status": "saved.."

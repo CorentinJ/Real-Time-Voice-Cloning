@@ -75,7 +75,7 @@ class Synthesizer:
         """
         Synthesizes mel spectrograms from texts and speaker embeddings.
 
-        :param texts: a list of N text prompts to be synthesized
+        :param text: a text prompt
         :param embeddings: a numpy array or list of speaker embeddings of shape (N, 256)
         :param return_alignments: if True, a matrix representing the alignments between the
         characters
@@ -98,11 +98,15 @@ class Synthesizer:
 
         specs = []
         batch = torch.tensor(inputs).unsqueeze(0).to(self.device)
-        # print(batch)
+
         speaker_embeds = np.stack(batched_embeds[0])
         speaker_embeddings = torch.tensor(speaker_embeds).float().to(self.device)
-        # print(batch.shape)
+
         # Inference
+        # tensor([[107, 92, 126, 123, 136, 1, 125, 140, 137, 107, 125, 1, 107, 92,
+        #          144, 140, 92, 143, 1, 149, 131, 127, 130, 1, 140, 131, 109, 1]],
+        #        device='cuda:0')
+        # torch.Size([1, 28])  or [1, n]
         _, mels, alignments = self._model.generate(batch, speaker_embeddings)
         mels = mels.detach().cpu().numpy()
         for m in mels:

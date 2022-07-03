@@ -152,7 +152,6 @@ if __name__ == '__main__':
                 # else:
                 #     synthesizer = Synthesizer(args.syn_model_fpath)
 
-            print(text)
             embeds = [embed]
             # If you know what the attention layer alignments are, you can retrieve them here by
             # passing return_alignments=True
