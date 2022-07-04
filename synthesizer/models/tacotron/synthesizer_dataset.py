@@ -35,12 +35,14 @@ class SynthesizerDataset(Dataset):
             try:
                 mel = np.load(str(mel_path), allow_pickle=True).T.astype(np.float32)
             except:
-                mel_path, embed_path = self.samples_fpaths[index+1]
+                mel_path, embed_path = self.samples_fpaths[index + 1]
                 mel = np.load(mel_path, allow_pickle=True).T.astype(np.float32)
         # Load the embed
         embed = np.load(embed_path)
 
-        text = text_to_sequence(self.samples_texts[index].lower())
+        text = self.samples_texts[index].lower()
+        text = "".join([x if x in " abcdefghijklmnopqrstuvwxyzйцукенгшщзхъфывапролджэячсмитьбю" else "" for x in text]).strip()
+        text = text_to_sequence(text)
         text = torch.tensor(text, dtype=torch.int)
         # Convert the list returned by text_to_sequence to a numpy array
         return text, mel, embed.astype(np.float32), index

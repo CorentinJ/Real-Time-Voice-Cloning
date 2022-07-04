@@ -18,15 +18,16 @@ Multispeaker Text-To-Speech Synthesis](https://arxiv.org/pdf/1806.04558.pdf) (SV
 5. Install the remaining requirements with `pip install -r requirements.txt`
 
 ### 2. Download Pretrained Models
-Synthesizer model download available by request, vocoder + encoder download from original repo [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models) and put them under saved_models/default/.<br/>
+Synthesizer model download available [here](https://drive.google.com/drive/folders/1OP2xez8aFOfNMXcbBYhM4kpvxiuRn6z4?usp=sharing) (beware that synthesizer.pt is multilingual but works worse, synthesizer_rus_only.pt works much better but only for russian language), vocoder + encoder download from original repo [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models) and put them under saved_models/default/.<br/>
 The scructure should be:<br/>
 ```
 saved_models/default/synthesizer.pt
 saved_models/default/vocoder.pt
 saved_models/default/encoder.pt
 ```
+Beware, that even if you use synthesizer_rus_only.pt, you should still rename it to synthesizer.pt
 ### 4. Download Datasets (only if you plan on training the model)
-For playing with the toolbox alone, I only recommend downloading [`LibriSpeech/train-clean-100`](https://www.openslr.org/resources/12/train-clean-100.tar.gz). Extract the contents as `<datasets_root>/LibriSpeech/train-clean-100` where `<datasets_root>` is a directory of your choosing. Other datasets are supported in the toolbox, see [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Training#datasets). You're free not to download any dataset, but then you will need your own data as audio files or you will have to record it with the toolbox. For other language dataset construction, see below.
+I only recommend downloading [`LibriSpeech/train-clean-100`](https://www.openslr.org/resources/12/train-clean-100.tar.gz). Extract the contents as `<datasets_root>/LibriSpeech/train-clean-100` where `<datasets_root>` is a directory of your choosing. Other datasets are supported in the toolbox, see [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Training#datasets). You're free not to download any dataset, but then you will need your own data as audio files or you will have to record it with the toolbox. For other language dataset construction, see below.
 ### 4. Other languages dataset
 So to do a custom dataset thing, you must unpack all files into the <datasets_root> with the following structures:
 ```
