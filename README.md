@@ -1,11 +1,11 @@
-# Real-Time Voice Cloning neonsecret fork
+# Text To Speech With Voice Cloning Feature (by neonsecret)
 This repository is an implementation of [Transfer Learning from Speaker Verification to
 Multispeaker Text-To-Speech Synthesis](https://arxiv.org/pdf/1806.04558.pdf) (SV2TTS) with a vocoder that works in real-time. 
 ## Differences from parent
-* Cleaned tensorflow requirement, by rewriting hparams stuff
+* Cleaned tensorflow requirement
 * Added russian language support (+guide how to add other languages)
 * Code reworks 
-* Theoretically, the model is bilingual, it can process both english and russian words, you will just need the dataset
+* Bilingual and single language model available
 
 ### Setup
 ### 0. delete everything from the directory, clone it from sratch.
