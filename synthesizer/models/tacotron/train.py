@@ -134,7 +134,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int, backup_
         model.load(weights_fpath, optimizer)
         print("Tacotron weights loaded from step %d" % model.step)
         gradinit_do = False
-    r, lr, max_step, batch_size = hparams.tts_schedule_dict[hparams.get_max(model.step)]
+    r, lr, max_step, batch_size = hparams.tts_schedule_dict[hparams.get_max(model.step - 40000)]
     if force_restart or not weights_fpath.exists():
         model.save(weights_fpath, optimizer)
     else:
