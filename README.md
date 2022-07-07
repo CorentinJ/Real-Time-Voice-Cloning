@@ -60,8 +60,8 @@ I also tweaked the original processor to detect the opus files so you can just p
 LibriTTS/train-clean-100/
 folder and skip converting to wavs.
 ### 4.2 Training
-The fork currently support two versions of synthesizers: the vanilla Tacotron2 or the tweaked version, which has different attention understanding and better generalization, but is yet unstable in training and takes longer to generalize.
-</br>Example vanilla synthesizer train command:
+Not really necessary, unless you plan adding another language or finetuning pretrained models.
+</br>Example synthesizer train command:
 ```
 synthesizer_train.py rusmodel SV2TTS\synthesizer
 ```
