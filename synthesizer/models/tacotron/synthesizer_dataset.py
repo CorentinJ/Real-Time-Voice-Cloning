@@ -41,7 +41,6 @@ class SynthesizerDataset(Dataset):
         embed = np.load(embed_path)
 
         text = self.samples_texts[index].lower()
-        text = "".join([x if x in " abcdefghijklmnopqrstuvwxyzйцукенгшщзхъфывапролджэячсмитьбю" else "" for x in text]).strip()
         text = text_to_sequence(text)
         text = torch.tensor(text, dtype=torch.int)
         # Convert the list returned by text_to_sequence to a numpy array

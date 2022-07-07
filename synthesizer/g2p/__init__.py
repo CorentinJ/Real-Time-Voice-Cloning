@@ -124,7 +124,7 @@ def g2p_all(word, dl_logger):
     else:  # elif ad.is_cyrillic(word):
         ourg2p = ru_g2p
     try:
-        with time_limit(2):
+        with time_limit(4):
             res = ourg2p(word)
     except TimeoutException:
         dl_logger.log("WARNING", data={
