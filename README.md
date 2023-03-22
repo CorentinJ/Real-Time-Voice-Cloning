@@ -18,21 +18,11 @@ SV2TTS is a deep learning framework in three stages. In the first stage, one cre
 |[1703.10135](https://arxiv.org/pdf/1703.10135.pdf) | Tacotron (synthesizer) | Tacotron: Towards End-to-End Speech Synthesis | [fatchord/WaveRNN](https://github.com/fatchord/WaveRNN)
 |[1710.10467](https://arxiv.org/pdf/1710.10467.pdf) | GE2E (encoder)| Generalized End-To-End Loss for Speaker Verification | This repo |
 
-## News
-**08/09/22**: Our team at Resemble.AI is releasing a voice conversion model (closed source), check out my demo [here](https://www.youtube.com/watch?v=f075EOzYKog). 
-
-**10/01/22**: I recommend checking out [CoquiTTS](https://github.com/coqui-ai/tts). It's a good and up-to-date TTS repository targeted for the ML community. It can also do voice cloning and more, such as cross-language cloning or voice conversion.
-
-**28/12/21**: I've done a [major maintenance update](https://github.com/CorentinJ/Real-Time-Voice-Cloning/pull/961). Mostly, I've worked on making setup easier. Find new instructions in the section below.
-
-**14/02/21**: This repo now runs on PyTorch instead of Tensorflow, thanks to the help of @bluefish.
-
-**13/11/19**: I'm now working full time and I will rarely maintain this repo anymore. To anyone who reads this:
-- **If you just want to clone your voice (and not someone else's):** I recommend our free plan on [Resemble.AI](https://www.resemble.ai/). You will get a better voice quality and less prosody errors.
-- **If this is not your case:** proceed with this repository, but you might end up being disappointed by the results. If you're planning to work on a serious project, my strong advice: find another TTS repo. Go [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/issues/364) for more info.
-
-**20/08/19:** I'm working on [resemblyzer](https://github.com/resemble-ai/Resemblyzer), an independent package for the voice encoder (inference only). You can use your trained encoder models from this repo with it.
-
+## Heads up
+Like everything else in Deep Learning, this repo is quickly getting old. Many other open-source repositories or SaaS apps (often paying) will give you a better audio quality than this repository will. If you care about the fidelity of the voice you're cloning, and its expressivity, here are some personal recommendations of alternative voice cloning solutions:
+- Check out [CoquiTTS](https://github.com/coqui-ai/tts) for an open source repository that is more up-to-date, with a better voice cloning quality and more functionalities.
+- Check out [paperswithcode](https://paperswithcode.com/task/speech-synthesis/) for other repositories and recent research in the field of speech synthesis.
+- Check out [Resemble.ai](https://www.resemble.ai/) (disclaimer: I work there) for state of the art voice cloning with little hassle.
 
 ## Setup
 
