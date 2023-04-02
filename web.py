@@ -20,7 +20,7 @@ def launch(port: int = typer.Option(2023, "--port", "-p")) -> None:
     # This is required to resolve the opyrator path
     sys.path.append(os.getcwd())
 
-    from control.mkgui.base.ui.streamlit_ui import launch_ui
+    from toolbox.streamlit_ui import launch_ui
 
     launch_ui(port)
     
