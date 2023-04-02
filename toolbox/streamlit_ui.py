@@ -14,8 +14,6 @@ from fastapi.encoders import jsonable_encoder
 from loguru import logger
 from pydantic import BaseModel, ValidationError, parse_obj_as
 
-from control.mkgui.base import Opyrator
-from control.mkgui.base.core import name_to_title
 from . import schema_utils
 from .streamlit_utils import CUSTOM_STREAMLIT_CSS
 
@@ -33,9 +31,6 @@ st.set_page_config(
 
 render_streamlit_ui()
 """
-
-# with st.spinner("Loading MockingBird GUI. Please wait..."):
-#     opyrator = Opyrator("{opyrator_path}")
 
 
 def launch_ui(port: int = 8501) -> None:
@@ -120,9 +115,9 @@ class InputUI:
         for property_key in self._schema_properties.keys():
             property = self._schema_properties[property_key]
 
-            if not property.get("title"):
-                # Set property key as fallback title
-                property["title"] = name_to_title(property_key)
+            # if not property.get("title"):
+            #     # Set property key as fallback title
+            #     property["title"] = name_to_title(property_key)
 
             try:
                 if "input_data" in self._session_state:
@@ -517,9 +512,9 @@ class InputUI:
         object_inputs = {}
         for property_key in properties:
             property = properties[property_key]
-            if not property.get("title"):
-                # Set property key as fallback title
-                property["title"] = name_to_title(property_key)
+            # if not property.get("title"):
+            #     # Set property key as fallback title
+            #     property["title"] = name_to_title(property_key)
             # construct full key based on key parts -> required later to get the value
             full_key = key + "." + property_key
             object_inputs[property_key] = self._render_property(
@@ -844,21 +839,21 @@ class OutputUI:
             streamlit.json(jsonable_encoder(output_data))
 
 
-def getOpyrator(mode: str) -> Opyrator:
-    if mode == None or mode.startswith('VC'):
-        from control.mkgui.app_vc import convert
-        return  Opyrator(convert)
-    if mode == None or mode.startswith('预处理'):
-        from control.mkgui.preprocess import preprocess
-        return  Opyrator(preprocess)
-    if mode == None or mode.startswith('模型训练'):
-        from control.mkgui.train import train
-        return  Opyrator(train)
-    if mode == None or mode.startswith('模型训练(VC)'):
-        from control.mkgui.train_vc import train_vc
-        return  Opyrator(train_vc)
-    from control.mkgui.app import synthesize
-    return Opyrator(synthesize)
+# def getOpyrator(mode: str) -> Opyrator:
+#     if mode == None or mode.startswith('VC'):
+#         from control.mkgui.app_vc import convert
+#         return  Opyrator(convert)
+#     if mode == None or mode.startswith('预处理'):
+#         from control.mkgui.preprocess import preprocess
+#         return  Opyrator(preprocess)
+#     if mode == None or mode.startswith('模型训练'):
+#         from control.mkgui.train import train
+#         return  Opyrator(train)
+#     if mode == None or mode.startswith('模型训练(VC)'):
+#         from control.mkgui.train_vc import train_vc
+#         return  Opyrator(train_vc)
+#     from control.mkgui.app import synthesize
+#     return Opyrator(synthesize)
     
 def render_streamlit_ui() -> None:
     # init
@@ -876,8 +871,8 @@ def render_streamlit_ui() -> None:
             mode = session_state.mode
         else:
             mode = ""
-        opyrator = getOpyrator(mode)
-    title = opyrator.name + mode
+        # opyrator = getOpyrator(mode)
+    title = mode
 
     col1, col2, _ = st.columns(3)
     col2.title(title)
@@ -898,21 +893,21 @@ def render_streamlit_ui() -> None:
             #     # To play audio in frontend:
             #     st.audio(audio.tobytes())
             
-        InputUI(session_state=session_state, input_class=opyrator.input_type).render_ui(st)
-        execute_selected = st.button(opyrator.action)
-        if execute_selected:
-            with st.spinner("Executing operation. Please wait..."):
-                try:
-                    input_data_obj = parse_obj_as(
-                        opyrator.input_type, session_state.input_data
-                    )
-                    session_state.output_data = opyrator(input=input_data_obj)
-                    session_state.latest_operation_input = input_data_obj  # should this really be saved as additional session object?
-                except ValidationError as ex:
-                    st.error(ex)
-                else:
-                    # st.success("Operation executed successfully.")
-                    pass
+        # InputUI(session_state=session_state, input_class=opyrator.input_type).render_ui(st)
+        # execute_selected = st.button(opyrator.action)
+        # if execute_selected:
+        #     with st.spinner("Executing operation. Please wait..."):
+        #         try:
+        #             input_data_obj = parse_obj_as(
+        #                 opyrator.input_type, session_state.input_data
+        #             )
+        #             session_state.output_data = opyrator(input=input_data_obj)
+        #             session_state.latest_operation_input = input_data_obj  # should this really be saved as additional session object?
+        #         except ValidationError as ex:
+        #             st.error(ex)
+        #         else:
+        #             # st.success("Operation executed successfully.")
+        #             pass
 
     with right:
         st.header("Result 结果")
