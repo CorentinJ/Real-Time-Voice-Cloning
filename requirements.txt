@@ -16,3 +16,4 @@ visdom==0.1.8.9
 webrtcvad==2.0.10
 pyngrok
 streamlit==1.8.0
+fastapi
