@@ -1,7 +1,7 @@
 inflect==5.3.0
 librosa==0.8.1
 matplotlib==3.5.1
-numpy
+numpy==1.22.4
 Pillow==8.4.0
 PyQt5==5.15.6
 scikit-learn==1.0.2
