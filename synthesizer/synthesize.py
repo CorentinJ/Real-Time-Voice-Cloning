@@ -25,6 +25,9 @@ def run_synthesis(in_dir: Path, out_dir: Path, syn_model_fpath: Path, hparams):
         device = torch.device("cuda")
         if hparams.synthesis_batch_size % torch.cuda.device_count() != 0:
             raise ValueError("`hparams.synthesis_batch_size` must be evenly divisible by n_gpus!")
+    elif hasattr(torch.backends, 'mps'):
+        if torch.backends.mps.is_available():
+            device = torch.device('mps')
     else:
         device = torch.device("cpu")
     print("Synthesizer using device:", device)
@@ -73,6 +76,8 @@ def run_synthesis(in_dir: Path, out_dir: Path, syn_model_fpath: Path, hparams):
 
             # Parallelize model onto GPUS using workaround due to python bug
             if device.type == "cuda" and torch.cuda.device_count() > 1:
+                _, mels_out, _ = data_parallel_workaround(model, texts, mels, embeds)
+            elif device.type == "mps":
                 _, mels_out, _ = data_parallel_workaround(model, texts, mels, embeds)
             else:
                 _, mels_out, _, _ = model(texts, mels, embeds)

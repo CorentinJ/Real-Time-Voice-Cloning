@@ -13,6 +13,9 @@ def sync(device: torch.device):
     # For correct profiling (cuda operations are async)
     if device.type == "cuda":
         torch.cuda.synchronize(device)
+    if hasattr(torch.backends, 'mps'):
+        if device.type == "mps":
+            torch.mps.synchronize()
 
 
 def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int, save_every: int,
@@ -30,7 +33,15 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int,
     # Setup the device on which to run the forward pass and the loss. These can be different,
     # because the forward pass is faster on the GPU whereas the loss is often (depending on your
     # hyperparameters) faster on the CPU.
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        device = "cuda"
+    elif hasattr(torch.backends, 'mps'):
+        if torch.backends.mps.is_available():
+            device = 'mps'
+        else:
+            device = "cpu"
+    else:
+        device = "cpu"
     # FIXME: currently, the gradient is None if loss_device is cuda
     loss_device = torch.device("cpu")
 
@@ -63,7 +74,16 @@ def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int,
     vis = Visualizations(run_id, vis_every, server=visdom_server, disabled=no_visdom)
     vis.log_dataset(dataset)
     vis.log_params()
-    device_name = str(torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU")
+    if torch.cuda.is_available():
+        device_name = torch.cuda.get_device_name(0)
+    elif hasattr(torch.backends, 'mps'):
+        if torch.backends.mps.is_available():
+            device_name = "MPS"  
+        else:
+            device_name = "CPU"
+    else:
+        device_name = "CPU"
+
     vis.log_implementation({"Device": device_name})
 
     # Training loop

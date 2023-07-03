@@ -17,7 +17,7 @@ def load_model(weights_fpath: Path, device=None):
     first call to embed_frames() with the default weights file.
 
     :param weights_fpath: the path to saved model weights.
-    :param device: either a torch device or the name of a torch device (e.g. "cpu", "cuda"). The
+    :param device: either a torch device or the name of a torch device (e.g. "cpu", "cuda", "mps"). The
     model will be loaded and will run on this device. Outputs will however always be on the cpu.
     If None, will default to your GPU if it"s available, otherwise your CPU.
     """
@@ -25,7 +25,15 @@ def load_model(weights_fpath: Path, device=None):
     #   was saved on. Worth investigating.
     global _model, _device
     if device is None:
-        _device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        if torch.cuda.is_available():
+            _device = "cuda"
+        elif hasattr(torch.backends, 'mps'):
+            if torch.backends.mps.is_available():
+                _device = 'mps'
+            else:
+                _device = "cpu"
+        else:
+            _device = "cpu"
     elif isinstance(device, str):
         _device = torch.device(device)
     _model = SpeakerEncoder(_device, torch.device("cpu"))

@@ -53,11 +53,13 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,  backup
     # From WaveRNN/train_tacotron.py
     if torch.cuda.is_available():
         device = torch.device("cuda")
-
         for session in hparams.tts_schedule:
             _, _, _, batch_size = session
             if batch_size % torch.cuda.device_count() != 0:
                 raise ValueError("`batch_size` must be evenly divisible by n_gpus!")
+    elif hasattr(torch.backends, 'mps'):
+        if torch.backends.mps.is_available():
+            device = torch.device('mps')
     else:
         device = torch.device("cpu")
     print("Using device:", device)
@@ -160,6 +162,8 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,  backup
                 # Forward pass
                 # Parallelize model onto GPUS using workaround due to python bug
                 if device.type == "cuda" and torch.cuda.device_count() > 1:
+                    m1_hat, m2_hat, attention, stop_pred = data_parallel_workaround(model, texts, mels, embeds)
+                elif device.type == "mps":
                     m1_hat, m2_hat, attention, stop_pred = data_parallel_workaround(model, texts, mels, embeds)
                 else:
                     m1_hat, m2_hat, attention, stop_pred = model(texts, mels, embeds)
