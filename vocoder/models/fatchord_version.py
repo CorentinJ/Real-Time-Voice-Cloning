@@ -121,6 +121,10 @@ class WaveRNN(nn.Module):
         if torch.cuda.is_available():
             h1 = torch.zeros(1, bsize, self.rnn_dims).cuda()
             h2 = torch.zeros(1, bsize, self.rnn_dims).cuda()
+        elif hasattr(torch.backends, 'mps'):
+            if torch.backends.mps.is_available():
+                h1 = torch.zeros(1, bsize, self.rnn_dims, device=mps_device)
+                h2 = torch.zeros(1, bsize, self.rnn_dims, device=mps_device)
         else:
             h1 = torch.zeros(1, bsize, self.rnn_dims).cpu()
             h2 = torch.zeros(1, bsize, self.rnn_dims).cpu()
@@ -163,6 +167,9 @@ class WaveRNN(nn.Module):
         with torch.no_grad():
             if torch.cuda.is_available():
                 mels = mels.cuda()
+            elif hasattr(torch.backends, 'mps'):
+                if torch.backends.mps.is_available():
+                    mels = mels.to(mps_device)
             else:
                 mels = mels.cpu()
             wave_len = (mels.size(-1) - 1) * self.hop_length
@@ -179,6 +186,11 @@ class WaveRNN(nn.Module):
                 h1 = torch.zeros(b_size, self.rnn_dims).cuda()
                 h2 = torch.zeros(b_size, self.rnn_dims).cuda()
                 x = torch.zeros(b_size, 1).cuda()
+            elif hasattr(torch.backends, 'mps'):
+                if torch.backends.mps.is_available():
+                    h1 = torch.zeros(b_size, self.rnn_dims, device=mps_device)
+                    h2 = torch.zeros(b_size, self.rnn_dims, device=mps_device)
+                    x = torch.zeros(b_size, 1, device=mps_device)
             else:
                 h1 = torch.zeros(b_size, self.rnn_dims).cpu()
                 h2 = torch.zeros(b_size, self.rnn_dims).cpu()
@@ -216,6 +228,9 @@ class WaveRNN(nn.Module):
                     if torch.cuda.is_available():
                         # x = torch.FloatTensor([[sample]]).cuda()
                         x = sample.transpose(0, 1).cuda()
+                    elif hasattr(torch.backends, 'mps'):
+                        if torch.backends.mps.is_available():
+                            x = sample.transpose(0, 1).to(mps_device)
                     else:
                         x = sample.transpose(0, 1)
 
@@ -277,6 +292,9 @@ class WaveRNN(nn.Module):
         total = t + 2 * pad if side == 'both' else t + pad
         if torch.cuda.is_available():
             padded = torch.zeros(b, total, c).cuda()
+        elif hasattr(torch.backends, 'mps'):
+            if torch.backends.mps.is_available():
+                padded = torch.zeros(b, total, c, device=mps_device)
         else:
             padded = torch.zeros(b, total, c).cpu()
         if side == 'before' or side == 'both':
@@ -326,6 +344,9 @@ class WaveRNN(nn.Module):
 
         if torch.cuda.is_available():
             folded = torch.zeros(num_folds, target + 2 * overlap, features).cuda()
+        elif hasattr(torch.backends, 'mps'):
+            if torch.backends.mps.is_available():
+                folded = torch.zeros(num_folds, target + 2 * overlap, features, device=mps_device)
         else:
             folded = torch.zeros(num_folds, target + 2 * overlap, features).cpu()
 

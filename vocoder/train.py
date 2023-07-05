@@ -39,6 +39,9 @@ def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_tr
 
     if torch.cuda.is_available():
         model = model.cuda()
+    elif hasattr(torch.backends, 'mps'):
+        if torch.backends.mps.is_available():
+            model = model.to(mps_device)
 
     # Initialize the optimizer
     optimizer = optim.Adam(model.parameters())
@@ -79,6 +82,9 @@ def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_tr
         for i, (x, y, m) in enumerate(data_loader, 1):
             if torch.cuda.is_available():
                 x, m, y = x.cuda(), m.cuda(), y.cuda()
+            elif hasattr(torch.backends, 'mps'):
+                if torch.backends.mps.is_available():
+                    x, m, y = x.to(mps_device), m.to(mps_device), y.to(mps_device)
 
             # Forward pass
             y_hat = model(x, m)

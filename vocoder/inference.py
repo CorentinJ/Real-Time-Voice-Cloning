@@ -28,6 +28,10 @@ def load_model(weights_fpath, verbose=True):
     if torch.cuda.is_available():
         _model = _model.cuda()
         _device = torch.device('cuda')
+    elif hasattr(torch.backends, 'mps'):
+        if torch.backends.mps.is_available():
+            _device = 'mps'
+            _model = _model.to(mps_device)
     else:
         _device = torch.device('cpu')
     
