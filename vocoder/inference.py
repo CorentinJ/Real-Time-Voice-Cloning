@@ -31,7 +31,7 @@ def load_model(weights_fpath, verbose=True):
     elif hasattr(torch.backends, 'mps'):
         if torch.backends.mps.is_available():
             _device = 'mps'
-            _model = _model.to(mps_device)
+            _model = _model.to(torch.device("mps"))
     else:
         _device = torch.device('cpu')
     

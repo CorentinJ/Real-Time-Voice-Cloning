@@ -129,6 +129,6 @@ def to_one_hot(tensor, n, fill_with=1.):
     if tensor.is_cuda:
         one_hot = one_hot.cuda()
     if torch.is_mps:
-        one_hot = one_hot.to(mps_device)
+        one_hot = one_hot.to(torch.device("mps"))
     one_hot.scatter_(len(tensor.size()), tensor.unsqueeze(-1), fill_with)
     return one_hot

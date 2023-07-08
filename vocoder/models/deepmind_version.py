@@ -88,8 +88,8 @@ class WaveRNN(nn.Module) :
                 out_fine = torch.LongTensor([0]).cuda()
             elif hasattr(torch.backends, 'mps'):
                 if torch.backends.mps.is_available():
-                    out_coarse = torch.LongTensor([0], device=mps_device)
-                    out_fine = torch.LongTensor([0], device=mps_device)
+                    out_coarse = torch.LongTensor([0], device=torch.device("mps"))
+                    out_fine = torch.LongTensor([0], device=torch.device("mps"))
 
             # We'll meed a hidden state
             hidden = self.init_hidden()
@@ -171,7 +171,7 @@ class WaveRNN(nn.Module) :
             return torch.zeros(batch_size, self.hidden_size).cuda()
         elif hasattr(torch.backends, 'mps'):
             if torch.backends.mps.is_available():
-                return torch.zeros(batch_size, self.hidden_size, device=mps_device)
+                return torch.zeros(batch_size, self.hidden_size, device=torch.device("mps"))
     
     def num_params(self) :
         parameters = filter(lambda p: p.requires_grad, self.parameters())
