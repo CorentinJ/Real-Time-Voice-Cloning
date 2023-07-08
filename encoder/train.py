@@ -15,7 +15,11 @@ def sync(device: torch.device):
         torch.cuda.synchronize(device)
     if hasattr(torch.backends, 'mps'):
         if device.type == "mps":
-            torch.mps.synchronize()
+            try:
+                import torch.mps
+                torch.mps.synchronize()
+            except:
+                pass
 
 
 def train(run_id: str, clean_data_root: Path, models_dir: Path, umap_every: int, save_every: int,
