@@ -4,11 +4,13 @@ Multispeaker Text-To-Speech Synthesis](https://arxiv.org/pdf/1806.04558.pdf) (SV
 
 SV2TTS is a deep learning framework in three stages. In the first stage, one creates a digital representation of a voice from a few seconds of audio. In the second and third stages, this representation is used as reference to generate speech given arbitrary text.
 
+English | [简体中文](./README_zh-CN.md)
+
 **Video demonstration** (click the picture):
 
 [![Toolbox demo](https://i.imgur.com/8lFUlgz.png)](https://www.youtube.com/watch?v=-O_hYhToKoA)
 
-English | [简体中文](./README_zh-CN.md)
+
 
 ### Papers implemented  
 | URL | Designation | Title | Implementation source |
