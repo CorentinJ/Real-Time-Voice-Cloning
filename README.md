@@ -8,7 +8,7 @@ SV2TTS is a deep learning framework in three stages. In the first stage, one cre
 
 [![Toolbox demo](https://i.imgur.com/8lFUlgz.png)](https://www.youtube.com/watch?v=-O_hYhToKoA)
 
-
+English | [简体中文](./README_zh-CN.md)
 
 ### Papers implemented  
 | URL | Designation | Title | Implementation source |
@@ -32,6 +32,8 @@ Like everything else in Deep Learning, this repo is quickly getting old. Many ot
 3. Install [ffmpeg](https://ffmpeg.org/download.html#get-packages). This is necessary for reading audio files.
 4. Install [PyTorch](https://pytorch.org/get-started/locally/). Pick the latest stable version, your operating system, your package manager (pip by default) and finally pick any of the proposed CUDA versions if you have a GPU, otherwise pick CPU. Run the given command.
 5. Install the remaining requirements with `pip install -r requirements.txt`
+
+​	:exclamation:for windows,Install [Microsoft Visual C++ 14.0](https://visualstudio.microsoft.com/visual-cpp-build-tools/)(Check the top three options.)
 
 ### 2. (Optional) Download Pretrained Models
 Pretrained models are now downloaded automatically. If this doesn't work for you, you can manually download them [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models).
