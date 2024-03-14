@@ -97,7 +97,7 @@ class WaveRNN(nn.Module):
         elif self.mode == 'MOL' :
             self.n_classes = 30
         else :
-            RuntimeError("Unknown model mode value - ", self.mode)
+            raise RuntimeError("Unknown model mode value - ", self.mode)
 
         self.rnn_dims = rnn_dims
         self.aux_dims = res_out_dims // 4
