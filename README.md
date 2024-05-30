@@ -8,7 +8,21 @@ SV2TTS is a deep learning framework in three stages. In the first stage, one cre
 
 [![Toolbox demo](https://i.imgur.com/8lFUlgz.png)](https://www.youtube.com/watch?v=-O_hYhToKoA)
 
+**Batteries-included working example (May 2024)**    
 
+This Lightning Studio has a full working reproducible environment of this model with an endpoint that can be deployed instantly for free by clicking "Open in Studio".  
+
+<a target="_blank" href="https://lightning.ai/lightning-ai/studios/deploy-a-voice-clone-api-svtt2">
+  <img src="https://pl-bolts-doc-images.s3.us-east-2.amazonaws.com/app-2/studio-badge.svg" alt="Open In Studio"/>
+</a>
+
+&nbsp;
+
+Example output:    
+
+<a href="https://pl-bolts-doc-images.s3.us-east-2.amazonaws.com/app-2/elon_2.mp4"><img src="https://github.com/CorentinJ/Real-Time-Voice-Cloning/assets/3640001/cb838792-6038-4e14-9c2f-5d0420afdbc6" height="300px"></a>
+
+&nbsp;
 
 ### Papers implemented  
 | URL | Designation | Title | Implementation source |
