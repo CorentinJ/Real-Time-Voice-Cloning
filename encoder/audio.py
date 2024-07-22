@@ -9,7 +9,7 @@ import struct
 
 try:
     import webrtcvad
-except:
+except ImportError:
     warn("Unable to import 'webrtcvad'. This package enables noise removal and is recommended.")
     webrtcvad=None
 
