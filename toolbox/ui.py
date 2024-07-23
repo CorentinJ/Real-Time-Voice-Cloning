@@ -34,7 +34,7 @@ colormap = np.array([
     [0, 0, 0],
     [183, 183, 183],
     [76, 255, 0],
-], dtype=np.float) / 255
+], dtype=np.float64) / 255
 
 default_text = \
     "Welcome to the toolbox! To begin, load an utterance from your datasets or record one " \
