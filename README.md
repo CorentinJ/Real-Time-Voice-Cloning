@@ -1,5 +1,4 @@
 # Real-Time Voice Cloning
-
 This repository is an implementation of [Transfer Learning from Speaker Verification to
 Multispeaker Text-To-Speech Synthesis](https://arxiv.org/pdf/1806.04558.pdf) (SV2TTS) with a vocoder that works in real-time. This was my [master's thesis](https://matheo.uliege.be/handle/2268.2/6801).
 
@@ -10,21 +9,21 @@ SV2TTS is a deep learning framework in three stages. In the first stage, one cre
 [![Toolbox demo](https://i.imgur.com/8lFUlgz.png)](https://www.youtube.com/watch?v=-O_hYhToKoA)
 
 
-### Papers implemented
 
-| URL                                                    | Designation            | Title                                                                                    | Implementation source                                   |
-| ------------------------------------------------------ | ---------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| [**1806.04558**](https://arxiv.org/pdf/1806.04558.pdf) | **SV2TTS**             | **Transfer Learning from Speaker Verification to Multispeaker Text-To-Speech Synthesis** | This repo                                               |
-| [1802.08435](https://arxiv.org/pdf/1802.08435.pdf)     | WaveRNN (vocoder)      | Efficient Neural Audio Synthesis                                                         | [fatchord/WaveRNN](https://github.com/fatchord/WaveRNN) |
-| [1703.10135](https://arxiv.org/pdf/1703.10135.pdf)     | Tacotron (synthesizer) | Tacotron: Towards End-to-End Speech Synthesis                                            | [fatchord/WaveRNN](https://github.com/fatchord/WaveRNN) |
-| [1710.10467](https://arxiv.org/pdf/1710.10467.pdf)     | GE2E (encoder)         | Generalized End-To-End Loss for Speaker Verification                                     | This repo                                               |
+### Papers implemented  
+| URL | Designation | Title | Implementation source |
+| --- | ----------- | ----- | --------------------- |
+|[**1806.04558**](https://arxiv.org/pdf/1806.04558.pdf) | **SV2TTS** | **Transfer Learning from Speaker Verification to Multispeaker Text-To-Speech Synthesis** | This repo |
+|[1802.08435](https://arxiv.org/pdf/1802.08435.pdf) | WaveRNN (vocoder) | Efficient Neural Audio Synthesis | [fatchord/WaveRNN](https://github.com/fatchord/WaveRNN) |
+|[1703.10135](https://arxiv.org/pdf/1703.10135.pdf) | Tacotron (synthesizer) | Tacotron: Towards End-to-End Speech Synthesis | [fatchord/WaveRNN](https://github.com/fatchord/WaveRNN)
+|[1710.10467](https://arxiv.org/pdf/1710.10467.pdf) | GE2E (encoder)| Generalized End-To-End Loss for Speaker Verification | This repo |
 
 ## Heads up
 Like everything else in Deep Learning, this repo has quickly gotten old. Many SaaS apps (often paying) will give you a better audio quality than this repository will. If you wish for an open-source solution with a high voice quality:
-
 - Check out [paperswithcode](https://paperswithcode.com/task/speech-synthesis/) for other repositories and recent research in the field of speech synthesis.
 - Check out [CoquiTTS](https://github.com/coqui-ai/tts) for a repository with a better voice cloning quality and more functionalities.
 - Check out [MetaVoice-1B](https://github.com/metavoiceio/metavoice-src) for a large voice model with high voice quality
+
 ## Setup
 
 ### 1. Install Requirements
@@ -52,6 +51,6 @@ You can then try the toolbox:
 
 `python demo_toolbox.py -d <datasets_root>`  
 or  
-`python demo_toolbox.py` 
+`python demo_toolbox.py`  
 
 depending on whether you downloaded any datasets. If you are running an X-server or if you have the error `Aborted (core dumped)`, see [this issue](https://github.com/CorentinJ/Real-Time-Voice-Cloning/issues/11#issuecomment-504733590).
