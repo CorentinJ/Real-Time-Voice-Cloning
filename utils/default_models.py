@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 default_models = {
     "encoder": ("https://drive.google.com/uc?export=download&id=1q8mEGwCkFy23KZsinbuvdKAQLqNKbYf1", 17090379),
-    "synthesizer": ("https://drive.google.com/uc?export=download&id=1EqFMIbvxffxtjiVrtykroF6_mUh-5Z3s&export=download", 370554559),
+    "synthesizer": ("https://drive.google.com/u/0/uc?id=1EqFMIbvxffxtjiVrtykroF6_mUh-5Z3s&export=download&confirm=t", 370554559),
     "vocoder": ("https://drive.google.com/uc?export=download&id=1cf2NO6FtI0jDuy8AV3Xgn6leO6dHjIgu", 53845290),
 }
 
