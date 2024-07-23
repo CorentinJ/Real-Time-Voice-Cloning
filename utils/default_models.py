@@ -23,6 +23,7 @@ def download(url: str, target: Path, bar_pos=0):
         gdown.download(url, str(target), quiet=False)
 
 def ensure_default_models(models_dir: Path):
+    # Define download tasks
     jobs = []
     for model_name, (url, size) in default_models.items():
         target_path = models_dir / "default" / f"{model_name}.pt"
@@ -35,7 +36,8 @@ def ensure_default_models(models_dir: Path):
         thread = Thread(target=download, args=(url, target_path, len(jobs)))
         thread.start()
         jobs.append((thread, target_path, size))
-
+    
+    # Run and join threads
     for thread, target_path, size in jobs:
         thread.join()
 
