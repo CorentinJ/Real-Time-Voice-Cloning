@@ -9,6 +9,7 @@ SV2TTS is a deep learning framework in three stages. In the first stage, one cre
 
 [![Toolbox demo](https://i.imgur.com/8lFUlgz.png)](https://www.youtube.com/watch?v=-O_hYhToKoA)
 
+
 ### Papers implemented
 
 | URL                                                    | Designation            | Title                                                                                    | Implementation source                                   |
@@ -19,17 +20,14 @@ SV2TTS is a deep learning framework in three stages. In the first stage, one cre
 | [1710.10467](https://arxiv.org/pdf/1710.10467.pdf)     | GE2E (encoder)         | Generalized End-To-End Loss for Speaker Verification                                     | This repo                                               |
 
 ## Heads up
-
 Like everything else in Deep Learning, this repo has quickly gotten old. Many SaaS apps (often paying) will give you a better audio quality than this repository will. If you wish for an open-source solution with a high voice quality:
 
 - Check out [paperswithcode](https://paperswithcode.com/task/speech-synthesis/) for other repositories and recent research in the field of speech synthesis.
 - Check out [CoquiTTS](https://github.com/coqui-ai/tts) for a repository with a better voice cloning quality and more functionalities.
 - Check out [MetaVoice-1B](https://github.com/metavoiceio/metavoice-src) for a large voice model with high voice quality
-
 ## Setup
 
 ### 1. Install Requirements
-
 1. Both Windows and Linux are supported. A GPU is recommended for training and for inference speed, but is not mandatory.
 2. Python 3.11.7 is recommended. Python 3.11 or greater should work, but you'll probably have to tweak the dependencies' versions. I recommend setting up a virtual environment using `venv`, but this is optional.
 3. Install [ffmpeg](https://ffmpeg.org/download.html#get-packages). This is necessary for reading audio files.
@@ -37,11 +35,9 @@ Like everything else in Deep Learning, this repo has quickly gotten old. Many Sa
 5. Install the remaining requirements with `pip install -r requirements.txt`
 
 ### 2. (Optional) Download Pretrained Models
-
 Pretrained models are now downloaded automatically. If this doesn't work for you, you can manually download them [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models).
 
 ### 3. (Optional) Test Configuration
-
 Before you download any dataset, you can begin by testing your configuration with:
 
 `python demo_cli.py`
@@ -49,15 +45,13 @@ Before you download any dataset, you can begin by testing your configuration wit
 If all tests pass, you're good to go.
 
 ### 4. (Optional) Download Datasets
-
 For playing with the toolbox alone, I only recommend downloading [`LibriSpeech/train-clean-100`](https://www.openslr.org/resources/12/train-clean-100.tar.gz). Extract the contents as `<datasets_root>/LibriSpeech/train-clean-100` where `<datasets_root>` is a directory of your choosing. Other datasets are supported in the toolbox, see [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Training#datasets). You're free not to download any dataset, but then you will need your own data as audio files or you will have to record it with the toolbox.
 
 ### 5. Launch the Toolbox
-
 You can then try the toolbox:
 
 `python demo_toolbox.py -d <datasets_root>`  
 or  
-`python demo_toolbox.py`
+`python demo_toolbox.py` 
 
 depending on whether you downloaded any datasets. If you are running an X-server or if you have the error `Aborted (core dumped)`, see [this issue](https://github.com/CorentinJ/Real-Time-Voice-Cloning/issues/11#issuecomment-504733590).
