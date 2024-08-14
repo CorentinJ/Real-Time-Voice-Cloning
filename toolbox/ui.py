@@ -381,7 +381,7 @@ class UI(QDialog):
         self.app.processEvents()
 
     def set_loading(self, value, maximum=1):
-        self.loading_bar.setValue(value * 100)
+        self.loading_bar.setValue(int(value * 100))
         self.loading_bar.setMaximum(maximum * 100)
         self.loading_bar.setTextVisible(value != 0)
         self.app.processEvents()
