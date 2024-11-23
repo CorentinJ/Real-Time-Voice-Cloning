@@ -1,5 +1,5 @@
-from scipy.ndimage.morphology import binary_dilation
-from encoder.params_data import *
+from scipy.ndimage import binary_dilation
+from .params_data import sampling_rate, audio_norm_target_dBFS, vad_window_length, vad_moving_average_width, vad_max_silence_length, mel_window_length, mel_window_step, mel_n_channels
 from pathlib import Path
 from typing import Optional, Union
 from warnings import warn
@@ -95,7 +95,7 @@ def trim_long_silences(wav):
     def moving_average(array, width):
         array_padded = np.concatenate((np.zeros((width - 1) // 2), array, np.zeros(width // 2)))
         ret = np.cumsum(array_padded, dtype=float)
-        ret[width:] = ret[width:] - ret[:-width]
+        ret[width:] = ret[width:] - ret[:len(ret) - width]
         return ret[width - 1:] / width
     
     audio_mask = moving_average(voice_flags, vad_moving_average_width)
