@@ -21,8 +21,7 @@ SV2TTS is a deep learning framework in three stages. In the first stage, one cre
 ## Heads up
 Like everything else in Deep Learning, this repo has quickly gotten old. Many SaaS apps (often paying) will give you a better audio quality than this repository will. If you wish for an open-source solution with a high voice quality:
 - Check out [paperswithcode](https://paperswithcode.com/task/speech-synthesis/) for other repositories and recent research in the field of speech synthesis.
-- Check out [CoquiTTS](https://github.com/coqui-ai/tts) for a repository with a better voice cloning quality and more functionalities.
-- Check out [MetaVoice-1B](https://github.com/metavoiceio/metavoice-src) for a large voice model with high voice quality
+- Check out [Chatterbox](https://github.com/resemble-ai/chatterbox) for a similar project up to date with the 2025 SOTA in voice cloning
 
 ## Setup
 
