@@ -1,18 +1,19 @@
 [project]
 name = "real-time-voice-cloning"
 version = "0.0.0"
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 
 # Dependencies will be populated by `uv add -r requirements.txt`.
 dependencies = [
   "inflect==5.3.0",
-  "librosa==0.8.1",
+  "librosa==0.9.2",
   "matplotlib==3.5.1",
-  "numpy==1.20.3",
+  "numpy>=1.26,<2",
   "Pillow==8.4.0",
   "PyQt5==5.15.6",
   "scikit-learn==1.0.2",
-  "scipy==1.7.3",
+  "scipy>=1.7",
+  "setuptools<=80.8.0",
   "sounddevice==0.4.3",
   "soundfile==0.10.3.post1",
   "tqdm==4.62.3",
