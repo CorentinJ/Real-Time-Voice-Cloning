@@ -1,7 +1,7 @@
 [project]
 name = "real-time-voice-cloning"
 version = "0.0.0"
-requires-python = ">=3.9"
+requires-python = ">=3.9,<3.10"
 
 # Dependencies will be populated by `uv add -r requirements.txt`.
 dependencies = [
@@ -26,7 +26,8 @@ dependencies = [
 
 [project.optional-dependencies]
 # CPU-only torch (default in CI)
-cpu = ["torch==1.10.*"]
+cpu   = ["torch==1.10.*"]
+cuda = ["torch==1.10.*"]
 
 [dependency-groups]
 # Dev/test dependencies
@@ -35,8 +36,14 @@ dev = ["pytest"]
 # Map extras -> PyTorch wheel indexes so uv knows where to fetch torch
 [tool.uv.sources]
 torch = [
-  { index = "pytorch-cpu",   extra = "cpu"   },
+  { index = "pytorch-cpu",   extra = "cpu" },
+  { index = "pytorch-cuda", extra = "cuda" },
 ]
+
+[[tool.uv.index]]
+name = "pytorch-cuda"
+url = "https://download.pytorch.org/whl/cu113"
+explicit = true
 
 [[tool.uv.index]]
 name = "pytorch-cpu"
@@ -51,3 +58,4 @@ required-environments = [
   "sys_platform == 'win32'",
   "sys_platform == 'linux' and platform_machine == 'x86_64'",
 ]
+conflicts = [[{ extra = "cpu" }, { extra = "cuda" }]]
