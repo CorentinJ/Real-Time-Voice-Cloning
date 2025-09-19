@@ -176,7 +176,7 @@ def denoise(wav, noise_profile: NoiseProfile, eta=0.15):
 #     wav += np.finfo(np.float64).eps
 #     
 #     nframes = int(math.floor(len(wav) / len2) - math.floor(window_size / len2))
-#     vad = np.zeros(nframes * len2, dtype=np.bool)
+#     vad = np.zeros(nframes * len2, dtype=bool)
 # 
 #     aa = 0.98
 #     mu = 0.98
