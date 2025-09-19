@@ -26,8 +26,6 @@ dependencies = [
 [project.optional-dependencies]
 # CPU-only torch (default in CI)
 cpu = ["torch==1.10.*"]
-# Uncomment if you want to support specific CUDA variants locally
-# cu113 = ["torch==1.10.2+cu113"]
 
 [dependency-groups]
 # Dev/test dependencies
@@ -37,7 +35,6 @@ dev = ["pytest"]
 [tool.uv.sources]
 torch = [
   { index = "pytorch-cpu",   extra = "cpu"   },
-  # { index = "pytorch-cu113", extra = "cu113" },
 ]
 
 [[tool.uv.index]]
@@ -53,8 +50,3 @@ required-environments = [
   "sys_platform == 'win32'",
   "sys_platform == 'linux' and platform_machine == 'x86_64'",
 ]
-
-# [[tool.uv.index]]
-# name = "pytorch-cu113"
-# url = "https://download.pytorch.org/whl/cu113"
-# explicit = true
