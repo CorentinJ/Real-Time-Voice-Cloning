@@ -1,0 +1,33 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsndfile1
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Set up Python 3.9
+        run: uv python install 3.9
+
+      - name: Pin Python 3.9
+        run: uv python pin 3.9
+
+      - name: Sync dependencies
+        run: uv sync --extra cpu --dev --locked || uv sync --extra cpu --dev
+
+      - name: Run tests
+        run: uv run pytest -q
