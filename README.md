@@ -27,7 +27,37 @@ Like everything else in Deep Learning, this repo has quickly gotten old. Many Sa
 
 ## Running the toolbox
 
-Both Windows and Linux are supported.
+Windows, Linux, and macOS are supported.
+
+### macOS Installation
+
+**Note:** macOS requires some additional setup. See [MACOS_INSTALL.md](MACOS_INSTALL.md) for detailed instructions.
+
+Quick start for macOS:
+1. Install system dependencies:
+   ```bash
+   brew install ffmpeg libsndfile qt@5
+   ```
+2. Set up Python environment:
+   ```bash
+   uv python install 3.10
+   uv python pin 3.10
+   ```
+3. Install dependencies and run:
+   ```bash
+   export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
+   uv sync --extra cpu
+   .venv/bin/python demo_toolbox.py --cpu
+   ```
+   
+   Or use the helper script:
+   ```bash
+   ./run_macos        # GUI version
+   ./run_macos cli    # CLI version
+   ```
+
+### Windows and Linux Installation
+
 1. Install [ffmpeg](https://ffmpeg.org/download.html#get-packages). This is necessary for reading audio files. Check if it's installed by running in a command line
 ```
 ffmpeg
