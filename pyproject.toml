@@ -1,7 +1,7 @@
 [project]
 name = "real-time-voice-cloning"
 version = "0.0.0"
-requires-python = ">=3.9,<3.10"
+requires-python = ">=3.10,<3.11"
 
 # Dependencies will be populated by `uv add -r requirements.txt`.
 dependencies = [
@@ -10,7 +10,7 @@ dependencies = [
   "matplotlib==3.5.1",
   "numpy>=1.26,<2",
   "Pillow==8.4.0",
-  "PyQt5==5.15.6",
+  "PyQt5>=5.15.6,<5.16",
   "scikit-learn==1.0.2",
   "scipy>=1.7",
   "setuptools<=80.8.0",
@@ -26,7 +26,8 @@ dependencies = [
 
 [project.optional-dependencies]
 # CPU-only torch (default in CI)
-cpu   = ["torch==1.10.*"]
+# For macOS ARM64, use PyTorch 1.13+ which supports Python 3.10
+cpu   = ["torch==1.10.*; sys_platform != 'darwin'", "torch>=1.13,<1.14; sys_platform == 'darwin'"]
 cuda = ["torch==1.10.*"]
 
 [dependency-groups]
@@ -34,10 +35,12 @@ cuda = ["torch==1.10.*"]
 dev = ["pytest"]
 
 # Map extras -> PyTorch wheel indexes so uv knows where to fetch torch
+# On macOS, always use CPU wheels (CUDA not available)
 [tool.uv.sources]
 torch = [
   { index = "pytorch-cpu",   extra = "cpu" },
-  { index = "pytorch-cuda", extra = "cuda" },
+  { index = "pytorch-cpu",   marker = "sys_platform == 'darwin'" },
+  { index = "pytorch-cuda", extra = "cuda", marker = "sys_platform != 'darwin'" },
 ]
 
 [[tool.uv.index]]
@@ -53,9 +56,10 @@ explicit = true
 # Constrain lock resolution to platforms we actually support to avoid
 # selecting wheels that don't exist on Windows during local sync.
 [tool.uv]
-# Use PEP 508 markers for environments we support; allows a lock usable on Windows and Linux.
+# Use PEP 508 markers for environments we support; allows a lock usable on Windows, Linux, and macOS.
 required-environments = [
   "sys_platform == 'win32'",
   "sys_platform == 'linux' and platform_machine == 'x86_64'",
+  "sys_platform == 'darwin'",
 ]
 conflicts = [[{ extra = "cpu" }, { extra = "cuda" }]]

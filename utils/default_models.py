@@ -27,8 +27,61 @@ def download(url: str, target: Path, bar_pos=0):
     desc = f"Downloading {target.name}"
     with DownloadProgressBar(unit="B", unit_scale=True, miniters=1, desc=desc, position=bar_pos, leave=False) as t:
         try:
-            urllib.request.urlretrieve(url, filename=target, reporthook=t.update_to)
-        except HTTPError:
+            # Handle Google Drive large file downloads
+            # Google Drive may return an HTML confirmation page for large files
+            import re
+            import http.cookiejar
+            
+            # Create a cookie jar to maintain session
+            cookie_jar = http.cookiejar.CookieJar()
+            opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie_jar))
+            
+            # Create a request with headers to avoid being blocked
+            req = urllib.request.Request(url)
+            req.add_header('User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36')
+            
+            with opener.open(req) as response:
+                # Check if we got an HTML page (confirmation page)
+                content = response.read()
+                if b'<html' in content or b'<HTML' in content:
+                    # Extract the form action URL and parameters
+                    html_content = content.decode('utf-8', errors='ignore')
+                    
+                    # Try to find the form action URL (newer Google Drive format)
+                    form_match = re.search(r'action="([^"]+)"', html_content)
+                    if form_match:
+                        action_url = form_match.group(1)
+                        # Extract form parameters
+                        id_match = re.search(r'name="id"\s+value="([^"]+)"', html_content)
+                        confirm_match = re.search(r'name="confirm"\s+value="([^"]+)"', html_content)
+                        
+                        if id_match:
+                            file_id = id_match.group(1)
+                            confirm = confirm_match.group(1) if confirm_match else 't'
+                            # Construct the actual download URL
+                            actual_url = f"https://drive.usercontent.google.com/download?id={file_id}&export=download&confirm={confirm}"
+                            urllib.request.urlretrieve(actual_url, filename=target, reporthook=t.update_to)
+                        else:
+                            # Fallback: use the action URL directly
+                            urllib.request.urlretrieve(action_url, filename=target, reporthook=t.update_to)
+                    else:
+                        # Try older format: extract from href
+                        match = re.search(r'href="(/uc\?[^"]+)"', html_content)
+                        if match:
+                            actual_url = 'https://drive.google.com' + match.group(1)
+                            urllib.request.urlretrieve(actual_url, filename=target, reporthook=t.update_to)
+                        else:
+                            raise Exception("Could not extract download URL from Google Drive confirmation page")
+                else:
+                    # Direct download, save the content
+                    with open(target, 'wb') as f:
+                        f.write(content)
+                        t.update(len(content))
+        except (HTTPError, Exception) as e:
+            print(f"Error downloading {target.name}: {e}")
+            # Remove incomplete file
+            if target.exists():
+                target.unlink()
             return
 
 
