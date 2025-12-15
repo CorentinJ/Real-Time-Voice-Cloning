@@ -57,7 +57,7 @@ Uv will automatically create a .venv directory for you with an appropriate pytho
 
 ### (Optional) Download Pretrained Models
 
-Pretrained models are now downloaded automatically. If this doesn't work for you, you can manually download them [here](https://github.com/CorentinJ/Real-Time-Voice-Cloning/wiki/Pretrained-models).
+Pretrained models are now downloaded automatically. If this doesn't work for you, you can manually download them from [Hugging Face](https://huggingface.co/CorentinJ/SV2TTS/tree/main).
 
 ### (Optional) Download Datasets
 

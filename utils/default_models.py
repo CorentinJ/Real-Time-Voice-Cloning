@@ -1,56 +1,41 @@
-import urllib.request
 from pathlib import Path
-from threading import Thread
-from urllib.error import HTTPError
 
-from tqdm import tqdm
+from huggingface_hub import hf_hub_download
 
+HUGGINGFACE_REPO = "CorentinJ/SV2TTS"
 
 default_models = {
-    "encoder": ("https://drive.google.com/uc?export=download&id=1q8mEGwCkFy23KZsinbuvdKAQLqNKbYf1", 17090379),
-    "synthesizer": ("https://drive.google.com/u/0/uc?id=1EqFMIbvxffxtjiVrtykroF6_mUh-5Z3s&export=download&confirm=t", 370554559),
-    "vocoder": ("https://drive.google.com/uc?export=download&id=1cf2NO6FtI0jDuy8AV3Xgn6leO6dHjIgu", 53845290),
+    "encoder": 17090379,
+    "synthesizer": 370554559,
+    "vocoder": 53845290,
 }
 
 
-class DownloadProgressBar(tqdm):
-    def update_to(self, b=1, bsize=1, tsize=None):
-        if tsize is not None:
-            self.total = tsize
-        self.update(b * bsize - self.n)
-
-
-def download(url: str, target: Path, bar_pos=0):
-    # Ensure the directory exists
-    target.parent.mkdir(exist_ok=True, parents=True)
-
-    desc = f"Downloading {target.name}"
-    with DownloadProgressBar(unit="B", unit_scale=True, miniters=1, desc=desc, position=bar_pos, leave=False) as t:
-        try:
-            urllib.request.urlretrieve(url, filename=target, reporthook=t.update_to)
-        except HTTPError:
-            return
+def _download_model(model_name: str, target_dir: Path):
+    hf_hub_download(
+        repo_id=HUGGINGFACE_REPO,
+        revision="main",
+        filename=f"{model_name}.pt",
+        local_dir=str(target_dir),
+        local_dir_use_symlinks=False,
+    )
 
 
 def ensure_default_models(models_dir: Path):
-    # Define download tasks
-    jobs = []
-    for model_name, (url, size) in default_models.items():
-        target_path = models_dir / "default" / f"{model_name}.pt"
+    target_dir = models_dir / "default"
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    for model_name, expected_size in default_models.items():
+        target_path = target_dir / f"{model_name}.pt"
+
         if target_path.exists():
-            if target_path.stat().st_size != size:
-                print(f"File {target_path} is not of expected size, redownloading...")
-            else:
+            if target_path.stat().st_size == expected_size:
                 continue
+            print(f"File {target_path} is not of expected size, redownloading...")
 
-        thread = Thread(target=download, args=(url, target_path, len(jobs)))
-        thread.start()
-        jobs.append((thread, target_path, size))
+        _download_model(model_name, target_dir)
 
-    # Run and join threads
-    for thread, target_path, size in jobs:
-        thread.join()
-
-        assert target_path.exists() and target_path.stat().st_size == size, \
-            f"Download for {target_path.name} failed. You may download models manually instead.\n" \
-            f"https://drive.google.com/drive/folders/1fU6umc5uQAVR2udZdHX-lDgXYzTyqG_j"
+        assert target_path.exists() and target_path.stat().st_size == expected_size, (
+            f"Download for {target_path.name} failed. You may download models manually instead.\n"
+            f"https://huggingface.co/{HUGGINGFACE_REPO}"
+        )
