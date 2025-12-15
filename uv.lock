@@ -478,19 +478,20 @@ wheels = [
 
 [[package]]
 name = "pyqt5"
-version = "5.15.6"
+version = "5.15.11"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pyqt5-qt5", version = "5.15.2", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform == 'win32' or (extra == 'extra-23-real-time-voice-cloning-cpu' and extra == 'extra-23-real-time-voice-cloning-cuda')" },
     { name = "pyqt5-qt5", version = "5.15.17", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32' or (extra == 'extra-23-real-time-voice-cloning-cpu' and extra == 'extra-23-real-time-voice-cloning-cuda')" },
     { name = "pyqt5-sip" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3b/27/fd81188a35f37be9b3b4c2db1654d9439d1418823916fe702ac3658c9c41/PyQt5-5.15.6.tar.gz", hash = "sha256:80343bcab95ffba619f2ed2467fd828ffeb0a251ad7225be5fc06dcc333af452", size = 3239505, upload-time = "2021-10-29T14:26:39.186Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0e/07/c9ed0bd428df6f87183fca565a79fee19fa7c88c7f00a7f011ab4379e77a/PyQt5-5.15.11.tar.gz", hash = "sha256:fda45743ebb4a27b4b1a51c6d8ef455c4c1b5d610c90d2934c7802b5c1557c52", size = 3216775, upload-time = "2024-07-19T08:39:57.756Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/80/1c/46d8f76e1719a8a00921ab579ed1b908c830d356a7658ec7ceda5d421912/PyQt5-5.15.6-cp36-abi3-macosx_10_13_x86_64.whl", hash = "sha256:33ced1c876f6a26e7899615a5a4efef2167c263488837c7beed023a64cebd051", size = 6974219, upload-time = "2021-10-29T14:25:19.463Z" },
-    { url = "https://files.pythonhosted.org/packages/36/66/19983d471c702e551a19a7225a92a7c1efadd961f6c650110ed906dd0ed7/PyQt5-5.15.6-cp36-abi3-manylinux1_x86_64.whl", hash = "sha256:9d6efad0377aa78bf081a20ac752ce86096ded18f04c592d98f5b92dc879ad0a", size = 8305724, upload-time = "2021-10-29T14:25:46.625Z" },
-    { url = "https://files.pythonhosted.org/packages/c3/bd/7660caaa932063f627fabdf01a963f16149ef26d056027b1b538fe1e26ff/PyQt5-5.15.6-cp36-abi3-win32.whl", hash = "sha256:9d2dcdaf82263ae56023410a7af15d1fd746c8e361733a7d0d1bd1f004ec2793", size = 5346146, upload-time = "2021-10-29T14:26:05.049Z" },
-    { url = "https://files.pythonhosted.org/packages/be/f2/8e7b751d102ce3500cbeff97cb514eaf5c06d5e423676c37e9de28d0c06b/PyQt5-5.15.6-cp36-abi3-win_amd64.whl", hash = "sha256:f411ecda52e488e1d3c5cce7563e1b2ca9cf0b7531e3c25b03d9a7e56e07e7fc", size = 6749398, upload-time = "2021-10-29T14:26:27.508Z" },
+    { url = "https://files.pythonhosted.org/packages/11/64/42ec1b0bd72d87f87bde6ceb6869f444d91a2d601f2e67cd05febc0346a1/PyQt5-5.15.11-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:c8b03dd9380bb13c804f0bdb0f4956067f281785b5e12303d529f0462f9afdc2", size = 6579776, upload-time = "2024-07-19T08:39:19.775Z" },
+    { url = "https://files.pythonhosted.org/packages/49/f5/3fb696f4683ea45d68b7e77302eff173493ac81e43d63adb60fa760b9f91/PyQt5-5.15.11-cp38-abi3-macosx_11_0_x86_64.whl", hash = "sha256:6cd75628f6e732b1ffcfe709ab833a0716c0445d7aec8046a48d5843352becb6", size = 7016415, upload-time = "2024-07-19T08:39:32.977Z" },
+    { url = "https://files.pythonhosted.org/packages/b4/8c/4065950f9d013c4b2e588fe33cf04e564c2322842d84dbcbce5ba1dc28b0/PyQt5-5.15.11-cp38-abi3-manylinux_2_17_x86_64.whl", hash = "sha256:cd672a6738d1ae33ef7d9efa8e6cb0a1525ecf53ec86da80a9e1b6ec38c8d0f1", size = 8188103, upload-time = "2024-07-19T08:39:40.561Z" },
+    { url = "https://files.pythonhosted.org/packages/f3/f0/ae5a5b4f9b826b29ea4be841b2f2d951bcf5ae1d802f3732b145b57c5355/PyQt5-5.15.11-cp38-abi3-win32.whl", hash = "sha256:76be0322ceda5deecd1708a8d628e698089a1cea80d1a49d242a6d579a40babd", size = 5433308, upload-time = "2024-07-19T08:39:46.932Z" },
+    { url = "https://files.pythonhosted.org/packages/56/d5/68eb9f3d19ce65df01b6c7b7a577ad3bbc9ab3a5dd3491a4756e71838ec9/PyQt5-5.15.11-cp38-abi3-win_amd64.whl", hash = "sha256:bdde598a3bb95022131a5c9ea62e0a96bd6fb28932cc1619fd7ba211531b7517", size = 6865864, upload-time = "2024-07-19T08:39:53.572Z" },
 ]
 
 [[package]]
@@ -665,7 +666,7 @@ requires-dist = [
     { name = "matplotlib", specifier = "==3.5.1" },
     { name = "numpy", specifier = ">=1.26,<2" },
     { name = "pillow", specifier = "==8.4.0" },
-    { name = "pyqt5", specifier = "==5.15.6" },
+    { name = "pyqt5", specifier = "==5.15.11" },
     { name = "scikit-learn", specifier = "==1.0.2" },
     { name = "scipy", specifier = ">=1.7" },
     { name = "setuptools", specifier = "<=80.8.0" },

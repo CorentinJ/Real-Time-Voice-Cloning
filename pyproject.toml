@@ -11,7 +11,7 @@ dependencies = [
   "matplotlib==3.5.1",
   "numpy>=1.26,<2",
   "Pillow==8.4.0",
-  "PyQt5==5.15.6",
+  "PyQt5==5.15.11",
   "scikit-learn==1.0.2",
   "scipy>=1.7",
   "setuptools<=80.8.0",
