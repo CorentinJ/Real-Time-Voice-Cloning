@@ -1,0 +1,27 @@
+{
+    "name": "Real-Time-Voice-Cloning DevEnvironment",
+    "build": {
+      "dockerfile": "Dockerfile",
+      "args": {
+        "vscode": "true"
+      }
+    },
+    // expose default ports on host
+    "appPort": [3000, 3333, 8080],
+    "settings": {
+        // set VScode color theme to show that it"s a container
+      "workbench.colorTheme": "Cobalt2",
+        // use zsh as default terminal
+      "terminal.integrated.shell.linux": "/bin/zsh"
+    },
+    // VScode extensions
+    "extensions": [
+      "wesbos.theme-cobalt2",
+      "editorconfig.editorconfig"
+    ],
+    "containerEnv": {
+    },
+    // run git status to build git index, install dependencies
+    "postCreateCommand": "cd /workspace/Real-Time-Voice-Cloning && pip install -r requirements.txt && zsh"
+  }
+  
