@@ -133,7 +133,7 @@ class Synthesizer:
         Loads and preprocesses an audio file under the same conditions the audio files were used to
         train the synthesizer.
         """
-        wav = librosa.load(str(fpath), hparams.sample_rate)[0]
+        wav = librosa.load(str(fpath), sr=hparams.sample_rate)[0]
         if hparams.rescale:
             wav = wav / np.abs(wav).max() * hparams.rescaling_max
         return wav
