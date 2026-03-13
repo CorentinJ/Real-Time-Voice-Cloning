@@ -39,7 +39,7 @@ def preprocess_wav(fpath_or_wav: Union[str, Path, np.ndarray],
     
     # Resample the wav if needed
     if source_sr is not None and source_sr != sampling_rate:
-        wav = librosa.resample(wav, source_sr, sampling_rate)
+        wav = librosa.resample(wav,orig_sr=source_sr,target_sr=sampling_rate)
         
     # Apply the preprocessing: normalize volume and shorten long silences 
     if normalize:
@@ -56,8 +56,8 @@ def wav_to_mel_spectrogram(wav):
     Note: this not a log-mel spectrogram.
     """
     frames = librosa.feature.melspectrogram(
-        wav,
-        sampling_rate,
+        y=wav,
+        sr=sampling_rate,
         n_fft=int(sampling_rate * mel_window_length / 1000),
         hop_length=int(sampling_rate * mel_window_step / 1000),
         n_mels=mel_n_channels
