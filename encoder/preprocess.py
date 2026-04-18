@@ -39,7 +39,7 @@ class DatasetLog:
 
     def add_sample(self, **kwargs):
         for param_name, value in kwargs.items():
-            if not param_name in self.sample_data:
+            if param_name not in self.sample_data:
                 self.sample_data[param_name] = []
             self.sample_data[param_name].append(value)
 

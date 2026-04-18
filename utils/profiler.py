@@ -15,7 +15,7 @@ class Profiler:
             return
         
         # Log the time needed to execute that function
-        if not name in self.logs:
+        if name not in self.logs:
             self.logs[name] = []
         if len(self.logs[name]) >= self.summarize_every:
             self.summarize()

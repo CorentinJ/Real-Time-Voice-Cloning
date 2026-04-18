@@ -165,7 +165,7 @@ class UI(QDialog):
                 output_devices.append(device["name"])
             except Exception as e:
                 # Log a warning only if the device is not an input
-                if not device["name"] in input_devices:
+                if device["name"] not in input_devices:
                     warn("Unsupported output device %s for the sample rate: %d \nError: %s" % (device["name"], sample_rate, str(e)))
 
         if len(input_devices) == 0:

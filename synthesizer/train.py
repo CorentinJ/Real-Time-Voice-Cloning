@@ -39,7 +39,7 @@ def train(run_id: str, syn_dir: Path, models_dir: Path, save_every: int,  backup
     mel_output_dir.mkdir(exist_ok=True)
     meta_folder.mkdir(exist_ok=True)
 
-    weights_fpath = model_dir / f"synthesizer.pt"
+    weights_fpath = model_dir / "synthesizer.pt"
     metadata_fpath = syn_dir.joinpath("train.txt")
 
     print("Checkpoint path: {}".format(weights_fpath))
